@@ -1,0 +1,240 @@
+@import '@nl-rvo/assets/fonts/index.css';
+@import '@nl-rvo/design-tokens/dist/index.css';
+@import '@nl-rvo/component-library-css/dist/index.css';
+
+/* IenW brand overrides */
+:root {
+  --rvo-color-primary: #154273;
+  --rvo-color-primary-hover: #0f3059;
+}
+
+body {
+  margin: 0;
+  background-color: #f5f5f5;
+}
+
+/* Question importance indicators */
+.question-mandatory {
+  border-left: 4px solid #0070bb;
+  padding-left: 12px;
+}
+
+.question-optional {
+  border-left: 4px solid #39870c;
+  padding-left: 12px;
+}
+
+/* Risk level badges */
+.risk-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.875rem;
+}
+
+.risk-onaanvaardbaar { background: #c0392b; color: white; }
+.risk-hoog { background: #e67e22; color: white; }
+.risk-beperkt { background: #2980b9; color: white; }
+.risk-minimaal { background: #27ae60; color: white; }
+
+/* Navigation sidebar */
+.nav-section {
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.nav-section:hover { background: rgba(0,0,0,0.06); }
+.nav-section.active { background: rgba(21,66,115,0.12); font-weight: bold; }
+.nav-section.completed { color: #27ae60; }
+
+/* Progress bar */
+.progress-bar-fill {
+  height: 6px;
+  background: #154273;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* ── Tiptap editor ─────────────────────────────────────────────────────────── */
+
+.tiptap-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.tiptap-editor {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #b3b3b3;
+  border-radius: 4px 4px 0 0;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.tiptap-editor:focus-within {
+  border-color: #154273;
+  box-shadow: 0 0 0 2px rgba(21,66,115,0.2);
+  outline: none;
+}
+
+/* The ProseMirror contenteditable div */
+.tiptap-editor .ProseMirror {
+  padding: 10px 12px;
+  min-height: 100px;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  outline: none;
+}
+
+/* Placeholder text */
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: #aaa;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+/* ── Toolbar (Improve button) ──────────────────────────────────────────────── */
+
+.tiptap-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 1px solid #b3b3b3;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  background: #fafafa;
+}
+
+.improve-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  font-size: 0.8125rem;
+  font-family: inherit;
+  font-weight: 500;
+  color: #154273;
+  background: white;
+  border: 1px solid #154273;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.improve-btn:hover:not(:disabled) {
+  background: #154273;
+  color: white;
+}
+
+.improve-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.improve-btn--loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.improve-error {
+  font-size: 0.8125rem;
+  color: #c0392b;
+}
+
+/* ── Suggestion / diff panel ───────────────────────────────────────────────── */
+
+.suggestion-panel {
+  border: 1px solid #b3b3b3;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  background: #f8faff;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.suggestion-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.suggestion-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #154273;
+}
+
+.suggestion-rationale {
+  font-size: 0.8125rem;
+  color: #555;
+  font-style: italic;
+}
+
+/* Word-level diff display */
+.diff-view {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  padding: 8px 10px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.diff-add {
+  background: #d4edda;
+  color: #155724;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.diff-del {
+  background: #f8d7da;
+  color: #721c24;
+  text-decoration: line-through;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.suggestion-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.suggestion-actions .btn-reject {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  font-size: 1rem;
+  font-family: inherit;
+  font-weight: 500;
+  color: #154273;
+  background: white;
+  border: 2px solid #154273;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.suggestion-actions .btn-reject:hover {
+  background: #154273;
+  color: white;
+}
+
+.diff-no-changes {
+  color: #555;
+  font-style: italic;
+}

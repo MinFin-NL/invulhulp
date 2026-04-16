@@ -1,0 +1,33 @@
+{
+  "name": "aiia-poc",
+  "version": "1.0.0",
+  "description": "AI Impact Assessment Tool - Ministerie van Infrastructuur en Waterstaat",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@nl-rvo/assets": "^1.0.0",
+    "@nl-rvo/component-library-css": "^4.19.1",
+    "@nl-rvo/design-tokens": "^2.3.0",
+    "@tiptap/extension-placeholder": "^3.22.3",
+    "@tiptap/pm": "^3.22.3",
+    "@tiptap/starter-kit": "^3.22.3",
+    "@tiptap/vue-3": "^3.22.3",
+    "@types/diff": "^7.0.2",
+    "diff": "^9.0.0",
+    "pdfmake": "^0.2.10",
+    "pinia": "^3.0.0",
+    "pinia-plugin-persistedstate": "^4.1.3",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@types/pdfmake": "^0.2.9",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "^5.7.2",
+    "vite": "^5.4.14",
+    "vue-tsc": "^2.2.0"
+  }
+}
