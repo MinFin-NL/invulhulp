@@ -17,7 +17,7 @@
     <!-- AI synthesis suggestion panel -->
     <div v-if="suggestion !== null" class="cross-suggestion-panel">
       <div class="cross-suggestion-header">
-        <span class="suggestion-label">AI-suggestie voor DPIA</span>
+        <span class="suggestion-label">✦ Synthese vanuit AIIA</span>
         <span v-if="rationale" class="suggestion-rationale">{{ rationale }}</span>
       </div>
 
@@ -294,10 +294,10 @@ function rejectSuggestion() {
   opacity: 0.88;
 }
 
-/* Suggestion diff panel (mirrors TiptapEditor styles) */
+/* Suggestion diff panel — distinct teal/green accent for cross-form synthesis */
 .cross-suggestion-panel {
-  background: #fff;
-  border: 1px solid #b3c9e5;
+  background: #f0faf4;
+  border: 1px solid #7ec8a0;
   border-radius: 4px;
   padding: 10px 12px;
   margin-top: 10px;
@@ -311,14 +311,16 @@ function rejectSuggestion() {
 }
 
 .suggestion-label {
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.8rem;
-  color: #154273;
+  color: #1a6b3a;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .suggestion-rationale {
   font-size: 0.75rem;
-  color: #555;
+  color: #3a7a52;
   font-style: italic;
 }
 

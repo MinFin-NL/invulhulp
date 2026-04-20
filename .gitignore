@@ -18,9 +18,6 @@ build/
 .env.*
 !.env.example
 
-# uv
-uv.lock
-
 # Node
 node_modules/
 npm-debug.log*
