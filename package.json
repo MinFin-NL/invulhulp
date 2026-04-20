@@ -1,7 +1,7 @@
 {
-  "name": "aiia-poc",
+  "name": "invulhulp",
   "version": "1.0.0",
-  "description": "AI Impact Assessment Tool - Ministerie van Infrastructuur en Waterstaat",
+  "description": "Invulhulp – AI-assisted Government Compliance Forms",
   "type": "module",
   "scripts": {
     "dev": "vite",

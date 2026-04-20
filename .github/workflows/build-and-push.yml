@@ -5,8 +5,8 @@ on:
 
 env:
   REGISTRY: ${{ secrets.ACR_LOGIN_SERVER }}
-  BACKEND_IMAGE: aiia-poc-backend
-  FRONTEND_IMAGE: aiia-poc-frontend
+  BACKEND_IMAGE: invulhulp-backend
+  FRONTEND_IMAGE: invulhulp-frontend
 
 jobs:
   build-and-push:

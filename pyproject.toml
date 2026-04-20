@@ -1,5 +1,5 @@
 [project]
-name = "aiia-poc"
+name = "invulhulp"
 version = "0.1.0"
 description = "AI Impact Assessment Tool – API backend"
 requires-python = ">=3.13"
