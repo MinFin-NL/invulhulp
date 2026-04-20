@@ -9,8 +9,8 @@
         :assessment-data="activeData"
       />
 
-      <!-- Main content -->
-      <main style="flex: 1; overflow-y: auto;">
+      <!-- Main content — padding-bottom leaves room for the fixed footer -->
+      <main style="flex: 1; overflow-y: auto; padding-bottom: 48px;">
 
         <!-- Home -->
         <DpiaHomePage v-if="store.currentView === 'home' && isDpia" @start="startAssessment" />
@@ -73,6 +73,8 @@
 
       </main>
     </div>
+
+    <AppFooter />
   </div>
 </template>
 
@@ -83,6 +85,7 @@ import { dpiaData } from '../data/dpia'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import type { AssessmentData, Section } from '../models/Assessment'
 import AppHeader from './AppHeader.vue'
+import AppFooter from './AppFooter.vue'
 import HomePage from './HomePage.vue'
 import DpiaHomePage from './DpiaHomePage.vue'
 import SectionNav from './SectionNav.vue'

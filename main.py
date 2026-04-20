@@ -4,8 +4,10 @@ AIIA PoC – FastAPI backend (Ollama)
 Run:
     uvicorn main:app --reload
 
-Optionally set OLLAMA_MODEL in a .env file (default: llama3.2).
-Ollama must be running locally on http://localhost:11434.
+Environment variables (can be set via .env file):
+    OLLAMA_MODEL      — model name (default: llama3.2)
+    OLLAMA_BASE_URL   — Ollama server URL (default: http://localhost:11434)
+    CORS_ORIGINS      — comma-separated allowed origins (default: http://localhost:5173)
 """
 
 import os
@@ -20,12 +22,16 @@ from pydantic import BaseModel
 load_dotenv()
 
 MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
+CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")]
+
+_ollama_client = ollama.Client(host=OLLAMA_BASE_URL)
 
 app = FastAPI(title="AIIA PoC API", version="1.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=CORS_ORIGINS,
     allow_methods=["POST", "OPTIONS"],
     allow_headers=["*"],
 )
@@ -95,7 +101,7 @@ async def synthesize_from_aiia(req: SynthesizeRequest) -> ImproveResponse:
     )
 
     try:
-        response = ollama.chat(
+        response = _ollama_client.chat(
             model=MODEL,
             messages=[
                 {"role": "system", "content": SYNTHESIZE_SYSTEM_PROMPT},
@@ -138,7 +144,7 @@ async def improve_text(req: ImproveRequest) -> ImproveResponse:
     )
 
     try:
-        response = ollama.chat(
+        response = _ollama_client.chat(
             model=MODEL,
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
