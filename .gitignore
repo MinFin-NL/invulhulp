@@ -57,3 +57,6 @@ coverage/
 # Temp / scratch
 *.tmp
 img.png
+
+# AI Assisted Coding
+CLAUDE.md
