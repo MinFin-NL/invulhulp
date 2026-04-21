@@ -4,7 +4,7 @@ trigger:
       - main
 
 pool:
-  vmImage: ubuntu-latest
+  name: alz-p-mgmt-we-ccoe-pool
 
 variables:
   BACKEND_IMAGE: invulhulp-backend
@@ -14,7 +14,6 @@ variables:
   BACKEND_APP: ca-invulhulp-backend-inno-d
   FRONTEND_APP: ca-invulhulp-frontend-inno-d
   AZURE_SERVICE_CONNECTION: ccoe-ipf-d-inno-spn-cicd
-  # ACR_LOGIN_SERVER: set this as a secret pipeline variable in Azure DevOps
 
 stages:
   - stage: Build
@@ -26,16 +25,16 @@ stages:
           - task: AzureCLI@2
             displayName: Build and push backend
             env:
-              ACR_LOGIN_SERVER: $(ACR_LOGIN_SERVER)
               IMAGE_TAG: $(Build.SourceVersion)
               BACKEND_IMAGE: $(BACKEND_IMAGE)
+              RESOURCE_GROUP: $(RESOURCE_GROUP)
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
-                ACR_NAME="${ACR_LOGIN_SERVER%%.*}"
-                az acr login --name "$ACR_NAME"
+                ACR_LOGIN_SERVER=$(az acr list --resource-group "$RESOURCE_GROUP" --query "[0].loginServer" -o tsv)
+                az acr login --name "${ACR_LOGIN_SERVER%%.*}"
                 docker build -f Dockerfile.backend \
                   -t "$ACR_LOGIN_SERVER/$BACKEND_IMAGE:$IMAGE_TAG" \
                   -t "$ACR_LOGIN_SERVER/$BACKEND_IMAGE:latest" .
@@ -45,16 +44,16 @@ stages:
           - task: AzureCLI@2
             displayName: Build and push frontend
             env:
-              ACR_LOGIN_SERVER: $(ACR_LOGIN_SERVER)
               IMAGE_TAG: $(Build.SourceVersion)
               FRONTEND_IMAGE: $(FRONTEND_IMAGE)
+              RESOURCE_GROUP: $(RESOURCE_GROUP)
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
-                ACR_NAME="${ACR_LOGIN_SERVER%%.*}"
-                az acr login --name "$ACR_NAME"
+                ACR_LOGIN_SERVER=$(az acr list --resource-group "$RESOURCE_GROUP" --query "[0].loginServer" -o tsv)
+                az acr login --name "${ACR_LOGIN_SERVER%%.*}"
                 docker build -f Dockerfile.frontend \
                   -t "$ACR_LOGIN_SERVER/$FRONTEND_IMAGE:$IMAGE_TAG" \
                   -t "$ACR_LOGIN_SERVER/$FRONTEND_IMAGE:latest" .
@@ -71,7 +70,6 @@ stages:
           - task: AzureCLI@2
             displayName: Deploy backend
             env:
-              ACR_LOGIN_SERVER: $(ACR_LOGIN_SERVER)
               IMAGE_TAG: $(Build.SourceVersion)
               BACKEND_IMAGE: $(BACKEND_IMAGE)
               BACKEND_APP: $(BACKEND_APP)
@@ -82,6 +80,7 @@ stages:
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
+                ACR_LOGIN_SERVER=$(az acr list --resource-group "$RESOURCE_GROUP" --query "[0].loginServer" -o tsv)
                 ACR_NAME="${ACR_LOGIN_SERVER%%.*}"
                 ACR_USER=$(az acr credential show --name "$ACR_NAME" --query username -o tsv)
                 ACR_PASS=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
@@ -110,7 +109,6 @@ stages:
           - task: AzureCLI@2
             displayName: Deploy frontend
             env:
-              ACR_LOGIN_SERVER: $(ACR_LOGIN_SERVER)
               IMAGE_TAG: $(Build.SourceVersion)
               FRONTEND_IMAGE: $(FRONTEND_IMAGE)
               FRONTEND_APP: $(FRONTEND_APP)
@@ -122,6 +120,7 @@ stages:
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
+                ACR_LOGIN_SERVER=$(az acr list --resource-group "$RESOURCE_GROUP" --query "[0].loginServer" -o tsv)
                 ACR_NAME="${ACR_LOGIN_SERVER%%.*}"
                 ACR_USER=$(az acr credential show --name "$ACR_NAME" --query username -o tsv)
                 ACR_PASS=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
