@@ -93,7 +93,7 @@ stages:
                     --set-env-vars \
                       "CORS_ORIGINS=*" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
-                      "AZURE_OPENAI_DEPLOYMENT=gpt-4o" \
+                      "AZURE_OPENAI_DEPLOYMENT=o4-mini" \
                       "AZURE_OPENAI_API_VERSION=2024-08-01-preview" \
                       "AZURE_OPENAI_API_KEY=secretref:openai-api-key"
                 else
@@ -110,7 +110,7 @@ stages:
                     --env-vars \
                       "CORS_ORIGINS=*" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
-                      "AZURE_OPENAI_DEPLOYMENT=gpt-4o" \
+                      "AZURE_OPENAI_DEPLOYMENT=o4-mini" \
                       "AZURE_OPENAI_API_VERSION=2024-08-01-preview" \
                       "AZURE_OPENAI_API_KEY=secretref:openai-api-key" \
                     --secrets "openai-endpoint=" "openai-api-key=" \
