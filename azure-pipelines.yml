@@ -7,13 +7,20 @@ pool:
   name: alz-p-mgmt-we-ccoe-pool
 
 variables:
-  BACKEND_IMAGE: invulhulp-backend
-  FRONTEND_IMAGE: invulhulp-frontend
-  RESOURCE_GROUP: rg-invulhulp-inno-d
-  CONTAINER_APP_ENV: cae-invulhulp-inno-d
-  BACKEND_APP: ca-invulhulp-backend-inno-d
-  FRONTEND_APP: ca-invulhulp-frontend-inno-d
-  AZURE_SERVICE_CONNECTION: ccoe-ipf-d-inno-spn-cicd
+  - group: invulhulp-secrets
+  - name: BACKEND_IMAGE
+    value: invulhulp-backend
+  - name: FRONTEND_IMAGE
+    value: invulhulp-frontend
+  - name: RESOURCE_GROUP
+    value: rg-invulhulp-inno-d
+  - name: CONTAINER_APP_ENV
+    value: cae-invulhulp-inno-d
+  - name: BACKEND_APP
+    value: ca-invulhulp-backend-inno-d
+  - name: FRONTEND_APP
+    value: ca-invulhulp-frontend-inno-d
+
 
 stages:
   - stage: Build
@@ -119,6 +126,31 @@ stages:
                 fi
 
           - task: AzureCLI@2
+            displayName: Apply firewall rules to backend
+            env:
+              BACKEND_APP: $(BACKEND_APP)
+              RESOURCE_GROUP: $(RESOURCE_GROUP)
+              ALLOWED_IP_1: $(ALLOWED_IP_1)
+              ALLOWED_IP_2: $(ALLOWED_IP_2)
+            inputs:
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az containerapp ingress access-restriction set \
+                  --name "$BACKEND_APP" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --rule-name "DWR Next werkplekken" \
+                  --ip-address "$ALLOWED_IP_1" \
+                  --action Allow
+                az containerapp ingress access-restriction set \
+                  --name "$BACKEND_APP" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --rule-name "ITS" \
+                  --ip-address "$ALLOWED_IP_2" \
+                  --action Allow
+
+          - task: AzureCLI@2
             displayName: Deploy frontend
             env:
               IMAGE_TAG: $(Build.SourceVersion)
@@ -164,3 +196,28 @@ stages:
                     --cpu 0.25 --memory 0.5Gi \
                     --min-replicas 1 --max-replicas 3
                 fi
+
+          - task: AzureCLI@2
+            displayName: Apply firewall rules to frontend
+            env:
+              FRONTEND_APP: $(FRONTEND_APP)
+              RESOURCE_GROUP: $(RESOURCE_GROUP)
+              ALLOWED_IP_1: $(ALLOWED_IP_1)
+              ALLOWED_IP_2: $(ALLOWED_IP_2)
+            inputs:
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                az containerapp ingress access-restriction set \
+                  --name "$FRONTEND_APP" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --rule-name "DWR Next werkplekken" \
+                  --ip-address "$ALLOWED_IP_1" \
+                  --action Allow
+                az containerapp ingress access-restriction set \
+                  --name "$FRONTEND_APP" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --rule-name "ITS" \
+                  --ip-address "$ALLOWED_IP_2" \
+                  --action Allow
