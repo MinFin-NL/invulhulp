@@ -101,7 +101,7 @@ stages:
                       "CORS_ORIGINS=*" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
                       "AZURE_OPENAI_DEPLOYMENT=o4-mini" \
-                      "AZURE_OPENAI_API_VERSION=2024-08-01-preview" \
+                      "AZURE_OPENAI_API_VERSION=2025-04-01-preview" \
                       "AZURE_OPENAI_API_KEY=secretref:openai-api-key"
                 else
                   az containerapp create \
@@ -118,12 +118,21 @@ stages:
                       "CORS_ORIGINS=*" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
                       "AZURE_OPENAI_DEPLOYMENT=o4-mini" \
-                      "AZURE_OPENAI_API_VERSION=2024-08-01-preview" \
+                      "AZURE_OPENAI_API_VERSION=2025-04-01-preview" \
                       "AZURE_OPENAI_API_KEY=secretref:openai-api-key" \
                     --secrets "openai-endpoint=" "openai-api-key=" \
                     --cpu 0.5 --memory 1.0Gi \
                     --min-replicas 1 --max-replicas 3
                 fi
+
+                az containerapp ingress access-restriction remove \
+                  --name "$BACKEND_APP" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --rule-name "DWR Next werkplekken" 2>/dev/null || true
+                az containerapp ingress access-restriction remove \
+                  --name "$BACKEND_APP" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --rule-name "ITS" 2>/dev/null || true
 
 
           - task: AzureCLI@2
