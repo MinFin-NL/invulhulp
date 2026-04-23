@@ -91,7 +91,7 @@ import { computed } from 'vue'
 import type { Question } from '../models/Assessment'
 import TiptapEditor from './TiptapEditor.vue'
 import CrossFormSuggestion from './CrossFormSuggestion.vue'
-import { getMappingForDpiaQuestion } from '../data/crossFormMappings'
+import { useCrossFormMappings } from '../composables/useCrossFormMappings'
 import { useAssessmentStore } from '../stores/assessmentStore'
 
 const props = defineProps<{
@@ -104,10 +104,11 @@ const emit = defineEmits<{
 }>()
 
 const store = useAssessmentStore()
+const mappings = useCrossFormMappings()
 
 const showCrossFormSuggestion = computed(() => {
-  if (store.activeAssessment !== 'dpia') return false
-  return getMappingForDpiaQuestion(props.question.id) !== undefined
+  if (store.activeFormId !== 'dpia') return false
+  return mappings.value.some((m) => m.dpiaQuestionId === props.question.id)
 })
 
 // ── Plain text value (for text-type questions) ────────────────────────────────

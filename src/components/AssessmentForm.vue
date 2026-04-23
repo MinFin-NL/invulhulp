@@ -2,23 +2,31 @@
   <div style="min-height: 100vh; display: flex; flex-direction: column;">
     <AppHeader />
 
-    <div style="display: flex; flex: 1;">
+    <div v-if="isLoading" style="display: flex; flex: 1; align-items: center; justify-content: center;">
+      <p class="rvo-text" style="color: #666;">Formulier laden...</p>
+    </div>
+
+    <div v-else-if="formConfig" style="display: flex; flex: 1;">
       <!-- Sidebar (hidden on home) -->
       <SectionNav
         v-if="store.currentView !== 'home'"
-        :assessment-data="activeData"
+        :form-config="formConfig"
+        :nav-order="navOrder"
       />
 
       <!-- Main content — padding-bottom leaves room for the fixed footer -->
       <main style="flex: 1; overflow-y: auto; padding-bottom: 48px;">
 
         <!-- Home -->
-        <DpiaHomePage v-if="store.currentView === 'home' && isDpia" @start="startAssessment" />
-        <HomePage v-else-if="store.currentView === 'home'" @start="startAssessment" />
+        <component
+          :is="formConfig.meta.homeComponent === 'DpiaHomePage' ? DpiaHomePage : HomePage"
+          v-if="store.currentView === 'home'"
+          @start="startAssessment"
+        />
 
         <!-- AIIA-only: Forbidden onaanvaardbaar risk stop screen -->
         <div
-          v-else-if="!isDpia && store.riskLevel === 'onaanvaardbaar' && store.currentView !== 'risk'"
+          v-else-if="formConfig.features.riskClassification && store.riskLevel === 'onaanvaardbaar' && store.currentView !== 'risk'"
           class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm"
           style="padding-top: 48px; padding-bottom: 48px;"
         >
@@ -42,15 +50,17 @@
           </div>
         </div>
 
-        <!-- AIIA-only: Risk classification -->
+        <!-- Risk classification (forms with riskClassification feature) -->
         <RiskClassification
-          v-else-if="!isDpia && store.currentView === 'risk'"
+          v-else-if="formConfig.features.riskClassification && store.currentView === 'risk'"
+          :form-config="formConfig"
           @confirmed="onRiskConfirmed"
         />
 
-        <!-- AIIA-only: Decision gate (Section 3) -->
+        <!-- Decision gate (forms with decisionGate feature) -->
         <DecisionGate
-          v-else-if="!isDpia && store.currentView === 'decision'"
+          v-else-if="formConfig.features.decisionGate && store.currentView === 'decision'"
+          :form-config="formConfig"
           @next="onDecisionNext"
           @prev="store.setCurrentView(prevViewOf('decision'))"
         />
@@ -58,7 +68,7 @@
         <!-- Summary -->
         <SummaryView
           v-else-if="store.currentView === 'summary'"
-          :assessment-data="activeData"
+          :form-config="formConfig"
         />
 
         <!-- Section views -->
@@ -79,11 +89,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { assessmentData as aiiaData } from '../data/assessment'
-import { dpiaData } from '../data/dpia'
+import { ref, computed, onMounted, watch } from 'vue'
+import { loadForm } from '../services/formLoader'
 import { useAssessmentStore } from '../stores/assessmentStore'
-import type { AssessmentData, Section } from '../models/Assessment'
+import type { FormConfig, NavStepSubsections, NavStepSpecialView, Section } from '../models/Assessment'
 import AppHeader from './AppHeader.vue'
 import AppFooter from './AppFooter.vue'
 import HomePage from './HomePage.vue'
@@ -95,55 +104,66 @@ import DecisionGate from './DecisionGate.vue'
 import SummaryView from './SummaryView.vue'
 
 const store = useAssessmentStore()
+const formConfig = ref<FormConfig | null>(null)
+const isLoading = ref(true)
 
-const isDpia = computed(() => store.activeAssessment === 'dpia')
+async function loadActiveForm() {
+  isLoading.value = true
+  formConfig.value = await loadForm(store.activeFormId)
+  isLoading.value = false
+}
 
-const activeData = computed((): AssessmentData =>
-  isDpia.value ? dpiaData : aiiaData,
-)
+onMounted(loadActiveForm)
+watch(() => store.activeFormId, loadActiveForm)
 
-// Build ordered navigation list
+// Build ordered navigation list from form config
 const navOrder = computed((): string[] => {
-  if (isDpia.value) {
-    // DPIA: linear through all subsections
-    const order: string[] = []
-    for (const section of dpiaData.sections) {
-      for (const sub of section.subsections) {
-        order.push(sub.id)
-      }
-    }
-    order.push('summary')
-    return order
-  }
-
-  // AIIA: existing logic with risk → decision → conditional Part B
-  const partA = aiiaData.sections.find((s) => s.id === 'deel_a')
-  const partB = aiiaData.sections.find((s) => s.id === 'deel_b')
-
+  if (!formConfig.value) return []
   const order: string[] = []
-  if (partA) {
-    for (const sub of partA.subsections) {
-      if (sub.id !== '3') order.push(sub.id)
-    }
-  }
-  order.push('risk')
-  order.push('decision')
 
-  if (store.goDecision !== false && partB) {
-    for (const sub of partB.subsections) {
-      order.push(sub.id)
+  for (const step of formConfig.value.navigation) {
+    if (step.type === 'subsections') {
+      const s = step as NavStepSubsections
+      if (s.condition) {
+        const val = store[s.condition.storeKey as keyof typeof store]
+        if (val !== s.condition.value) continue
+      }
+      const section = formConfig.value.sections.find((sec) => sec.id === s.sectionId)
+      if (section) {
+        for (const sub of section.subsections) {
+          if (s.exclude?.includes(sub.id)) continue
+          order.push(sub.id)
+        }
+      }
+    } else {
+      order.push((step as NavStepSpecialView).viewId)
     }
   }
-  order.push('summary')
+
   return order
 })
 
-// Flat map of all subsections by id
+// Set of subsection IDs excluded from direct section rendering
+const excludedSubsectionIds = computed((): Set<string> => {
+  if (!formConfig.value) return new Set()
+  const excluded = new Set<string>()
+  for (const step of formConfig.value.navigation) {
+    if (step.type === 'subsections') {
+      for (const id of (step as NavStepSubsections).exclude ?? []) {
+        excluded.add(id)
+      }
+    }
+  }
+  return excluded
+})
+
+// Flat map of all subsections by id (for SectionView rendering)
 const sectionMap = computed((): Record<string, Section> => {
   const map: Record<string, Section> = {}
-  for (const section of activeData.value.sections) {
+  if (!formConfig.value) return map
+  for (const section of formConfig.value.sections) {
     for (const sub of section.subsections) {
-      if (!isDpia.value && sub.id === '3') continue // handled by DecisionGate
+      if (excludedSubsectionIds.value.has(sub.id)) continue
       map[sub.id] = {
         id: sub.id,
         title: section.title,
@@ -157,9 +177,7 @@ const sectionMap = computed((): Record<string, Section> => {
 
 const currentSection = computed((): Section | null => {
   const view = store.currentView
-  const specialViews = isDpia.value
-    ? ['home', 'summary']
-    : ['home', 'risk', 'decision', 'summary']
+  const specialViews = ['home', 'risk', 'decision', 'summary']
   if (specialViews.includes(view)) return null
   return sectionMap.value[view] ?? null
 })
@@ -168,17 +186,14 @@ const currentIndex = computed(() => navOrder.value.indexOf(store.currentView))
 const hasPrev = computed(() => currentIndex.value > 0)
 
 const nextLabel = computed(() => {
-  if (isDpia.value) {
-    const idx = currentIndex.value
-    const next = navOrder.value[idx + 1]
-    if (next === 'summary') return 'Naar samenvatting'
-    return 'Volgende'
+  if (!formConfig.value) return 'Volgende'
+  const nextViewId = navOrder.value[currentIndex.value + 1]
+  if (!nextViewId) return 'Volgende'
+  for (const step of formConfig.value.navigation) {
+    if (step.type === 'specialView' && (step as NavStepSpecialView).viewId === nextViewId) {
+      return (step as NavStepSpecialView).label ?? 'Volgende'
+    }
   }
-  const idx = currentIndex.value
-  const next = navOrder.value[idx + 1]
-  if (next === 'risk') return 'Naar risicoclassificatie'
-  if (next === 'decision') return 'Naar afweging &amp; beslissing'
-  if (next === 'summary') return 'Naar samenvatting'
   return 'Volgende'
 })
 
@@ -210,13 +225,21 @@ function onRiskConfirmed() {
 }
 
 function onDecisionNext(go: boolean) {
-  if (go) {
-    const partB = aiiaData.sections.find((s) => s.id === 'deel_b')
-    if (partB && partB.subsections.length > 0) {
-      store.setCurrentView(partB.subsections[0].id)
-      return
+  if (!formConfig.value) return
+  const decisionStep = formConfig.value.navigation.find(
+    (s) => s.type === 'specialView' && (s as NavStepSpecialView).viewId === 'decision',
+  ) as NavStepSpecialView | undefined
+
+  if (decisionStep?.conditionalNext) {
+    const targetId = go ? decisionStep.conditionalNext.ifTrue : decisionStep.conditionalNext.ifFalse
+    const section = formConfig.value.sections.find((s) => s.id === targetId)
+    if (section?.subsections.length) {
+      store.setCurrentView(section.subsections[0].id)
+    } else {
+      store.setCurrentView(targetId)
     }
+  } else {
+    store.setCurrentView('summary')
   }
-  store.setCurrentView('summary')
 }
 </script>

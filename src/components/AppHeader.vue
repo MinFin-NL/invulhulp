@@ -25,13 +25,13 @@
       <div style="display: flex; border-top: 1px solid rgba(255,255,255,0.2); margin: 0 -16px; padding: 0 16px;">
         <button
           @click="switchTo('aiia')"
-          :style="tabStyle(store.activeAssessment === 'aiia')"
+          :style="tabStyle(store.activeFormId === 'aiia')"
         >
           AI Impact Assessment
         </button>
         <button
           @click="switchTo('dpia')"
-          :style="tabStyle(store.activeAssessment === 'dpia')"
+          :style="tabStyle(store.activeFormId === 'dpia')"
         >
           DPIA
         </button>
@@ -42,7 +42,7 @@
 
 <script setup lang="ts">
 import emblemUrl from '@nl-rvo/assets/images/emblem.svg'
-import type { AssessmentType } from '../stores/assessmentStore'
+import type { FormId } from '../stores/assessmentStore'
 import { useAssessmentStore } from '../stores/assessmentStore'
 
 const store = useAssessmentStore()
@@ -62,12 +62,12 @@ function tabStyle(active: boolean) {
   }
 }
 
-function switchTo(type: AssessmentType) {
-  store.setActiveAssessment(type)
+function switchTo(id: FormId) {
+  store.setActiveForm(id)
 }
 
 function confirmReset() {
-  const label = store.activeAssessment === 'dpia' ? 'DPIA' : 'AI Impact Assessment'
+  const label = store.activeFormId === 'dpia' ? 'DPIA' : 'AI Impact Assessment'
   if (confirm(`Weet u zeker dat u de ${label} opnieuw wilt beginnen? Al uw antwoorden worden gewist.`)) {
     store.resetActive()
   }

@@ -81,8 +81,8 @@ import { computed, ref } from 'vue'
 import { diffWords } from 'diff'
 import type { Change } from 'diff'
 import { useAssessmentStore } from '../stores/assessmentStore'
-import { getMappingForDpiaQuestion } from '../data/crossFormMappings'
-import { assessmentData } from '../data/assessment'
+import { useCrossFormMappings } from '../composables/useCrossFormMappings'
+import { getCachedForm } from '../services/formLoader'
 import { synthesizeFromAiia } from '../services/llmService'
 
 const props = defineProps<{
@@ -97,11 +97,14 @@ const emit = defineEmits<{
 }>()
 
 const store = useAssessmentStore()
+const mappings = useCrossFormMappings()
 
 // ── Resolve AIIA question text by ID ─────────────────────────────────────────
 
 function findAiiaQuestionText(questionId: string): string {
-  for (const section of assessmentData.sections) {
+  const aiiaForm = getCachedForm('aiia')
+  if (!aiiaForm) return questionId
+  for (const section of aiiaForm.sections) {
     for (const sub of section.subsections) {
       for (const q of sub.questions) {
         if (q.id === questionId) return q.text
@@ -114,13 +117,12 @@ function findAiiaQuestionText(questionId: string): string {
 // ── Build context from AIIA answers ──────────────────────────────────────────
 
 const aiiaContext = computed(() => {
-  const mapping = getMappingForDpiaQuestion(props.dpiaQuestionId)
+  const mapping = mappings.value.find((m) => m.dpiaQuestionId === props.dpiaQuestionId)
   if (!mapping) return []
 
   return mapping.aiiaQuestionIds
     .map((id) => {
-      const raw = store.aiia.answers[id]
-      // For radio answers stored as "option\n---\nfollowup", strip the separator
+      const raw = store.forms['aiia']?.answers[id]
       const answer =
         typeof raw === 'string'
           ? raw.replace('\n---\n', ': ')
@@ -160,7 +162,7 @@ const noChanges = computed(
 )
 
 async function requestSynthesis() {
-  const mapping = getMappingForDpiaQuestion(props.dpiaQuestionId)
+  const mapping = mappings.value.find((m) => m.dpiaQuestionId === props.dpiaQuestionId)
   if (!mapping || aiiaContext.value.length === 0) return
 
   error.value = ''
@@ -294,7 +296,6 @@ function rejectSuggestion() {
   opacity: 0.88;
 }
 
-/* Suggestion diff panel — distinct teal/green accent for cross-form synthesis */
 .cross-suggestion-panel {
   background: #f0faf4;
   border: 1px solid #7ec8a0;

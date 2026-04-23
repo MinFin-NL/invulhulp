@@ -1,0 +1,6 @@
+{
+  "forms": [
+    { "id": "aiia", "file": "aiia.json" },
+    { "id": "dpia", "file": "dpia.json" }
+  ]
+}

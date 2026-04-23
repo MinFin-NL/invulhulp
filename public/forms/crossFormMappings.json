@@ -1,0 +1,107 @@
+[
+  {
+    "dpiaQuestionId": "d1.1",
+    "aiiaQuestionIds": ["1.1.1"],
+    "synthesisHint": "Formuleer de beschrijving van het AI-systeem als projectbeschrijving voor een DPIA, met nadruk op de gegevensverwerkingscontext."
+  },
+  {
+    "dpiaQuestionId": "d1.2",
+    "aiiaQuestionIds": ["1.1.4"],
+    "synthesisHint": "Beschrijf de aanleiding voor het project vanuit het perspectief van de DPIA, met nadruk op de noodzaak van gegevensverwerking."
+  },
+  {
+    "dpiaQuestionId": "d5.1",
+    "aiiaQuestionIds": ["1.1.1", "1.1.4"],
+    "synthesisHint": "Combineer het doel en de aanleiding van het AI-systeem tot specifieke, uitdrukkelijk omschreven verwerkingsdoeleinden voor de DPIA."
+  },
+  {
+    "dpiaQuestionId": "d5.2",
+    "aiiaQuestionIds": ["7.2.4"],
+    "synthesisHint": "Beschrijf hoe betrokkenen worden geïnformeerd over de verwerkingsdoeleinden, gebaseerd op de transparantie-aanpak uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d6.1",
+    "aiiaQuestionIds": ["1.3.1", "1.3.2"],
+    "synthesisHint": "Vertaal de rolverdeling en betrokkenen uit de AIIA naar AVG-rollen (verwerkingsverantwoordelijke, verwerker, betrokkene, etc.) voor de DPIA."
+  },
+  {
+    "dpiaQuestionId": "d6.3",
+    "aiiaQuestionIds": ["4.4.5"],
+    "synthesisHint": "Beschrijf of verwerkersovereenkomsten zijn gesloten, gebaseerd op de externe-hostingvoorwaarden uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d7.3",
+    "aiiaQuestionIds": ["1.3.3", "1.3.4"],
+    "synthesisHint": "Beschrijf het overleg met betrokkenen gebaseerd op de stakeholderconsultatie uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d4.2",
+    "aiiaQuestionIds": ["1.2.1"],
+    "synthesisHint": "Beschrijf de (semi-)geautomatiseerde besluitvorming of profilering op basis van de technische systeembeschrijving uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d4.3",
+    "aiiaQuestionIds": ["4.4.5"],
+    "synthesisHint": "Beschrijf het gebruik van cloudoplossingen of big data-verwerkingen op basis van de hostinginformatie uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d9.1",
+    "aiiaQuestionIds": ["2.1.2", "2.1.3"],
+    "synthesisHint": "Noem de relevante wet- en regelgeving gebaseerd op de wettelijke grondslag en grondrechtelijke bepalingen uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d10.1",
+    "aiiaQuestionIds": ["7.4.1", "7.4.3"],
+    "synthesisHint": "Beschrijf de bewaartermijnen voor persoonsgegevens gebaseerd op de archiveringsinformatie uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d10.2",
+    "aiiaQuestionIds": ["7.4.1", "7.4.2"],
+    "synthesisHint": "Beschrijf hoe toezicht wordt gehouden op bewaartermijnen en vernietiging, gebaseerd op de versiebeheers- en archiveringsaanpak uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d11.2",
+    "aiiaQuestionIds": ["2.1.2", "2.1.3"],
+    "synthesisHint": "Motiveer de gekozen AVG-rechtsgrond gebaseerd op de juridische onderbouwing en grondrechtelijke bepalingen uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d14.1",
+    "aiiaQuestionIds": ["5.1.3"],
+    "synthesisHint": "Beoordeel de noodzaak van persoonsgegevensverwerking gebaseerd op de dataminimalisatie-informatie uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d14.2",
+    "aiiaQuestionIds": ["3.1", "5.2.3"],
+    "synthesisHint": "Beschrijf de proportionaliteit van de gegevensverwerking gebaseerd op de proportionaliteitsafweging uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d14.3",
+    "aiiaQuestionIds": ["1.2.3", "3.1"],
+    "synthesisHint": "Beschrijf de subsidiariteit en de overwogen alternatieven gebaseerd op de alternatieven-analyse uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d15.1",
+    "aiiaQuestionIds": ["7.2.12"],
+    "synthesisHint": "Beschrijf hoe betrokkenen hun AVG-rechten kunnen uitoefenen gebaseerd op de bezwaar- en beroepsprocedures uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d16.1",
+    "aiiaQuestionIds": ["2.1.1", "2.1.4"],
+    "synthesisHint": "Beschrijf de mogelijke negatieve gevolgen voor betrokkenen vanuit gegevensbeschermingsperspectief, gebaseerd op de grondrechtenanalyse uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d17.1",
+    "aiiaQuestionIds": ["4.4.6", "4.4.8", "6.3.2", "5.2.8"],
+    "synthesisHint": "Beschrijf de technische maatregelen (toegangscontrole, logging, beveiliging) gebaseerd op de beveiligingsmaatregelen uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d17.2",
+    "aiiaQuestionIds": ["3.2", "6.1.1"],
+    "synthesisHint": "Beschrijf de organisatorische maatregelen gebaseerd op de risicobeheersings- en aanvullende maatregelen uit de AIIA."
+  },
+  {
+    "dpiaQuestionId": "d17.4",
+    "aiiaQuestionIds": ["6.1.1"],
+    "synthesisHint": "Beschrijf de resterende risico's na het treffen van maatregelen, gebaseerd op de risicoanalyse uit de AIIA."
+  }
+]

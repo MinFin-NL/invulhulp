@@ -42,16 +42,23 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { assessmentData, riskLevelInfo } from '../data/assessment'
+import type { FormConfig } from '../models/Assessment'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import QuestionItem from './QuestionItem.vue'
 
+const props = defineProps<{ formConfig: FormConfig }>()
 const emit = defineEmits<{ next: [goDecision: boolean]; prev: [] }>()
 
 const store = useAssessmentStore()
 
-const decisionSection = assessmentData.sections[0].subsections.find((s) => s.id === '3')
-const decisionQuestions = decisionSection?.questions ?? []
+const riskLevelInfo = computed(() => props.formConfig.riskLevelInfo ?? {})
+
+const decisionSection = computed(() =>
+  props.formConfig.sections
+    .flatMap((s) => s.subsections)
+    .find((s) => s.id === '3'),
+)
+const decisionQuestions = computed(() => decisionSection.value?.questions ?? [])
 
 const goAnswer = computed(() => {
   const raw = store.getAnswer('3.3')
@@ -67,7 +74,7 @@ const alertType = computed(() => {
   }
 })
 
-const riskInfo = computed(() => store.riskLevel ? riskLevelInfo[store.riskLevel] : null)
+const riskInfo = computed(() => store.riskLevel ? riskLevelInfo.value[store.riskLevel] : null)
 
 function onNext() {
   store.markSectionCompleted('3')
