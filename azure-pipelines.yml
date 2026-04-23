@@ -125,30 +125,6 @@ stages:
                     --min-replicas 1 --max-replicas 3
                 fi
 
-          - task: AzureCLI@2
-            displayName: Apply firewall rules to backend
-            env:
-              BACKEND_APP: $(BACKEND_APP)
-              RESOURCE_GROUP: $(RESOURCE_GROUP)
-              ALLOWED_IP_1: $(ALLOWED_IP_1)
-              ALLOWED_IP_2: $(ALLOWED_IP_2)
-            inputs:
-              azureSubscription: $(AZURE_SERVICE_CONNECTION)
-              scriptType: bash
-              scriptLocation: inlineScript
-              inlineScript: |
-                az containerapp ingress access-restriction set \
-                  --name "$BACKEND_APP" \
-                  --resource-group "$RESOURCE_GROUP" \
-                  --rule-name "DWR Next werkplekken" \
-                  --ip-address "$ALLOWED_IP_1" \
-                  --action Allow
-                az containerapp ingress access-restriction set \
-                  --name "$BACKEND_APP" \
-                  --resource-group "$RESOURCE_GROUP" \
-                  --rule-name "ITS" \
-                  --ip-address "$ALLOWED_IP_2" \
-                  --action Allow
 
           - task: AzureCLI@2
             displayName: Deploy frontend
