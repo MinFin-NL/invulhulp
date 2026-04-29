@@ -12,7 +12,7 @@ Environment variables (can be set via .env file):
     # Azure OpenAI — used when AZURE_OPENAI_ENDPOINT is set
     AZURE_OPENAI_ENDPOINT        — e.g. https://oai-foundation-inno-d.openai.azure.com/
     AZURE_OPENAI_API_KEY         — API key
-    AZURE_OPENAI_DEPLOYMENT      — deployment name (default: gpt-4o)
+    AZURE_OPENAI_DEPLOYMENT      — deployment name (default: gpt-5.3-chat)
     AZURE_OPENAI_API_VERSION     — API version (default: 2025-04-01-preview)
 
     # Shared
@@ -42,7 +42,7 @@ if USE_AZURE:
         api_key=os.environ.get("AZURE_OPENAI_API_KEY", ""),
         api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2025-04-01-preview"),
     )
-    AZURE_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-4o")
+    AZURE_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-5.3-chat")
 else:
     import ollama
 
