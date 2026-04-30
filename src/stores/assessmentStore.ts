@@ -23,15 +23,13 @@ function initialFormState(): FormState {
 
 export const useAssessmentStore = defineStore('assessment', {
   state: () => ({
-    activeFormId: 'aiia' as FormId,
-    forms: {
-      aiia: initialFormState(),
-      dpia: initialFormState(),
-    } as Record<FormId, FormState>,
+    activeFormId: null as FormId | null,
+    forms: {} as Record<FormId, FormState>,
   }),
 
   getters: {
-    activeForm: (state): FormState => state.forms[state.activeFormId] ?? initialFormState(),
+    activeForm: (state): FormState =>
+      state.activeFormId ? (state.forms[state.activeFormId] ?? initialFormState()) : initialFormState(),
     answers(): Answers { return this.activeForm.answers },
     currentView(): string { return this.activeForm.currentView },
     completedSections(): string[] { return this.activeForm.completedSections },
@@ -75,8 +73,12 @@ export const useAssessmentStore = defineStore('assessment', {
       }
     },
 
+    goToPortal() {
+      this.activeFormId = null
+    },
+
     resetActive() {
-      this.forms[this.activeFormId] = initialFormState()
+      if (this.activeFormId) this.forms[this.activeFormId] = initialFormState()
     },
 
     reset() {

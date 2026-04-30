@@ -100,19 +100,18 @@ SYSTEM_PROMPT = (
 )
 
 SYNTHESIZE_SYSTEM_PROMPT = (
-    "Je bent een specialist in gegevensbescherming die DPIA's (Data Protection Impact Assessments) "
-    "opstelt voor de Nederlandse overheid (Ministerie van Financiën - MinFin).\n\n"
-    "Je krijgt antwoorden uit een AIIA (AI Impact Assessment) en een specifieke DPIA-vraag. "
-    "Jouw taak is om een volledig nieuw DPIA-antwoord te schrijven dat:\n"
-    "1. Uitsluitend gebaseerd is op de feiten uit de AIIA-antwoorden (voeg geen nieuwe feiten toe)\n"
-    "2. De DPIA-vraag direct en volledig beantwoordt vanuit het perspectief van gegevensbescherming\n"
-    "3. AVG-terminologie gebruikt waar relevant (verwerkingsdoeleinden, rechtsgrond, betrokkenen, "
-    "   verwerkingsverantwoordelijke, gegevensminimalisatie, etc.)\n"
-    "4. Inhoudelijk anders geformuleerd is dan de AIIA-brontekst — dit is een DPIA, geen AI-assessment\n\n"
+    "Je bent een assistent die helpt bij het invullen van projectmanagement- en compliance-documenten "
+    "voor de Nederlandse overheid (Ministerie van Financiën - MinFin).\n\n"
+    "Je krijgt antwoorden uit een bronformulier en een specifieke doelvraag. "
+    "Jouw taak is om een volledig nieuw antwoord te schrijven dat:\n"
+    "1. Uitsluitend gebaseerd is op de feiten uit de bronantwoorden (voeg geen nieuwe feiten toe)\n"
+    "2. De doelvraag direct en volledig beantwoordt in de context van dat document\n"
+    "3. De juiste terminologie gebruikt die past bij het doeldocument\n"
+    "4. Inhoudelijk anders geformuleerd is dan de brontekst — het gaat om een ander document met een andere focus\n\n"
     "Schrijf in het Nederlands. Het antwoord mag korter of langer zijn dan de brontekst als dat passend is.\n\n"
     "Reageer uitsluitend in dit XML-formaat:\n"
-    "<suggestie>jouw DPIA-antwoord hier</suggestie>\n"
-    "<toelichting>één zin over welke AIIA-informatie je hebt vertaald naar DPIA-context</toelichting>"
+    "<suggestie>jouw antwoord hier</suggestie>\n"
+    "<toelichting>één zin over welke broninformatie je hebt vertaald naar de doelcontext</toelichting>"
 )
 
 
@@ -127,9 +126,9 @@ class ImproveResponse(BaseModel):
 
 
 class SynthesizeRequest(BaseModel):
-    aiia_answers: dict[str, str]
-    aiia_questions: dict[str, str]
-    dpia_question: str
+    source_answers: dict[str, str]
+    source_questions: dict[str, str]
+    target_question: str
     synthesis_hint: str = ""
 
 
@@ -161,19 +160,19 @@ async def improve_text(req: ImproveRequest) -> ImproveResponse:
 
 
 @app.post("/api/synthesize", response_model=ImproveResponse)
-async def synthesize_from_aiia(req: SynthesizeRequest) -> ImproveResponse:
-    if not req.aiia_answers:
-        raise HTTPException(status_code=400, detail="Geen AIIA-antwoorden opgegeven.")
+async def synthesize_from_source(req: SynthesizeRequest) -> ImproveResponse:
+    if not req.source_answers:
+        raise HTTPException(status_code=400, detail="Geen bronantwoorden opgegeven.")
 
     context_parts = []
-    for qid, answer in req.aiia_answers.items():
-        q_text = req.aiia_questions.get(qid, qid)
-        context_parts.append(f"AIIA-vraag: {q_text}\nAntwoord: {answer}")
+    for qid, answer in req.source_answers.items():
+        q_text = req.source_questions.get(qid, qid)
+        context_parts.append(f"Bronvraag: {q_text}\nAntwoord: {answer}")
 
     hint = f"\nExtra context: {req.synthesis_hint}" if req.synthesis_hint else ""
     user_message = (
-        f"DPIA-vraag waarvoor een suggestie nodig is:\n{req.dpia_question}\n\n"
-        f"Beschikbare AIIA-informatie:{hint}\n\n" + "\n\n".join(context_parts)
+        f"Doelvraag waarvoor een suggestie nodig is:\n{req.target_question}\n\n"
+        f"Beschikbare broninformatie:{hint}\n\n" + "\n\n".join(context_parts)
     )
 
     try:

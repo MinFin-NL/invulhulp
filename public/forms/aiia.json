@@ -8,7 +8,17 @@
     "docTitle": "AI Impact Assessment",
     "footerLabel": "AI Impact Assessment – MinFin",
     "filename": "AI-Impact-Assessment-IenW.pdf",
-    "systemNamePlaceholder": "Bijv. Verkeersprognosemodel v2"
+    "systemNamePlaceholder": "Bijv. Verkeersprognosemodel v2",
+    "homeContent": {
+      "notice": "Dit is een digitale hulptool bij het invullen van het AI Impact Assessment. Het invullen van dit formulier vervangt niet het advies van juridische, privacy- of AI-experts. Raadpleeg bij twijfel altijd de relevante deskundigen binnen MinFin.",
+      "description": "Het AI Impact Assessment (AIIA) helpt medewerkers van MinFin om op een gestructureerde manier te beoordelen of het verantwoord is een AI-systeem in te zetten, en hoe dit systeem verantwoord geïmplementeerd en gebruikt kan worden.",
+      "steps": [
+        "Risicoclassificatie op basis van de EU AI-verordening",
+        "Deel A – Afweging: is het verantwoord dit AI-systeem in te zetten?",
+        "Deel B – Implementatie: hoe wordt het systeem verantwoord geïmplementeerd en gebruikt?"
+      ],
+      "buttonLabel": "Starten met het assessment"
+    }
   },
   "features": {
     "riskClassification": true,

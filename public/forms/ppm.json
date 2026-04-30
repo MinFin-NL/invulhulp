@@ -1,0 +1,276 @@
+{
+  "id": "ppm",
+  "version": "1.0",
+  "title": "PPM Projectplan",
+  "meta": {
+    "homeComponent": "HomePage",
+    "exportLabel": "PPM Projectplan",
+    "docTitle": "PPM Projectplan",
+    "footerLabel": "PPM Projectplan – MinFin",
+    "filename": "PPM-Projectplan.pdf",
+    "systemNamePlaceholder": "Bijv. Vervanging declaratiesysteem",
+    "homeContent": {
+      "notice": "Het projectplan vereist goedkeuring van de opdrachtgever, manager planning resources (business en IT), PSA-architect, informatiebeveiliging (CISO/ISO), privacy officer en controller. Stem de planning af met alle betrokkenen voorafgaand aan indiening bij portfoliomanagement.",
+      "description": "Het PPM Projectplan legt de projectdefinitie, business case, aanpak en organisatie vast. Het is één van de verplichte documenten bij de start van een project in het projectportfolioproces van MinFin en vormt de basis voor sturing door de stuurgroep.",
+      "steps": [
+        "Projectdefinitie: achtergrond, doelstellingen, scope en afhankelijkheden",
+        "Business case: redenen, overwogen opties, kosten en baten, fasering",
+        "Projectaanpak: gekozen aanpak, PSA en Privacy Impact Assessment",
+        "Organisatie: projectmanagementstructuur en stakeholders",
+        "Projectproductbeschrijving: eindproduct, kwaliteit en acceptatiecriteria"
+      ],
+      "buttonLabel": "Starten met het projectplan"
+    }
+  },
+  "features": {
+    "riskClassification": false,
+    "decisionGate": false,
+    "conditionalPartB": false
+  },
+  "navigation": [
+    { "type": "subsections", "sectionId": "ppm_a" },
+    { "type": "subsections", "sectionId": "ppm_b" },
+    { "type": "subsections", "sectionId": "ppm_c" },
+    { "type": "subsections", "sectionId": "ppm_d" },
+    { "type": "subsections", "sectionId": "ppm_e" },
+    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+  ],
+  "sections": [
+    {
+      "id": "ppm_a",
+      "title": "1. Projectdefinitie",
+      "part": "A",
+      "subsections": [
+        {
+          "id": "ppm_a1",
+          "title": "1.1 Achtergrond en doelstellingen",
+          "description": "Beschrijf de aanleiding, doelstellingen en gewenste eindresultaten van het project.",
+          "questions": [
+            {
+              "id": "ppm_a.achtergrond",
+              "text": "Achtergrond",
+              "guidance": "Beschrijf wat de aanleiding is om het project te starten. Welk probleem wordt opgelost? Welke kans wordt benut?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_a.doelstellingen",
+              "text": "Projectdoelstellingen en randvoorwaarden",
+              "guidance": "Beschrijf welke doelstelling dient te worden bereikt en de randvoorwaarden vanuit het perspectief van de stuurgroep (bijv. gewenste einddatum, budgetbegrenzing).",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_a.eindresultaten",
+              "text": "Gewenste eindresultaten (Milestones)",
+              "guidance": "Geef een overzicht van de belangrijkste producten (milestones) die moeten worden opgeleverd, inclusief implementatie en acceptatie door de beheerorganisatie.",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        },
+        {
+          "id": "ppm_a2",
+          "title": "1.2 Scope, beperkingen en afhankelijkheden",
+          "description": "Geef aan wat binnen en buiten het project valt, en beschrijf eventuele afhankelijkheden.",
+          "questions": [
+            {
+              "id": "ppm_a.scope",
+              "text": "Projectscope en afbakening",
+              "guidance": "Maak inzichtelijk wat binnen en buiten de grenzen van het project valt. Besteed aandacht aan het grijze gebied en zorg dat borging en acceptatie door functioneel beheer expliciet is opgenomen.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_a.beperkingen",
+              "text": "Beperkingen en aannames",
+              "guidance": "Zijn er aannames aan het licht gekomen die voor het gehele project gelden?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "ppm_a.toleranties",
+              "text": "Projecttoleranties (oranje/rood voor product, tijd en geld)",
+              "guidance": "Definieer de tolerantiegrenzen voor product, planning en budget. Wanneer wordt afwijkend gerapporteerd aan de stuurgroep?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "ppm_a.afhankelijkheden",
+              "text": "Afhankelijkheden van andere projecten of activiteiten",
+              "guidance": "Noem de projecten waarvan dit project afhankelijk is en beschrijf per project wat de afhankelijkheid inhoudt en hoe kritisch deze is.",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppm_b",
+      "title": "2. Business case op hoofdlijnen",
+      "part": "B",
+      "subsections": [
+        {
+          "id": "ppm_b1",
+          "title": "2.1 Redenen en argumentatie",
+          "description": "Beschrijf de zakelijke rechtvaardiging voor het project.",
+          "questions": [
+            {
+              "id": "ppm_b.redenen",
+              "text": "Redenen om te starten met het project",
+              "guidance": "Beschrijf de aanleiding en de bijdrage aan bedrijfsdoelstellingen. Denk aan wettelijke verplichtingen, politieke toezeggingen, ondersteuning van bedrijfsprocessen en bijdrage aan betrouwbare dienstverlening.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_b.overwogen_opties",
+              "text": "Overwogen opties en argumentatie voor de gekozen optie",
+              "guidance": "Welke alternatieven zijn overwogen? Waarom is voor de gekozen aanpak gekozen?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_b.kosten_baten",
+              "text": "Kosten en baten / besparingen",
+              "guidance": "Beschrijf de verwachte baten (financieel en niet-financieel) en de kosten van het project.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_b.fasering",
+              "text": "Doorlooptijd en fasering (indicatief)",
+              "guidance": "Geef een indicatieve planning met de belangrijkste fasen en mijlpalen.",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppm_c",
+      "title": "3. Projectaanpak",
+      "part": "C",
+      "subsections": [
+        {
+          "id": "ppm_c1",
+          "title": "3.1 Aanpak en architectuur",
+          "description": "Beschrijf de gekozen projectaanpak en relevante architectuur- en privacyaspecten.",
+          "questions": [
+            {
+              "id": "ppm_c.alternatieven_aanpak",
+              "text": "Overwogen alternatieve wijzen van aanpak",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "ppm_c.gekozen_aanpak",
+              "text": "Beschrijving van de gekozen aanpak",
+              "guidance": "Beschrijf welke aanpak is gekozen voor de uitvoering van het project.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_c.onderbouwing_aanpak",
+              "text": "Onderbouwing van de gekozen aanpak",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "ppm_c.beheeromgeving",
+              "text": "Toekomstige productie- en beheeromgeving",
+              "guidance": "Beschrijf hoe de toekomstige productie- en beheeromgeving eruitziet na oplevering.",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "ppm_c.psa",
+              "text": "Project Start Architectuur (PSA)",
+              "guidance": "Is een PSA opgesteld of vereist? Verwijs naar het PSA-document of licht toe waarom geen PSA nodig is.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_c.pia",
+              "text": "Privacy Impact Assessment (PIA / DPIA)",
+              "guidance": "Is een QuickScan en preDPIA uitgevoerd om het basisbeveiligingsniveau vast te stellen en na te gaan of een DPIA noodzakelijk is? Verwijs naar de relevante documenten.",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppm_d",
+      "title": "4. Organisatie",
+      "part": "D",
+      "subsections": [
+        {
+          "id": "ppm_d1",
+          "title": "4.1 Projectorganisatie en stakeholders",
+          "description": "Beschrijf de projectmanagementstructuur en de betrokken stakeholders.",
+          "questions": [
+            {
+              "id": "ppm_d.projectmanagement",
+              "text": "Projectmanagementteamstructuur",
+              "guidance": "Beschrijf de projectorganisatie: stuurgroep, projectmanager, projectteam en hun rollen.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_d.stakeholders",
+              "text": "Gebruikers en andere stakeholders",
+              "guidance": "Beschrijf welke gebruikers en stakeholders betrokken zijn bij het project en wat hun belangen zijn.",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppm_e",
+      "title": "5. Projectproductbeschrijving",
+      "part": "D",
+      "subsections": [
+        {
+          "id": "ppm_e1",
+          "title": "5.1 Eindproduct en kwaliteit",
+          "description": "Beschrijf het eindproduct van het project en de kwaliteitseisen.",
+          "questions": [
+            {
+              "id": "ppm_e.doel_eindproduct",
+              "text": "Doel van het eindproduct",
+              "guidance": "Wat is het beoogde doel van het eindproduct? Welk probleem lost het op?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_e.samenstelling",
+              "text": "Samenstelling van het eindproduct",
+              "guidance": "Uit welke componenten bestaat het eindproduct?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "ppm_e.kwaliteitsverwachtingen",
+              "text": "Kwaliteitsverwachtingen van de klant",
+              "guidance": "Welke kwaliteitseisen worden gesteld aan het eindproduct?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_e.acceptatiecriteria",
+              "text": "Acceptatiecriteria",
+              "guidance": "Op basis van welke criteria wordt het eindproduct geaccepteerd?",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

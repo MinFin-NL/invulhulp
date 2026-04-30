@@ -2,7 +2,12 @@
   <div style="min-height: 100vh; display: flex; flex-direction: column;">
     <AppHeader />
 
-    <div v-if="isLoading" style="display: flex; flex: 1; align-items: center; justify-content: center;">
+    <!-- Portal landing page (no form selected) -->
+    <main v-if="store.activeFormId === null" style="flex: 1; overflow-y: auto;">
+      <PortalPage @open="store.setActiveForm" />
+    </main>
+
+    <div v-else-if="isLoading" style="display: flex; flex: 1; align-items: center; justify-content: center;">
       <p class="rvo-text" style="color: #666;">Formulier laden...</p>
     </div>
 
@@ -18,9 +23,9 @@
       <main style="flex: 1; overflow-y: auto; padding-bottom: 48px;">
 
         <!-- Home -->
-        <component
-          :is="formConfig.meta.homeComponent === 'DpiaHomePage' ? DpiaHomePage : HomePage"
+        <FormHomePage
           v-if="store.currentView === 'home'"
+          :form-config="formConfig"
           @start="startAssessment"
         />
 
@@ -95,8 +100,8 @@ import { useAssessmentStore } from '../stores/assessmentStore'
 import type { FormConfig, NavStepSubsections, NavStepSpecialView, Section } from '../models/Assessment'
 import AppHeader from './AppHeader.vue'
 import AppFooter from './AppFooter.vue'
-import HomePage from './HomePage.vue'
-import DpiaHomePage from './DpiaHomePage.vue'
+import PortalPage from './PortalPage.vue'
+import FormHomePage from './FormHomePage.vue'
 import SectionNav from './SectionNav.vue'
 import SectionView from './SectionView.vue'
 import RiskClassification from './RiskClassification.vue'
@@ -108,6 +113,11 @@ const formConfig = ref<FormConfig | null>(null)
 const isLoading = ref(true)
 
 async function loadActiveForm() {
+  if (!store.activeFormId) {
+    isLoading.value = false
+    formConfig.value = null
+    return
+  }
   isLoading.value = true
   formConfig.value = await loadForm(store.activeFormId)
   isLoading.value = false
