@@ -1,12 +1,12 @@
 <template>
-  <div v-if="aiiaContext.length > 0" class="cross-form-suggestion">
+  <div v-if="sourceContext.length > 0" class="cross-form-suggestion">
     <div class="cross-form-header">
-      <span class="cross-form-label">Beschikbaar uit AIIA</span>
+      <span class="cross-form-label">Beschikbaar uit {{ sourceLabel }}</span>
     </div>
 
-    <!-- AIIA answer blocks -->
+    <!-- Source form answer blocks -->
     <div
-      v-for="item in aiiaContext"
+      v-for="item in sourceContext"
       :key="item.id"
       class="aiia-answer-block"
     >
@@ -68,7 +68,7 @@
         @click="requestSynthesis"
       >
         <span v-if="isLoading">Bezig…</span>
-        <span v-else>✦ AI-suggestie voor DPIA</span>
+        <span v-else>✦ AI-suggestie</span>
       </button>
     </div>
 
@@ -80,14 +80,14 @@
 import { computed, ref } from 'vue'
 import { diffWords } from 'diff'
 import type { Change } from 'diff'
+import type { CrossFormMapping } from '../models/Assessment'
 import { useAssessmentStore } from '../stores/assessmentStore'
-import { getMappingForDpiaQuestion } from '../data/crossFormMappings'
-import { assessmentData } from '../data/assessment'
-import { synthesizeFromAiia } from '../services/llmService'
+import { getCachedForm } from '../services/formLoader'
+import { synthesize } from '../services/llmService'
 
 const props = defineProps<{
-  dpiaQuestionId: string
-  dpiaQuestionText: string
+  mapping: CrossFormMapping
+  targetQuestionText: string
   questionType: string
   currentValue: string
 }>()
@@ -98,10 +98,12 @@ const emit = defineEmits<{
 
 const store = useAssessmentStore()
 
-// ── Resolve AIIA question text by ID ─────────────────────────────────────────
+// ── Resolve source question text by ID ────────────────────────────────────────
 
-function findAiiaQuestionText(questionId: string): string {
-  for (const section of assessmentData.sections) {
+function findSourceQuestionText(sourceFormId: string, questionId: string): string {
+  const form = getCachedForm(sourceFormId)
+  if (!form) return questionId
+  for (const section of form.sections) {
     for (const sub of section.subsections) {
       for (const q of sub.questions) {
         if (q.id === questionId) return q.text
@@ -111,34 +113,33 @@ function findAiiaQuestionText(questionId: string): string {
   return questionId
 }
 
-// ── Build context from AIIA answers ──────────────────────────────────────────
+// ── Build context from source form answers ────────────────────────────────────
 
-const aiiaContext = computed(() => {
-  const mapping = getMappingForDpiaQuestion(props.dpiaQuestionId)
-  if (!mapping) return []
-
-  return mapping.aiiaQuestionIds
+const sourceContext = computed(() => {
+  const { sourceFormId, sourceQuestionIds } = props.mapping
+  return sourceQuestionIds
     .map((id) => {
-      const raw = store.aiia.answers[id]
-      // For radio answers stored as "option\n---\nfollowup", strip the separator
+      const raw = store.forms[sourceFormId]?.answers[id]
       const answer =
         typeof raw === 'string'
           ? raw.replace('\n---\n', ': ')
           : Array.isArray(raw)
             ? raw.join(', ')
             : ''
-      return { id, questionText: findAiiaQuestionText(id), answer }
+      return { id, questionText: findSourceQuestionText(sourceFormId, id), answer }
     })
     .filter((item) => item.answer.trim().length > 0)
 })
+
+const sourceLabel = computed(() => props.mapping.sourceFormId.toUpperCase())
 
 const isTextType = computed(() => props.questionType === 'text')
 
 // ── "Use directly" ────────────────────────────────────────────────────────────
 
 function useDirectly() {
-  const combined = aiiaContext.value
-    .map((item) => (aiiaContext.value.length > 1 ? `${item.questionText}:\n${item.answer}` : item.answer))
+  const combined = sourceContext.value
+    .map((item) => (sourceContext.value.length > 1 ? `${item.questionText}:\n${item.answer}` : item.answer))
     .join('\n\n')
   emit('apply-suggestion', combined)
 }
@@ -160,26 +161,26 @@ const noChanges = computed(
 )
 
 async function requestSynthesis() {
-  const mapping = getMappingForDpiaQuestion(props.dpiaQuestionId)
-  if (!mapping || aiiaContext.value.length === 0) return
+  const mapping = props.mapping
+  if (sourceContext.value.length === 0) return
 
   error.value = ''
   isLoading.value = true
   suggestion.value = null
 
-  const aiiaAnswers: Record<string, string> = {}
-  const aiiaQuestions: Record<string, string> = {}
+  const sourceAnswers: Record<string, string> = {}
+  const sourceQuestions: Record<string, string> = {}
 
-  for (const item of aiiaContext.value) {
-    aiiaAnswers[item.id] = item.answer
-    aiiaQuestions[item.id] = item.questionText
+  for (const item of sourceContext.value) {
+    sourceAnswers[item.id] = item.answer
+    sourceQuestions[item.id] = item.questionText
   }
 
   try {
-    const result = await synthesizeFromAiia({
-      aiiaAnswers,
-      aiiaQuestions,
-      dpiaQuestion: props.dpiaQuestionText,
+    const result = await synthesize({
+      sourceAnswers,
+      sourceQuestions,
+      targetQuestion: props.targetQuestionText,
       synthesisHint: mapping.synthesisHint,
     })
     suggestion.value = result.suggestion
@@ -294,7 +295,6 @@ function rejectSuggestion() {
   opacity: 0.88;
 }
 
-/* Suggestion diff panel — distinct teal/green accent for cross-form synthesis */
 .cross-suggestion-panel {
   background: #f0faf4;
   border: 1px solid #7ec8a0;

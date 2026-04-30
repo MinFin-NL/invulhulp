@@ -1,0 +1,334 @@
+{
+  "id": "psa",
+  "version": "1.0",
+  "title": "Project Start Architectuur (PSA)",
+  "meta": {
+    "homeComponent": "HomePage",
+    "exportLabel": "PSA",
+    "docTitle": "Project Start Architectuur",
+    "footerLabel": "PSA – MinFin",
+    "filename": "PSA.pdf",
+    "systemNamePlaceholder": "Bijv. Vervanging declaratiesysteem",
+    "homeContent": {
+      "notice": "Een PSA is verplicht als onderdeel van het werken onder architectuur bij MinFin. De PSA wordt opgesteld door architecten in nauwe samenwerking met het projectteam en vereist goedkeuring van de Architectuurboard Financiën en het MT CDIO.",
+      "description": "De Project Start Architectuur (PSA) beschrijft in globale termen hoe de organisatorische, informatie-, applicatie- en technologielaag eruitzien na het project. De PSA is één van de voorwaarden om te starten met een project en geeft richting aan de uitvoering.",
+      "steps": [
+        "Over de verandering: aanleiding, opdracht, afbakening en relaties met andere projecten",
+        "Grondslagen: wet- en regelgeving, beleid en architectuurkaders",
+        "Organisatorisch: producten, processen en betrokken organisatieonderdelen",
+        "Informatie en applicatie: gegevensmodel, functionaliteit, technologie en algoritmeregister",
+        "Niet-functionele aspecten: informatiebeveiliging, privacy, logging en IAM",
+        "Beheer, exit-strategie, EA-toetsing en openstaande issues"
+      ],
+      "buttonLabel": "Starten met de PSA"
+    }
+  },
+  "features": {
+    "riskClassification": false,
+    "decisionGate": false,
+    "conditionalPartB": false
+  },
+  "navigation": [
+    { "type": "subsections", "sectionId": "psa_a" },
+    { "type": "subsections", "sectionId": "psa_b" },
+    { "type": "subsections", "sectionId": "psa_c" },
+    { "type": "subsections", "sectionId": "psa_d" },
+    { "type": "subsections", "sectionId": "psa_e" },
+    { "type": "subsections", "sectionId": "psa_f" },
+    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+  ],
+  "sections": [
+    {
+      "id": "psa_a",
+      "title": "Over de verandering (projectaanleiding)",
+      "part": "A",
+      "subsections": [
+        {
+          "id": "psa_a1",
+          "title": "1. Aanleiding en context",
+          "description": "Beschrijf de context en redenen voor het project en de afbakening ervan.",
+          "questions": [
+            {
+              "id": "psa_a.managementsamenvatting",
+              "text": "Managementsamenvatting",
+              "guidance": "Geef een korte beschrijving van het document (maximaal 1 pagina). Wat is de kern van de architectuurbeslissingen en de verandering?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_a.aanleiding",
+              "text": "Aanleiding en doelstelling",
+              "guidance": "Beschrijf de huidige situatie en de precieze aanleiding om deze PSA op te stellen: welke vraagstukken doen zich voor, welke doelstellingen worden nagestreefd?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_a.opdracht_resultaat",
+              "text": "De opdracht, het resultaat en te bereiken effect",
+              "guidance": "Beschrijf kort de verandering en aan welke maatschappelijke doelen die verandering bijdraagt. Wat is het resultaat en wat zijn de te bereiken effecten?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_a.projectafbakening",
+              "text": "Projectafbakening",
+              "guidance": "Geef duidelijk aan wat de afbakening is van het project: wat valt er wel en niet onder.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_a.relatie_andere_projecten",
+              "text": "De relatie met andere projecten",
+              "guidance": "Geef de relatie aan met eventuele andere (deel)projecten en waaruit de relatie bestaat.",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "psa_b",
+      "title": "Grondslagen",
+      "part": "B",
+      "subsections": [
+        {
+          "id": "psa_b1",
+          "title": "2. Wet- en regelgeving en kaders",
+          "description": "Beschrijf de uitgangspunten die zijn gehanteerd bij het opstellen van deze PSA.",
+          "questions": [
+            {
+              "id": "psa_b.wet_regelgeving",
+              "text": "Relevante wet- en regelgeving",
+              "guidance": "Geef de relevante wet- en regelgeving die van toepassing zijn op deze PSA. Denk aan Woo, Wdo, Archiefwet, AVG.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_b.beleidskaders",
+              "text": "Beleidskaders",
+              "guidance": "Geef de beleidskaders die van toepassing zijn, inclusief informatiebeveiliging en het Privacybeleid van het Ministerie van Financiën.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_b.architectuurkaders",
+              "text": "Architectuurkaders, -voorschriften en standaarden",
+              "guidance": "Noem de Enterprise Architectuur Principes Financiën, NORA, Forum Standaardisatie 'Pas toe of leg uit'-standaarden en eventuele specifieke kaders.",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "psa_c",
+      "title": "Organisatorisch",
+      "part": "C",
+      "subsections": [
+        {
+          "id": "psa_c1",
+          "title": "3. Organisatielaag",
+          "description": "Beschrijf welke producten, diensten, processen en organisatieonderdelen worden geraakt door het project.",
+          "questions": [
+            {
+              "id": "psa_c.producten_diensten",
+              "text": "Producten en diensten",
+              "guidance": "Welke producten en diensten worden geraakt of geleverd door het project?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_c.processen",
+              "text": "Processen",
+              "guidance": "Welke bedrijfsprocessen worden geraakt door de verandering?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_c.organisatieonderdelen",
+              "text": "Betrokken organisatieonderdelen",
+              "guidance": "Welke organisatieonderdelen worden geraakt door het project?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_c.architectuurbesluiten_org",
+              "text": "Genomen architectuurbesluiten (organisatorisch)",
+              "guidance": "Welke architectuurbesluiten zijn genomen op het organisatorische vlak?",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "psa_d",
+      "title": "Informatie en applicatie",
+      "part": "D",
+      "subsections": [
+        {
+          "id": "psa_d1",
+          "title": "4. Informatielaag",
+          "description": "Beschrijf de informatieobjecten en gegevens die relevant zijn voor het project.",
+          "questions": [
+            {
+              "id": "psa_d.gegevensmodel",
+              "text": "Gegevensmodel",
+              "guidance": "Beschrijf de relevante informatieobjecten en gegevens. Welke (persoons)gegevens worden verwerkt?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_d.architectuurbesluiten_info",
+              "text": "Genomen architectuurbesluiten (informatie)",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        },
+        {
+          "id": "psa_d2",
+          "title": "5. Applicatielaag",
+          "description": "Beschrijf de applicatiecontext en functionaliteit die wordt gerealiseerd.",
+          "questions": [
+            {
+              "id": "psa_d.functioneel",
+              "text": "Functionele beschrijving",
+              "guidance": "Beschrijf de relevante applicatiecontext, welke functionaliteit wordt gerealiseerd en welke data wordt uitgewisseld.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_d.nonfunctioneel",
+              "text": "Niet-functionele eisen en wensen",
+              "guidance": "Beschrijf de niet-functionele eisen, zoals performance, schaalbaarheid, beschikbaarheid.",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "psa_d.eigenaarschap",
+              "text": "Eigenaarschap data en applicaties",
+              "guidance": "Wie is eigenaar van de data en de applicatie?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "psa_d.algoritmeregister",
+              "text": "Algoritmeregister",
+              "guidance": "Wordt er gebruik gemaakt van algoritmen? Zo ja, beschrijf het gebruik en verwijs naar het algoritmeregister.",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "psa_d.architectuurbesluiten_app",
+              "text": "Genomen architectuurbesluiten (applicatie)",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        },
+        {
+          "id": "psa_d3",
+          "title": "6. Technologielaag",
+          "description": "Beschrijf de technologielaag die de applicaties ondersteunt.",
+          "questions": [
+            {
+              "id": "psa_d.technologie",
+              "text": "Technologielaag",
+              "guidance": "Beschrijf de technologielaag voor dit project, inclusief infrastructuur, netwerk en platforms.",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "psa_e",
+      "title": "Niet-functionele aspecten",
+      "part": "D",
+      "subsections": [
+        {
+          "id": "psa_e1",
+          "title": "7. Beveiliging en privacy",
+          "description": "Beschrijf de niet-functionele aspecten op het gebied van beveiliging, privacy, logging en toegangsbeheer.",
+          "questions": [
+            {
+              "id": "psa_e.informatiebeveiliging",
+              "text": "Informatiebeveiliging",
+              "guidance": "Beschrijf de maatregelen op het gebied van informatiebeveiliging conform de BIO. Noem het vastgestelde basisbeveiligingsniveau (BBN).",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_e.privacy",
+              "text": "Privacy",
+              "guidance": "Beschrijf de privacy-aspecten: welke persoonsgegevens worden verwerkt, hoe worden betrokkenen geïnformeerd en zijn er aanvullende maatregelen uit een DPIA van toepassing?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_e.logging_monitoring",
+              "text": "Logging en monitoring",
+              "guidance": "Beschrijf de aanpak voor logging en monitoring conform het Financiën-beleid.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_e.iam",
+              "text": "Identity & access management",
+              "guidance": "Beschrijf hoe identity & access management is ingericht voor dit project.",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "psa_f",
+      "title": "Beheer, exit en openstaande issues",
+      "part": "D",
+      "subsections": [
+        {
+          "id": "psa_f1",
+          "title": "8. Beheer en exit-strategie",
+          "description": "Beschrijf de beheeraspecten en exit-strategie.",
+          "questions": [
+            {
+              "id": "psa_f.beheer",
+              "text": "Beheer in de operationele situatie",
+              "guidance": "Beschrijf hoe het beheer van de applicatie en infrastructuur is ingericht na oplevering.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_f.exit_strategie",
+              "text": "Exit-strategie",
+              "guidance": "Beschrijf wat er gebeurt als de applicatie wordt uitgefaseerd: datamigratie, beëindiging contracten, afbouw infrastructuur.",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "psa_f.ea_toetsing",
+              "text": "Toetsing aan Enterprise Architectuur Principes en architectuurafwijkingen",
+              "guidance": "Beschrijf hoe invulling is gegeven aan de EA-principes Financiën en wat de eventuele architectuurafwijkingen zijn.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "psa_f.openstaande_issues",
+              "text": "Openstaande issues",
+              "guidance": "Welke issues staan nog open die voor de start van het project moeten worden opgelost?",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

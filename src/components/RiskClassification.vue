@@ -76,10 +76,10 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { riskQuestions, riskLevelInfo } from '../data/assessment'
-import type { RiskLevelValue } from '../models/Assessment'
+import type { FormConfig, RiskLevelValue } from '../models/Assessment'
 import { useAssessmentStore } from '../stores/assessmentStore'
 
+const props = defineProps<{ formConfig: FormConfig }>()
 const emit = defineEmits<{ confirmed: [] }>()
 
 const store = useAssessmentStore()
@@ -87,8 +87,11 @@ const currentIndex = ref(0)
 const history = ref<number[]>([])
 const result = ref<RiskLevelValue>(null)
 
-const currentQuestion = computed(() => riskQuestions[currentIndex.value])
-const resultInfo = computed(() => result.value ? riskLevelInfo[result.value] : null)
+const riskQuestions = computed(() => props.formConfig.riskQuestions ?? [])
+const riskLevelInfo = computed(() => props.formConfig.riskLevelInfo ?? {})
+
+const currentQuestion = computed(() => riskQuestions.value[currentIndex.value])
+const resultInfo = computed(() => result.value ? riskLevelInfo.value[result.value] : null)
 
 function answer(choice: 'yes' | 'no') {
   const q = currentQuestion.value
@@ -102,7 +105,7 @@ function answer(choice: 'yes' | 'no') {
     result.value = next as RiskLevelValue
     store.setRiskLevel(next as RiskLevelValue)
   } else {
-    const idx = riskQuestions.findIndex((rq) => rq.id === next)
+    const idx = riskQuestions.value.findIndex((rq) => rq.id === next)
     if (idx !== -1) currentIndex.value = idx
   }
 }

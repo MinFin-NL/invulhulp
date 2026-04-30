@@ -74,11 +74,12 @@
       </div>
     </div>
 
-    <!-- Cross-form suggestion panel (DPIA only, when AIIA answers are available) -->
+    <!-- One suggestion panel per source form that has a mapping for this question -->
     <CrossFormSuggestion
-      v-if="showCrossFormSuggestion"
-      :dpia-question-id="question.id"
-      :dpia-question-text="question.text"
+      v-for="mapping in matchingMappings"
+      :key="`${mapping.sourceFormId}-${mapping.targetQuestionId}`"
+      :mapping="mapping"
+      :target-question-text="question.text"
       :question-type="question.type"
       :current-value="textModel"
       @apply-suggestion="onApplySuggestion"
@@ -91,7 +92,7 @@ import { computed } from 'vue'
 import type { Question } from '../models/Assessment'
 import TiptapEditor from './TiptapEditor.vue'
 import CrossFormSuggestion from './CrossFormSuggestion.vue'
-import { getMappingForDpiaQuestion } from '../data/crossFormMappings'
+import { useCrossFormMappings } from '../composables/useCrossFormMappings'
 import { useAssessmentStore } from '../stores/assessmentStore'
 
 const props = defineProps<{
@@ -104,11 +105,13 @@ const emit = defineEmits<{
 }>()
 
 const store = useAssessmentStore()
+const mappings = useCrossFormMappings()
 
-const showCrossFormSuggestion = computed(() => {
-  if (store.activeAssessment !== 'dpia') return false
-  return getMappingForDpiaQuestion(props.question.id) !== undefined
-})
+const matchingMappings = computed(() =>
+  mappings.value.filter(
+    (m) => m.targetFormId === store.activeFormId && m.targetQuestionId === props.question.id,
+  ),
+)
 
 // ── Plain text value (for text-type questions) ────────────────────────────────
 

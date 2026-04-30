@@ -25,12 +25,6 @@ export interface Section {
   subsections: Subsection[]
 }
 
-export interface AssessmentData {
-  version: string
-  title: string
-  sections: Section[]
-}
-
 export interface Answers {
   [questionId: string]: string | string[]
 }
@@ -49,3 +43,79 @@ export interface RiskQuestion {
   yesLeadsTo: 'onaanvaardbaar' | 'hoog' | 'beperkt' | 'minimaal' | string
   noLeadsTo: 'onaanvaardbaar' | 'hoog' | 'beperkt' | 'minimaal' | string
 }
+
+// ── Form config types (JSON-driven form registry) ────────────────────────────
+
+export interface NavStepSubsections {
+  type: 'subsections'
+  sectionId: string
+  exclude?: string[]
+  condition?: { storeKey: 'goDecision'; value: boolean }
+}
+
+export interface NavStepSpecialView {
+  type: 'specialView'
+  viewId: string
+  label?: string
+  navLabel?: string
+  navGroupHeader?: string
+  completionSectionId?: string
+  conditionalNext?: {
+    storeKey: 'goDecision'
+    ifTrue: string
+    ifFalse: string
+  }
+}
+
+export type NavStep = NavStepSubsections | NavStepSpecialView
+
+export interface FormHomeContent {
+  notice: string
+  description: string
+  steps: string[]
+  buttonLabel: string
+}
+
+export interface FormMeta {
+  homeComponent: string
+  exportLabel: string
+  docTitle: string
+  footerLabel: string
+  filename: string
+  systemNamePlaceholder?: string
+  homeContent?: FormHomeContent
+}
+
+export interface FormFeatures {
+  riskClassification: boolean
+  decisionGate: boolean
+  conditionalPartB: boolean
+}
+
+export interface RiskLevelInfoEntry {
+  label: string
+  description: string
+  color: string
+}
+
+export interface FormConfig {
+  id: string
+  version: string
+  title: string
+  meta: FormMeta
+  features: FormFeatures
+  navigation: NavStep[]
+  sections: Section[]
+  riskQuestions?: RiskQuestion[]
+  riskLevelInfo?: Record<string, RiskLevelInfoEntry>
+}
+
+export interface CrossFormMapping {
+  targetFormId: string
+  targetQuestionId: string
+  sourceFormId: string
+  sourceQuestionIds: string[]
+  synthesisHint: string
+}
+
+export type AssessmentData = Pick<FormConfig, 'version' | 'title' | 'sections'>

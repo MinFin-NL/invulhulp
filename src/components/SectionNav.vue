@@ -21,84 +21,55 @@
         Introductie
       </div>
 
-      <!-- AIIA nav -->
-      <template v-if="!isDpia">
-        <!-- Deel A -->
-        <div style="font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 8px 4px; margin-top: 8px;">
-          Deel A – Afweging
-        </div>
-        <div
-          v-for="sub in aiiaPartASubs"
-          :key="sub.id"
-          :class="['nav-section', store.currentView === sub.id ? 'active' : '', store.isSectionCompleted(sub.id) ? 'completed' : '']"
-          @click="navigate(sub.id)"
-          style="font-size: 0.825rem; padding-left: 12px;"
-        >
-          <span v-if="store.isSectionCompleted(sub.id)" style="color: #27ae60; margin-right: 4px;">✓</span>
-          {{ sub.title }}
-        </div>
+      <!-- Data-driven nav from form config -->
+      <template v-for="step in props.formConfig.navigation" :key="step.type === 'subsections' ? step.sectionId : step.viewId">
 
-        <!-- Risk -->
-        <div style="font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 8px 4px; margin-top: 8px;">
-          Bijlage 1
-        </div>
-        <div
-          :class="['nav-section', store.currentView === 'risk' ? 'active' : '', store.isSectionCompleted('risk') ? 'completed' : '']"
-          @click="navigate('risk')"
-          style="font-size: 0.825rem; padding-left: 12px;"
-        >
-          <span v-if="store.isSectionCompleted('risk')" style="color: #27ae60; margin-right: 4px;">✓</span>
-          Risicoclassificatie
-          <span v-if="store.riskLevel" :class="`risk-badge risk-${store.riskLevel}`" style="font-size: 0.7rem; padding: 2px 6px; margin-left: 4px;">
-            {{ riskLabels[store.riskLevel!] }}
-          </span>
-        </div>
+        <!-- Subsections step: render section header + subsection items -->
+        <template v-if="step.type === 'subsections'">
+          <template v-if="!step.condition || store[step.condition.storeKey] !== false">
+            <div style="font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 8px 4px; margin-top: 8px;">
+              {{ getSectionTitle(step.sectionId) }}
+            </div>
+            <template v-for="sub in getSubsections(step)" :key="sub.id">
+              <div
+                :class="['nav-section', store.currentView === sub.id ? 'active' : '', store.isSectionCompleted(sub.id) ? 'completed' : '']"
+                @click="navigate(sub.id)"
+                style="font-size: 0.825rem; padding-left: 12px;"
+              >
+                <span v-if="store.isSectionCompleted(sub.id)" style="color: #27ae60; margin-right: 4px;">✓</span>
+                {{ sub.title }}
+              </div>
+            </template>
+          </template>
+        </template>
 
-        <!-- Decision -->
-        <div
-          :class="['nav-section', store.currentView === 'decision' ? 'active' : '', store.isSectionCompleted('3') ? 'completed' : '']"
-          @click="navigate('decision')"
-          style="font-size: 0.825rem; padding-left: 12px;"
-        >
-          <span v-if="store.isSectionCompleted('3')" style="color: #27ae60; margin-right: 4px;">✓</span>
-          3. Afweging &amp; beslissing
-        </div>
-
-        <!-- Deel B -->
-        <template v-if="store.goDecision !== false">
-          <div style="font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 8px 4px; margin-top: 8px;">
-            Deel B – Implementatie
+        <!-- Special view: skip summary (rendered at bottom) -->
+        <template v-else-if="step.viewId !== 'summary'">
+          <!-- Optional group header above the nav item -->
+          <div
+            v-if="step.navGroupHeader"
+            style="font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 8px 4px; margin-top: 8px;"
+          >
+            {{ step.navGroupHeader }}
           </div>
           <div
-            v-for="sub in aiiaPartBSubs"
-            :key="sub.id"
-            :class="['nav-section', store.currentView === sub.id ? 'active' : '', store.isSectionCompleted(sub.id) ? 'completed' : '']"
-            @click="navigate(sub.id)"
+            :class="['nav-section', store.currentView === step.viewId ? 'active' : '', store.isSectionCompleted(completionId(step)) ? 'completed' : '']"
+            @click="navigate(step.viewId)"
             style="font-size: 0.825rem; padding-left: 12px;"
           >
-            <span v-if="store.isSectionCompleted(sub.id)" style="color: #27ae60; margin-right: 4px;">✓</span>
-            {{ sub.title }}
+            <span v-if="store.isSectionCompleted(completionId(step))" style="color: #27ae60; margin-right: 4px;">✓</span>
+            {{ step.navLabel ?? step.viewId }}
+            <!-- Risk badge for risk classification step -->
+            <span
+              v-if="step.viewId === 'risk' && store.riskLevel"
+              :class="`risk-badge risk-${store.riskLevel}`"
+              style="font-size: 0.7rem; padding: 2px 6px; margin-left: 4px;"
+            >
+              {{ riskLabels[store.riskLevel!] }}
+            </span>
           </div>
         </template>
-      </template>
 
-      <!-- DPIA nav -->
-      <template v-else>
-        <template v-for="section in assessmentData.sections" :key="section.id">
-          <div style="font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 8px 4px; margin-top: 8px;">
-            {{ section.title }}
-          </div>
-          <div
-            v-for="sub in section.subsections"
-            :key="sub.id"
-            :class="['nav-section', store.currentView === sub.id ? 'active' : '', store.isSectionCompleted(sub.id) ? 'completed' : '']"
-            @click="navigate(sub.id)"
-            style="font-size: 0.825rem; padding-left: 12px;"
-          >
-            <span v-if="store.isSectionCompleted(sub.id)" style="color: #27ae60; margin-right: 4px;">✓</span>
-            {{ sub.title }}
-          </div>
-        </template>
       </template>
 
       <!-- Summary -->
@@ -118,25 +89,15 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { assessmentData as aiiaData } from '../data/assessment'
 import { useAssessmentStore } from '../stores/assessmentStore'
-import type { AssessmentData } from '../models/Assessment'
+import type { FormConfig, NavStepSubsections, NavStepSpecialView, Subsection } from '../models/Assessment'
 
 const props = defineProps<{
-  assessmentData: AssessmentData
+  formConfig: FormConfig
+  navOrder: string[]
 }>()
 
 const store = useAssessmentStore()
-const isDpia = computed(() => store.activeAssessment === 'dpia')
-
-// AIIA-specific
-const aiiaPartA = aiiaData.sections.find((s) => s.id === 'deel_a')
-const aiiaPartB = aiiaData.sections.find((s) => s.id === 'deel_b')
-
-const aiiaPartASubs = computed(() =>
-  (aiiaPartA?.subsections ?? []).filter((s) => s.id !== '3'),
-)
-const aiiaPartBSubs = computed(() => aiiaPartB?.subsections ?? [])
 
 const riskLabels: Record<string, string> = {
   onaanvaardbaar: 'Verboden',
@@ -145,26 +106,22 @@ const riskLabels: Record<string, string> = {
   minimaal: 'Minimaal',
 }
 
-// Progress tracking
-const allNavItems = computed(() => {
-  if (isDpia.value) {
-    const items: string[] = ['home']
-    for (const section of props.assessmentData.sections) {
-      for (const sub of section.subsections) {
-        items.push(sub.id)
-      }
-    }
-    items.push('summary')
-    return items
-  }
-  const items = ['home', ...aiiaPartASubs.value.map((s) => s.id), 'risk', 'decision']
-  if (store.goDecision !== false) items.push(...aiiaPartBSubs.value.map((s) => s.id))
-  items.push('summary')
-  return items
-})
+function getSectionTitle(sectionId: string): string {
+  return props.formConfig.sections.find((s) => s.id === sectionId)?.title ?? sectionId
+}
+
+function getSubsections(step: NavStepSubsections): Subsection[] {
+  const section = props.formConfig.sections.find((s) => s.id === step.sectionId)
+  if (!section) return []
+  return section.subsections.filter((sub) => !step.exclude?.includes(sub.id))
+}
+
+function completionId(step: NavStepSpecialView): string {
+  return step.completionSectionId ?? step.viewId
+}
 
 const completedCount = computed(() => store.completedSections.length)
-const totalCount = computed(() => allNavItems.value.length - 1)
+const totalCount = computed(() => props.navOrder.filter((v) => v !== 'home' && v !== 'summary').length)
 const progressPct = computed(() =>
   totalCount.value > 0 ? Math.round((completedCount.value / totalCount.value) * 100) : 0,
 )

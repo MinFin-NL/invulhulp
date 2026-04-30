@@ -7,8 +7,8 @@
         <p class="rvo-text" style="color: #555; margin: 0;">Overzicht van alle ingevulde antwoorden.</p>
       </div>
 
-      <!-- AIIA-only: Risk level -->
-      <div v-if="!isDpia && store.riskLevel" :class="`rvo-alert rvo-alert--${alertType}`" style="border-radius: 4px;">
+      <!-- Risk level (forms with riskClassification feature) -->
+      <div v-if="props.formConfig.features.riskClassification && store.riskLevel" :class="`rvo-alert rvo-alert--${alertType}`" style="border-radius: 4px;">
         <div class="rvo-alert__content">
           <strong>Risicoclassificatie: {{ riskInfo?.label }}</strong><br />
           {{ riskInfo?.description }}
@@ -31,14 +31,14 @@
       <!-- Name input -->
       <div>
         <label class="rvo-text rvo-text--md" style="font-weight: 500; display: block; margin-bottom: 6px;">
-          {{ isDpia ? 'Naam van het project / de verwerking (voor export)' : 'Naam van het AI-systeem (voor export)' }}
+          {{ props.formConfig.meta.systemNamePlaceholder ? 'Naam (voor export)' : 'Naam van het AI-systeem (voor export)' }}
         </label>
         <input
           v-model="systemName"
           type="text"
           class="aiia-textarea"
           style="min-height: unset; padding: 10px 12px; resize: none; height: auto;"
-          :placeholder="isDpia ? 'Bijv. Klantportaal persoonsgegevens v1' : 'Bijv. Verkeersprognosemodel v2'"
+          :placeholder="props.formConfig.meta.systemNamePlaceholder ?? 'Naam van het systeem...'"
         />
       </div>
 
@@ -101,14 +101,13 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { riskLevelInfo } from '../data/assessment'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { exportToPdf } from '../services/pdfExport'
 import { exportToJson, importFromJson } from '../services/dataExport'
-import type { AssessmentData, Question } from '../models/Assessment'
+import type { FormConfig, Question } from '../models/Assessment'
 
 const props = defineProps<{
-  assessmentData: AssessmentData
+  formConfig: FormConfig
 }>()
 
 const store = useAssessmentStore()
@@ -117,11 +116,9 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const importError = ref('')
 const importSuccess = ref(false)
 
-const isDpia = computed(() => store.activeAssessment === 'dpia')
-
 const visibleSections = computed(() =>
-  props.assessmentData.sections.filter((s) => {
-    if (!isDpia.value && s.part === 'B' && !store.showPartB) return false
+  props.formConfig.sections.filter((s) => {
+    if (props.formConfig.features.conditionalPartB && s.part === 'B' && !store.showPartB) return false
     return true
   }),
 )
@@ -145,7 +142,9 @@ const unansweredMandatory = computed(() =>
   }),
 )
 
-const riskInfo = computed(() => store.riskLevel ? riskLevelInfo[store.riskLevel] : null)
+const riskInfo = computed(() =>
+  store.riskLevel ? (props.formConfig.riskLevelInfo?.[store.riskLevel] ?? null) : null,
+)
 
 const alertType = computed(() => {
   switch (store.riskLevel) {
@@ -173,8 +172,7 @@ function formattedAnswer(id: string): string {
 function exportPdf() {
   exportToPdf(
     store.answers,
-    store.activeAssessment,
-    props.assessmentData,
+    props.formConfig,
     store.riskLevel,
     store.goDecision,
     systemName.value || undefined,
@@ -184,10 +182,10 @@ function exportPdf() {
 function doExportJson() {
   exportToJson(
     store.answers,
-    store.activeAssessment,
+    props.formConfig.id,
     store.riskLevel,
     store.goDecision,
-    store[store.activeAssessment].completedSections,
+    store.completedSections,
     systemName.value,
   )
 }
@@ -201,20 +199,17 @@ async function handleImport(event: Event) {
 
   try {
     const data = await importFromJson(file)
-    store.setActiveAssessment(data.assessmentType)
-    // Restore answers
-    store[data.assessmentType].answers = data.answers
-    // Restore metadata
-    if (data.assessmentType === 'aiia') {
-      store.aiia.riskLevel = data.riskLevel
-      store.aiia.goDecision = data.goDecision
-      store.aiia.completedSections = data.completedSections
-    } else {
-      store.dpia.completedSections = data.completedSections
-    }
+    // Support both old assessmentType field and new formId field
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const formId = (data as any).formId ?? (data as any).assessmentType ?? 'aiia'
+    store.setActiveForm(formId)
+    const formState = store.forms[formId]
+    formState.answers = data.answers
+    formState.riskLevel = data.riskLevel
+    formState.goDecision = data.goDecision
+    formState.completedSections = data.completedSections
     systemName.value = data.systemName || ''
     importSuccess.value = true
-    // Reset file input so same file can be re-imported
     input.value = ''
   } catch (e: unknown) {
     importError.value = e instanceof Error ? e.message : 'Import mislukt'

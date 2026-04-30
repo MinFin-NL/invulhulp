@@ -1,0 +1,1025 @@
+{
+  "id": "aiia",
+  "version": "2.0",
+  "title": "AI Impact Assessment",
+  "meta": {
+    "homeComponent": "HomePage",
+    "exportLabel": "AIIA",
+    "docTitle": "AI Impact Assessment",
+    "footerLabel": "AI Impact Assessment – MinFin",
+    "filename": "AI-Impact-Assessment-IenW.pdf",
+    "systemNamePlaceholder": "Bijv. Verkeersprognosemodel v2",
+    "homeContent": {
+      "notice": "Dit is een digitale hulptool bij het invullen van het AI Impact Assessment. Het invullen van dit formulier vervangt niet het advies van juridische, privacy- of AI-experts. Raadpleeg bij twijfel altijd de relevante deskundigen binnen MinFin.",
+      "description": "Het AI Impact Assessment (AIIA) helpt medewerkers van MinFin om op een gestructureerde manier te beoordelen of het verantwoord is een AI-systeem in te zetten, en hoe dit systeem verantwoord geïmplementeerd en gebruikt kan worden.",
+      "steps": [
+        "Risicoclassificatie op basis van de EU AI-verordening",
+        "Deel A – Afweging: is het verantwoord dit AI-systeem in te zetten?",
+        "Deel B – Implementatie: hoe wordt het systeem verantwoord geïmplementeerd en gebruikt?"
+      ],
+      "buttonLabel": "Starten met het assessment"
+    }
+  },
+  "features": {
+    "riskClassification": true,
+    "decisionGate": true,
+    "conditionalPartB": true
+  },
+  "navigation": [
+    { "type": "subsections", "sectionId": "deel_a", "exclude": ["3"] },
+    { "type": "specialView", "viewId": "risk", "label": "Naar risicoclassificatie", "navGroupHeader": "Bijlage 1", "navLabel": "Risicoclassificatie" },
+    { "type": "specialView", "viewId": "decision", "label": "Naar afweging &amp; beslissing", "navLabel": "3. Afweging &amp; beslissing", "completionSectionId": "3", "conditionalNext": { "storeKey": "goDecision", "ifTrue": "deel_b", "ifFalse": "summary" } },
+    { "type": "subsections", "sectionId": "deel_b", "condition": { "storeKey": "goDecision", "value": true } },
+    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+  ],
+  "riskQuestions": [
+    {
+      "id": "r1",
+      "text": "Maakt het systeem gebruik van subliminale technieken om het gedrag van personen te beïnvloeden buiten hun bewustzijn, of maakt het gebruik van kwetsbaarheden van specifieke groepen (leeftijd, handicap) om hun gedrag te beïnvloeden op een manier die hen of anderen schade berokkent?",
+      "guidance": "Dit betreft systemen die verboden zijn onder de AI-verordening (Art. 5 lid 1a/b).",
+      "yesLeadsTo": "onaanvaardbaar",
+      "noLeadsTo": "r2"
+    },
+    {
+      "id": "r2",
+      "text": "Maakt het systeem gebruik van \"social scoring\" door overheidsinstanties (beoordeling van burgers op basis van sociaal gedrag of persoonlijkheidskenmerken met nadelige gevolgen)?",
+      "guidance": "Dit betreft Art. 5 lid 1c van de AI-verordening.",
+      "yesLeadsTo": "onaanvaardbaar",
+      "noLeadsTo": "r3"
+    },
+    {
+      "id": "r3",
+      "text": "Maakt het systeem gebruik van real-time biometrische identificatie op afstand in de openbare ruimte voor rechtshandhavingsdoeleinden (zonder uitdrukkelijke wettelijke grondslag)?",
+      "guidance": "Dit betreft Art. 5 lid 1d van de AI-verordening.",
+      "yesLeadsTo": "onaanvaardbaar",
+      "noLeadsTo": "r4"
+    },
+    {
+      "id": "r4",
+      "text": "Wordt het systeem gebruikt voor profilering van individuen, biometrische identificatie, of inzet in kritieke infrastructuur, onderwijs, werkgelegenheid, essentiële diensten, rechtshandhaving, migratie/grenscontrole, of democratische processen (zoals vermeld in Bijlage III van de AI-verordening)?",
+      "guidance": "Dit zijn de hoog-risico categorieën van Bijlage III van de AI-verordening.",
+      "yesLeadsTo": "hoog",
+      "noLeadsTo": "r5"
+    },
+    {
+      "id": "r5",
+      "text": "Is het systeem een generatief AI-systeem, maakt het gebruik van emotieherkenning, of genereert het deepfakes of synthetische media?",
+      "guidance": "Deze systemen vallen onder de transparantievereisten (Art. 50) van de AI-verordening.",
+      "yesLeadsTo": "beperkt",
+      "noLeadsTo": "minimaal"
+    }
+  ],
+  "riskLevelInfo": {
+    "onaanvaardbaar": {
+      "label": "Onaanvaardbaar risico",
+      "description": "Dit AI-systeem valt in de categorie onaanvaardbaar risico en is verboden onder de AI-verordening. Het systeem mag niet worden ingezet.",
+      "color": "error"
+    },
+    "hoog": {
+      "label": "Hoog risico",
+      "description": "Dit AI-systeem valt in de categorie hoog risico. Er gelden strikte vereisten vanuit de AI-verordening, waaronder een conformiteitsbeoordeling, registratie in de EU-database en post-market monitoring. Zie Bijlage 2 voor de volledige vereisten.",
+      "color": "warning"
+    },
+    "beperkt": {
+      "label": "Beperkt risico",
+      "description": "Dit AI-systeem valt in de categorie beperkt risico. Er gelden transparantievereisten: gebruikers moeten weten dat zij met AI interacteren.",
+      "color": "info"
+    },
+    "minimaal": {
+      "label": "Minimaal risico",
+      "description": "Dit AI-systeem valt in de categorie minimaal of geen risico. De standaard AIIA-vragen zijn van toepassing. Er gelden geen aanvullende verplichte maatregelen vanuit de AI-verordening.",
+      "color": "success"
+    }
+  },
+  "sections": [
+    {
+      "id": "deel_a",
+      "title": "Deel A: Afweging",
+      "part": "A",
+      "subsections": [
+        {
+          "id": "1.1",
+          "title": "1.1 Doel van het systeem",
+          "description": "Beschrijf het doel en de noodzaak van het AI-systeem dat u wilt inzetten.",
+          "questions": [
+            {
+              "id": "1.1.1",
+              "text": "Geef een beknopte beschrijving van het beoogde doel en de verwachte resultaten van het AI-systeem.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "1.1.2",
+              "text": "In welke risicocategorie van de AI-verordening valt het systeem (onaanvaardbaar, hoog, beperkt, minimaal)?",
+              "guidance": "Zie Bijlage 1 voor de risicoclassificatie. Vul dit in nadat u Bijlage 1 heeft ingevuld.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": [
+                "Onaanvaardbaar risico",
+                "Hoog risico",
+                "Beperkt risico",
+                "Minimaal risico",
+                "Nog niet bepaald"
+              ]
+            },
+            {
+              "id": "1.1.3",
+              "text": "Waar in de organisatie wordt het systeem ingezet (afdeling, proces, werkzaamheden)?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "1.1.4",
+              "text": "Wat is de aanleiding voor de inzet van dit AI-systeem?",
+              "guidance": "Beschrijf welk probleem of welke behoefte ten grondslag ligt aan de keuze voor dit systeem.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "1.1.5",
+              "text": "Wat zijn de verwachte voordelen van het gebruik van dit AI-systeem?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "1.1.6",
+              "text": "Op welke termijn wordt het systeem ingezet en wat is de geplande looptijd?",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        },
+        {
+          "id": "1.2",
+          "title": "1.2 Beoogde oplossing",
+          "description": "Beschrijf de technische oplossing en de overwegingen daarbij.",
+          "questions": [
+            {
+              "id": "1.2.1",
+              "text": "Geef een beschrijving van het AI-systeem (techniek, data, type algoritme).",
+              "guidance": "Beschrijf welk type AI-systeem wordt gebruikt (machine learning, regelgebaseerd, generatief AI, etc.), welke data als input dient en welk type output het systeem produceert.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "1.2.2",
+              "text": "Waarom is voor deze vorm van AI gekozen?",
+              "guidance": "Motiveer de keuze voor AI ten opzichte van niet-AI-alternatieven.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "1.2.3",
+              "text": "Welke alternatieven zijn overwogen (inclusief niet-AI-oplossingen)?",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        },
+        {
+          "id": "1.3",
+          "title": "1.3 Rol binnen de organisatie",
+          "description": "Beschrijf de rolverdeling en betrokken partijen.",
+          "questions": [
+            {
+              "id": "1.3.1",
+              "text": "Hoe is de rolverdeling geregeld (ontwikkelaar, opdrachtgever, projectleider, beheerders)?",
+              "guidance": "Benoem de namen of functies van de betrokkenen en hun verantwoordelijkheden.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "1.3.2",
+              "text": "Wie zijn de gebruikers en betrokkenen (degenen die de output van het systeem ondervinden)?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "1.3.3",
+              "text": "Welke stakeholders zijn geconsulteerd bij de ontwikkeling of aanschaf van het systeem?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "1.3.4",
+              "text": "Welke feedback is verzameld van diverse groepen, inclusief kwetsbare of ondervertegenwoordigde groepen?",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        },
+        {
+          "id": "1.4",
+          "title": "1.4 Onderhoud en beheer",
+          "description": "Beschrijf hoe het systeem beheerd en onderhouden wordt.",
+          "questions": [
+            {
+              "id": "1.4.1",
+              "text": "Hoe is de rolverdeling voor het onderhoud en beheer van het systeem geregeld?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "1.4.2",
+              "text": "Hoe wordt omgegaan met wijzigingen in wet- en regelgeving die het systeem raken?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "1.4.3",
+              "text": "Is de benodigde expertise voor onderhoud en beheer gedocumenteerd en geborgd?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk", "N.v.t."],
+              "followUp": "Licht toe hoe de expertise is geborgd of welke stappen worden genomen."
+            },
+            {
+              "id": "1.4.4",
+              "text": "Hoe wordt omgegaan met veranderingen in de context waarbinnen het systeem wordt ingezet?",
+              "guidance": "Denk aan organisatorische veranderingen, wijziging van werkprocessen, of nieuwe gebruikersgroepen.",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        },
+        {
+          "id": "2.1",
+          "title": "2.1 Grondrechten",
+          "description": "Beoordeel de mogelijke impact op grondrechten van burgers.",
+          "questions": [
+            {
+              "id": "2.1.1",
+              "text": "Wat is de mogelijke impact van het AI-systeem op grondrechten van burgers?",
+              "guidance": "Denk aan privacy, non-discriminatie, vrijheid van meningsuiting, recht op een eerlijk proces, en toegang tot diensten.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "2.1.2",
+              "text": "Wat is de wettelijke grondslag voor de inzet van het AI-systeem?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "2.1.3",
+              "text": "Welke grondrechtelijke bepalingen zijn van toepassing op dit systeem?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "2.1.4",
+              "text": "Welke rechten kunnen worden geschonden als het systeem niet correct functioneert?",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        },
+        {
+          "id": "2.2",
+          "title": "2.2 Duurzaamheid",
+          "description": "Beoordeel de milieu-impact van het AI-systeem.",
+          "questions": [
+            {
+              "id": "2.2.1",
+              "text": "Wat is de milieu-impact van het AI-systeem (ontwikkeling, installatie, gebruik) en hoe wordt dit gemeten?",
+              "guidance": "Denk aan energieverbruik, CO₂-uitstoot en gebruik van schaarse materialen.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "2.2.2",
+              "text": "Welke maatregelen worden getroffen om de negatieve milieu-impact te minimaliseren?",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        },
+        {
+          "id": "2.3",
+          "title": "2.3 Overige effecten",
+          "description": "Beschrijf overige maatschappelijke effecten van het AI-systeem.",
+          "questions": [
+            {
+              "id": "2.3.1",
+              "text": "Hoe draagt het AI-systeem bij aan de missie van de organisatie?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "2.3.2",
+              "text": "Zijn er overige positieve of negatieve effecten voor specifieke groepen of de samenleving als geheel?",
+              "guidance": "Denk aan werkgelegenheid, toegankelijkheid, sociale cohesie of ongelijkheid.",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        },
+        {
+          "id": "3",
+          "title": "3. Afweging",
+          "description": "Maak een expliciete afweging over de inzet van het AI-systeem op basis van proportionaliteit en subsidiariteit.",
+          "questions": [
+            {
+              "id": "3.1",
+              "text": "Is de impact van het AI-systeem proportioneel ten opzichte van de doelstellingen en zijn er minder ingrijpende alternatieven?",
+              "guidance": "Proportionaliteit: weeg de voordelen af tegen de risico's en nadelen. Subsidiariteit: is er een minder ingrijpend alternatief dat hetzelfde doel bereikt?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "3.2",
+              "text": "Welke aanvullende maatregelen kunnen worden getroffen om verantwoord gebruik te waarborgen?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "3.3",
+              "text": "Conclusie: wordt het AI-systeem ingezet?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja, het systeem wordt ingezet", "Nee, het systeem wordt niet ingezet"],
+              "followUp": "Motiveer uw beslissing."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "deel_b",
+      "title": "Deel B: Implementatie en gebruik AI-systeem",
+      "part": "B",
+      "subsections": [
+        {
+          "id": "4.1",
+          "title": "4.1 Bias",
+          "description": "Beschrijf hoe ongewenste bias in het AI-systeem wordt voorkomen en beheersed.",
+          "questions": [
+            {
+              "id": "4.1.1",
+              "text": "Hoe wordt omgegaan met ongewenste bias (in input, model en output)?",
+              "guidance": "Beschrijf de maatregelen voor elk van de drie fasen: inputdata, het model zelf en de output.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.1.2",
+              "text": "Is de inputdata relevant en representatief voor de beoogde toepassing?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk", "N.v.t."],
+              "followUp": "Licht toe hoe de representativiteit is vastgesteld."
+            },
+            {
+              "id": "4.1.3",
+              "text": "Zijn subpopulaties beschermd in de steekproefstrategie?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "N.v.t."],
+              "followUp": "Beschrijf welke subpopulaties zijn onderscheiden en hoe zij beschermd worden."
+            },
+            {
+              "id": "4.1.4",
+              "text": "Is de variabelekeuze gemotiveerd en gerechtvaardigd?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.1.5",
+              "text": "Hoe houdt het systeem rekening met ongerechtvaardigde bias in de uitkomsten?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.1.6",
+              "text": "Kunnen beoogde gebruikers het systeem feitelijk gebruiken ongeacht hun kenmerken (toegankelijkheid)?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk"],
+              "followUp": "Beschrijf eventuele toegankelijkheidsmaatregelen."
+            },
+            {
+              "id": "4.1.7",
+              "text": "Zijn er monitoringsmechanismen ingericht om negatieve effecten voor specifieke groepen te signaleren?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "In ontwikkeling"],
+              "followUp": "Beschrijf hoe de monitoring is ingericht."
+            }
+          ]
+        },
+        {
+          "id": "4.2",
+          "title": "4.2 Accuraatheid",
+          "description": "Beschrijf hoe de nauwkeurigheid van het systeem wordt gemeten en geborgd.",
+          "questions": [
+            {
+              "id": "4.2.1",
+              "text": "Hoe wordt de nauwkeurigheid van het systeem continu gemeten en gewaarborgd?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.2.2",
+              "text": "Welke acceptatiecriteria gelden voor de kwaliteit van input en output?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.2.3",
+              "text": "Sluiten de acceptatiecriteria aan bij de data en het doel van het systeem?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk"],
+              "followUp": "Licht toe waarom de criteria aansluiten of wat er nog moet worden verbeterd."
+            },
+            {
+              "id": "4.2.4",
+              "text": "Hoe wordt de output periodiek gemonitord?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.2.5",
+              "text": "Hoe worden afwijkingen van de acceptatiecriteria geanalyseerd en gecorrigeerd?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.2.6",
+              "text": "Wat zijn de resultaten van alternatieve modellen die zijn overwogen?",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        },
+        {
+          "id": "4.3",
+          "title": "4.3 Betrouwbaarheid",
+          "description": "Beschrijf hoe de betrouwbaarheid van het systeem is geborgd.",
+          "questions": [
+            {
+              "id": "4.3.1",
+              "text": "Is het systeem betrouwbaar en hoe is dit vastgesteld?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.3.2",
+              "text": "Welke factoren hebben de meeste invloed op de prestaties van het systeem?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.3.3",
+              "text": "Is de testdata gescheiden voor validatie of wordt cross-validatie gebruikt?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Testdata gescheiden", "Cross-validatie", "Beide", "N.v.t."],
+              "followUp": "Beschrijf de validatiemethodiek."
+            },
+            {
+              "id": "4.3.4",
+              "text": "Hoe is de hyperparameter-tuning onderbouwd en getest?",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        },
+        {
+          "id": "4.4",
+          "title": "4.4 Technische implementatie",
+          "description": "Beschrijf de technische opzet en infrastructuur van het systeem.",
+          "questions": [
+            {
+              "id": "4.4.1",
+              "text": "Hoe is het systeem technisch geïmplementeerd?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.4.2",
+              "text": "Past het systeem binnen de bestaande technische infrastructuur? Zo niet, welke maatregelen zijn getroffen?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee, met aanpassingen", "Nee"],
+              "followUp": "Beschrijf de aanpassingen of afwijkingen."
+            },
+            {
+              "id": "4.4.3",
+              "text": "Wat is de systeemarchitectuur?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.4.4",
+              "text": "Zijn de hardware- en softwarevereisten gedocumenteerd?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk"],
+              "followUp": "Beschrijf of verwijs naar de documentatie."
+            },
+            {
+              "id": "4.4.5",
+              "text": "Als het systeem extern gehost wordt, onder welke voorwaarden?",
+              "guidance": "Denk aan verwerkersovereenkomst, datalocatie, SLA en exitstrategie.",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "4.4.6",
+              "text": "Hoe is toegangsbeheer ingericht?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.4.7",
+              "text": "Hoe kan het systeem samenwerken met andere hard- en software?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "4.4.8",
+              "text": "Hoe zijn logging en monitoring ingericht?",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        },
+        {
+          "id": "4.5",
+          "title": "4.5 Reproduceerbaarheid",
+          "description": "Beschrijf hoe de reproduceerbaarheid van het systeem is geborgd.",
+          "questions": [
+            {
+              "id": "4.5.1",
+              "text": "Is het systeem reproduceerbaar en is er een meetproces voor vastgesteld?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk"],
+              "followUp": "Beschrijf het meetproces."
+            },
+            {
+              "id": "4.5.2",
+              "text": "Kan de output worden gereconstrueerd met oude versies, datasets en condities?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk"],
+              "followUp": "Beschrijf hoe dit is ingericht."
+            },
+            {
+              "id": "4.5.3",
+              "text": "Kan het model worden gereconstrueerd gegeven de parameters en een vaste seed?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "N.v.t."],
+              "followUp": "Licht toe."
+            },
+            {
+              "id": "4.5.4",
+              "text": "Kan het systeem worden gereproduceerd op basis van de documentatie?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk"],
+              "followUp": "Beschrijf eventuele lacunes in de documentatie."
+            },
+            {
+              "id": "4.5.5",
+              "text": "Hoe worden wijzigingen gedurende de levensduur van het systeem gedocumenteerd?",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        },
+        {
+          "id": "4.6",
+          "title": "4.6 Uitlegbaarheid",
+          "description": "Beschrijf hoe het systeem uitlegbaar is voor ontwikkelaars en gebruikers.",
+          "questions": [
+            {
+              "id": "4.6.1",
+              "text": "Is het systeem voldoende uitlegbaar voor de ontwikkelaars?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.6.2",
+              "text": "Hoe is uitlegbaarheid voor gebruikers meegewogen tijdens de ontwikkeling?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "4.6.3",
+              "text": "Welke technieken maken het systeem uitlegbaar en waarom zijn deze gekozen?",
+              "guidance": "Denk aan SHAP, LIME, attention maps, regelgebaseerde uitleg, etc.",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        },
+        {
+          "id": "5.1",
+          "title": "5.1 Kwaliteit en integriteit van data",
+          "description": "Beschrijf hoe de datakwaliteit en data-integriteit zijn geborgd.",
+          "questions": [
+            {
+              "id": "5.1.1",
+              "text": "Welke trainingsdata worden gebruikt en uit welke bronnen?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "5.1.2",
+              "text": "Hoe wordt de datakwaliteit geborgd?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "5.1.3",
+              "text": "Is de gebruikte data noodzakelijk voor het systeem (dataminimalisatie)?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk"],
+              "followUp": "Licht toe welke data worden gebruikt en waarom deze noodzakelijk zijn."
+            },
+            {
+              "id": "5.1.4",
+              "text": "Hoe worden onbedoelde dataduplicaties voorkomen?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "5.1.5",
+              "text": "Kunnen trainings- en testdata worden bijgewerkt indien nodig? Wanneer wordt het model opnieuw getraind, gestopt of opnieuw ontwikkeld?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "5.1.6",
+              "text": "Voldoet de data aan de modelaannames?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk"],
+              "followUp": "Beschrijf de modelaannames en hoe de data hieraan voldoet."
+            },
+            {
+              "id": "5.1.7",
+              "text": "Hoe wordt inputdata verzameld en gecombineerd?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "5.1.8",
+              "text": "Hoe wordt data gelabeld?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "5.1.9",
+              "text": "Welke factoren beïnvloeden de kwaliteit van de inputdata en wat kan hiertegen worden gedaan?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "5.1.10",
+              "text": "Wordt inputdata getest op wijzigingen tijdens training, testen en gebruik?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk"],
+              "followUp": "Beschrijf hoe datatests zijn ingericht."
+            },
+            {
+              "id": "5.1.11",
+              "text": "Als output als nieuwe input wordt gebruikt, hoe wordt dit opgeslagen en geverifieerd?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "5.1.12",
+              "text": "Hoe is de beschikbaarheid van outputdata gewaarborgd?",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        },
+        {
+          "id": "5.2",
+          "title": "5.2 Privacy en vertrouwelijkheid",
+          "description": "Beschrijf hoe privacyrisico's en vertrouwelijke data worden beheerd.",
+          "questions": [
+            {
+              "id": "5.2.1",
+              "text": "Hoe wordt omgegaan met persoonsgegevens en vertrouwelijke data?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "5.2.2",
+              "text": "Verwerkt het systeem persoonsgegevens (AVG van toepassing)?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee"],
+              "followUp": "Beschrijf welke persoonsgegevens worden verwerkt en op welke grondslag."
+            },
+            {
+              "id": "5.2.3",
+              "text": "Is de verwerking van persoonsgegevens proportioneel en subsidiair?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "N.v.t."],
+              "followUp": "Motiveer de proportionaliteit en subsidiariteit."
+            },
+            {
+              "id": "5.2.4",
+              "text": "Is de output herleidbaar tot individuen?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Mogelijk"],
+              "followUp": "Beschrijf de risico's en maatregelen."
+            },
+            {
+              "id": "5.2.5",
+              "text": "Zijn relevante functionarissen betrokken (Chief Privacy Officer, Functionaris Gegevensbescherming)?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "N.v.t."],
+              "followUp": "Beschrijf de betrokkenheid."
+            },
+            {
+              "id": "5.2.6",
+              "text": "Hoe vaak wordt de kwaliteit en noodzakelijkheid van de verwerking van persoonsgegevens geëvalueerd?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "5.2.7",
+              "text": "Worden vertrouwelijke gegevens (niet-persoonlijk) gebruikt of opgeslagen?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee"],
+              "followUp": "Beschrijf welke vertrouwelijke gegevens en hoe deze worden beschermd."
+            },
+            {
+              "id": "5.2.8",
+              "text": "Hoe is de beveiliging van vertrouwelijke informatie gewaarborgd?",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        },
+        {
+          "id": "6.1",
+          "title": "6.1 Risicobeheersing",
+          "description": "Beschrijf hoe risicobeheer is ingericht.",
+          "questions": [
+            {
+              "id": "6.1.1",
+              "text": "Hoe is het systeem getest op passende risicobeheersmaatregelen?",
+              "guidance": "Beschrijf de uitgevoerde risicoanalyse(s) en de getroffen beheersmaatregelen.",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        },
+        {
+          "id": "6.2",
+          "title": "6.2 Alternatieve werkwijze",
+          "description": "Beschrijf de aanpak als het systeem uitvalt of niet beschikbaar is.",
+          "questions": [
+            {
+              "id": "6.2.1",
+              "text": "Wat is het plan als het systeem uitvalt (fallback procedure)?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "6.2.2",
+              "text": "Wat is de impact als het systeem uitvalt?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "6.2.3",
+              "text": "Welk verlies van vaardigheden of expertise kan optreden door het gebruik van AI (deskilling)?",
+              "guidance": "Denk aan situaties waarbij medewerkers bepaalde handelingen niet meer zelf kunnen uitvoeren doordat het systeem dit overneemt.",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        },
+        {
+          "id": "6.3",
+          "title": "6.3 Informatiebeveiligingsrisico's",
+          "description": "Beschrijf hoe informatiebeveiligingsrisico's worden beheerd.",
+          "questions": [
+            {
+              "id": "6.3.1",
+              "text": "Hoe worden informatiebeveiligingsrisico's inzichtelijk gemaakt, gereduceerd en getest?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "6.3.2",
+              "text": "Hoe wordt onbevoegde toegang voorkomen?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "6.3.3",
+              "text": "Wat is de impact als er onbevoegde toegang plaatsvindt?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "6.3.4",
+              "text": "Kunnen personen misbruik maken van het feit dat AI wordt gebruikt in plaats van menselijke beslissingen?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Mogelijk"],
+              "followUp": "Beschrijf de risico's en maatregelen."
+            },
+            {
+              "id": "6.3.5",
+              "text": "Hoe wordt geregistreerd wie het systeem gebruikt en gedurende hoelang?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "6.3.6",
+              "text": "Worden aanvullende maatregelen getroffen bovenop de standaard MinFin-beveiligingsmaatregelen?",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Ja", "Nee"],
+              "followUp": "Beschrijf de aanvullende maatregelen."
+            }
+          ]
+        },
+        {
+          "id": "7.1",
+          "title": "7.1 Transparantie richting gebruikers",
+          "description": "Beschrijf hoe het systeem transparant is voor de gebruikers.",
+          "questions": [
+            {
+              "id": "7.1.1",
+              "text": "Hoe begrijpen eindgebruikers het functioneren en de beperkingen van het systeem? Hoe wordt dit actueel gehouden?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "7.1.2",
+              "text": "Welke rol spelen mensen in de besluitvorming (human in the loop)?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "7.1.3",
+              "text": "Hoe kan het systeem worden gemonitord en begrepen door mensen (human oversight)?",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        },
+        {
+          "id": "7.2",
+          "title": "7.2 Communicatie naar betrokkenen",
+          "description": "Beschrijf hoe gecommuniceerd wordt over het AI-systeem naar verschillende doelgroepen.",
+          "questions": [
+            {
+              "id": "7.2.1",
+              "text": "Hoe transparant bent u naar verschillende groepen over het systeem?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "7.2.2",
+              "text": "Zijn er mechanismen voor gebruikersfeedback en hoe worden zorgen geadresseerd?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "7.2.3",
+              "text": "Moet het systeem worden geregistreerd in het algoritmeregister of de EU-database?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Wordt onderzocht"],
+              "followUp": "Beschrijf de registratiestatus."
+            },
+            {
+              "id": "7.2.4",
+              "text": "Wordt aan eindgebruikers en betrokkenen gecommuniceerd dat het AI-gegenereerde output betreft?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk"],
+              "followUp": "Beschrijf hoe dit gecommuniceerd wordt."
+            },
+            {
+              "id": "7.2.5",
+              "text": "Is er een gebruikershandleiding?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "In ontwikkeling"],
+              "followUp": "Geef een link of beschrijving van de handleiding."
+            },
+            {
+              "id": "7.2.6",
+              "text": "Welke psychologische neveneffecten kunnen optreden (verwarring, voorkeursbias, cognitieve vermoeidheid)?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "7.2.7",
+              "text": "Hoe krijgen verschillende groepen inzicht in de verschillende aspecten van het systeem (data, model, uitkomsten)?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "7.2.8",
+              "text": "Hoe is uitlegbaarheid specifiek voor eindgebruikers uitgewerkt?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "7.2.9",
+              "text": "Is het systeem voldoende transparant voor verantwoord gebruik?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk"],
+              "followUp": "Licht toe."
+            },
+            {
+              "id": "7.2.10",
+              "text": "Worden eindgebruikers getraind in het gebruik van het systeem?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gepland"],
+              "followUp": "Beschrijf het trainingsaanbod."
+            },
+            {
+              "id": "7.2.11",
+              "text": "Hoe wordt feedback van stakeholders intern verwerkt?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "7.2.12",
+              "text": "Is het duidelijk welke stappen betrokkenen kunnen nemen om bezwaar te maken, te klagen of in beroep te gaan?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Gedeeltelijk"],
+              "followUp": "Beschrijf de bezwaar- en beroepsprocedures."
+            }
+          ]
+        },
+        {
+          "id": "7.3",
+          "title": "7.3 Controleerbaarheid",
+          "description": "Beschrijf hoe het systeem gecontroleerd en verantwoord kan worden.",
+          "questions": [
+            {
+              "id": "7.3.1",
+              "text": "Hoe en door wie wordt het systeem gecontroleerd?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "7.3.2",
+              "text": "Hoe wordt verantwoording afgelegd?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "7.3.3",
+              "text": "Wie voert onafhankelijke controle uit en hoe?",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        },
+        {
+          "id": "7.4",
+          "title": "7.4 Archivering",
+          "description": "Beschrijf hoe data en modellen worden gearchiveerd.",
+          "questions": [
+            {
+              "id": "7.4.1",
+              "text": "Hoe wordt inputdata opgeslagen en wat is de bewaartermijn?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "7.4.2",
+              "text": "Hoe wordt het model opgeslagen en versiebeheerd?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "7.4.3",
+              "text": "Wat is de bewaartermijn van outputdata?",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

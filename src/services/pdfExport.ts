@@ -1,7 +1,5 @@
 import type { TDocumentDefinitions, Content } from 'pdfmake/interfaces'
-import { riskLevelInfo } from '../data/assessment'
-import type { Answers, AssessmentData, RiskLevelValue } from '../models/Assessment'
-import type { AssessmentType } from '../stores/assessmentStore'
+import type { Answers, RiskLevelValue, FormConfig } from '../models/Assessment'
 
 function formatAnswer(value: string | string[] | undefined): string {
   if (!value) return '(niet ingevuld)'
@@ -11,28 +9,23 @@ function formatAnswer(value: string | string[] | undefined): string {
 
 export function exportToPdf(
   answers: Answers,
-  assessmentType: AssessmentType,
-  assessmentData: AssessmentData,
+  formConfig: FormConfig,
   riskLevel: RiskLevelValue,
   goDecision: boolean | null,
   systemName?: string,
 ): void {
-  const isDpia = assessmentType === 'dpia'
-  const riskInfo = riskLevel ? riskLevelInfo[riskLevel] : null
+  const hasConditionalPartB = formConfig.features.conditionalPartB
+  const riskInfo = riskLevel ? (formConfig.riskLevelInfo?.[riskLevel] ?? null) : null
   const today = new Date().toLocaleDateString('nl-NL', {
     day: 'numeric',
     month: 'long',
     year: 'numeric',
   })
 
-  const docTitle = isDpia ? 'Data Protection Impact Assessment' : 'AI Impact Assessment'
-  const footerLabel = isDpia ? 'DPIA – MinFin' : 'AI Impact Assessment – MinFin'
-  const filename = isDpia ? 'DPIA-IenW.pdf' : 'AI-Impact-Assessment-IenW.pdf'
-
   const content: Content[] = [
     // Cover
     {
-      text: docTitle,
+      text: formConfig.meta.docTitle,
       style: 'title',
       margin: [0, 0, 0, 8],
     },
@@ -42,20 +35,20 @@ export function exportToPdf(
       margin: [0, 0, 0, 4],
     },
     {
-      text: isDpia ? `Versie 1.0 | ${today}` : `Versie 2.0 | ${today}`,
+      text: `Versie ${formConfig.version} | ${today}`,
       style: 'meta',
       margin: [0, 0, 0, 4],
     },
     systemName
       ? {
-          text: isDpia ? `Project: ${systemName}` : `Systeem: ${systemName}`,
+          text: `${hasConditionalPartB ? 'Systeem' : 'Project'}: ${systemName}`,
           style: 'meta',
           margin: [0, 0, 0, 20],
         }
       : { text: '', margin: [0, 0, 0, 20] },
 
-    // AIIA-only: Risk level badge
-    !isDpia && riskInfo
+    // Risk level badge (forms with riskClassification)
+    hasConditionalPartB && riskInfo
       ? {
           table: {
             widths: ['*'],
@@ -87,8 +80,8 @@ export function exportToPdf(
   ]
 
   // Filter sections
-  const sectionsToInclude = assessmentData.sections.filter((s) => {
-    if (!isDpia && s.part === 'B' && !goDecision) return false
+  const sectionsToInclude = formConfig.sections.filter((s) => {
+    if (hasConditionalPartB && s.part === 'B' && !goDecision) return false
     return true
   })
 
@@ -171,7 +164,7 @@ export function exportToPdf(
     },
     pageMargins: [40, 60, 40, 60],
     footer: (currentPage, pageCount) => ({
-      text: `${footerLabel} | Pagina ${currentPage} van ${pageCount}`,
+      text: `${formConfig.meta.footerLabel} | Pagina ${currentPage} van ${pageCount}`,
       alignment: 'center',
       fontSize: 8,
       color: '#999999',
@@ -186,7 +179,7 @@ export function exportToPdf(
       const vfs = (vfsFontsModule as { default?: { pdfMake?: { vfs: Record<string, string> } } })
         .default?.pdfMake?.vfs
       if (vfs) pdfMake.vfs = vfs
-      pdfMake.createPdf(docDefinition).download(filename)
+      pdfMake.createPdf(docDefinition).download(formConfig.meta.filename)
     })
   })
 }

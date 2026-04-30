@@ -1,10 +1,10 @@
-import type { Answers, AssessmentData, RiskLevelValue } from '../models/Assessment'
-import type { AssessmentType } from '../stores/assessmentStore'
+import type { Answers, RiskLevelValue, FormConfig } from '../models/Assessment'
+import type { FormId } from '../stores/assessmentStore'
 
 export interface ExportData {
   version: '1'
   exportedAt: string
-  assessmentType: AssessmentType
+  formId: FormId
   systemName: string
   answers: Answers
   riskLevel: RiskLevelValue
@@ -30,7 +30,7 @@ function timestamp(): string {
 
 export function exportToJson(
   answers: Answers,
-  assessmentType: AssessmentType,
+  formId: FormId,
   riskLevel: RiskLevelValue,
   goDecision: boolean | null,
   completedSections: string[],
@@ -39,14 +39,14 @@ export function exportToJson(
   const data: ExportData = {
     version: '1',
     exportedAt: new Date().toISOString(),
-    assessmentType,
+    formId,
     systemName,
     answers,
     riskLevel,
     goDecision,
     completedSections,
   }
-  const label = assessmentType === 'dpia' ? 'DPIA' : 'AIIA'
+  const label = formId.toUpperCase()
   const filename = `${label}-${timestamp()}.json`
 
   triggerDownload(JSON.stringify(data, null, 2), filename, 'application/json')
@@ -57,10 +57,15 @@ export function importFromJson(file: File): Promise<ExportData> {
     const reader = new FileReader()
     reader.onload = (e) => {
       try {
-        const data = JSON.parse(e.target?.result as string) as ExportData
-        if (data.version !== '1' || !data.assessmentType || !data.answers) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const raw = JSON.parse(e.target?.result as string) as any
+        if (raw.version !== '1' || !raw.answers) {
           reject(new Error('Ongeldig bestandsformaat'))
           return
+        }
+        const data: ExportData = {
+          ...raw,
+          formId: raw.formId ?? raw.assessmentType ?? 'aiia',
         }
         resolve(data)
       } catch {
@@ -81,28 +86,26 @@ function formatAnswerMd(value: string | string[] | undefined): string {
 
 export function exportToMarkdown(
   answers: Answers,
-  assessmentType: AssessmentType,
-  assessmentData: AssessmentData,
+  formConfig: FormConfig,
   riskLevel: RiskLevelValue,
   goDecision: boolean | null,
   systemName: string,
 ): void {
-  const isDpia = assessmentType === 'dpia'
+  const hasConditionalPartB = formConfig.features.conditionalPartB
   const today = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })
-  const docTitle = isDpia ? 'Data Protection Impact Assessment' : 'AI Impact Assessment'
 
   const lines: string[] = []
-  lines.push(`# ${docTitle}`)
+  lines.push(`# ${formConfig.meta.docTitle}`)
   lines.push(`**Ministerie van Financiën** | ${today}`)
   if (systemName) lines.push(`**Systeem/project:** ${systemName}`)
-  if (!isDpia && riskLevel) lines.push(`**Risicoclassificatie:** ${riskLevel}`)
-  if (!isDpia && goDecision !== null) lines.push(`**Go-beslissing:** ${goDecision ? 'Ja' : 'Nee'}`)
+  if (hasConditionalPartB && riskLevel) lines.push(`**Risicoclassificatie:** ${riskLevel}`)
+  if (hasConditionalPartB && goDecision !== null) lines.push(`**Go-beslissing:** ${goDecision ? 'Ja' : 'Nee'}`)
   lines.push('')
 
-  const showPartB = !isDpia && goDecision === true
+  const showPartB = !hasConditionalPartB || goDecision === true
 
-  for (const section of assessmentData.sections) {
-    if (!isDpia && section.part === 'B' && !showPartB) continue
+  for (const section of formConfig.sections) {
+    if (hasConditionalPartB && section.part === 'B' && !showPartB) continue
 
     lines.push(`## ${section.title}`)
     lines.push('')
@@ -120,8 +123,6 @@ export function exportToMarkdown(
     }
   }
 
-  const label = isDpia ? 'DPIA' : 'AIIA'
-  const filename = `${label}-${timestamp()}.md`
-
+  const filename = `${formConfig.meta.exportLabel}-${timestamp()}.md`
   triggerDownload(lines.join('\n'), filename, 'text/markdown')
 }
