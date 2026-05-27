@@ -238,3 +238,20 @@ body {
   color: #555;
   font-style: italic;
 }
+
+/* ── Streaming state ───────────────────────────────────────────────────────── */
+
+.streaming-view {
+  color: #333;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.streaming-cursor {
+  animation: blink 0.9s step-end infinite;
+  margin-left: 1px;
+  color: #154273;
+}

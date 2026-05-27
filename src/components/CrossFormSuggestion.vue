@@ -15,45 +15,54 @@
     </div>
 
     <!-- AI synthesis suggestion panel -->
-    <div v-if="suggestion !== null" class="cross-suggestion-panel">
+    <div v-if="streamingText || suggestion !== null" class="cross-suggestion-panel">
       <div class="cross-suggestion-header">
         <span class="suggestion-label">✦ Synthese vanuit AIIA</span>
         <span v-if="rationale" class="suggestion-rationale">{{ rationale }}</span>
       </div>
 
-      <div v-if="noChanges" class="diff-view diff-no-changes">
-        Geen wijzigingen — het huidige antwoord dekt de AIIA-informatie al.
-      </div>
-      <div v-else class="diff-view" aria-label="Voorgestelde invulling">
-        <span
-          v-for="(part, i) in diffParts"
-          :key="i"
-          :class="part.added ? 'diff-add' : part.removed ? 'diff-del' : 'diff-eq'"
-        >{{ part.value }}</span>
+      <!-- Live streaming view -->
+      <div v-if="isLoading" class="diff-view streaming-view">
+        <span v-if="streamingText">{{ streamingText }}<span class="streaming-cursor">▋</span></span>
+        <span v-else class="diff-no-changes">Verbinding maken…</span>
       </div>
 
-      <div class="suggestion-actions">
-        <button
-          type="button"
-          class="rvo-button rvo-button--primary"
-          style="font-size: 0.8rem; padding: 4px 12px;"
-          @click="acceptSuggestion"
-        >
-          Overnemen
-        </button>
-        <button
-          type="button"
-          class="btn-reject"
-          style="font-size: 0.8rem;"
-          @click="rejectSuggestion"
-        >
-          Afwijzen
-        </button>
-      </div>
+      <!-- Final diff view -->
+      <template v-else-if="suggestion !== null">
+        <div v-if="noChanges" class="diff-view diff-no-changes">
+          Geen wijzigingen — het huidige antwoord dekt de AIIA-informatie al.
+        </div>
+        <div v-else class="diff-view" aria-label="Voorgestelde invulling">
+          <span
+            v-for="(part, i) in diffParts"
+            :key="i"
+            :class="part.added ? 'diff-add' : part.removed ? 'diff-del' : 'diff-eq'"
+          >{{ part.value }}</span>
+        </div>
+
+        <div class="suggestion-actions">
+          <button
+            type="button"
+            class="rvo-button rvo-button--primary"
+            style="font-size: 0.8rem; padding: 4px 12px;"
+            @click="acceptSuggestion"
+          >
+            Overnemen
+          </button>
+          <button
+            type="button"
+            class="btn-reject"
+            style="font-size: 0.8rem;"
+            @click="rejectSuggestion"
+          >
+            Afwijzen
+          </button>
+        </div>
+      </template>
     </div>
 
-    <!-- Action buttons (only for text-type questions) -->
-    <div v-if="isTextType && suggestion === null" class="cross-form-actions">
+    <!-- Action buttons (only for text-type questions, hidden while streaming) -->
+    <div v-if="isTextType && suggestion === null && !streamingText" class="cross-form-actions">
       <button
         type="button"
         class="cross-btn cross-btn--direct"
@@ -83,7 +92,7 @@ import type { Change } from 'diff'
 import type { CrossFormMapping } from '../models/Assessment'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { getCachedForm } from '../services/formLoader'
-import { synthesize } from '../services/llmService'
+import { synthesizeStream } from '../services/llmService'
 
 const props = defineProps<{
   mapping: CrossFormMapping
@@ -150,6 +159,17 @@ const suggestion = ref<string | null>(null)
 const rationale = ref('')
 const isLoading = ref(false)
 const error = ref('')
+const streamingRaw = ref('')
+
+// Extract the content inside <suggestie>…</suggestie> for live display
+const streamingText = computed((): string => {
+  if (!streamingRaw.value) return ''
+  const afterOpen = streamingRaw.value.match(/<suggestie>([\s\S]*)/i)
+  if (!afterOpen) return ''
+  const content = afterOpen[1]
+  const beforeClose = content.match(/([\s\S]*?)<\/suggestie>/i)
+  return (beforeClose ? beforeClose[1] : content).trim()
+})
 
 const diffParts = computed((): Change[] => {
   if (suggestion.value === null) return []
@@ -167,6 +187,8 @@ async function requestSynthesis() {
   error.value = ''
   isLoading.value = true
   suggestion.value = null
+  streamingRaw.value = ''
+  rationale.value = ''
 
   const sourceAnswers: Record<string, string> = {}
   const sourceQuestions: Record<string, string> = {}
@@ -176,20 +198,28 @@ async function requestSynthesis() {
     sourceQuestions[item.id] = item.questionText
   }
 
-  try {
-    const result = await synthesize({
+  await synthesizeStream(
+    {
       sourceAnswers,
       sourceQuestions,
       targetQuestion: props.targetQuestionText,
       synthesisHint: mapping.synthesisHint,
-    })
-    suggestion.value = result.suggestion
-    rationale.value = result.rationale
-  } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Er is een fout opgetreden.'
-  } finally {
-    isLoading.value = false
-  }
+    },
+    (chunk) => {
+      streamingRaw.value += chunk
+    },
+    (result) => {
+      suggestion.value = result.suggestion
+      rationale.value = result.rationale
+      streamingRaw.value = ''
+      isLoading.value = false
+    },
+    (errMsg) => {
+      error.value = errMsg
+      streamingRaw.value = ''
+      isLoading.value = false
+    },
+  )
 }
 
 function acceptSuggestion() {

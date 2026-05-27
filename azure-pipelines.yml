@@ -97,6 +97,7 @@ stages:
                     --name "$BACKEND_APP" \
                     --resource-group "$RESOURCE_GROUP" \
                     --image "$ACR_LOGIN_SERVER/$BACKEND_IMAGE:$IMAGE_TAG" \
+                    --min-replicas 1 \
                     --set-env-vars \
                       "CORS_ORIGINS=*" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
@@ -165,6 +166,7 @@ stages:
                     --name "$FRONTEND_APP" \
                     --resource-group "$RESOURCE_GROUP" \
                     --image "$ACR_LOGIN_SERVER/$FRONTEND_IMAGE:$IMAGE_TAG" \
+                    --min-replicas 1 \
                     --set-env-vars "BACKEND_URL=${BACKEND_URL}"
                 else
                   az containerapp create \
