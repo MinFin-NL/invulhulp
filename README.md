@@ -137,6 +137,20 @@ This starts the frontend (nginx, port 80) and backend (FastAPI, port 8000) in co
 }
 ```
 
+## Mogelijke toekomstige functionaliteit
+
+### Samenwerken via Tiptap
+
+De rich-text editor (Tiptap) biedt een solide basis voor real-time samenwerking. Met de Tiptap Collaboration-extensie (gebaseerd op Yjs/CRDT) kunnen meerdere gebruikers tegelijk aan hetzelfde formulier werken: wijzigingen worden direct zichtbaar, conflicten worden automatisch opgelost en er is geen handmatig samenvoegen nodig. Dit is met name waardevol voor grote assessments waarbij juridische, privacy- en technische experts elk hun eigen secties invullen.
+
+### Automatisch invullen vanuit documenten
+
+In plaats van formulieren helemaal handmatig in te vullen, zou de tool bestaande projectdocumenten (bijv. een projectplan, architectuurdocument of eerder ingevuld assessment) als invoer kunnen verwerken. Het LLM analyseert de documenten en genereert automatisch voorstellen voor alle relevante vragen. Dit verkort de doorlooptijd aanzienlijk voor projecten die al over uitgebreide documentatie beschikken.
+
+### Bewaarfunctionaliteit in de app
+
+Op dit moment wordt de voortgang opgeslagen in de lokale browsersessie (via Pinia persisted state). Een volwaardige bewaarfunctionaliteit zou het mogelijk maken om ingevulde formulieren op te slaan in een account of gedeelde omgeving, later verder te gaan op een ander apparaat, en meerdere versies of concepten naast elkaar te beheren. Dit vereist een backend-koppeling met gebruikersauthenticatie en een database.
+
 ## Source documents
 
 | Document | Source |
