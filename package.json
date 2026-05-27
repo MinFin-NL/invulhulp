@@ -1,7 +1,7 @@
 {
-  "name": "invulhulp",
+  "name": "findocs",
   "version": "1.0.0",
-  "description": "Invulhulp – AI-assisted Government Compliance Forms",
+  "description": "findocs – AI-assisted Government Compliance Forms",
   "type": "module",
   "scripts": {
     "dev": "vite",

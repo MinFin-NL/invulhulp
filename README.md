@@ -1,4 +1,4 @@
-# Invulhulp – AI-assisted Government Compliance Forms
+# findocs – AI-assisted Government Compliance Forms
 
 A web application that helps Dutch government employees fill in AI-related compliance assessments. It guides users through structured forms and uses a locally running LLM to suggest text improvements and synthesize answers across forms.
 

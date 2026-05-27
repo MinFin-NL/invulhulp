@@ -1,7 +1,7 @@
 [project]
-name = "invulhulp"
+name = "findocs"
 version = "0.1.0"
-description = "Invulhulp – AI-assisted Government Compliance Forms"
+description = "findocs – AI-assisted Government Compliance Forms"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.115.0",
