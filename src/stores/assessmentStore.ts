@@ -11,6 +11,13 @@ export interface FormState {
   goDecision: boolean | null
 }
 
+export interface SourceDocument {
+  id: string
+  name: string
+  content: string
+  uploadedAt: number
+}
+
 function initialFormState(): FormState {
   return {
     answers: {},
@@ -25,6 +32,7 @@ export const useAssessmentStore = defineStore('assessment', {
   state: () => ({
     activeFormId: null as FormId | null,
     forms: {} as Record<FormId, FormState>,
+    documents: [] as SourceDocument[],
   }),
 
   getters: {
@@ -85,6 +93,19 @@ export const useAssessmentStore = defineStore('assessment', {
       for (const id of Object.keys(this.forms)) {
         this.forms[id] = initialFormState()
       }
+    },
+
+    addDocument(name: string, content: string) {
+      this.documents.push({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        name,
+        content,
+        uploadedAt: Date.now(),
+      })
+    },
+
+    removeDocument(id: string) {
+      this.documents = this.documents.filter((d) => d.id !== id)
     },
   },
 

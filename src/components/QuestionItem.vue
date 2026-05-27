@@ -84,6 +84,16 @@
       :current-value="textModel"
       @apply-suggestion="onApplySuggestion"
     />
+
+    <!-- Document extraction panel (only when user has uploaded documents) -->
+    <DocumentSuggestion
+      v-if="store.documents.length > 0"
+      :target-question-text="question.text"
+      :question-type="question.type"
+      :question-options="question.options"
+      :current-value="currentValueAsString"
+      @apply-suggestion="onApplySuggestion"
+    />
   </div>
 </template>
 
@@ -92,6 +102,7 @@ import { computed } from 'vue'
 import type { Question } from '../models/Assessment'
 import TiptapEditor from './TiptapEditor.vue'
 import CrossFormSuggestion from './CrossFormSuggestion.vue'
+import DocumentSuggestion from './DocumentSuggestion.vue'
 import { useCrossFormMappings } from '../composables/useCrossFormMappings'
 import { useAssessmentStore } from '../stores/assessmentStore'
 
@@ -122,6 +133,12 @@ const textModel = computed({
   set(val: string) {
     emit('update:modelValue', val)
   },
+})
+
+// Serialized current value for the DocumentSuggestion (handles checkbox arrays too)
+const currentValueAsString = computed(() => {
+  if (Array.isArray(props.modelValue)) return props.modelValue.join(', ')
+  return props.modelValue ?? ''
 })
 
 // ── Radio helpers ─────────────────────────────────────────────────────────────

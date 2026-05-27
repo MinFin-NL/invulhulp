@@ -10,6 +10,18 @@ export interface SynthesizeRequest {
   synthesisHint?: string
 }
 
+export interface ExtractDocument {
+  name: string
+  content: string
+}
+
+export interface ExtractRequest {
+  documents: ExtractDocument[]
+  targetQuestion: string
+  options?: string[]
+  questionType?: string
+}
+
 async function parseSseStream(
   response: Response,
   onChunk: (text: string) => void,
@@ -90,6 +102,36 @@ export async function synthesizeStream(
         source_questions: req.sourceQuestions,
         target_question: req.targetQuestion,
         synthesis_hint: req.synthesisHint ?? '',
+      }),
+    })
+  } catch {
+    onError('Verbindingsfout')
+    return
+  }
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ detail: 'Onbekende fout' }))
+    onError((err as { detail?: string }).detail ?? `HTTP ${response.status}`)
+    return
+  }
+  await parseSseStream(response, onChunk, onDone, onError)
+}
+
+export async function extractFromDocumentsStream(
+  req: ExtractRequest,
+  onChunk: (text: string) => void,
+  onDone: (result: ImproveResponse) => void,
+  onError: (message: string) => void,
+): Promise<void> {
+  let response: Response
+  try {
+    response = await fetch('/api/extract/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        documents: req.documents,
+        target_question: req.targetQuestion,
+        options: req.options ?? [],
+        question_type: req.questionType ?? 'text',
       }),
     })
   } catch {

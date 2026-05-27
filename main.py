@@ -142,6 +142,28 @@ SYSTEM_PROMPT = (
     "<toelichting>één zin over wat je hebt verbeterd</toelichting>"
 )
 
+EXTRACT_SYSTEM_PROMPT = (
+    "Je bent een assistent die helpt bij het invullen van compliance- en projectdocumenten "
+    "voor de Nederlandse overheid (Ministerie van Financiën - MinFin).\n\n"
+    "Je krijgt een of meer brondocumenten (bijvoorbeeld notulen, brainstorms of agenda's) "
+    "en een specifieke vraag uit een formulier. Jouw taak is om uit de brondocumenten de "
+    "relevante informatie te halen en daarmee een antwoord op de vraag te formuleren.\n\n"
+    "Regels:\n"
+    "1. Baseer je antwoord UITSLUITEND op feiten die expliciet in de brondocumenten staan. Verzin niks.\n"
+    "2. Als de brondocumenten onvoldoende informatie bevatten om de vraag te beantwoorden, "
+    "schrijf dan: 'Onvoldoende informatie in de brondocumenten.'\n"
+    "3. Schrijf in helder Nederlands, passend bij de toon van een compliance-document.\n"
+    "4. Vermeld in de toelichting uit welk(e) document(en) je de informatie hebt gehaald, "
+    "en bij een meerkeuzevraag ook waarom je voor die optie kiest.\n\n"
+    "Als bij de vraag een lijst met antwoordopties is meegegeven (meerkeuze):\n"
+    "- Kies precies één optie uit de lijst en geef die WOORDELIJK terug (exact dezelfde tekst).\n"
+    "- Wijk niet af van de gegeven opties, ook niet in spelling of hoofdletters.\n"
+    "- Als geen enkele optie past op basis van de brondocumenten, antwoord 'Onvoldoende informatie in de brondocumenten.'\n\n"
+    "Reageer uitsluitend in dit XML-formaat:\n"
+    "<suggestie>jouw antwoord hier</suggestie>\n"
+    "<toelichting>één zin over welk document(en) je hebt gebruikt en, bij meerkeuze, waarom je deze optie kiest</toelichting>"
+)
+
 SYNTHESIZE_SYSTEM_PROMPT = (
     "Je bent een assistent die helpt bij het invullen van projectmanagement- en compliance-documenten "
     "voor de Nederlandse overheid (Ministerie van Financiën - MinFin).\n\n"
@@ -175,6 +197,18 @@ class SynthesizeRequest(BaseModel):
     synthesis_hint: str = ""
 
 
+class ExtractDocument(BaseModel):
+    name: str
+    content: str
+
+
+class ExtractRequest(BaseModel):
+    documents: list[ExtractDocument]
+    target_question: str
+    options: list[str] = []
+    question_type: str = "text"
+
+
 def _improve_user_message(req: ImproveRequest) -> str:
     return (
         f"Vraag in het formulier: {req.question_context}\n\n"
@@ -198,6 +232,25 @@ def _parse_improve(raw: str, fallback: str) -> tuple[str, str]:
     m_s = re.search(r"<verbeterd>(.*?)</verbeterd>", raw, re.DOTALL | re.IGNORECASE)
     m_r = re.search(r"<toelichting>(.*?)</toelichting>", raw, re.DOTALL | re.IGNORECASE)
     return (m_s.group(1).strip() if m_s else fallback), (m_r.group(1).strip() if m_r else "")
+
+
+def _extract_user_message(req: ExtractRequest) -> str:
+    doc_parts = [
+        f"=== Document: {doc.name} ===\n{doc.content.strip()}"
+        for doc in req.documents
+    ]
+    options_block = ""
+    if req.options:
+        formatted = "\n".join(f"- {opt}" for opt in req.options)
+        kind = "meerdere opties mogelijk" if req.question_type == "checkbox" else "kies precies één optie"
+        options_block = (
+            f"\n\nDit is een meerkeuzevraag ({kind}). Beschikbare antwoordopties (kies woordelijk):\n{formatted}"
+        )
+    return (
+        f"Doelvraag waarvoor een antwoord nodig is:\n{req.target_question}"
+        f"{options_block}\n\n"
+        f"Brondocumenten:\n\n" + "\n\n".join(doc_parts)
+    )
 
 
 def _parse_synthesize(raw: str) -> tuple[str, str]:
@@ -274,6 +327,35 @@ async def synthesize_stream(req: SynthesizeRequest) -> StreamingResponse:
         raise HTTPException(status_code=400, detail="Geen bronantwoorden opgegeven.")
     return StreamingResponse(
         _sse_stream(SYNTHESIZE_SYSTEM_PROMPT, _synthesize_user_message(req), _parse_synthesize),
+        media_type="text/event-stream",
+        headers=_SSE_HEADERS,
+    )
+
+
+@app.post("/api/extract", response_model=ImproveResponse)
+async def extract_from_documents(req: ExtractRequest) -> ImproveResponse:
+    if not req.documents:
+        raise HTTPException(status_code=400, detail="Geen brondocumenten opgegeven.")
+    if not req.target_question.strip():
+        raise HTTPException(status_code=400, detail="Doelvraag mag niet leeg zijn.")
+    try:
+        raw = await chat(EXTRACT_SYSTEM_PROMPT, _extract_user_message(req))
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"LLM fout: {e}") from e
+    suggestion, rationale = _parse_synthesize(raw)
+    if not suggestion:
+        raise HTTPException(status_code=500, detail="Kon geen suggestie genereren.")
+    return ImproveResponse(suggestion=suggestion, rationale=rationale)
+
+
+@app.post("/api/extract/stream")
+async def extract_from_documents_stream(req: ExtractRequest) -> StreamingResponse:
+    if not req.documents:
+        raise HTTPException(status_code=400, detail="Geen brondocumenten opgegeven.")
+    if not req.target_question.strip():
+        raise HTTPException(status_code=400, detail="Doelvraag mag niet leeg zijn.")
+    return StreamingResponse(
+        _sse_stream(EXTRACT_SYSTEM_PROMPT, _extract_user_message(req), _parse_synthesize),
         media_type="text/event-stream",
         headers=_SSE_HEADERS,
     )
