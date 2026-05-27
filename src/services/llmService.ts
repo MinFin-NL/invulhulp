@@ -4,20 +4,20 @@ export interface ImproveResponse {
 }
 
 export interface SynthesizeRequest {
-  aiiaAnswers: { [questionId: string]: string }
-  aiiaQuestions: { [questionId: string]: string }
-  dpiaQuestion: string
+  sourceAnswers: { [questionId: string]: string }
+  sourceQuestions: { [questionId: string]: string }
+  targetQuestion: string
   synthesisHint?: string
 }
 
-export async function synthesizeFromAiia(req: SynthesizeRequest): Promise<ImproveResponse> {
+export async function synthesize(req: SynthesizeRequest): Promise<ImproveResponse> {
   const response = await fetch('/api/synthesize', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      aiia_answers: req.aiiaAnswers,
-      aiia_questions: req.aiiaQuestions,
-      dpia_question: req.dpiaQuestion,
+      source_answers: req.sourceAnswers,
+      source_questions: req.sourceQuestions,
+      target_question: req.targetQuestion,
       synthesis_hint: req.synthesisHint ?? '',
     }),
   })

@@ -100,8 +100,8 @@ stages:
                     --set-env-vars \
                       "CORS_ORIGINS=*" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
-                      "AZURE_OPENAI_DEPLOYMENT=o4-mini" \
-                      "AZURE_OPENAI_API_VERSION=2024-08-01-preview" \
+                      "AZURE_OPENAI_DEPLOYMENT=gpt-5.3-chat" \
+                      "AZURE_OPENAI_API_VERSION=2025-04-01-preview" \
                       "AZURE_OPENAI_API_KEY=secretref:openai-api-key"
                 else
                   az containerapp create \
@@ -117,38 +117,23 @@ stages:
                     --env-vars \
                       "CORS_ORIGINS=*" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
-                      "AZURE_OPENAI_DEPLOYMENT=o4-mini" \
-                      "AZURE_OPENAI_API_VERSION=2024-08-01-preview" \
+                      "AZURE_OPENAI_DEPLOYMENT=gpt-5.3-chat" \
+                      "AZURE_OPENAI_API_VERSION=2025-04-01-preview" \
                       "AZURE_OPENAI_API_KEY=secretref:openai-api-key" \
                     --secrets "openai-endpoint=" "openai-api-key=" \
                     --cpu 0.5 --memory 1.0Gi \
                     --min-replicas 1 --max-replicas 3
                 fi
 
-          - task: AzureCLI@2
-            displayName: Apply firewall rules to backend
-            env:
-              BACKEND_APP: $(BACKEND_APP)
-              RESOURCE_GROUP: $(RESOURCE_GROUP)
-              ALLOWED_IP_1: $(ALLOWED_IP_1)
-              ALLOWED_IP_2: $(ALLOWED_IP_2)
-            inputs:
-              azureSubscription: $(AZURE_SERVICE_CONNECTION)
-              scriptType: bash
-              scriptLocation: inlineScript
-              inlineScript: |
-                az containerapp ingress access-restriction set \
+                az containerapp ingress access-restriction remove \
                   --name "$BACKEND_APP" \
                   --resource-group "$RESOURCE_GROUP" \
-                  --rule-name "DWR Next werkplekken" \
-                  --ip-address "$ALLOWED_IP_1" \
-                  --action Allow
-                az containerapp ingress access-restriction set \
+                  --rule-name "DWR Next werkplekken" 2>/dev/null || true
+                az containerapp ingress access-restriction remove \
                   --name "$BACKEND_APP" \
                   --resource-group "$RESOURCE_GROUP" \
-                  --rule-name "ITS" \
-                  --ip-address "$ALLOWED_IP_2" \
-                  --action Allow
+                  --rule-name "ITS" 2>/dev/null || true
+
 
           - task: AzureCLI@2
             displayName: Deploy frontend

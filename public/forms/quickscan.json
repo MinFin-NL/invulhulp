@@ -1,0 +1,248 @@
+{
+  "id": "quickscan",
+  "version": "1.0",
+  "title": "Quick scan BIO Baselinetoets",
+  "meta": {
+    "homeComponent": "HomePage",
+    "exportLabel": "Quick scan BIO",
+    "docTitle": "Quick scan BIO Baselinetoets",
+    "footerLabel": "Quick scan BIO – MinFin",
+    "filename": "Quickscan-BIO.pdf",
+    "systemNamePlaceholder": "Bijv. Klantportaal medewerkers v1",
+    "homeContent": {
+      "notice": "De baselinetoets BIO is een momentopname van de huidige situatie. Voer de scan opnieuw uit bij nieuwe wet- of regelgeving, meer ketenpartners, meer persoonsgegevens of grote proces- en systeemwijzigingen. Uitgevoerde baselinetoetsen maken onderdeel uit van het systeemdossier.",
+      "description": "De Quick scan BIO Baselinetoets bepaalt het Basis Beveiligingsniveau (BBN) van een proces of systeem conform de Baseline Informatiebeveiliging Overheid (BIO). De uitkomst geeft aan welk beschermingsniveau vereist is en of aanvullende maatregelen of een DPIA noodzakelijk zijn.",
+      "steps": [
+        "Basisgegevens: organisatie, afdeling, systeem en opsteller",
+        "BIV-classificatie: vereist niveau voor beschikbaarheid, integriteit en vertrouwelijkheid",
+        "Beveiligingsaspecten: subprocessen, ketenpartners, koppelvlakken en systemen",
+        "Privacy-screening: persoonsgegevens, bijzondere categorieën en DPIA-noodzaak"
+      ],
+      "buttonLabel": "Starten met de quick scan"
+    }
+  },
+  "features": {
+    "riskClassification": false,
+    "decisionGate": false,
+    "conditionalPartB": false
+  },
+  "navigation": [
+    { "type": "subsections", "sectionId": "qs_a" },
+    { "type": "subsections", "sectionId": "qs_b" },
+    { "type": "subsections", "sectionId": "qs_c" },
+    { "type": "subsections", "sectionId": "qs_d" },
+    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+  ],
+  "sections": [
+    {
+      "id": "qs_a",
+      "title": "Algemeen",
+      "part": "A",
+      "subsections": [
+        {
+          "id": "qs_a1",
+          "title": "0. Basisgegevens",
+          "description": "Vul de basisgegevens in over het proces of systeem waarvoor de baselinetoets wordt uitgevoerd.",
+          "questions": [
+            {
+              "id": "qs_a.organisatie",
+              "text": "Organisatie",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "qs_a.afdeling",
+              "text": "Afdeling",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "qs_a.systeemnaam",
+              "text": "Naam van het proces of systeem",
+              "guidance": "Beschrijf het object van de analyse: het systeem, de applicatie of het bedrijfsproces.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "qs_a.opsteller",
+              "text": "Naam en functie opsteller",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "qs_a.versienummer",
+              "text": "Versienummer",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "qs_a.datum",
+              "text": "Datum van de baselinetoets",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "qs_b",
+      "title": "Belang van het proces (BIV-classificatie)",
+      "part": "B",
+      "subsections": [
+        {
+          "id": "qs_b1",
+          "title": "1.1 Beschikbaarheid, integriteit en vertrouwelijkheid",
+          "description": "Bepaal het belang van het proces door na te gaan hoe groot de schade is als de betrouwbaarheidsaspecten niet in orde zijn. Denk aan persoonlijke veiligheid, persoonsgegevens, wettelijke verplichtingen, financieel verlies en imagoschade.",
+          "questions": [
+            {
+              "id": "qs_b.beschikbaarheid",
+              "text": "Vereist niveau voor Beschikbaarheid",
+              "guidance": "Hoe groot is de schade als het systeem niet beschikbaar is? Laag = beperkte schade; Midden = aanzienlijke schade; Hoog = kritieke schade voor de organisatie of burgers.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Laag", "Midden", "Hoog"]
+            },
+            {
+              "id": "qs_b.integriteit",
+              "text": "Vereist niveau voor Integriteit",
+              "guidance": "Hoe groot is de schade als de informatie onjuist of gemanipuleerd is? Laag = beperkte schade; Midden = aanzienlijke schade; Hoog = kritieke schade.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Laag", "Midden", "Hoog"]
+            },
+            {
+              "id": "qs_b.vertrouwelijkheid",
+              "text": "Vereist niveau voor Vertrouwelijkheid",
+              "guidance": "Hoe groot is de schade als vertrouwelijke informatie bij ongeautoriseerde personen terechtkomt? Laag = beperkte schade; Midden = aanzienlijke schade; Hoog = kritieke schade.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Laag", "Midden", "Hoog"]
+            },
+            {
+              "id": "qs_b.classificatie_onderbouwing",
+              "text": "Onderbouwing van de classificatie",
+              "guidance": "Beschrijf het proces, de informatie die wordt gebruikt en welke soort persoonsgegevens (indien van toepassing) worden verwerkt. Beschrijf ook de afnemers van het proces.",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "qs_c",
+      "title": "Beveiligingsaspecten",
+      "part": "C",
+      "subsections": [
+        {
+          "id": "qs_c1",
+          "title": "1.2 Proceskenmerken en systemen",
+          "description": "Beschrijf de relevante kenmerken van het proces en de gebruikte systemen.",
+          "questions": [
+            {
+              "id": "qs_c.subprocessen",
+              "text": "Zijn er subprocessen te onderscheiden?",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Ja", "Nee"]
+            },
+            {
+              "id": "qs_c.ketenpartners",
+              "text": "Beschrijf de ketenpartners en afnemers van het proces",
+              "guidance": "Welke externe partijen zijn betrokken bij of afhankelijk van dit proces of systeem?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "qs_c.koppelvlakken",
+              "text": "Zijn er geautomatiseerde koppelvlakken met andere systemen?",
+              "guidance": "Worden er automatisch gegevens uitgewisseld met andere systemen of externe partijen?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Deels"]
+            },
+            {
+              "id": "qs_c.externe_hosting",
+              "text": "Is er sprake van externe hosting of cloudgebruik?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Deels"]
+            },
+            {
+              "id": "qs_c.systemen_beschrijving",
+              "text": "Beschrijf de gebruikte systemen en applicaties",
+              "guidance": "Welke systemen of applicaties worden ingezet voor dit proces?",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "qs_d",
+      "title": "Privacy en DPIA-screening",
+      "part": "D",
+      "subsections": [
+        {
+          "id": "qs_d1",
+          "title": "Privacy-vragen",
+          "description": "Beantwoord de privacy-vragen om te bepalen of een DPIA noodzakelijk is. De Autoriteit Persoonsgegevens heeft een lijst van verwerkingen opgesteld waarvoor een DPIA verplicht is.",
+          "questions": [
+            {
+              "id": "qs_d.persoonsgegevens",
+              "text": "Worden er persoonsgegevens verwerkt?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee"]
+            },
+            {
+              "id": "qs_d.bijzondere_persoonsgegevens",
+              "text": "Worden er bijzondere persoonsgegevens verwerkt (artikel 9 AVG)?",
+              "guidance": "Bijv. gezondheidsgegevens, ras, politieke opvattingen, biometrische gegevens.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Niet van toepassing"]
+            },
+            {
+              "id": "qs_d.grootschalige_verwerking",
+              "text": "Is er sprake van grootschalige verwerking van persoonsgegevens?",
+              "guidance": "Let op het aantal betrokkenen, volume van gegevens, duur en geografische omvang.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Onduidelijk"]
+            },
+            {
+              "id": "qs_d.dpia_noodzakelijk",
+              "text": "Is een DPIA noodzakelijk op basis van de quick scan?",
+              "guidance": "Bepaal op basis van de voorgaande antwoorden of een DPIA verplicht is.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": [
+                "Ja — DPIA is verplicht",
+                "Nee — geen DPIA vereist",
+                "Nader te bepalen"
+              ]
+            },
+            {
+              "id": "qs_d.extra_maatregelen",
+              "text": "Zijn aanvullende beveiligingsmaatregelen bovenop de BIO-baseline nodig?",
+              "guidance": "Op basis van de BIV-classificatie en de privacy-uitkomst: zijn extra maatregelen vereist?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Nader te bepalen"]
+            },
+            {
+              "id": "qs_d.persoonsgegevens_toelichting",
+              "text": "Toelichting op de verwerking van persoonsgegevens",
+              "guidance": "Beschrijf welke persoonsgegevens worden verwerkt en in welke context.",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

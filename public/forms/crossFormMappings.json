@@ -1,107 +1,428 @@
 [
   {
-    "dpiaQuestionId": "d1.1",
-    "aiiaQuestionIds": ["1.1.1"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d1.1",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["1.1.1"],
     "synthesisHint": "Formuleer de beschrijving van het AI-systeem als projectbeschrijving voor een DPIA, met nadruk op de gegevensverwerkingscontext."
   },
   {
-    "dpiaQuestionId": "d1.2",
-    "aiiaQuestionIds": ["1.1.4"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d1.2",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["1.1.4"],
     "synthesisHint": "Beschrijf de aanleiding voor het project vanuit het perspectief van de DPIA, met nadruk op de noodzaak van gegevensverwerking."
   },
   {
-    "dpiaQuestionId": "d5.1",
-    "aiiaQuestionIds": ["1.1.1", "1.1.4"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d5.1",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["1.1.1", "1.1.4"],
     "synthesisHint": "Combineer het doel en de aanleiding van het AI-systeem tot specifieke, uitdrukkelijk omschreven verwerkingsdoeleinden voor de DPIA."
   },
   {
-    "dpiaQuestionId": "d5.2",
-    "aiiaQuestionIds": ["7.2.4"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d5.2",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["7.2.4"],
     "synthesisHint": "Beschrijf hoe betrokkenen worden geïnformeerd over de verwerkingsdoeleinden, gebaseerd op de transparantie-aanpak uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d6.1",
-    "aiiaQuestionIds": ["1.3.1", "1.3.2"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d6.1",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["1.3.1", "1.3.2"],
     "synthesisHint": "Vertaal de rolverdeling en betrokkenen uit de AIIA naar AVG-rollen (verwerkingsverantwoordelijke, verwerker, betrokkene, etc.) voor de DPIA."
   },
   {
-    "dpiaQuestionId": "d6.3",
-    "aiiaQuestionIds": ["4.4.5"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d6.3",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["4.4.5"],
     "synthesisHint": "Beschrijf of verwerkersovereenkomsten zijn gesloten, gebaseerd op de externe-hostingvoorwaarden uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d7.3",
-    "aiiaQuestionIds": ["1.3.3", "1.3.4"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d7.3",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["1.3.3", "1.3.4"],
     "synthesisHint": "Beschrijf het overleg met betrokkenen gebaseerd op de stakeholderconsultatie uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d4.2",
-    "aiiaQuestionIds": ["1.2.1"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d4.2",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["1.2.1"],
     "synthesisHint": "Beschrijf de (semi-)geautomatiseerde besluitvorming of profilering op basis van de technische systeembeschrijving uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d4.3",
-    "aiiaQuestionIds": ["4.4.5"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d4.3",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["4.4.5"],
     "synthesisHint": "Beschrijf het gebruik van cloudoplossingen of big data-verwerkingen op basis van de hostinginformatie uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d9.1",
-    "aiiaQuestionIds": ["2.1.2", "2.1.3"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d9.1",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["2.1.2", "2.1.3"],
     "synthesisHint": "Noem de relevante wet- en regelgeving gebaseerd op de wettelijke grondslag en grondrechtelijke bepalingen uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d10.1",
-    "aiiaQuestionIds": ["7.4.1", "7.4.3"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d10.1",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["7.4.1", "7.4.3"],
     "synthesisHint": "Beschrijf de bewaartermijnen voor persoonsgegevens gebaseerd op de archiveringsinformatie uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d10.2",
-    "aiiaQuestionIds": ["7.4.1", "7.4.2"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d10.2",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["7.4.1", "7.4.2"],
     "synthesisHint": "Beschrijf hoe toezicht wordt gehouden op bewaartermijnen en vernietiging, gebaseerd op de versiebeheers- en archiveringsaanpak uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d11.2",
-    "aiiaQuestionIds": ["2.1.2", "2.1.3"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d11.2",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["2.1.2", "2.1.3"],
     "synthesisHint": "Motiveer de gekozen AVG-rechtsgrond gebaseerd op de juridische onderbouwing en grondrechtelijke bepalingen uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d14.1",
-    "aiiaQuestionIds": ["5.1.3"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d14.1",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["5.1.3"],
     "synthesisHint": "Beoordeel de noodzaak van persoonsgegevensverwerking gebaseerd op de dataminimalisatie-informatie uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d14.2",
-    "aiiaQuestionIds": ["3.1", "5.2.3"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d14.2",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["3.1", "5.2.3"],
     "synthesisHint": "Beschrijf de proportionaliteit van de gegevensverwerking gebaseerd op de proportionaliteitsafweging uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d14.3",
-    "aiiaQuestionIds": ["1.2.3", "3.1"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d14.3",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["1.2.3", "3.1"],
     "synthesisHint": "Beschrijf de subsidiariteit en de overwogen alternatieven gebaseerd op de alternatieven-analyse uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d15.1",
-    "aiiaQuestionIds": ["7.2.12"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d15.1",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["7.2.12"],
     "synthesisHint": "Beschrijf hoe betrokkenen hun AVG-rechten kunnen uitoefenen gebaseerd op de bezwaar- en beroepsprocedures uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d16.1",
-    "aiiaQuestionIds": ["2.1.1", "2.1.4"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d16.1",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["2.1.1", "2.1.4"],
     "synthesisHint": "Beschrijf de mogelijke negatieve gevolgen voor betrokkenen vanuit gegevensbeschermingsperspectief, gebaseerd op de grondrechtenanalyse uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d17.1",
-    "aiiaQuestionIds": ["4.4.6", "4.4.8", "6.3.2", "5.2.8"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d17.1",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["4.4.6", "4.4.8", "6.3.2", "5.2.8"],
     "synthesisHint": "Beschrijf de technische maatregelen (toegangscontrole, logging, beveiliging) gebaseerd op de beveiligingsmaatregelen uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d17.2",
-    "aiiaQuestionIds": ["3.2", "6.1.1"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d17.2",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["3.2", "6.1.1"],
     "synthesisHint": "Beschrijf de organisatorische maatregelen gebaseerd op de risicobeheersings- en aanvullende maatregelen uit de AIIA."
   },
   {
-    "dpiaQuestionId": "d17.4",
-    "aiiaQuestionIds": ["6.1.1"],
+    "targetFormId": "dpia",
+    "targetQuestionId": "d17.4",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": ["6.1.1"],
     "synthesisHint": "Beschrijf de resterende risico's na het treffen van maatregelen, gebaseerd op de risicoanalyse uit de AIIA."
-  }
+  },
+  {
+    "targetFormId": "aanbiedingsformulier",
+    "targetQuestionId": "aa_b.projectbeschrijving",
+    "sourceFormId": "intake",
+    "sourceQuestionIds": ["intake_b.omschrijving"],
+    "synthesisHint": "Herschrijf de IV-verzoekbeschrijving als strategische projectbeschrijving voor het aanbiedingsformulier, met nadruk op strategische doelstelling en toegevoegde waarde."
+  },
+  {
+    "targetFormId": "aanbiedingsformulier",
+    "targetQuestionId": "aa_b.urgentie",
+    "sourceFormId": "intake",
+    "sourceQuestionIds": ["intake_b.noodzaak", "intake_d.urgentie"],
+    "synthesisHint": "Combineer de nut/noodzaak en urgentie uit het intakeformulier tot een beschrijving van de politieke en bestuurlijke urgentie van het project."
+  },
+  {
+    "targetFormId": "aanbiedingsformulier",
+    "targetQuestionId": "aa_e.impact_gebruikersorg",
+    "sourceFormId": "intake",
+    "sourceQuestionIds": ["intake_b.doelgroep"],
+    "synthesisHint": "Vertaal de doelgroepbeschrijving uit het intakeformulier naar een beschrijving van de impact op de gebruikersorganisatie voor het aanbiedingsformulier."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_a.achtergrond",
+    "sourceFormId": "intake",
+    "sourceQuestionIds": ["intake_b.omschrijving", "intake_b.noodzaak"],
+    "synthesisHint": "Combineer de omschrijving en nut/noodzaak uit het intakeformulier tot een projectachtergrond voor het PPM-projectplan."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_b.redenen",
+    "sourceFormId": "intake",
+    "sourceQuestionIds": ["intake_b.noodzaak"],
+    "synthesisHint": "Herschrijf de nut/noodzaak uit het intakeformulier als zakelijke redenen om het project te starten, inclusief bijdrage aan bedrijfsdoelstellingen."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_a.afhankelijkheden",
+    "sourceFormId": "intake",
+    "sourceQuestionIds": ["intake_d.afhankelijkheden"],
+    "synthesisHint": "Vertaal de projectafhankelijkheden uit het intakeformulier naar een gestructureerde afhankelijkhedenlijst voor het projectplan."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_a.achtergrond",
+    "sourceFormId": "aanbiedingsformulier",
+    "sourceQuestionIds": ["aa_b.projectbeschrijving"],
+    "synthesisHint": "Gebruik de projectbeschrijving uit het aanbiedingsformulier als basis voor de projectachtergrond in het PPM-projectplan."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_b.overwogen_opties",
+    "sourceFormId": "aanbiedingsformulier",
+    "sourceQuestionIds": ["aa_b.alternatieven"],
+    "synthesisHint": "Vertaal de overwogen alternatieven uit het aanbiedingsformulier naar een gestructureerde analyse van opties met argumentatie voor de gekozen optie."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_b.kosten_baten",
+    "sourceFormId": "aanbiedingsformulier",
+    "sourceQuestionIds": ["aa_c.kwantitatieve_baten", "aa_c.kwalitatieve_baten"],
+    "synthesisHint": "Combineer de kwantitatieve en kwalitatieve baten uit het aanbiedingsformulier tot een kosten-batenanalyse voor het projectplan."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_a.beperkingen",
+    "sourceFormId": "aanbiedingsformulier",
+    "sourceQuestionIds": ["aa_e.risicos"],
+    "synthesisHint": "Vertaal de risico's uit het aanbiedingsformulier naar beperkingen en aannames in het projectplan."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_b.fasering",
+    "sourceFormId": "aanbiedingsformulier",
+    "sourceQuestionIds": ["aa_e.startdatum_einddatum"],
+    "synthesisHint": "Gebruik de start- en einddatum uit het aanbiedingsformulier als basis voor de doorlooptijd en fasering in het projectplan."
+  },
+  {
+    "targetFormId": "psa",
+    "targetQuestionId": "psa_a.aanleiding",
+    "sourceFormId": "ppm",
+    "sourceQuestionIds": ["ppm_a.achtergrond", "ppm_b.redenen"],
+    "synthesisHint": "Combineer de projectachtergrond en redenen uit het projectplan tot een beknopte aanleiding en doelstelling voor de PSA."
+  },
+  {
+    "targetFormId": "psa",
+    "targetQuestionId": "psa_a.projectafbakening",
+    "sourceFormId": "ppm",
+    "sourceQuestionIds": ["ppm_a.scope"],
+    "synthesisHint": "Vertaal de projectscope en afbakening uit het projectplan naar de projectafbakening in de PSA."
+  },
+  {
+    "targetFormId": "psa",
+    "targetQuestionId": "psa_c.organisatieonderdelen",
+    "sourceFormId": "ppm",
+    "sourceQuestionIds": ["ppm_d.stakeholders"],
+    "synthesisHint": "Gebruik de stakeholder- en gebruikersorganisatie-informatie uit het projectplan om te beschrijven welke organisatieonderdelen worden geraakt in de PSA."
+  },
+  {
+    "targetFormId": "psa",
+    "targetQuestionId": "psa_a.relatie_andere_projecten",
+    "sourceFormId": "ppm",
+    "sourceQuestionIds": ["ppm_a.afhankelijkheden"],
+    "synthesisHint": "Vertaal de projectafhankelijkheden uit het projectplan naar een beschrijving van de relatie met andere projecten in de PSA."
+  },
+  {
+    "targetFormId": "dpia",
+    "targetQuestionId": "d1.1",
+    "sourceFormId": "ppm",
+    "sourceQuestionIds": ["ppm_a.achtergrond"],
+    "synthesisHint": "Herschrijf de projectachtergrond uit het PPM-projectplan als een projectbeschrijving voor de DPIA, met nadruk op de gegevensverwerkingsaspecten."
+  },
+  {
+    "targetFormId": "dpia",
+    "targetQuestionId": "d1.2",
+    "sourceFormId": "ppm",
+    "sourceQuestionIds": ["ppm_b.redenen"],
+    "synthesisHint": "Gebruik de redenen om het project te starten uit het projectplan als aanleiding voor de DPIA, met nadruk op de verwerkingsnoodzaak."
+  },
+  {
+    "targetFormId": "dpia",
+    "targetQuestionId": "d2.1",
+    "sourceFormId": "psa",
+    "sourceQuestionIds": ["psa_d.gegevensmodel"],
+    "synthesisHint": "Gebruik het gegevensmodel uit de PSA om te beschrijven welke soorten persoonsgegevens worden verwerkt in de DPIA."
+  },
+  {
+    "targetFormId": "dpia",
+    "targetQuestionId": "d5.1",
+    "sourceFormId": "psa",
+    "sourceQuestionIds": ["psa_e.privacy"],
+    "synthesisHint": "Vertaal de privacybeschrijving uit de PSA naar de verwerkingsdoeleinden in de DPIA, met gebruik van AVG-terminologie."
+  },
+  {
+    "targetFormId": "aiia",
+    "targetQuestionId": "1.1.1",
+    "sourceFormId": "psa",
+    "sourceQuestionIds": ["psa_d.functioneel"],
+    "synthesisHint": "Gebruik de functionele beschrijving van de applicatie uit de PSA als basis voor de beschrijving van het AI-systeem in de AIIA."
+  },
+  {
+    "targetFormId": "aiia",
+    "targetQuestionId": "1.2.1",
+    "sourceFormId": "psa",
+    "sourceQuestionIds": ["psa_d.algoritmeregister"],
+    "synthesisHint": "Gebruik de algoritmeregisterinformatie uit de PSA als technische beschrijving van het AI-systeem in de AIIA."
+  },
+  {
+    "targetFormId": "prescandpia",
+    "targetQuestionId": "ps_b.typen_persoonsgegevens",
+    "sourceFormId": "quickscan",
+    "sourceQuestionIds": ["qs_d.persoonsgegevens_toelichting"],
+    "synthesisHint": "Gebruik de toelichting over persoonsgegevensverwerking uit de quickscan om te specificeren welke typen persoonsgegevens worden verwerkt in de prescan DPIA."
+  },
+  {
+    "targetFormId": "prescandpia",
+    "targetQuestionId": "ps_a.omschrijving",
+    "sourceFormId": "quickscan",
+    "sourceQuestionIds": ["qs_a.systeemnaam", "qs_b.classificatie_onderbouwing"],
+    "synthesisHint": "Combineer de systeemnaam en classificatieonderbouwing uit de quickscan tot een beschrijving van de verwerking voor de prescan DPIA."
+  },
+  {
+    "targetFormId": "dpia",
+    "targetQuestionId": "d1.1",
+    "sourceFormId": "quickscan",
+    "sourceQuestionIds": ["qs_a.systeemnaam", "qs_c.systemen_beschrijving"],
+    "synthesisHint": "Combineer de systeemnaam en systeemsomschrijving uit de quickscan tot een projectbeschrijving voor de DPIA."
+  },
+  {
+    "targetFormId": "dpia",
+    "targetQuestionId": "d6.1",
+    "sourceFormId": "quickscan",
+    "sourceQuestionIds": ["qs_c.ketenpartners"],
+    "synthesisHint": "Vertaal de beschrijving van ketenpartners uit de quickscan naar AVG-rollen (verwerkingsverantwoordelijke, verwerker, etc.) in de DPIA."
+  },
+  {
+    "targetFormId": "dpia",
+    "targetQuestionId": "d1.1",
+    "sourceFormId": "prescandpia",
+    "sourceQuestionIds": ["ps_a.omschrijving"],
+    "synthesisHint": "Gebruik de omschrijving van de verwerking uit de prescan DPIA als projectbeschrijving in de volledige DPIA."
+  },
+  {
+    "targetFormId": "dpia",
+    "targetQuestionId": "d5.1",
+    "sourceFormId": "prescandpia",
+    "sourceQuestionIds": ["ps_a.verwerkingsdoelen"],
+    "synthesisHint": "Vertaal de verwerkingsdoelen uit de prescan DPIA naar specifieke, uitdrukkelijk omschreven verwerkingsdoeleinden voor de DPIA."
+  },
+  {
+    "targetFormId": "dpia",
+    "targetQuestionId": "d11.2",
+    "sourceFormId": "prescandpia",
+    "sourceQuestionIds": ["ps_a.grondslag"],
+    "synthesisHint": "Gebruik de gekozen wettelijke grondslag uit de prescan DPIA en motiveer deze in de context van de volledige DPIA."
+  },
+  {
+    "targetFormId": "dpia",
+    "targetQuestionId": "d4.2",
+    "sourceFormId": "prescandpia",
+    "sourceQuestionIds": ["ps_c.geautomatiseerde_besluitvorming"],
+    "synthesisHint": "Gebruik de informatie over geautomatiseerde besluitvorming uit de prescan DPIA om dit te beschrijven in de volledige DPIA."
+  },
+  {
+    "targetFormId": "dpia",
+    "targetQuestionId": "d16.1",
+    "sourceFormId": "prescandpia",
+    "sourceQuestionIds": ["ps_c.evaluatie_scoring", "ps_c.monitoring", "ps_c.bijzondere_gegevens", "ps_c.kwetsbare_groepen"],
+    "synthesisHint": "Combineer de risicofactoren uit de prescan DPIA (scoring, monitoring, bijzondere gegevens, kwetsbare groepen) tot een beschrijving van mogelijke negatieve gevolgen voor betrokkenen in de DPIA."
+  },
+
+  { "targetFormId": "aiia", "targetQuestionId": "1.1.1", "sourceFormId": "dpia", "sourceQuestionIds": ["d1.1"],
+    "synthesisHint": "Vertaal de DPIA-projectbeschrijving naar een beknopte beschrijving van het AI-systeem: wat doet het, welk doel dient het en wat zijn de verwachte resultaten vanuit AI-perspectief." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "1.1.4", "sourceFormId": "dpia", "sourceQuestionIds": ["d1.2"],
+    "synthesisHint": "Gebruik de aanleiding uit de DPIA als context voor de aanleiding van de AI-systeeminzet in de AIIA. Vertaal de verwerkingsnoodzaak naar een AI-specifieke motivatie." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "1.2.1", "sourceFormId": "dpia", "sourceQuestionIds": ["d4.2"],
+    "synthesisHint": "Gebruik de DPIA-beschrijving van geautomatiseerde besluitvorming of profilering als vertrekpunt voor de technische beschrijving van het AI-systeem in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "1.2.3", "sourceFormId": "dpia", "sourceQuestionIds": ["d14.3"],
+    "synthesisHint": "Gebruik de subsidiariteits- en alternatievenafweging uit de DPIA als basis voor de alternatieven-analyse in de AIIA (inclusief niet-AI-oplossingen)." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "1.3.1", "sourceFormId": "dpia", "sourceQuestionIds": ["d6.1"],
+    "synthesisHint": "Vertaal de AVG-rolverdeling (verwerkingsverantwoordelijke, verwerker) uit de DPIA naar de projectrolverdeling in de AIIA (ontwikkelaar, opdrachtgever, beheerder)." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "1.3.2", "sourceFormId": "dpia", "sourceQuestionIds": ["d6.1"],
+    "synthesisHint": "Gebruik de beschrijving van betrokkenen uit de DPIA om de gebruikers en betrokkenen van het AI-systeem te beschrijven in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "1.3.3", "sourceFormId": "dpia", "sourceQuestionIds": ["d7.3"],
+    "synthesisHint": "Gebruik het overleg met betrokkenen uit de DPIA als basis voor de stakeholderconsultatie in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "2.1.1", "sourceFormId": "dpia", "sourceQuestionIds": ["d16.1"],
+    "synthesisHint": "Vertaal de geïdentificeerde risico's voor betrokkenen uit de DPIA naar een analyse van de mogelijke impact van het AI-systeem op grondrechten van burgers." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "2.1.2", "sourceFormId": "dpia", "sourceQuestionIds": ["d9.1", "d11.2"],
+    "synthesisHint": "Gebruik de wet- en regelgeving en de AVG-rechtsgrond uit de DPIA als basis voor de wettelijke grondslag van de AI-inzet in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "2.1.4", "sourceFormId": "dpia", "sourceQuestionIds": ["d16.1"],
+    "synthesisHint": "Gebruik de risico's voor betrokkenen uit de DPIA om te beschrijven welke grondrechten kunnen worden geschonden als het AI-systeem niet correct functioneert." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "3.1", "sourceFormId": "dpia", "sourceQuestionIds": ["d14.1", "d14.2"],
+    "synthesisHint": "Gebruik de noodzakelijkheids- en proportionaliteitsafweging uit de DPIA als basis voor de proportionaliteitsbeoordeling van het AI-systeem in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "3.2", "sourceFormId": "dpia", "sourceQuestionIds": ["d17.2"],
+    "synthesisHint": "Gebruik de organisatorische maatregelen uit de DPIA als vertrekpunt voor de aanvullende maatregelen om verantwoord AI-gebruik te waarborgen in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "4.4.5", "sourceFormId": "dpia", "sourceQuestionIds": ["d6.3", "d4.3"],
+    "synthesisHint": "Gebruik de informatie over verwerkersovereenkomsten en cloudgebruik uit de DPIA voor de beschrijving van externe hosting in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "4.4.6", "sourceFormId": "dpia", "sourceQuestionIds": ["d17.1"],
+    "synthesisHint": "Gebruik de technische maatregelen uit de DPIA (toegangscontrole) als basis voor de beschrijving van toegangsbeheer in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "4.4.8", "sourceFormId": "dpia", "sourceQuestionIds": ["d17.1"],
+    "synthesisHint": "Gebruik de technische maatregelen uit de DPIA (logging en monitoring) als basis voor de beschrijving van logging en monitoring in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "5.1.3", "sourceFormId": "dpia", "sourceQuestionIds": ["d14.1"],
+    "synthesisHint": "Gebruik de noodzakelijkheidsafweging uit de DPIA als basis voor de dataminimalisatiebeschrijving in de AIIA: is de gebruikte data echt noodzakelijk voor het systeem?" },
+
+  { "targetFormId": "aiia", "targetQuestionId": "5.2.3", "sourceFormId": "dpia", "sourceQuestionIds": ["d14.2"],
+    "synthesisHint": "Gebruik de proportionaliteitsafweging uit de DPIA als basis voor de beoordeling of de persoonsgegevensverwerking proportioneel en subsidiair is in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "6.1.1", "sourceFormId": "dpia", "sourceQuestionIds": ["d17.2", "d17.4"],
+    "synthesisHint": "Combineer de organisatorische maatregelen en resterende risico's uit de DPIA als basis voor de risicobeheersmaatregelen in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "6.3.2", "sourceFormId": "dpia", "sourceQuestionIds": ["d17.1"],
+    "synthesisHint": "Gebruik de technische beveiligingsmaatregelen uit de DPIA als basis voor de beschrijving van het voorkomen van onbevoegde toegang in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "7.2.4", "sourceFormId": "dpia", "sourceQuestionIds": ["d5.2"],
+    "synthesisHint": "Gebruik de informatieverstrekking aan betrokkenen uit de DPIA als basis voor de communicatie over AI-gegenereerde output aan eindgebruikers en betrokkenen in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "7.2.12", "sourceFormId": "dpia", "sourceQuestionIds": ["d15.1"],
+    "synthesisHint": "Gebruik de AVG-rechtenbeschrijving uit de DPIA als basis voor de bezwaar- en beroepsprocedures in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "7.4.1", "sourceFormId": "dpia", "sourceQuestionIds": ["d10.1"],
+    "synthesisHint": "Gebruik de bewaartermijnen uit de DPIA als basis voor de opslag en bewaartermijn van inputdata in de AIIA." },
+
+  { "targetFormId": "aiia", "targetQuestionId": "7.4.3", "sourceFormId": "dpia", "sourceQuestionIds": ["d10.1"],
+    "synthesisHint": "Gebruik de bewaartermijnen uit de DPIA als basis voor de bewaartermijn van outputdata in de AIIA." }
 ]

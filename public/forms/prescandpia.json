@@ -1,0 +1,295 @@
+{
+  "id": "prescandpia",
+  "version": "1.0",
+  "title": "Prescan DPIA",
+  "meta": {
+    "homeComponent": "HomePage",
+    "exportLabel": "Prescan DPIA",
+    "docTitle": "Prescan Data Protection Impact Assessment",
+    "footerLabel": "Prescan DPIA – MinFin",
+    "filename": "Prescan-DPIA.pdf",
+    "systemNamePlaceholder": "Bijv. Klantportaal persoonsgegevens v1",
+    "homeContent": {
+      "notice": "Met behulp van de prescan DPIA beoordeelt u of er mogelijk grote risico's bestaan voor de rechten en vrijheden van betrokkenen (AVG/WPG/WJSG). Bij twijfel over de uitkomst: neem contact op met de Privacy Officer of de Functionaris voor de Gegevensbescherming (FG).",
+      "description": "De Prescan DPIA is een quick assessment waarmee wordt bepaald of een volledige DPIA verplicht is. De uitkomst hangt af van aanwezige risicofactoren zoals grootschalige verwerking, bijzondere persoonsgegevens, geautomatiseerde besluitvorming of kwetsbare groepen betrokkenen.",
+      "steps": [
+        "Deel A – Beschrijving van de verwerking: doel, grondslag en cloudgebruik",
+        "Deel B – Typen persoonsgegevens en bijzondere categorieën (art. 9 AVG)",
+        "Deel C – Risicofactoren op basis van de AP/EDPB-criteria",
+        "Deel D – Algoritme en AI: gebruik, kwalificatie en conclusie DPIA-noodzaak"
+      ],
+      "buttonLabel": "Starten met de prescan DPIA"
+    }
+  },
+  "features": {
+    "riskClassification": false,
+    "decisionGate": false,
+    "conditionalPartB": false
+  },
+  "navigation": [
+    { "type": "subsections", "sectionId": "ps_a" },
+    { "type": "subsections", "sectionId": "ps_b" },
+    { "type": "subsections", "sectionId": "ps_c" },
+    { "type": "subsections", "sectionId": "ps_d" },
+    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+  ],
+  "sections": [
+    {
+      "id": "ps_a",
+      "title": "Deel A: Beschrijving van de verwerking",
+      "part": "A",
+      "subsections": [
+        {
+          "id": "ps_a1",
+          "title": "A.1 Algemene beschrijving",
+          "description": "Beschrijf het proces of systeem waarvoor de prescan wordt ingevuld. Deze informatie kan worden hergebruikt in paragraaf 1 van het Model DPIA Rijksdienst.",
+          "questions": [
+            {
+              "id": "ps_a.omschrijving",
+              "text": "Geef een uitvoerige beschrijving van de verwerking of het geheel van verwerkingen",
+              "guidance": "Beschrijf om welk proces/systeem/applicatie het gaat en de context. Noem de stappen op hoofdlijnen, betrokken partijen en welke systemen worden gebruikt.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ps_a.verwerkingsdoelen",
+              "text": "Welk doel wil de organisatie bereiken met de gegevensverwerking?",
+              "guidance": "Beschrijf de doelen. Deze kunnen worden hergebruikt in paragraaf 5 van het Model DPIA Rijksdienst.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ps_a.grondslag",
+              "text": "Wat is de wettelijke grondslag voor de verwerking (artikel 6 lid 1 AVG)?",
+              "guidance": "De grondslag kan worden gebruikt voor paragraaf 11 van het Model DPIA Rijksdienst.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": [
+                "Toestemming van de betrokkene",
+                "Noodzakelijk voor uitvoering overeenkomst",
+                "Wettelijke verplichting",
+                "Vitaal belang betrokkene",
+                "Taak van algemeen belang",
+                "Gerechtvaardigd belang",
+                "Nog niet bepaald"
+              ]
+            },
+            {
+              "id": "ps_a.cloudgebruik",
+              "text": "Is er sprake van cloudgebruik?",
+              "guidance": "Geef aan of en welk type cloudoplossing wordt gebruikt.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": [
+                "Geen cloudgebruik (on-premise)",
+                "SaaS (Software as a Service)",
+                "IaaS (Infrastructure as a Service)",
+                "PaaS (Platform as a Service)",
+                "Hybride cloud",
+                "Nog niet bepaald"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ps_b",
+      "title": "Deel B: Gegevensverwerking",
+      "part": "B",
+      "subsections": [
+        {
+          "id": "ps_b1",
+          "title": "B.1 Typen persoonsgegevens",
+          "description": "Geef aan welke typen persoonsgegevens worden verwerkt. Dit kan worden hergebruikt in paragraaf 12 van het Model DPIA Rijksdienst.",
+          "questions": [
+            {
+              "id": "ps_b.typen_persoonsgegevens",
+              "text": "Welke typen persoonsgegevens worden mogelijk verwerkt?",
+              "guidance": "Selecteer alle van toepassing zijnde categorieën.",
+              "type": "checkbox",
+              "importance": "mandatory",
+              "options": [
+                "Naam en contactgegevens",
+                "Demografische gegevens (geslacht, leeftijd, woonplaats)",
+                "Content (documenten, ingevulde velden in applicaties)",
+                "Apparaat- en internetgegevens (IP-adres, MAC-adres, locatiegegevens)",
+                "Logging (audit trail en/of applicatielogging)",
+                "Diagnostische gegevens of telemetrie",
+                "Helpdeskgegevens",
+                "Webformulieren en cookies",
+                "Overige"
+              ]
+            },
+            {
+              "id": "ps_b.bijzondere_persoonsgegevens",
+              "text": "Worden er ook bijzondere persoonsgegevens verwerkt (artikel 9 AVG)?",
+              "guidance": "Selecteer alle van toepassing zijnde categorieën bijzondere persoonsgegevens.",
+              "type": "checkbox",
+              "importance": "mandatory",
+              "options": [
+                "Geen bijzondere persoonsgegevens",
+                "Ras of etnische afkomst",
+                "Politieke opvattingen",
+                "Religieuze of levensbeschouwelijke overtuiging",
+                "Vakbondslidmaatschap",
+                "Gezondheidsgegevens",
+                "Genetische gegevens",
+                "Biometrische gegevens",
+                "Gegevens over seksueel gedrag of seksuele gerichtheid",
+                "Strafrechtelijke persoonsgegevens"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ps_c",
+      "title": "Deel C: Risicofactoren (AP/EDPB-criteria)",
+      "part": "C",
+      "subsections": [
+        {
+          "id": "ps_c1",
+          "title": "C.1 Risicoindicatoren",
+          "description": "Beoordeel of de volgende risicofactoren van toepassing zijn. Op basis van de antwoorden wordt bepaald of een volledige DPIA verplicht is.",
+          "questions": [
+            {
+              "id": "ps_c.evaluatie_scoring",
+              "text": "Is er sprake van evaluatie of scoring van personen op basis van persoonskenmerken?",
+              "guidance": "Bijv. het vaststellen van een score op basis van kenmerken of de financiële situatie van personen.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Mogelijk / nader te bepalen"]
+            },
+            {
+              "id": "ps_c.geautomatiseerde_besluitvorming",
+              "text": "Is er sprake van geautomatiseerde besluitvorming met rechtsgevolg of aanmerkelijke impact?",
+              "guidance": "Besluitvorming zonder menselijke tussenkomst met rechtsgevolg of anderszins aanmerkelijke impact op de rechten en vrijheden van betrokkenen.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Mogelijk / nader te bepalen"]
+            },
+            {
+              "id": "ps_c.monitoring",
+              "text": "Is er sprake van stelselmatige en grootschalige monitoring van betrokkenen?",
+              "guidance": "Verwerking voor het observeren, monitoren of controleren van betrokkenen, inclusief monitoring van openbaar toegankelijke ruimten.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Mogelijk / nader te bepalen"]
+            },
+            {
+              "id": "ps_c.bijzondere_gegevens",
+              "text": "Is er sprake van grootschalige verwerking van bijzondere persoonsgegevens?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Mogelijk / nader te bepalen"]
+            },
+            {
+              "id": "ps_c.koppelen_datasets",
+              "text": "Is er sprake van het koppelen of combineren van datasets uit verschillende bronnen of verwerkingen?",
+              "guidance": "Bijv. datasets van twee of meer verwerkingen voor verschillende doeleinden of door verschillende verwerkingsverantwoordelijken.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Mogelijk / nader te bepalen"]
+            },
+            {
+              "id": "ps_c.kwetsbare_groepen",
+              "text": "Betreft de verwerking kwetsbare groepen of personen?",
+              "guidance": "Bijv. kinderen, ouderen, psychiatrische patiënten, asielzoekers, of andere groepen die verminderd in staat zijn om toestemming te geven.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Mogelijk / nader te bepalen"]
+            },
+            {
+              "id": "ps_c.nieuwe_technologieen",
+              "text": "Wordt er gebruik gemaakt van nieuwe technologieën of een combinatie van technologieën die tot nieuwe verwerkingen leidt?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Mogelijk / nader te bepalen"]
+            },
+            {
+              "id": "ps_c.basisregistraties",
+              "text": "Maakt de verwerking gebruik van een basisregistratie met persoonsgegevens?",
+              "guidance": "Bijv. BRP, Handelsregister, BAG, BRK, BRV, BRI, WOZ, BGT, BRO.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee", "Niet van toepassing"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ps_d",
+      "title": "Deel D: Algoritme en AI",
+      "part": "D",
+      "subsections": [
+        {
+          "id": "ps_d1",
+          "title": "D.1 Algoritmegebruik",
+          "description": "Beoordeel of er algoritmen of AI-systemen worden ingezet en wat de impact hiervan is.",
+          "questions": [
+            {
+              "id": "ps_d.algoritme_gebruik",
+              "text": "Wordt er gebruik gemaakt van een algoritme?",
+              "guidance": "Dit kan worden hergebruikt in paragraaf 4 van het Model DPIA Rijksdienst.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": ["Ja", "Nee"]
+            },
+            {
+              "id": "ps_d.algoritme_beschrijving",
+              "text": "Beschrijf het algoritme en de rol ervan in de verwerking",
+              "guidance": "Speelt het algoritme een belangrijke rol? Essentieel is als de uitkomsten noodzakelijk zijn voor het goed werken van het proces.",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "ps_d.ai_systeem",
+              "text": "Kwalificeert het algoritme als een AI-systeem (artikel 3 lid 1 AI-verordening)?",
+              "guidance": "Een AI-systeem is een machinaal systeem dat is ontworpen om met niveaus van autonomie te werken en dat op basis van invoer prognoses, aanbevelingen of beslissingen genereert.",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Ja", "Nee", "Onduidelijk / nader te beoordelen"]
+            },
+            {
+              "id": "ps_d.verboden_ai",
+              "text": "Is er mogelijk sprake van gebruik van een verboden AI-systeem (Hoofdstuk II AI-verordening)?",
+              "guidance": "Denk aan subliminale technieken, misbruik van kwetsbaarheden, sociale kredietwaardigheidsscores, predictive policing, gezichtsherkenningsdatabases, emotiedetectie op werkplek.",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Nee", "Mogelijk — nader onderzoek nodig", "Ja — onmiddellijk stoppen"]
+            }
+          ]
+        },
+        {
+          "id": "ps_d2",
+          "title": "D.2 Conclusie",
+          "description": "Bepaal op basis van de voorgaande antwoorden of een volledige DPIA verplicht is.",
+          "questions": [
+            {
+              "id": "ps_d.conclusie_dpia",
+              "text": "Conclusie: is een volledige DPIA noodzakelijk?",
+              "guidance": "Bij twee of meer risicofactoren uit deel C is een DPIA verplicht. Bij één factor overleggen met de Functionaris Gegevensbescherming (FG).",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": [
+                "Ja — DPIA is verplicht",
+                "Nee — geen DPIA vereist",
+                "Overleg met FG vereist"
+              ]
+            },
+            {
+              "id": "ps_d.conclusie_toelichting",
+              "text": "Toelichting bij de conclusie",
+              "guidance": "Licht de conclusie toe op basis van de ingevulde risicofactoren.",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -69,6 +69,13 @@ export interface NavStepSpecialView {
 
 export type NavStep = NavStepSubsections | NavStepSpecialView
 
+export interface FormHomeContent {
+  notice: string
+  description: string
+  steps: string[]
+  buttonLabel: string
+}
+
 export interface FormMeta {
   homeComponent: string
   exportLabel: string
@@ -76,6 +83,7 @@ export interface FormMeta {
   footerLabel: string
   filename: string
   systemNamePlaceholder?: string
+  homeContent?: FormHomeContent
 }
 
 export interface FormFeatures {
@@ -103,8 +111,10 @@ export interface FormConfig {
 }
 
 export interface CrossFormMapping {
-  dpiaQuestionId: string
-  aiiaQuestionIds: string[]
+  targetFormId: string
+  targetQuestionId: string
+  sourceFormId: string
+  sourceQuestionIds: string[]
   synthesisHint: string
 }
 

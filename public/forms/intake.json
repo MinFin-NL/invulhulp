@@ -1,0 +1,198 @@
+{
+  "id": "intake",
+  "version": "1.0",
+  "title": "Intakeformulier nieuwe IV-verzoeken",
+  "meta": {
+    "homeComponent": "HomePage",
+    "exportLabel": "Intakeformulier",
+    "docTitle": "Intakeformulier nieuwe IV-verzoeken",
+    "footerLabel": "Intakeformulier – MinFin",
+    "filename": "Intakeformulier.pdf",
+    "systemNamePlaceholder": "Bijv. Klantportaal medewerkers v1",
+    "homeContent": {
+      "notice": "Dit is een digitale hulptool bij het invullen van het intakeformulier voor nieuwe IV-verzoeken. Stem het formulier af met de vertegenwoordiger van uw organisatieonderdeel in de portfolioboard voordat u het indient.",
+      "description": "Het intakeformulier wordt gebruikt om nieuwe IV-verzoeken aan te melden voor beoordeling door het intakeboard. Op basis van dit formulier wordt bepaald of het verzoek wordt toegelaten tot het reguliere dienstverlening-, project- of innovatieportfolioproces.",
+      "steps": [
+        "Gegevens opdrachtgever en contactpersoon",
+        "Details van het IV-verzoek: omschrijving, noodzaak en doelgroep",
+        "Typering van de aanvraag",
+        "Planning en resources: urgentie, kosten en budget"
+      ],
+      "buttonLabel": "Starten met het intakeformulier"
+    }
+  },
+  "features": {
+    "riskClassification": false,
+    "decisionGate": false,
+    "conditionalPartB": false
+  },
+  "navigation": [
+    { "type": "subsections", "sectionId": "intake_a" },
+    { "type": "subsections", "sectionId": "intake_b" },
+    { "type": "subsections", "sectionId": "intake_c" },
+    { "type": "subsections", "sectionId": "intake_d" },
+    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+  ],
+  "sections": [
+    {
+      "id": "intake_a",
+      "title": "Deel 1: Gegevens opdrachtgever en contactpersoon",
+      "part": "A",
+      "subsections": [
+        {
+          "id": "intake_a1",
+          "title": "1. Contactgegevens",
+          "description": "Vul de contactgegevens in van de opdrachtgever en het aanspreekpunt voor dit IV-verzoek.",
+          "questions": [
+            {
+              "id": "intake_a.naam_opdrachtgever",
+              "text": "Naam opdrachtgever",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "intake_a.directie_afdeling",
+              "text": "Directie / afdeling(en)",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "intake_a.contactpersoon",
+              "text": "Naam contactpersoon",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "intake_a.email",
+              "text": "E-mailadres contactpersoon",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "intake_a.telefoonnummer",
+              "text": "Telefoonnummer contactpersoon",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intake_b",
+      "title": "Deel 2: Details aanvraag",
+      "part": "B",
+      "subsections": [
+        {
+          "id": "intake_b1",
+          "title": "2. Inhoud van het IV-verzoek",
+          "description": "Beschrijf wat er wordt aangevraagd, waarom dit noodzakelijk is en voor wie de oplossing bestemd is.",
+          "questions": [
+            {
+              "id": "intake_b.omschrijving",
+              "text": "Omschrijving van het IV-verzoek (doelstelling / noodzaak / probleemstelling)",
+              "guidance": "Beschrijf wat het verzoek inhoudt, welk probleem er wordt opgelost en wat het beoogde resultaat is.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "intake_b.alternatieven",
+              "text": "Aanvullende informatie, mogelijke oplossingen en overwogen alternatieven",
+              "guidance": "Zijn er al mogelijke oplossingsrichtingen in beeld? Welke alternatieven zijn overwogen?",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "intake_b.noodzaak",
+              "text": "Nut / noodzaak / organisatiedoelstelling (o.a. wettelijk kader)",
+              "guidance": "Aan welke organisatiedoelstelling draagt dit verzoek bij? Is er een wettelijke verplichting of politieke toezegging van toepassing?",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "intake_b.doelgroep",
+              "text": "Doelgroep en omvang toekomstige gebruikers",
+              "guidance": "Wie gaat de oplossing gebruiken en hoeveel gebruikers worden er verwacht?",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intake_c",
+      "title": "Deel 3: Typering aanvraag",
+      "part": "C",
+      "subsections": [
+        {
+          "id": "intake_c1",
+          "title": "3. Classificatie",
+          "description": "Geef aan hoe het IV-verzoek getypeerd wordt.",
+          "questions": [
+            {
+              "id": "intake_c.classificatie",
+              "text": "Classificatie van de aanvraag",
+              "guidance": "Valt dit verzoek onder de reguliere dienstverlening, het projectportfolioproces of het innovatieportfolioproces?",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": [
+                "Regulier dienstverlening",
+                "Project portfolioproces",
+                "Innovatie portfolioproces"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intake_d",
+      "title": "Deel 4: Planning en resources",
+      "part": "D",
+      "subsections": [
+        {
+          "id": "intake_d1",
+          "title": "4. Planning, resources en budget",
+          "description": "Geef inzicht in de planning, benodigde resources en beschikbaar budget.",
+          "questions": [
+            {
+              "id": "intake_d.afhankelijkheden",
+              "text": "Is er een relatie en/of afhankelijkheid met andere activiteiten of projecten?",
+              "guidance": "Beschrijf de afhankelijkheden met andere lopende of geplande projecten.",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "intake_d.urgentie",
+              "text": "Urgentie: is er een noodzaak en een moment in de tijd waarop de oplossing gereed moet zijn?",
+              "guidance": "Licht toe waarom er een bepaalde deadline is of waarom het verzoek urgent is.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "intake_d.resources",
+              "text": "Welke resources zijn naar verwachting nodig voor de vervolgstappen? Geef indien mogelijk een globale raming van de kosten.",
+              "guidance": "Denk aan personele inzet, licenties, hardware en externe inhuur. Geef ook aan hoe de kosten worden gefinancierd.",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "intake_d.budget",
+              "text": "Beschikbaarheid van budget",
+              "guidance": "Is er decentraal budget beschikbaar bij de opdrachtgever, of wordt een beroep gedaan op centrale budgetten?",
+              "type": "radio",
+              "importance": "optional",
+              "options": [
+                "Decentraal budget bij opdrachtgever",
+                "Centraal budget bij CDIO",
+                "Innovatie- of portfolioboard",
+                "Nog niet bepaald"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

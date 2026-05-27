@@ -8,7 +8,18 @@
     "docTitle": "Data Protection Impact Assessment",
     "footerLabel": "DPIA – MinFin",
     "filename": "DPIA-IenW.pdf",
-    "systemNamePlaceholder": "Bijv. Klantportaal persoonsgegevens v1"
+    "systemNamePlaceholder": "Bijv. Klantportaal persoonsgegevens v1",
+    "homeContent": {
+      "notice": "Dit is een digitale hulptool bij het uitvoeren van een Data Protection Impact Assessment (DPIA). Het invullen vervangt niet het advies van juridische of privacy-experts. Raadpleeg bij twijfel altijd de Functionaris voor de Gegevensbescherming (FG) of een privacy-jurist.",
+      "description": "Een DPIA (gegevensbeschermingseffectbeoordeling) is verplicht bij verwerkingen die waarschijnlijk een hoog risico opleveren voor de rechten en vrijheden van betrokkenen. Dit instrument begeleidt u stap voor stap door het proces zoals voorgeschreven door de AVG (artikel 35).",
+      "steps": [
+        "Deel A – Beschrijving van de verwerking en de verwerkingsdoeleinden",
+        "Deel B – Beoordeling rechtmatigheid (rechtsgrond, bijzondere gegevens, rechten betrokkenen)",
+        "Deel C – Risico's voor betrokkenen",
+        "Deel D – Maatregelen om risico's te beheersen"
+      ],
+      "buttonLabel": "Starten met de DPIA"
+    }
   },
   "features": {
     "riskClassification": false,

@@ -12,11 +12,19 @@ export async function loadForm(id: string): Promise<FormConfig> {
   return config
 }
 
-export async function loadAvailableForms(): Promise<string[]> {
+export interface FormIndexEntry {
+  id: string
+  title: string
+  track?: string
+  order?: number
+  shortDescription?: string
+}
+
+export async function loadAvailableForms(): Promise<FormIndexEntry[]> {
   const res = await fetch('/forms/index.json')
   if (!res.ok) throw new Error('Could not load form index')
-  const raw = await res.json() as { forms: { id: string }[] }
-  return raw.forms.map((f) => f.id)
+  const raw = await res.json() as { forms: FormIndexEntry[] }
+  return raw.forms.map((f) => ({ id: f.id, title: f.title ?? f.id, track: f.track, order: f.order, shortDescription: f.shortDescription }))
 }
 
 export async function loadCrossFormMappings(): Promise<CrossFormMapping[]> {
