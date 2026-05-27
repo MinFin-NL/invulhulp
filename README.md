@@ -9,6 +9,23 @@ Currently supported forms:
 
 The tool also supports **cross-form mapping**: relevant AIIA answers are used to pre-suggest answers for related DPIA questions, reducing duplicate work.
 
+## Gerelateerde tools
+
+Het Ministerie van Binnenlandse Zaken en Koninkrijksrelaties (MinBZK) heeft een vergelijkbare tool ontwikkeld: [par-dpia-form](https://github.com/MinBZK/par-dpia-form). Beide tools richten zich op het digitaal invullen van DPIA-formulieren, maar ze zijn gebouwd voor andere contexten en hebben een ander uitgangspunt.
+
+| | **par-dpia-form** (MinBZK) | **findocs** (MinFin) |
+|---|---|---|
+| Formulieren | DPIA, Pre-scan DPIA | AIIA, DPIA, Pre-scan DPIA, en meer |
+| Installatie | Geen — standalone HTML-bestand | Node.js + Python + Ollama vereist |
+| Hosting | Draait puur in de browser (GitHub Pages) | Vereist een lokale of gehoste server |
+| AI-ondersteuning | Geen | Tekstverbetering en kruisformulier-synthese via LLM |
+| Opslaan | Handmatig als JSON-bestand exporteren/importeren | Automatisch in de browser (Pinia) |
+| Kruisformulier-koppeling | Niet aanwezig | AIIA-antwoorden pre-suggereren DPIA-antwoorden |
+| Rijke tekstbewerking | Nee | Ja, via Tiptap |
+| Formulierdefinities | YAML-bestanden | JSON-bestanden |
+
+**par-dpia-form** is ideaal als je een DPIA wil invullen zonder enige installatie of infrastructuur: open de HTML-pagina, vul in, exporteer naar PDF. **findocs** is geschikter wanneer je meerdere compliance-instrumenten in samenhang wil doorlopen (bijv. eerst een AIIA, daarna een DPIA waarbij relevante antwoorden al worden overgenomen) en daarbij AI-hulp wil inzetten voor het formuleren van antwoorden.
+
 ## Architecture
 
 | Layer | Technology |
