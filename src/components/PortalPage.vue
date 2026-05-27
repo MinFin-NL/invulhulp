@@ -4,7 +4,7 @@
 
       <!-- Hero -->
       <div class="portal-hero">
-        <h1 class="rvo-heading rvo-heading--2xl portal-title">Invulhulp</h1>
+        <h1 class="rvo-heading rvo-heading--2xl portal-title">FinDocs</h1>
         <p class="rvo-text rvo-text--lg portal-subtitle">
           Digitale instrumenten voor IV-projecten, privacy en AI-impact assessments — Ministerie van Financiën
         </p>
