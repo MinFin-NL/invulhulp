@@ -1,5 +1,7 @@
 # findocs – AI-assisted Government Compliance Forms
 
+> ⚠️ **Proof of Concept** — This project is an early-stage proof of concept and is not production-ready. We are very much looking for direction, feedback, and collaboration on where to take it next. Please reach out or open an issue if you have ideas.
+
 A web application that helps Dutch government employees fill in AI-related compliance assessments. It guides users through structured forms and uses a locally running LLM to suggest text improvements and synthesize answers across forms.
 
 Currently supported forms:
