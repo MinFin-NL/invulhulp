@@ -93,6 +93,13 @@ stages:
                 ACR_PASS=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
 
                 if az containerapp show --name "$BACKEND_APP" --resource-group "$RESOURCE_GROUP" &>/dev/null; then
+                  az containerapp secret set \
+                    --name "$BACKEND_APP" \
+                    --resource-group "$RESOURCE_GROUP" \
+                    --secrets \
+                      "openai-embedding-endpoint=$(AZURE_OPENAI_EMBEDDING_ENDPOINT)" \
+                      "openai-embedding-api-key=$(AZURE_OPENAI_EMBEDDING_API_KEY)"
+
                   az containerapp update \
                     --name "$BACKEND_APP" \
                     --resource-group "$RESOURCE_GROUP" \
@@ -103,7 +110,11 @@ stages:
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
                       "AZURE_OPENAI_DEPLOYMENT=gpt-5.3-chat" \
                       "AZURE_OPENAI_API_VERSION=2025-04-01-preview" \
-                      "AZURE_OPENAI_API_KEY=secretref:openai-api-key"
+                      "AZURE_OPENAI_API_KEY=secretref:openai-api-key" \
+                      "AZURE_OPENAI_EMBEDDING_ENDPOINT=secretref:openai-embedding-endpoint" \
+                      "AZURE_OPENAI_EMBEDDING_API_KEY=secretref:openai-embedding-api-key" \
+                      "AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3-large" \
+                      "AZURE_OPENAI_EMBEDDING_API_VERSION=2024-02-01"
                 else
                   az containerapp create \
                     --name "$BACKEND_APP" \
@@ -121,7 +132,15 @@ stages:
                       "AZURE_OPENAI_DEPLOYMENT=gpt-5.3-chat" \
                       "AZURE_OPENAI_API_VERSION=2025-04-01-preview" \
                       "AZURE_OPENAI_API_KEY=secretref:openai-api-key" \
-                    --secrets "openai-endpoint=" "openai-api-key=" \
+                      "AZURE_OPENAI_EMBEDDING_ENDPOINT=secretref:openai-embedding-endpoint" \
+                      "AZURE_OPENAI_EMBEDDING_API_KEY=secretref:openai-embedding-api-key" \
+                      "AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3-large" \
+                      "AZURE_OPENAI_EMBEDDING_API_VERSION=2024-02-01" \
+                    --secrets \
+                      "openai-endpoint=" \
+                      "openai-api-key=" \
+                      "openai-embedding-endpoint=$(AZURE_OPENAI_EMBEDDING_ENDPOINT)" \
+                      "openai-embedding-api-key=$(AZURE_OPENAI_EMBEDDING_API_KEY)" \
                     --cpu 0.5 --memory 1.0Gi \
                     --min-replicas 1 --max-replicas 3
                 fi

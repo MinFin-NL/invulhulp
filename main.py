@@ -15,6 +15,13 @@ Environment variables (can be set via .env file):
     AZURE_OPENAI_DEPLOYMENT      — deployment name (default: gpt-5.3-chat)
     AZURE_OPENAI_API_VERSION     — API version (default: 2025-04-01-preview)
 
+    # Azure OpenAI embeddings — optional separate resource for embeddings.
+    # If AZURE_OPENAI_EMBEDDING_ENDPOINT is unset, the chat endpoint/key/version above are reused.
+    AZURE_OPENAI_EMBEDDING_ENDPOINT      — e.g. https://oai-embedding-inno-d.openai.azure.com/
+    AZURE_OPENAI_EMBEDDING_API_KEY       — API key for the embedding resource
+    AZURE_OPENAI_EMBEDDING_API_VERSION   — API version (falls back to AZURE_OPENAI_API_VERSION)
+    AZURE_OPENAI_EMBEDDING_DEPLOYMENT    — embedding deployment name (read by rag.py)
+
     # Shared
     CORS_ORIGINS      — comma-separated allowed origins (default: http://localhost:5173)
 """
@@ -49,6 +56,21 @@ if USE_AZURE:
         api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2025-04-01-preview"),
     )
     AZURE_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-5.3-chat")
+
+    # Embeddings may live on a different Azure OpenAI resource with its own endpoint/key.
+    # If AZURE_OPENAI_EMBEDDING_ENDPOINT is set, use a dedicated client; otherwise reuse the chat client.
+    AZURE_EMBEDDING_ENDPOINT = os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOINT", "")
+    if AZURE_EMBEDDING_ENDPOINT:
+        _azure_embedding_client = AsyncAzureOpenAI(
+            azure_endpoint=AZURE_EMBEDDING_ENDPOINT,
+            api_key=os.environ.get("AZURE_OPENAI_EMBEDDING_API_KEY", ""),
+            api_version=os.environ.get(
+                "AZURE_OPENAI_EMBEDDING_API_VERSION",
+                os.environ.get("AZURE_OPENAI_API_VERSION", "2025-04-01-preview"),
+            ),
+        )
+    else:
+        _azure_embedding_client = _azure_client
 else:
     import ollama
 
@@ -256,7 +278,7 @@ class RagExtractRequest(BaseModel):
 
 def _embed_clients() -> dict:
     if USE_AZURE:
-        return {"azure_client": _azure_client, "ollama_client": None}
+        return {"azure_client": _azure_embedding_client, "ollama_client": None}
     return {"azure_client": None, "ollama_client": _ollama_client}
 
 
