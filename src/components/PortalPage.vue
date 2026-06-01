@@ -66,6 +66,14 @@
             <span v-if="store.documents.length > 0" class="docs-count-badge" aria-live="polite">
               {{ store.documents.length }} {{ store.documents.length === 1 ? 'document' : 'documenten' }} beschikbaar
             </span>
+            <button
+              v-if="hasAnyOntology"
+              type="button"
+              class="docs-graph-btn"
+              @click="showGraph = !showGraph"
+            >
+              {{ showGraph ? 'Verberg entiteitengrafiek' : 'Toon entiteitengrafiek' }}
+            </button>
           </div>
           <p class="rvo-text docs-desc">
             Upload achtergronddocumenten (notulen, brainstorms, agenda's) in .txt of .md formaat.
@@ -116,6 +124,12 @@
             </div>
           </div>
         </div>
+
+        <EntityGraph
+          v-if="showGraph"
+          :documents="store.documents"
+          @close="showGraph = false"
+        />
 
         <ul v-if="store.documents.length > 0" class="docs-list">
           <li
@@ -185,6 +199,7 @@ import { ref, computed, onMounted } from 'vue'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import DocumentOntology from './DocumentOntology.vue'
+import EntityGraph from './EntityGraph.vue'
 
 defineEmits<{ open: [id: string] }>()
 
@@ -196,6 +211,8 @@ const successMessage = ref('')
 const isUploading = ref(false)
 const uploadingLabel = ref('')
 const recentlyAddedIds = ref<Set<string>>(new Set())
+const showGraph = ref(false)
+const hasAnyOntology = computed(() => store.documents.some(d => !!d.ontology))
 
 const MAX_DOC_BYTES = 200_000
 
@@ -569,6 +586,19 @@ const trackGroups = computed(() => {
   font-size: 0.75rem;
   font-weight: 600;
 }
+
+.docs-graph-btn {
+  margin-left: auto;
+  background: white;
+  color: #154273;
+  border: 1px solid #154273;
+  border-radius: 4px;
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.docs-graph-btn:hover { background: #154273; color: white; }
 
 .docs-desc {
   color: #666;
