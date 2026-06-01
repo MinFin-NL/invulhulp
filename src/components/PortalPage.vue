@@ -319,9 +319,9 @@ const TRACK_META: Record<string, { label: string; description: string; order: nu
     description: 'Gebruik deze formulieren in volgorde om een IV-project voor te bereiden, in te dienen bij het portfolioboard en architectureel te onderbouwen.',
     order: 1,
   },
-  privacy: {
-    label: 'Privacyspoor',
-    description: 'Doorloop deze stappen om te bepalen of een volledige DPIA verplicht is voor de verwerking van persoonsgegevens.',
+  compliance: {
+    label: 'Compliancespoor',
+    description: 'Bepaal snel het BIO-beveiligingsniveau en eventuele aanvullende compliance-maatregelen.',
     order: 2,
   },
   assessment: {

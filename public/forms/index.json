@@ -36,7 +36,7 @@
       "id": "quickscan",
       "file": "quickscan.json",
       "title": "Quick scan BIO",
-      "track": "privacy",
+      "track": "compliance",
       "order": 1,
       "shortDescription": "Bepaal snel het BIO-beveiligingsniveau (BBN) en of een DPIA of aanvullende maatregelen nodig zijn."
     },
@@ -44,8 +44,8 @@
       "id": "prescandpia",
       "file": "prescandpia.json",
       "title": "Prescan DPIA",
-      "track": "privacy",
-      "order": 2,
+      "track": "assessment",
+      "order": 1,
       "shortDescription": "Scan op basis van AP/EDPB-criteria of een volledige DPIA verplicht is."
     },
     {
@@ -53,7 +53,7 @@
       "file": "dpia.json",
       "title": "DPIA",
       "track": "assessment",
-      "order": 1,
+      "order": 2,
       "shortDescription": "Voer een volledige Data Protection Impact Assessment uit conform het Model DPIA Rijksdienst."
     },
     {
@@ -61,7 +61,7 @@
       "file": "aiia.json",
       "title": "AI Impact Assessment",
       "track": "assessment",
-      "order": 2,
+      "order": 3,
       "shortDescription": "Beoordeel de impact van een AI-systeem op grondrechten, proportionaliteit en beveiliging."
     }
   ]
