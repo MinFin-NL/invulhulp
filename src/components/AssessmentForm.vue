@@ -1,5 +1,5 @@
 <template>
-  <div style="min-height: 100vh; display: flex; flex-direction: column;">
+  <div style="height: 100vh; display: flex; flex-direction: column; overflow: hidden;">
     <AppHeader />
 
     <!-- Portal landing page (no form selected) -->
