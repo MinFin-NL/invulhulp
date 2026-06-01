@@ -10,6 +10,54 @@
         </p>
       </div>
 
+      <!-- Dossier selector -->
+      <div class="dossier-section">
+        <div class="dossier-header">
+          <h2 class="rvo-heading rvo-heading--lg dossier-title">Dossier</h2>
+          <p class="rvo-text dossier-desc">
+            Een dossier groepeert brondocumenten en formulierantwoorden. Wissel tussen dossiers om met een andere verzameling te werken.
+          </p>
+        </div>
+        <div class="dossier-controls">
+          <div class="dossier-tabs" role="tablist">
+            <button
+              v-for="d in store.dossierList"
+              :key="d.id"
+              type="button"
+              role="tab"
+              :aria-selected="d.id === store.activeDossierId"
+              class="dossier-tab"
+              :class="{ 'dossier-tab--active': d.id === store.activeDossierId }"
+              @click="store.switchDossier(d.id)"
+            >
+              <span class="dossier-tab-name">{{ d.name }}</span>
+              <span class="dossier-tab-meta">{{ d.documents.length }} doc</span>
+            </button>
+          </div>
+          <div class="dossier-actions">
+            <button type="button" class="dossier-btn" @click="onCreateDossier">
+              + Nieuw dossier
+            </button>
+            <button
+              v-if="store.activeDossierId"
+              type="button"
+              class="dossier-btn"
+              @click="onRenameDossier"
+            >
+              Hernoemen
+            </button>
+            <button
+              v-if="store.dossierList.length > 1"
+              type="button"
+              class="dossier-btn-danger"
+              @click="onDeleteDossier"
+            >
+              Verwijderen
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Brondocumenten upload -->
       <div class="docs-section">
         <div class="docs-header">
@@ -152,8 +200,35 @@ const recentlyAddedIds = ref<Set<string>>(new Set())
 const MAX_DOC_BYTES = 200_000
 
 onMounted(async () => {
+  store.ensureDossier()
   forms.value = await loadAvailableForms()
 })
+
+function onCreateDossier() {
+  const name = window.prompt('Naam voor het nieuwe dossier:', `Dossier ${store.dossierList.length + 1}`)
+  if (name === null) return
+  store.createDossier(name)
+}
+
+function onRenameDossier() {
+  if (!store.activeDossierId) return
+  const current = store.dossiers[store.activeDossierId]
+  if (!current) return
+  const name = window.prompt('Nieuwe naam:', current.name)
+  if (name === null) return
+  store.renameDossier(current.id, name)
+}
+
+function onDeleteDossier() {
+  if (!store.activeDossierId) return
+  const current = store.dossiers[store.activeDossierId]
+  if (!current) return
+  const ok = window.confirm(
+    `Dossier "${current.name}" verwijderen? Alle formulierantwoorden en brondocumenten in dit dossier gaan verloren.`,
+  )
+  if (!ok) return
+  store.deleteDossier(current.id)
+}
 
 async function onFilesSelected(e: Event) {
   const target = e.target as HTMLInputElement
@@ -351,6 +426,113 @@ const trackGroups = computed(() => {
   font-size: 0.85rem;
   padding: 6px 14px;
   align-self: flex-start;
+}
+
+.dossier-section {
+  margin-bottom: 24px;
+  padding: 20px 24px;
+  background: white;
+  border: 1px solid #d0dce8;
+  border-radius: 6px;
+}
+
+.dossier-header {
+  margin-bottom: 14px;
+}
+
+.dossier-title {
+  color: #154273;
+  margin: 0 0 4px;
+}
+
+.dossier-desc {
+  color: #666;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.dossier-controls {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.dossier-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dossier-tab {
+  background: #f4f7fb;
+  border: 1px solid #d0dce8;
+  border-radius: 999px;
+  padding: 6px 14px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #1a2a3a;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dossier-tab:hover {
+  border-color: #9ab0cc;
+}
+
+.dossier-tab--active {
+  background: #154273;
+  border-color: #154273;
+  color: white;
+}
+
+.dossier-tab-name {
+  font-weight: 600;
+}
+
+.dossier-tab-meta {
+  font-size: 0.72rem;
+  opacity: 0.75;
+}
+
+.dossier-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.dossier-btn {
+  font-size: 0.8rem;
+  padding: 6px 12px;
+  background: #154273;
+  color: white;
+  border: 1px solid #154273;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.dossier-btn:hover {
+  background: #1f5a99;
+  border-color: #1f5a99;
+}
+
+.dossier-btn-danger {
+  background: none;
+  border: none;
+  color: #c0392b;
+  cursor: pointer;
+  font-size: 0.8rem;
+  text-decoration: underline;
+  padding: 6px 8px;
+}
+
+.dossier-btn-danger:hover {
+  color: #8a2a1f;
 }
 
 .docs-section {
