@@ -3,23 +3,25 @@
     <div class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm">
 
       <!-- Hero -->
-      <div class="portal-hero">
-        <h1 class="rvo-heading rvo-heading--2xl portal-title">FinDocs</h1>
-        <p class="rvo-text rvo-text--lg portal-subtitle">
-          Digitale instrumenten voor IV-projecten, privacy en AI-impact assessments — Ministerie van Financiën
-        </p>
-      </div>
+      <section class="rvo-hero rvo-hero--lichtblauw portal-hero">
+        <div class="rvo-hero__content">
+          <h1 class="rvo-heading rvo-heading--2xl rvo-hero__title">FinDocs</h1>
+          <p class="rvo-text rvo-text--lg rvo-hero__subtitle">
+            Digitale instrumenten voor IV-projecten, privacy en AI-impact assessments — Ministerie van Financiën
+          </p>
+        </div>
+      </section>
 
       <!-- Dossier selector -->
-      <div class="dossier-section">
-        <div class="dossier-header">
-          <h2 class="rvo-heading rvo-heading--lg dossier-title">Dossier</h2>
-          <p class="rvo-text dossier-desc">
+      <section class="portal-card" aria-labelledby="dossier-title">
+        <div class="portal-card__header">
+          <h2 id="dossier-title" class="rvo-heading rvo-heading--lg portal-card__title">Dossier</h2>
+          <p class="rvo-text portal-card__desc">
             Een dossier groepeert brondocumenten en formulierantwoorden. Wissel tussen dossiers om met een andere verzameling te werken.
           </p>
         </div>
-        <div class="dossier-controls">
-          <div class="dossier-tabs" role="tablist">
+        <div class="portal-card__controls">
+          <div class="dossier-tabs" role="tablist" aria-label="Dossiers">
             <button
               v-for="d in store.dossierList"
               :key="d.id"
@@ -30,52 +32,58 @@
               :class="{ 'dossier-tab--active': d.id === store.activeDossierId }"
               @click="store.switchDossier(d.id)"
             >
-              <span class="dossier-tab-name">{{ d.name }}</span>
-              <span class="dossier-tab-meta">{{ d.documents.length }} doc</span>
+              <span class="dossier-tab__name">{{ d.name }}</span>
+              <span class="dossier-tab__meta">{{ d.documents.length }} doc</span>
             </button>
           </div>
           <div class="dossier-actions">
-            <button type="button" class="dossier-btn" @click="onCreateDossier">
+            <button
+              type="button"
+              class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+              @click="openCreateDialog"
+            >
               + Nieuw dossier
             </button>
             <button
               v-if="store.activeDossierId"
               type="button"
-              class="dossier-btn"
-              @click="onRenameDossier"
+              class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+              @click="openRenameDialog"
             >
               Hernoemen
             </button>
             <button
               v-if="store.dossierList.length > 1"
               type="button"
-              class="dossier-btn-danger"
-              @click="onDeleteDossier"
+              class="rvo-button rvo-button--warning-subtle rvo-button--size-sm"
+              @click="openDeleteDialog"
             >
               Verwijderen
             </button>
           </div>
         </div>
-      </div>
+      </section>
 
       <!-- Brondocumenten upload -->
-      <div class="docs-section">
-        <div class="docs-header">
+      <section class="portal-card" aria-labelledby="docs-title">
+        <div class="portal-card__header">
           <div class="docs-title-row">
-            <h2 class="rvo-heading rvo-heading--lg docs-title">Brondocumenten</h2>
-            <span v-if="store.documents.length > 0" class="docs-count-badge" aria-live="polite">
+            <h2 id="docs-title" class="rvo-heading rvo-heading--lg portal-card__title">Brondocumenten</h2>
+            <span v-if="store.documents.length > 0" class="rvo-tag rvo-tag--info rvo-tag--pill" aria-live="polite">
               {{ store.documents.length }} {{ store.documents.length === 1 ? 'document' : 'documenten' }} beschikbaar
             </span>
             <button
               v-if="hasAnyOntology"
               type="button"
-              class="docs-graph-btn"
+              class="rvo-button rvo-button--secondary rvo-button--size-sm docs-graph-btn"
+              :aria-pressed="showGraph"
+              aria-controls="entity-graph-region"
               @click="showGraph = !showGraph"
             >
               {{ showGraph ? 'Verberg entiteitengrafiek' : 'Toon entiteitengrafiek' }}
             </button>
           </div>
-          <p class="rvo-text docs-desc">
+          <p class="rvo-text portal-card__desc">
             Upload achtergronddocumenten (notulen, brainstorms, agenda's) in .txt, .md, .docx of .xlsx formaat.
             Bij het invullen van een formulier kun je per vraag automatisch een antwoord laten extraheren uit deze documenten.
           </p>
@@ -93,40 +101,36 @@
               accept=".txt,.md,.docx,.xlsx,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               multiple
               :disabled="isUploading"
-              style="display: none;"
+              class="invulhulp-visually-hidden"
               @change="onFilesSelected"
             />
-            <svg v-if="!isUploading" class="docs-upload-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 16V4M12 4l-5 5M12 4l5 5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            <span v-if="!isUploading" aria-hidden="true">↑</span>
             <span v-if="isUploading">Bezig met inlezen…</span>
             <span v-else>Document(en) uploaden</span>
           </label>
-          <span class="docs-upload-hint">Klik op de knop om een of meer .txt / .md / .docx / .xlsx bestanden te kiezen</span>
+          <span class="docs-upload-hint rvo-text rvo-text--sm">
+            Klik op de knop om een of meer .txt / .md / .docx / .xlsx bestanden te kiezen
+          </span>
         </div>
 
-        <!-- Live status alerts (NL Design System) -->
+        <!-- Live status alerts -->
         <div class="docs-alerts" role="status" aria-live="polite">
-          <div v-if="isUploading" class="rvo-alert rvo-alert--info docs-alert">
-            <div class="rvo-alert__content">
-              {{ uploadingLabel }}
-            </div>
+          <div v-if="isUploading" class="rvo-alert rvo-alert--info rvo-alert--padding-sm">
+            <div class="rvo-alert__container">{{ uploadingLabel }}</div>
           </div>
-          <div v-if="successMessage" class="rvo-alert rvo-alert--success docs-alert">
-            <div class="rvo-alert__content">
+          <div v-if="successMessage" class="rvo-alert rvo-alert--success rvo-alert--padding-sm">
+            <div class="rvo-alert__container">
               <strong>Toegevoegd:</strong> {{ successMessage }}
             </div>
           </div>
-          <div v-if="uploadError" class="rvo-alert rvo-alert--error docs-alert">
-            <div class="rvo-alert__content">
-              {{ uploadError }}
-            </div>
+          <div v-if="uploadError" class="rvo-alert rvo-alert--error rvo-alert--padding-sm">
+            <div class="rvo-alert__container">{{ uploadError }}</div>
           </div>
         </div>
 
         <EntityGraph
           v-if="showGraph"
+          id="entity-graph-region"
           :documents="store.documents"
           @close="showGraph = false"
         />
@@ -138,12 +142,12 @@
             class="docs-item"
             :class="{ 'docs-item--new': recentlyAddedIds.has(doc.id) }"
           >
-            <div class="docs-item-row">
-              <div class="docs-item-info">
-                <span class="docs-item-check" aria-hidden="true">✓</span>
-                <div class="docs-item-text">
-                  <span class="docs-item-name">{{ doc.name }}</span>
-                  <span class="docs-item-meta">
+            <div class="docs-item__row">
+              <div class="docs-item__info">
+                <img :src="bevestigingIcon" class="docs-item__check" aria-hidden="true" alt="" />
+                <div class="docs-item__text">
+                  <span class="docs-item__name">{{ doc.name }}</span>
+                  <span class="docs-item__meta rvo-text rvo-text--sm">
                     {{ formatSize(doc.content.length) }}
                     <template v-if="doc.indexing"> · indexeren…</template>
                     <template v-else-if="doc.indexError"> · indexering mislukt</template>
@@ -151,55 +155,88 @@
                   </span>
                 </div>
               </div>
-              <button type="button" class="docs-item-remove" @click="store.removeDocument(doc.id)">
+              <button
+                type="button"
+                class="rvo-link docs-item__remove"
+                @click="store.removeDocument(doc.id)"
+              >
                 Verwijderen
               </button>
             </div>
             <DocumentOntology v-if="!doc.indexing && doc.ontology" :ontology="doc.ontology" />
-            <p v-else-if="doc.indexError" class="docs-item-error">{{ doc.indexError }}</p>
+            <p v-else-if="doc.indexError" class="docs-item__error rvo-text rvo-text--sm">{{ doc.indexError }}</p>
           </li>
         </ul>
-        <p v-else-if="!isUploading" class="docs-empty">Nog geen documenten geüpload.</p>
-      </div>
+        <p v-else-if="!isUploading" class="docs-empty rvo-text rvo-text--sm">Nog geen documenten geüpload.</p>
+      </section>
 
       <!-- Track sections -->
-      <div v-for="group in trackGroups" :key="group.track" class="track-section">
+      <section v-for="group in trackGroups" :key="group.track" class="track-section" :aria-labelledby="`track-${group.track}-title`">
         <div class="track-header">
-          <h2 class="rvo-heading rvo-heading--xl track-title">{{ group.label }}</h2>
+          <h2 :id="`track-${group.track}-title`" class="rvo-heading rvo-heading--xl track-title">{{ group.label }}</h2>
           <p class="rvo-text track-desc">{{ group.description }}</p>
         </div>
 
         <div class="card-row">
           <template v-for="(form, idx) in group.forms" :key="form.id">
-            <div v-if="idx > 0" class="card-connector">
+            <div v-if="idx > 0" class="card-connector" aria-hidden="true">
               {{ group.track === 'assessment' ? '↔' : '→' }}
             </div>
-            <div class="form-card">
-              <div class="card-body">
-                <h3 class="rvo-heading rvo-heading--lg card-title">{{ form.title }}</h3>
-                <p class="rvo-text card-desc">{{ form.shortDescription }}</p>
+            <article class="rvo-card rvo-card--outline rvo-card--padding--md form-card">
+              <div class="form-card__body">
+                <h3 class="rvo-heading rvo-heading--md form-card__title">{{ form.title }}</h3>
+                <p class="rvo-text rvo-text--sm form-card__desc">{{ form.shortDescription }}</p>
               </div>
               <button
-                class="rvo-button rvo-button--primary card-btn"
+                class="rvo-button rvo-button--primary rvo-button--size-sm form-card__btn"
                 @click="$emit('open', form.id)"
               >
                 Openen
               </button>
-            </div>
+            </article>
           </template>
         </div>
-      </div>
+      </section>
 
     </div>
+
+    <ConfirmDialog
+      ref="createDialog"
+      title="Nieuw dossier"
+      message="Geef het dossier een naam."
+      kind="prompt"
+      input-label="Naam"
+      confirm-label="Aanmaken"
+      @confirm="onCreateConfirmed"
+    />
+    <ConfirmDialog
+      ref="renameDialog"
+      title="Dossier hernoemen"
+      kind="prompt"
+      input-label="Nieuwe naam"
+      confirm-label="Opslaan"
+      @confirm="onRenameConfirmed"
+    />
+    <ConfirmDialog
+      ref="deleteDialog"
+      title="Dossier verwijderen"
+      :message="deleteMessage"
+      confirm-label="Verwijderen"
+      cancel-label="Annuleren"
+      variant="warning"
+      @confirm="onDeleteConfirmed"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import bevestigingIcon from '@nl-rvo/assets/icons/status/bevestiging.svg'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import DocumentOntology from './DocumentOntology.vue'
 import EntityGraph from './EntityGraph.vue'
+import ConfirmDialog from './ConfirmDialog.vue'
 
 defineEmits<{ open: [id: string] }>()
 
@@ -214,6 +251,16 @@ const recentlyAddedIds = ref<Set<string>>(new Set())
 const showGraph = ref(false)
 const hasAnyOntology = computed(() => store.documents.some(d => !!d.ontology))
 
+const createDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
+const renameDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
+const deleteDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
+
+const deleteMessage = computed(() => {
+  const current = store.activeDossierId ? store.dossiers[store.activeDossierId] : null
+  if (!current) return ''
+  return `Dossier "${current.name}" verwijderen? Alle formulierantwoorden en brondocumenten in dit dossier gaan verloren.`
+})
+
 const MAX_DOC_BYTES = 200_000
 
 onMounted(async () => {
@@ -221,30 +268,37 @@ onMounted(async () => {
   forms.value = await loadAvailableForms()
 })
 
-function onCreateDossier() {
-  const name = window.prompt('Naam voor het nieuwe dossier:', `Dossier ${store.dossierList.length + 1}`)
-  if (name === null) return
-  store.createDossier(name)
+function openCreateDialog() {
+  createDialog.value?.open()
 }
 
-function onRenameDossier() {
+function openRenameDialog() {
   if (!store.activeDossierId) return
   const current = store.dossiers[store.activeDossierId]
   if (!current) return
-  const name = window.prompt('Nieuwe naam:', current.name)
-  if (name === null) return
-  store.renameDossier(current.id, name)
+  renameDialog.value?.open(current.name)
 }
 
-function onDeleteDossier() {
+function openDeleteDialog() {
   if (!store.activeDossierId) return
-  const current = store.dossiers[store.activeDossierId]
-  if (!current) return
-  const ok = window.confirm(
-    `Dossier "${current.name}" verwijderen? Alle formulierantwoorden en brondocumenten in dit dossier gaan verloren.`,
-  )
-  if (!ok) return
-  store.deleteDossier(current.id)
+  deleteDialog.value?.open()
+}
+
+function onCreateConfirmed(name: string) {
+  const trimmed = name.trim() || `Dossier ${store.dossierList.length + 1}`
+  store.createDossier(trimmed)
+}
+
+function onRenameConfirmed(name: string) {
+  if (!store.activeDossierId) return
+  const trimmed = name.trim()
+  if (!trimmed) return
+  store.renameDossier(store.activeDossierId, trimmed)
+}
+
+function onDeleteConfirmed() {
+  if (!store.activeDossierId) return
+  store.deleteDossier(store.activeDossierId)
 }
 
 async function onFilesSelected(e: Event) {
@@ -272,8 +326,6 @@ async function onFilesSelected(e: Event) {
       errors.push(`${file.name}: alleen .txt, .md, .docx en .xlsx zijn toegestaan.`)
       continue
     }
-    // Size guard: text formats checked against MAX_DOC_BYTES; office formats are
-    // compressed, so we allow up to 4 MB raw and rely on the extracted-text length.
     const isOffice = ext === 'docx' || ext === 'xlsx'
     if (!isOffice && file.size > MAX_DOC_BYTES) {
       errors.push(`${file.name} is te groot (max 200 KB).`)
@@ -320,7 +372,6 @@ async function onFilesSelected(e: Event) {
     }
   }
 
-  // Identify newly added documents for the "just added" highlight
   const newIds = store.documents.map((d) => d.id).filter((id) => !previousIds.has(id))
   recentlyAddedIds.value = new Set(newIds)
   setTimeout(() => {
@@ -386,41 +437,264 @@ const trackGroups = computed(() => {
 
 <style scoped>
 .portal-page {
-  padding: 48px 0 64px;
-  background: #f8f9fb;
+  padding: var(--rvo-space-3xl) 0 var(--rvo-space-4xl);
+  background: var(--rvo-color-lichtblauw-150);
   min-height: 100%;
 }
 
 .portal-hero {
-  margin-bottom: 48px;
+  margin-block-end: var(--rvo-space-3xl);
 }
 
-.portal-title {
-  color: #154273;
-  margin-bottom: 12px;
+.portal-card {
+  position: relative;
+  margin-block-end: var(--rvo-space-2xl);
+  padding: var(--rvo-space-lg) var(--rvo-space-xl);
+  background: var(--rvo-color-wit);
+  border: 1px solid var(--rvo-color-lichtblauw-300);
+  border-radius: var(--rvo-border-radius-md);
+  box-shadow: 0 1px 3px rgb(21 66 115 / 0.06), 0 4px 12px rgb(21 66 115 / 0.04);
 }
 
-.portal-subtitle {
-  color: #555;
-  max-width: 640px;
+.portal-card::before {
+  content: "";
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
+  block-size: 4px;
+  background: var(--rvo-color-lintblauw);
+  border-start-start-radius: var(--rvo-border-radius-md);
+  border-start-end-radius: var(--rvo-border-radius-md);
+}
+
+.portal-card__header {
+  margin-block-end: var(--rvo-space-md);
+}
+
+.portal-card__title {
+  color: var(--rvo-color-lintblauw);
+  margin: 0 0 var(--rvo-space-2xs);
+}
+
+.portal-card__desc {
+  color: var(--invulhulp-color-text-subtle);
+  font-size: var(--rvo-font-size-sm);
+  margin: 0;
+}
+
+.portal-card__controls {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--rvo-space-md);
+  flex-wrap: wrap;
+}
+
+.dossier-tabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--rvo-space-3xs);
+  padding: var(--rvo-space-3xs);
+  background: var(--rvo-color-grijs-100);
+  border: 1px solid var(--invulhulp-color-border);
+  border-radius: 999px;
+}
+
+.dossier-tab {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--rvo-space-xs);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  padding: var(--rvo-space-2xs) var(--rvo-space-md);
+  cursor: pointer;
+  color: var(--rvo-color-grijs-800);
+  font: inherit;
+  font-size: var(--rvo-font-size-sm);
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+}
+
+.dossier-tab:hover:not(.dossier-tab--active) {
+  background: var(--rvo-color-wit);
+  color: var(--rvo-color-lintblauw);
+}
+
+.dossier-tab:focus-visible {
+  outline: 2px solid var(--rvo-color-lintblauw);
+  outline-offset: 1px;
+}
+
+.dossier-tab--active {
+  background: var(--rvo-color-lintblauw);
+  color: var(--rvo-color-wit);
+  box-shadow: 0 1px 2px rgb(21 66 115 / 0.25);
+}
+
+.dossier-tab__name {
+  font-weight: var(--rvo-font-weight-semibold);
+}
+
+.dossier-tab__meta {
+  font-size: var(--rvo-font-size-2xs);
+  opacity: 0.75;
+}
+
+.dossier-tab--active .dossier-tab__meta {
+  opacity: 0.85;
+}
+
+.dossier-actions {
+  display: flex;
+  gap: var(--rvo-space-xs);
+  align-items: center;
+}
+
+.docs-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--rvo-space-sm);
+  flex-wrap: wrap;
+  margin-block-end: var(--rvo-space-2xs);
+}
+
+.docs-graph-btn {
+  margin-inline-start: auto;
+}
+
+.docs-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--rvo-space-sm);
+  margin-block-end: var(--rvo-space-sm);
+}
+
+.docs-upload-btn {
+  cursor: pointer;
+}
+.docs-upload-btn--busy {
+  cursor: progress;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.docs-upload-hint {
+  color: var(--invulhulp-color-text-subtle);
+}
+
+.docs-alerts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rvo-space-xs);
+  margin-block-end: var(--rvo-space-sm);
+}
+
+.docs-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--rvo-space-2xs);
+}
+
+.docs-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rvo-space-2xs);
+  padding: var(--rvo-space-xs) var(--rvo-space-sm);
+  background: var(--rvo-color-grijs-100);
+  border: 1px solid var(--invulhulp-color-border);
+  border-radius: var(--rvo-border-radius-sm);
+  transition: background 0.6s ease, border-color 0.6s ease;
+}
+
+.docs-item__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rvo-space-xs);
+}
+
+.docs-item__error {
+  margin: var(--rvo-space-2xs) 0 0;
+  color: var(--rvo-color-rood);
+}
+
+.docs-item--new {
+  background: var(--rvo-color-groen-150);
+  border-color: var(--rvo-color-groen);
+  animation: doc-pulse 1.2s ease-out;
+}
+
+@keyframes doc-pulse {
+  0% { background: var(--rvo-color-groen-300); }
+  100% { background: var(--rvo-color-groen-150); }
+}
+
+.docs-item__info {
+  display: flex;
+  align-items: center;
+  gap: var(--rvo-space-xs);
+}
+
+.docs-item__check {
+  inline-size: 20px;
+  block-size: 20px;
+  flex-shrink: 0;
+  /* Tint the SVG to the RVO groen colour via a CSS filter */
+  filter: invert(40%) sepia(80%) saturate(500%) hue-rotate(65deg) brightness(90%);
+}
+
+.docs-item__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.docs-item__name {
+  font-weight: var(--rvo-font-weight-semibold);
+  color: var(--rvo-color-grijs-800);
+  font-size: var(--rvo-font-size-sm);
+}
+
+.docs-item__meta {
+  color: var(--invulhulp-color-text-subtle);
+}
+
+.docs-item__remove {
+  background: none;
+  border: 0;
+  color: var(--rvo-color-rood);
+  cursor: pointer;
+  font-size: var(--rvo-font-size-sm);
+  text-decoration: underline;
+  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+}
+
+.docs-empty {
+  color: var(--rvo-color-grijs-500);
+  font-style: italic;
+  margin: 0;
 }
 
 .track-section {
-  margin-bottom: 48px;
+  margin-block-end: var(--rvo-space-3xl);
 }
 
 .track-header {
-  margin-bottom: 20px;
+  margin-block-end: var(--rvo-space-md);
 }
 
 .track-title {
-  color: #154273;
-  margin-bottom: 4px;
+  color: var(--rvo-color-lintblauw);
+  margin: 0 0 var(--rvo-space-2xs);
 }
 
 .track-desc {
-  color: #666;
-  font-size: 0.9rem;
+  color: var(--invulhulp-color-text-subtle);
+  font-size: var(--rvo-font-size-sm);
+  margin: 0;
 }
 
 .card-row {
@@ -433,367 +707,41 @@ const trackGroups = computed(() => {
 .card-connector {
   display: flex;
   align-items: center;
-  padding: 0 8px;
-  color: #9ab0cc;
-  font-size: 1.1rem;
+  padding: 0 var(--rvo-space-xs);
+  color: var(--rvo-color-grijs-400);
+  font-size: var(--rvo-font-size-md);
   flex-shrink: 0;
   align-self: center;
 }
 
 .form-card {
-  background: white;
-  border: 1px solid #d0dce8;
-  border-radius: 6px;
-  padding: 20px 20px 16px;
+  inline-size: 210px;
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  width: 210px;
-  flex-shrink: 0;
   transition: box-shadow 0.15s, border-color 0.15s;
 }
 
 .form-card:hover {
-  box-shadow: 0 2px 8px rgba(21, 66, 115, 0.12);
-  border-color: #9ab0cc;
+  box-shadow: 0 2px 8px rgb(21 66 115 / 0.12);
 }
 
-.card-body {
-  margin-bottom: 16px;
+.form-card__body {
+  margin-block-end: var(--rvo-space-md);
 }
 
-.card-title {
-  color: #154273;
-  font-size: 0.95rem;
-  margin-bottom: 8px;
+.form-card__title {
+  color: var(--rvo-color-lintblauw);
+  margin: 0 0 var(--rvo-space-xs);
 }
 
-.card-desc {
-  color: #555;
-  font-size: 0.8rem;
-  line-height: 1.5;
+.form-card__desc {
+  color: var(--invulhulp-color-text-subtle);
+  line-height: var(--rvo-line-height-md);
 }
 
-.card-btn {
-  font-size: 0.85rem;
-  padding: 6px 14px;
+.form-card__btn {
   align-self: flex-start;
-}
-
-.dossier-section {
-  margin-bottom: 24px;
-  padding: 20px 24px;
-  background: white;
-  border: 1px solid #d0dce8;
-  border-radius: 6px;
-}
-
-.dossier-header {
-  margin-bottom: 14px;
-}
-
-.dossier-title {
-  color: #154273;
-  margin: 0 0 4px;
-}
-
-.dossier-desc {
-  color: #666;
-  font-size: 0.85rem;
-  margin: 0;
-}
-
-.dossier-controls {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.dossier-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.dossier-tab {
-  background: #f4f7fb;
-  border: 1px solid #d0dce8;
-  border-radius: 999px;
-  padding: 6px 14px;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
-  color: #1a2a3a;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.dossier-tab:hover {
-  border-color: #9ab0cc;
-}
-
-.dossier-tab--active {
-  background: #154273;
-  border-color: #154273;
-  color: white;
-}
-
-.dossier-tab-name {
-  font-weight: 600;
-}
-
-.dossier-tab-meta {
-  font-size: 0.72rem;
-  opacity: 0.75;
-}
-
-.dossier-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.dossier-btn {
-  font-size: 0.8rem;
-  padding: 6px 12px;
-  background: #154273;
-  color: white;
-  border: 1px solid #154273;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: background 0.15s, border-color 0.15s;
-}
-
-.dossier-btn:hover {
-  background: #1f5a99;
-  border-color: #1f5a99;
-}
-
-.dossier-btn-danger {
-  background: none;
-  border: none;
-  color: #c0392b;
-  cursor: pointer;
-  font-size: 0.8rem;
-  text-decoration: underline;
-  padding: 6px 8px;
-}
-
-.dossier-btn-danger:hover {
-  color: #8a2a1f;
-}
-
-.docs-section {
-  margin-bottom: 48px;
-  padding: 24px;
-  background: white;
-  border: 1px solid #d0dce8;
-  border-radius: 6px;
-}
-
-.docs-header {
-  margin-bottom: 16px;
-}
-
-.docs-title-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 4px;
-}
-
-.docs-title {
-  color: #154273;
-  margin: 0;
-}
-
-.docs-count-badge {
-  background: #e8f0fb;
-  color: #154273;
-  border: 1px solid #b3c9e5;
-  border-radius: 999px;
-  padding: 3px 10px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.docs-graph-btn {
-  margin-left: auto;
-  background: white;
-  color: #154273;
-  border: 1px solid #154273;
-  border-radius: 4px;
-  padding: 4px 12px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  cursor: pointer;
-}
-.docs-graph-btn:hover { background: #154273; color: white; }
-
-.docs-desc {
-  color: #666;
-  font-size: 0.9rem;
-  max-width: 720px;
-}
-
-.docs-controls {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.docs-upload-btn {
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  box-shadow: 0 1px 3px rgba(21, 66, 115, 0.2);
-  transition: transform 0.1s, box-shadow 0.15s, opacity 0.15s;
-}
-
-.docs-upload-btn:hover:not(.docs-upload-btn--busy) {
-  box-shadow: 0 3px 8px rgba(21, 66, 115, 0.28);
-  transform: translateY(-1px);
-}
-
-.docs-upload-btn:active:not(.docs-upload-btn--busy) {
-  transform: translateY(0);
-  box-shadow: 0 1px 2px rgba(21, 66, 115, 0.2);
-}
-
-.docs-upload-btn--busy {
-  cursor: progress;
-  opacity: 0.7;
-  pointer-events: none;
-}
-
-.docs-upload-icon {
-  flex-shrink: 0;
-}
-
-.docs-upload-hint {
-  color: #666;
-  font-size: 0.8rem;
-}
-
-.docs-alerts {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.docs-alert {
-  font-size: 0.85rem;
-}
-
-.docs-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.docs-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 8px 12px;
-  background: #f8f9fb;
-  border: 1px solid #e3e8ef;
-  border-radius: 4px;
-  transition: background 0.6s ease, border-color 0.6s ease;
-}
-
-.docs-item-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.docs-item-error {
-  margin: 4px 0 0;
-  font-size: 0.78rem;
-  color: #c0392b;
-}
-
-.docs-item--new {
-  background: #e6f4ea;
-  border-color: #7ec8a0;
-  animation: doc-pulse 1.2s ease-out;
-}
-
-@keyframes doc-pulse {
-  0% { background: #c8e6c9; border-color: #4caf50; }
-  100% { background: #e6f4ea; border-color: #7ec8a0; }
-}
-
-.docs-item-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.docs-item-check {
-  color: #2e7d32;
-  font-weight: 700;
-  font-size: 0.95rem;
-  width: 18px;
-  height: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #d4edda;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.docs-item-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.docs-item-name {
-  font-weight: 500;
-  color: #1a2a3a;
-  font-size: 0.9rem;
-}
-
-.docs-item-meta {
-  font-size: 0.72rem;
-  color: #888;
-}
-
-.docs-item-remove {
-  background: none;
-  border: none;
-  color: #c0392b;
-  cursor: pointer;
-  font-size: 0.8rem;
-  text-decoration: underline;
-  padding: 4px 6px;
-}
-
-.docs-item-remove:hover {
-  color: #8a2a1f;
-}
-
-.docs-empty {
-  color: #999;
-  font-size: 0.85rem;
-  font-style: italic;
-  margin: 0;
 }
 </style>

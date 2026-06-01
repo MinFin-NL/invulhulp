@@ -1,30 +1,34 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm" style="padding-top: 32px; padding-bottom: 48px;">
+  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm summary-view">
     <div class="rvo-layout-column rvo-layout-gap--xl">
 
-      <div>
-        <h1 class="rvo-heading rvo-heading--xl" style="color: #154273; margin: 0 0 8px 0;">Samenvatting</h1>
-        <p class="rvo-text" style="color: #555; margin: 0;">Overzicht van alle ingevulde antwoorden.</p>
+      <div class="summary-view__intro">
+        <h1 class="rvo-heading rvo-heading--xl summary-view__title">Samenvatting</h1>
+        <p class="rvo-text summary-view__lead">Overzicht van alle ingevulde antwoorden.</p>
       </div>
 
       <!-- Risk level (forms with riskClassification feature) -->
-      <div v-if="props.formConfig.features.riskClassification && store.riskLevel" :class="`rvo-alert rvo-alert--${alertType}`" style="border-radius: 4px;">
-        <div class="rvo-alert__content">
+      <div
+        v-if="props.formConfig.features.riskClassification && store.riskLevel"
+        class="rvo-alert rvo-alert--padding-md"
+        :class="`rvo-alert--${alertType}`"
+      >
+        <div class="rvo-alert__container">
           <strong>Risicoclassificatie: {{ riskInfo?.label }}</strong><br />
           {{ riskInfo?.description }}
         </div>
       </div>
 
       <!-- Unanswered mandatory -->
-      <div v-if="unansweredMandatory.length > 0" class="rvo-alert rvo-alert--warning" style="border-radius: 4px;">
-        <div class="rvo-alert__content">
+      <div v-if="unansweredMandatory.length > 0" class="rvo-alert rvo-alert--warning rvo-alert--padding-md">
+        <div class="rvo-alert__container">
           <strong>Verplichte vragen niet ingevuld ({{ unansweredMandatory.length }})</strong><br />
           De volgende verplichte vragen zijn nog niet beantwoord:
-          <div v-for="group in unansweredGrouped" :key="group.sectionTitle" style="margin-top: 8px;">
-            <p class="rvo-text rvo-text--sm" style="margin: 4px 0; font-weight: 600;">
+          <div v-for="group in unansweredGrouped" :key="group.sectionTitle" class="summary-view__unanswered-group">
+            <p class="rvo-text rvo-text--sm summary-view__unanswered-section">
               {{ group.sectionTitle }}
             </p>
-            <ul style="margin: 0 0 8px; padding-left: 20px;">
+            <ul class="summary-view__unanswered-list">
               <li v-for="q in group.questions" :key="q.id" class="rvo-text rvo-text--sm">
                 <em>{{ q.subsectionTitle }}</em> — {{ q.text }}
               </li>
@@ -34,21 +38,21 @@
       </div>
 
       <!-- Name input -->
-      <div>
-        <label class="rvo-text rvo-text--md" style="font-weight: 500; display: block; margin-bottom: 6px;">
+      <div class="rvo-form-field">
+        <label class="rvo-form-field__label" for="summary-system-name">
           {{ props.formConfig.meta.systemNamePlaceholder ? 'Naam (voor export)' : 'Naam van het AI-systeem (voor export)' }}
         </label>
         <input
+          id="summary-system-name"
           v-model="systemName"
           type="text"
-          class="aiia-textarea"
-          style="min-height: unset; padding: 10px 12px; resize: none; height: auto;"
+          class="utrecht-textbox utrecht-textbox--md"
           :placeholder="props.formConfig.meta.systemNamePlaceholder ?? 'Naam van het systeem...'"
         />
       </div>
 
       <!-- Export buttons -->
-      <div class="rvo-layout-row rvo-layout-gap--md" style="flex-wrap: wrap;">
+      <div class="rvo-layout-row rvo-layout-gap--md summary-view__exports">
         <button @click="exportPdf" class="rvo-button rvo-button--primary">
           Download PDF rapport
         </button>
@@ -62,44 +66,47 @@
 
       <!-- Import -->
       <div>
-        <p class="rvo-text rvo-text--sm" style="color: #555; margin: 0 0 8px 0;">
+        <p class="rvo-text rvo-text--sm summary-view__import-hint">
           Of laad een eerder opgeslagen JSON-bestand om verder te gaan waar u gebleven was:
         </p>
-        <div class="rvo-layout-row rvo-layout-gap--sm" style="align-items: center; flex-wrap: wrap;">
-          <input ref="fileInput" type="file" accept=".json" style="display:none" @change="handleImport" />
+        <div class="rvo-layout-row rvo-layout-gap--sm summary-view__import-row">
+          <input ref="fileInput" type="file" accept=".json" class="invulhulp-visually-hidden" @change="handleImport" />
           <button @click="fileInput?.click()" class="rvo-button rvo-button--tertiary">
             JSON importeren
           </button>
-          <span v-if="importError" class="rvo-text rvo-text--sm" style="color: #c0392b;">{{ importError }}</span>
-          <span v-if="importSuccess" class="rvo-text rvo-text--sm" style="color: #27ae60;">Gegevens hersteld!</span>
+          <span v-if="importError" class="rvo-text rvo-text--sm summary-view__import-error">{{ importError }}</span>
+          <span v-if="importSuccess" class="rvo-text rvo-text--sm summary-view__import-success">Gegevens hersteld!</span>
         </div>
       </div>
 
       <!-- Answers by section -->
       <div v-for="section in visibleSections" :key="section.id" class="rvo-layout-column rvo-layout-gap--lg">
-        <h2 class="rvo-heading rvo-heading--lg" style="color: #154273; border-bottom: 2px solid #154273; padding-bottom: 8px;">
+        <h2 class="rvo-heading rvo-heading--lg summary-view__section-title">
           {{ section.title }}
         </h2>
+        <hr class="invulhulp-divider summary-view__section-divider" />
 
         <div v-for="subsection in section.subsections" :key="subsection.id" class="rvo-layout-column rvo-layout-gap--md">
-          <h3 class="rvo-heading rvo-heading--md" style="color: #333;">{{ subsection.title }}</h3>
+          <h3 class="rvo-heading rvo-heading--md summary-view__subsection-title">{{ subsection.title }}</h3>
 
-          <div v-for="question in subsection.questions" :key="question.id" style="padding: 12px; background: white; border-radius: 4px; border: 1px solid #e8e8e8;">
-            <div class="rvo-layout-row" style="gap: 8px; align-items: flex-start;">
-              <div
-                style="width: 4px; height: 100%; min-height: 40px; border-radius: 2px; flex-shrink: 0; align-self: stretch;"
-                :style="{ background: question.importance === 'mandatory' ? '#0070bb' : '#39870c' }"
-              ></div>
-              <div class="rvo-layout-column" style="gap: 4px; flex: 1;">
-                <p class="rvo-text rvo-text--sm" style="font-weight: 500; margin: 0; color: #333;">
-                  {{ question.text }}
-                </p>
-                <p class="rvo-text rvo-text--sm" :style="{ color: hasAnswer(question.id) ? '#000' : '#999', fontStyle: hasAnswer(question.id) ? 'normal' : 'italic', margin: 0 }">
-                  {{ formattedAnswer(question.id) }}
-                </p>
-              </div>
+          <article
+            v-for="question in subsection.questions"
+            :key="question.id"
+            class="rvo-card rvo-card--outline rvo-card--padding--sm summary-view__card"
+            :class="`summary-view__card--${question.importance}`"
+          >
+            <div class="summary-view__card-body">
+              <p class="rvo-text rvo-text--sm summary-view__question">
+                {{ question.text }}
+              </p>
+              <p
+                class="rvo-text rvo-text--sm summary-view__answer"
+                :class="{ 'summary-view__answer--empty': !hasAnswer(question.id) }"
+              >
+                {{ formattedAnswer(question.id) }}
+              </p>
             </div>
-          </div>
+          </article>
         </div>
       </div>
 
@@ -235,7 +242,6 @@ async function handleImport(event: Event) {
 
   try {
     const data = await importFromJson(file)
-    // Support both old assessmentType field and new formId field
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const formId = (data as any).formId ?? (data as any).assessmentType ?? 'aiia'
     store.setActiveForm(formId)
@@ -253,3 +259,105 @@ async function handleImport(event: Event) {
   }
 }
 </script>
+
+<style scoped>
+.summary-view {
+  padding-block: var(--rvo-space-2xl) var(--rvo-space-3xl);
+}
+
+.summary-view__title {
+  color: var(--rvo-color-lintblauw);
+  margin: 0 0 var(--rvo-space-xs);
+}
+
+.summary-view__lead {
+  color: var(--invulhulp-color-text-muted);
+  margin: 0;
+}
+
+.summary-view__unanswered-group {
+  margin-block-start: var(--rvo-space-xs);
+}
+
+.summary-view__unanswered-section {
+  margin: var(--rvo-space-2xs) 0;
+  font-weight: var(--rvo-font-weight-semibold);
+}
+
+.summary-view__unanswered-list {
+  margin: 0 0 var(--rvo-space-xs);
+  padding-inline-start: var(--rvo-space-md);
+}
+
+.summary-view__exports {
+  flex-wrap: wrap;
+}
+
+.summary-view__import-hint {
+  color: var(--invulhulp-color-text-muted);
+  margin: 0 0 var(--rvo-space-xs);
+}
+
+.summary-view__import-row {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.summary-view__import-error {
+  color: var(--rvo-color-rood);
+}
+
+.summary-view__import-success {
+  color: var(--rvo-color-groen);
+}
+
+.summary-view__section-title {
+  color: var(--rvo-color-lintblauw);
+  margin: 0;
+}
+
+.summary-view__section-divider {
+  border-block-end-color: var(--rvo-color-lintblauw);
+  border-block-end-width: 2px;
+  margin: 0;
+}
+
+.summary-view__subsection-title {
+  color: var(--rvo-color-grijs-800);
+  margin: 0;
+}
+
+.summary-view__card {
+  border-inline-start: 4px solid var(--invulhulp-color-border);
+}
+
+.summary-view__card--mandatory {
+  border-inline-start-color: var(--invulhulp-color-mandatory);
+}
+
+.summary-view__card--optional {
+  border-inline-start-color: var(--invulhulp-color-optional);
+}
+
+.summary-view__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rvo-space-2xs);
+}
+
+.summary-view__question {
+  font-weight: var(--rvo-font-weight-semibold);
+  margin: 0;
+  color: var(--rvo-color-grijs-800);
+}
+
+.summary-view__answer {
+  margin: 0;
+  color: var(--rvo-color-grijs-900, var(--rvo-color-grijs-800));
+}
+
+.summary-view__answer--empty {
+  color: var(--rvo-color-grijs-500);
+  font-style: italic;
+}
+</style>

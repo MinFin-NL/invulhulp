@@ -1,78 +1,82 @@
 <template>
-  <div v-if="sourceContext.length > 0" class="cross-form-suggestion">
-    <div class="cross-form-header">
-      <span class="cross-form-label">Beschikbaar uit {{ sourceLabel }}</span>
+  <div v-if="sourceContext.length > 0" class="cross-suggestion">
+    <div class="cross-suggestion__header">
+      <span class="cross-suggestion__label">Beschikbaar uit {{ sourceLabel }}</span>
     </div>
 
     <!-- Source form answer blocks -->
     <div
       v-for="item in sourceContext"
       :key="item.id"
-      class="aiia-answer-block"
+      class="cross-suggestion__block"
     >
-      <div class="aiia-question-label">{{ item.questionText }}</div>
-      <div class="aiia-answer-text">{{ item.answer }}</div>
+      <div class="cross-suggestion__question">{{ item.questionText }}</div>
+      <div class="cross-suggestion__answer">{{ item.answer }}</div>
     </div>
 
     <!-- AI synthesis suggestion panel -->
-    <div v-if="streamingText || suggestion !== null" class="cross-suggestion-panel">
-      <div class="cross-suggestion-header">
-        <span class="suggestion-label">✦ Synthese vanuit AIIA</span>
-        <span v-if="rationale" class="suggestion-rationale">{{ rationale }}</span>
+    <div
+      v-if="streamingText || suggestion !== null"
+      class="rvo-alert rvo-alert--success rvo-alert--padding-sm cross-suggestion__panel"
+      :aria-busy="isLoading"
+    >
+      <div class="rvo-alert__container">
+        <div class="cross-suggestion__panel-header">
+          <span class="cross-suggestion__panel-label">✦ Synthese vanuit {{ sourceLabel }}</span>
+          <span v-if="rationale" class="cross-suggestion__rationale">{{ rationale }}</span>
+        </div>
+
+        <!-- Live streaming view -->
+        <div v-if="isLoading" class="cross-diff cross-diff--streaming" aria-live="polite">
+          <span v-if="streamingText">{{ streamingText }}<span class="cross-diff__cursor" aria-hidden="true">▋</span></span>
+          <span v-else class="cross-diff__empty">Verbinding maken…</span>
+        </div>
+
+        <!-- Final diff view -->
+        <template v-else-if="suggestion !== null">
+          <div v-if="noChanges" class="cross-diff cross-diff__empty">
+            Geen wijzigingen — het huidige antwoord dekt de informatie al.
+          </div>
+          <div v-else class="cross-diff" aria-label="Voorgestelde invulling">
+            <span
+              v-for="(part, i) in diffParts"
+              :key="i"
+              :class="part.added ? 'cross-diff__add' : part.removed ? 'cross-diff__del' : ''"
+            >{{ part.value }}</span>
+          </div>
+
+          <div class="cross-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
+            <button
+              type="button"
+              class="rvo-button rvo-button--primary rvo-button--size-sm"
+              @click="acceptSuggestion"
+            >
+              Overnemen
+            </button>
+            <button
+              type="button"
+              class="rvo-button rvo-button--secondary rvo-button--size-sm"
+              @click="rejectSuggestion"
+            >
+              Afwijzen
+            </button>
+          </div>
+        </template>
       </div>
-
-      <!-- Live streaming view -->
-      <div v-if="isLoading" class="diff-view streaming-view">
-        <span v-if="streamingText">{{ streamingText }}<span class="streaming-cursor">▋</span></span>
-        <span v-else class="diff-no-changes">Verbinding maken…</span>
-      </div>
-
-      <!-- Final diff view -->
-      <template v-else-if="suggestion !== null">
-        <div v-if="noChanges" class="diff-view diff-no-changes">
-          Geen wijzigingen — het huidige antwoord dekt de AIIA-informatie al.
-        </div>
-        <div v-else class="diff-view" aria-label="Voorgestelde invulling">
-          <span
-            v-for="(part, i) in diffParts"
-            :key="i"
-            :class="part.added ? 'diff-add' : part.removed ? 'diff-del' : 'diff-eq'"
-          >{{ part.value }}</span>
-        </div>
-
-        <div class="suggestion-actions">
-          <button
-            type="button"
-            class="rvo-button rvo-button--primary"
-            style="font-size: 0.8rem; padding: 4px 12px;"
-            @click="acceptSuggestion"
-          >
-            Overnemen
-          </button>
-          <button
-            type="button"
-            class="btn-reject"
-            style="font-size: 0.8rem;"
-            @click="rejectSuggestion"
-          >
-            Afwijzen
-          </button>
-        </div>
-      </template>
     </div>
 
     <!-- Action buttons (only for text-type questions, hidden while streaming) -->
-    <div v-if="isTextType && suggestion === null && !streamingText" class="cross-form-actions">
+    <div v-if="isTextType && suggestion === null && !streamingText" class="cross-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
       <button
         type="button"
-        class="cross-btn cross-btn--direct"
+        class="rvo-button rvo-button--secondary rvo-button--size-sm"
         @click="useDirectly"
       >
         Gebruik direct
       </button>
       <button
         type="button"
-        class="cross-btn cross-btn--ai"
+        class="rvo-button rvo-button--primary rvo-button--size-sm"
         :disabled="isLoading"
         @click="requestSynthesis"
       >
@@ -81,7 +85,7 @@
       </button>
     </div>
 
-    <span v-if="error" class="improve-error" style="font-size: 0.8rem;">{{ error }}</span>
+    <span v-if="error" class="cross-suggestion__error rvo-text rvo-text--sm" role="alert">{{ error }}</span>
   </div>
 </template>
 
@@ -107,8 +111,6 @@ const emit = defineEmits<{
 
 const store = useAssessmentStore()
 
-// ── Resolve source question text by ID ────────────────────────────────────────
-
 function findSourceQuestionText(sourceFormId: string, questionId: string): string {
   const form = getCachedForm(sourceFormId)
   if (!form) return questionId
@@ -121,8 +123,6 @@ function findSourceQuestionText(sourceFormId: string, questionId: string): strin
   }
   return questionId
 }
-
-// ── Build context from source form answers ────────────────────────────────────
 
 const sourceContext = computed(() => {
   const { sourceFormId, sourceQuestionIds } = props.mapping
@@ -141,10 +141,7 @@ const sourceContext = computed(() => {
 })
 
 const sourceLabel = computed(() => props.mapping.sourceFormId.toUpperCase())
-
 const isTextType = computed(() => props.questionType === 'text')
-
-// ── "Use directly" ────────────────────────────────────────────────────────────
 
 function useDirectly() {
   const combined = sourceContext.value
@@ -153,15 +150,12 @@ function useDirectly() {
   emit('apply-suggestion', combined)
 }
 
-// ── AI synthesis ──────────────────────────────────────────────────────────────
-
 const suggestion = ref<string | null>(null)
 const rationale = ref('')
 const isLoading = ref(false)
 const error = ref('')
 const streamingRaw = ref('')
 
-// Extract the content inside <suggestie>…</suggestie> for live display
 const streamingText = computed((): string => {
   if (!streamingRaw.value) return ''
   const afterOpen = streamingRaw.value.match(/<suggestie>([\s\S]*)/i)
@@ -237,171 +231,122 @@ function rejectSuggestion() {
 </script>
 
 <style scoped>
-.cross-form-suggestion {
-  margin-top: 12px;
-  border: 1px solid #b3c9e5;
-  border-radius: 6px;
-  background: #f0f6ff;
-  padding: 12px 14px;
-  font-size: 0.85rem;
+.cross-suggestion {
+  margin-block-start: var(--rvo-space-sm);
+  border: 1px solid var(--rvo-color-hemelblauw-300);
+  border-radius: var(--rvo-border-radius-md);
+  background: var(--rvo-color-hemelblauw-150);
+  padding: var(--rvo-space-sm) var(--rvo-space-md);
+  font-size: var(--rvo-font-size-sm);
 }
 
-.cross-form-header {
+.cross-suggestion__header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: var(--rvo-space-xs);
+  margin-block-end: var(--rvo-space-xs);
 }
 
-.cross-form-label {
-  font-weight: 600;
-  color: #154273;
-  font-size: 0.8rem;
+.cross-suggestion__label {
+  font-weight: var(--rvo-font-weight-semibold);
+  color: var(--rvo-color-lintblauw);
+  font-size: var(--rvo-font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
-.aiia-answer-block {
-  background: white;
-  border: 1px solid #d0dff0;
-  border-radius: 4px;
-  padding: 8px 10px;
-  margin-bottom: 8px;
+.cross-suggestion__block {
+  background: var(--rvo-color-wit);
+  border: 1px solid var(--rvo-color-hemelblauw-300);
+  border-radius: var(--rvo-border-radius-sm);
+  padding: var(--rvo-space-xs) var(--rvo-space-sm);
+  margin-block-end: var(--rvo-space-xs);
 }
 
-.aiia-question-label {
-  font-size: 0.75rem;
-  color: #5a6d88;
-  font-weight: 500;
-  margin-bottom: 4px;
+.cross-suggestion__question {
+  font-size: var(--rvo-font-size-xs);
+  color: var(--invulhulp-color-text-muted);
+  font-weight: var(--rvo-font-weight-semibold);
+  margin-block-end: var(--rvo-space-3xs);
 }
 
-.aiia-answer-text {
-  color: #1a2a3a;
+.cross-suggestion__answer {
+  color: var(--rvo-color-grijs-800);
   white-space: pre-wrap;
   word-break: break-word;
-  max-height: 100px;
+  max-block-size: 100px;
   overflow-y: auto;
 }
 
-.cross-form-actions {
-  display: flex;
-  gap: 8px;
-  margin-top: 10px;
+.cross-suggestion__actions {
+  margin-block-start: var(--rvo-space-xs);
+  align-items: center;
   flex-wrap: wrap;
 }
 
-.cross-btn {
-  border: none;
-  border-radius: 4px;
-  padding: 5px 12px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  font-weight: 500;
-  transition: opacity 0.15s;
+.cross-suggestion__panel {
+  margin-block: var(--rvo-space-xs) var(--rvo-space-xs);
 }
 
-.cross-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.cross-btn--direct {
-  background: #e8f0fb;
-  color: #154273;
-  border: 1px solid #b3c9e5;
-}
-
-.cross-btn--direct:hover:not(:disabled) {
-  background: #d0e4f5;
-}
-
-.cross-btn--ai {
-  background: #154273;
-  color: white;
-}
-
-.cross-btn--ai:hover:not(:disabled) {
-  opacity: 0.88;
-}
-
-.cross-suggestion-panel {
-  background: #f0faf4;
-  border: 1px solid #7ec8a0;
-  border-radius: 4px;
-  padding: 10px 12px;
-  margin-top: 10px;
-}
-
-.cross-suggestion-header {
+.cross-suggestion__panel-header {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: var(--rvo-space-xs);
+  margin-block-end: var(--rvo-space-xs);
+  flex-wrap: wrap;
 }
 
-.suggestion-label {
-  font-weight: 700;
-  font-size: 0.8rem;
-  color: #1a6b3a;
+.cross-suggestion__panel-label {
+  font-weight: var(--rvo-font-weight-bold);
+  font-size: var(--rvo-font-size-xs);
+  color: var(--rvo-color-groen-750);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
-.suggestion-rationale {
-  font-size: 0.75rem;
-  color: #3a7a52;
+.cross-suggestion__rationale {
+  font-size: var(--rvo-font-size-xs);
+  color: var(--rvo-color-groen-600);
   font-style: italic;
 }
 
-.diff-view {
-  font-size: 0.85rem;
-  line-height: 1.6;
+.cross-suggestion__error {
+  color: var(--rvo-color-rood);
+  margin-block-start: var(--rvo-space-2xs);
+  display: block;
+}
+
+.cross-diff {
+  font-size: var(--rvo-font-size-sm);
+  line-height: var(--rvo-line-height-md);
   white-space: pre-wrap;
   word-break: break-word;
-  background: #fafafa;
-  border-radius: 3px;
-  padding: 6px 8px;
-  margin-bottom: 8px;
+  background: var(--rvo-color-wit);
+  border-radius: var(--rvo-border-radius-sm);
+  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  margin-block-end: var(--rvo-space-xs);
 }
 
-.diff-no-changes {
-  color: #666;
+.cross-diff__empty {
+  color: var(--invulhulp-color-text-subtle);
   font-style: italic;
 }
 
-.diff-add {
-  background: #d4edda;
-  color: #155724;
+.cross-diff__cursor {
+  display: inline-block;
+  margin-inline-start: 2px;
+  color: var(--rvo-color-grijs-500);
+  animation: invulhulp-blink 1s steps(2, start) infinite;
 }
 
-.diff-del {
-  background: #f8d7da;
-  color: #721c24;
+.cross-diff__add {
+  background: var(--rvo-color-groen-150);
+  color: var(--rvo-color-groen-750);
+}
+
+.cross-diff__del {
+  background: var(--rvo-color-rood-150);
+  color: var(--rvo-color-rood-750);
   text-decoration: line-through;
-}
-
-.diff-eq {
-  color: #333;
-}
-
-.suggestion-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.btn-reject {
-  background: none;
-  border: none;
-  color: #888;
-  cursor: pointer;
-  font-size: 0.8rem;
-  padding: 4px 8px;
-  text-decoration: underline;
-}
-
-.btn-reject:hover {
-  color: #333;
 }
 </style>

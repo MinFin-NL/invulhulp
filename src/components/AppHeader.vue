@@ -1,10 +1,15 @@
 <template>
-  <header style="background: #154273; color: white; padding: 0;">
+  <header data-rvo-on-dark class="invulhulp-header">
     <div class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm">
       <!-- Top bar: logo + reset button -->
-      <div class="rvo-layout-row rvo-layout-gap--md" style="padding: 12px 0; align-items: center; justify-content: space-between;">
-        <button @click="store.goToPortal()" class="logo-btn">
-          <div class="rvo-logo" style="--rvo-logo-color: white; --rvo-logo-font-family: inherit; --rvo-logo-font-weight: bold;">
+      <div class="rvo-layout-row rvo-layout-gap--md invulhulp-header__topbar">
+        <button
+          type="button"
+          @click="store.goToPortal()"
+          class="invulhulp-header__logo-btn"
+          aria-label="Ga naar startpagina"
+        >
+          <div class="rvo-logo invulhulp-header__logo">
             <img class="rvo-logo__emblem" :src="emblemUrl" alt="" />
             <div class="rvo-logo__wordmark">
               <p class="rvo-logo__title">Ministerie van&#10;Financiën</p>
@@ -13,33 +18,52 @@
         </button>
         <button
           v-if="store.activeFormId !== null && store.currentView !== 'home'"
-          @click="confirmReset"
-          class="rvo-button rvo-button--secondary-action"
-          style="color: white; border-color: rgba(255,255,255,0.6); font-size: 0.875rem; padding: 6px 14px;"
+          @click="openResetDialog"
+          class="rvo-button rvo-button--secondary rvo-button--size-sm"
         >
           Opnieuw beginnen
         </button>
       </div>
 
       <!-- Grouped form tabs with track labels and sequence arrows -->
-      <div class="tab-bar">
-        <div v-for="(group, gIdx) in trackGroups" :key="group.track" class="tab-group">
-          <div v-if="gIdx > 0" class="tab-group-divider" />
-          <div class="tab-group-inner">
-            <div class="track-label">{{ group.label }}</div>
-            <div class="tab-row">
+      <nav class="invulhulp-header__tab-bar" aria-label="Formulieren">
+        <div v-for="(group, gIdx) in trackGroups" :key="group.track" class="invulhulp-header__tab-group">
+          <div v-if="gIdx > 0" class="invulhulp-header__tab-divider" aria-hidden="true" />
+          <div class="invulhulp-header__tab-group-inner">
+            <h2 class="invulhulp-header__track-label">{{ group.label }}</h2>
+            <ul class="rvo-tabs invulhulp-header__tabs">
               <template v-for="(form, idx) in group.forms" :key="form.id">
-                <span v-if="idx > 0" class="tab-arrow">{{ group.track === 'assessment' ? '↔' : '→' }}</span>
-                <button :style="tabStyle(store.activeFormId === form.id)" @click="switchTo(form.id)">
-                  {{ form.title }}
-                </button>
+                <li v-if="idx > 0" class="invulhulp-header__tab-arrow" aria-hidden="true">
+                  {{ group.track === 'assessment' ? '↔' : '→' }}
+                </li>
+                <li class="rvo-tabs__item">
+                  <button
+                    type="button"
+                    class="rvo-tabs__item-link"
+                    :class="{ 'rvo-tabs__item-link--active': store.activeFormId === form.id }"
+                    :aria-current="store.activeFormId === form.id ? 'page' : undefined"
+                    @click="switchTo(form.id)"
+                  >
+                    {{ form.title }}
+                  </button>
+                </li>
               </template>
-            </div>
+            </ul>
           </div>
         </div>
-      </div>
+      </nav>
     </div>
   </header>
+
+  <ConfirmDialog
+    ref="resetDialog"
+    :title="resetTitle"
+    :message="`Al uw antwoorden in dit formulier worden gewist.`"
+    confirm-label="Opnieuw beginnen"
+    cancel-label="Annuleren"
+    variant="warning"
+    @confirm="store.resetActive()"
+  />
 </template>
 
 <script setup lang="ts">
@@ -48,18 +72,20 @@ import emblemUrl from '@nl-rvo/assets/images/emblem.svg'
 import type { FormId } from '../stores/assessmentStore'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
+import ConfirmDialog from './ConfirmDialog.vue'
 
 const store = useAssessmentStore()
 const availableForms = ref<FormIndexEntry[]>([])
+const resetDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 
 onMounted(async () => {
   availableForms.value = await loadAvailableForms()
 })
 
 const TRACK_META: Record<string, { label: string; order: number }> = {
-  project:    { label: 'Projectspoor',  order: 1 },
-  privacy:    { label: 'Privacyspoor',  order: 2 },
-  assessment: { label: 'Assessments',   order: 3 },
+  project: { label: 'Projectspoor', order: 1 },
+  privacy: { label: 'Privacyspoor', order: 2 },
+  assessment: { label: 'Assessments', order: 3 },
 }
 
 const trackGroups = computed(() => {
@@ -78,88 +104,154 @@ const trackGroups = computed(() => {
     }))
 })
 
-function tabStyle(active: boolean) {
-  return {
-    background: 'transparent',
-    border: 'none',
-    color: active ? 'white' : 'rgba(255,255,255,0.65)',
-    fontWeight: active ? '600' : '400',
-    fontSize: '0.9rem',
-    padding: '10px 16px',
-    cursor: 'pointer',
-    borderBottom: active ? '3px solid white' : '3px solid transparent',
-    marginBottom: '-1px',
-    transition: 'color 0.15s, border-color 0.15s',
-    whiteSpace: 'nowrap',
-  }
-}
+const resetTitle = computed(() => {
+  const label = availableForms.value.find((f) => f.id === store.activeFormId)?.title ?? 'dit formulier'
+  return `"${label}" opnieuw beginnen?`
+})
 
 function switchTo(id: FormId) {
   store.setActiveForm(id)
 }
 
-function confirmReset() {
-  const label = availableForms.value.find((f) => f.id === store.activeFormId)?.title ?? store.activeFormId
-  if (confirm(`Weet u zeker dat u "${label}" opnieuw wilt beginnen? Al uw antwoorden worden gewist.`)) {
-    store.resetActive()
-  }
+function openResetDialog() {
+  resetDialog.value?.open()
 }
 </script>
 
 <style scoped>
-.logo-btn {
+.invulhulp-header {
+  background-color: var(--rvo-color-lintblauw);
+  color: var(--rvo-color-wit);
+  padding: 0;
+}
+
+.invulhulp-header__topbar {
+  padding-block: var(--rvo-space-sm);
+  align-items: center;
+  justify-content: space-between;
+}
+
+.invulhulp-header__logo-btn {
   background: none;
-  border: none;
+  border: 0;
   padding: 0;
   cursor: pointer;
   color: inherit;
 }
 
-.tab-bar {
-  display: flex;
-  align-items: stretch;
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  margin: 0 -16px;
-  padding: 0 16px;
-  overflow-x: auto;
-  overflow-y: hidden;
+.invulhulp-header__logo {
+  --rvo-logo-color: var(--rvo-color-wit);
+  --rvo-logo-font-family: inherit;
+  --rvo-logo-font-weight: bold;
 }
 
-.tab-group {
+.invulhulp-header__tab-bar {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: var(--rvo-space-md) var(--rvo-space-lg);
+  border-block-start: 1px solid rgb(255 255 255 / 0.15);
+  padding-block: var(--rvo-space-sm) var(--rvo-space-md);
+}
+
+.invulhulp-header__tab-group {
   display: flex;
   align-items: stretch;
 }
 
-.tab-group-divider {
-  width: 1px;
-  background: rgba(255, 255, 255, 0.25);
-  margin: 8px 8px 0;
+.invulhulp-header__tab-divider {
+  inline-size: 1px;
+  background: rgb(255 255 255 / 0.2);
+  margin-block: var(--rvo-space-xs) 0;
+  margin-inline-end: var(--rvo-space-sm);
   flex-shrink: 0;
 }
 
-.tab-group-inner {
+.invulhulp-header__tab-group-inner {
   display: flex;
   flex-direction: column;
+  gap: var(--rvo-space-2xs);
+  min-inline-size: 0;
 }
 
-.track-label {
-  font-size: 0.6rem;
-  color: rgba(255, 255, 255, 0.45);
+.invulhulp-header__track-label {
+  font-size: var(--rvo-font-size-2xs);
+  font-weight: var(--rvo-font-weight-semibold);
+  color: rgb(255 255 255 / 0.6);
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  padding: 6px 16px 0;
+  letter-spacing: 0.08em;
+  margin: 0;
+  padding-inline-start: var(--rvo-space-2xs);
 }
 
-.tab-row {
-  display: flex;
+.invulhulp-header__tabs {
+  list-style: none;
+  margin: 0;
+  padding: var(--rvo-space-3xs);
+  display: inline-flex;
   align-items: center;
+  flex-wrap: wrap;
+  gap: var(--rvo-space-3xs);
+  background: rgb(255 255 255 / 0.08);
+  border: 1px solid rgb(255 255 255 / 0.12);
+  border-radius: 999px;
 }
 
-.tab-arrow {
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 0.75rem;
-  padding: 0 2px;
+.invulhulp-header__tab-arrow {
+  color: rgb(255 255 255 / 0.4);
+  font-size: var(--rvo-font-size-sm);
+  padding-inline: var(--rvo-space-3xs);
   user-select: none;
   flex-shrink: 0;
+  list-style: none;
+  display: inline-flex;
+  align-items: center;
+}
+.invulhulp-header__tab-arrow::before {
+  display: none;
+}
+
+/* Pill chips on the dark header */
+.invulhulp-header__tabs :deep(.rvo-tabs__item) {
+  list-style: none;
+  display: inline-flex;
+}
+.invulhulp-header__tabs :deep(.rvo-tabs__item)::before {
+  display: none;
+}
+
+/* Pill chip buttons — all colour rules use !important to beat both the
+   browser UA stylesheet (ButtonText) and the @media ≥600px rvo-tabs rules */
+.invulhulp-header__tabs :deep(.rvo-tabs__item-link) {
+  display: inline-flex;
+  align-items: center;
+  border: 0 !important;
+  background: transparent !important;
+  color: rgb(255 255 255 / 0.82) !important;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--rvo-font-size-sm);
+  font-weight: var(--rvo-font-weight-semibold);
+  white-space: nowrap;
+  padding: var(--rvo-space-2xs) var(--rvo-space-md);
+  border-radius: 999px;
+  margin-block-end: 0 !important;
+  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+}
+
+.invulhulp-header__tabs :deep(.rvo-tabs__item-link:hover) {
+  background: rgb(255 255 255 / 0.12) !important;
+  color: var(--rvo-color-wit) !important;
+}
+
+.invulhulp-header__tabs :deep(.rvo-tabs__item-link:focus-visible) {
+  outline: 2px solid var(--rvo-color-wit);
+  outline-offset: 2px;
+}
+
+.invulhulp-header__tabs :deep(.rvo-tabs__item-link--active) {
+  background: var(--rvo-color-wit) !important;
+  color: var(--rvo-color-lintblauw) !important;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
 }
 </style>

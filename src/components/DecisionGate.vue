@@ -1,15 +1,15 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm" style="padding-top: 32px; padding-bottom: 48px;">
+  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm decision-gate">
     <div class="rvo-layout-column rvo-layout-gap--xl">
 
       <div>
-        <p class="rvo-text rvo-text--sm" style="color: #666; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.5px;">Sectie 3 – Afweging</p>
-        <h1 class="rvo-heading rvo-heading--xl" style="color: #154273; margin: 0;">Beslissing: inzet AI-systeem</h1>
+        <p class="rvo-text rvo-text--sm decision-gate__kicker">Sectie 3 – Afweging</p>
+        <h1 class="rvo-heading rvo-heading--xl decision-gate__title">Beslissing: inzet AI-systeem</h1>
       </div>
 
       <!-- Risk level reminder -->
-      <div v-if="store.riskLevel" :class="`rvo-alert rvo-alert--${alertType}`" style="border-radius: 4px;">
-        <div class="rvo-alert__content">
+      <div v-if="store.riskLevel" class="rvo-alert rvo-alert--padding-md" :class="`rvo-alert--${alertType}`">
+        <div class="rvo-alert__container">
           <strong>Risicoclassificatie: {{ riskInfo?.label }}</strong><br />
           {{ riskInfo?.description }}
         </div>
@@ -27,9 +27,9 @@
       </div>
 
       <!-- Navigation -->
-      <div class="rvo-layout-row rvo-layout-gap--md" style="justify-content: space-between; border-top: 1px solid #e0e0e0; padding-top: 24px;">
-        <button @click="$emit('prev')" class="rvo-button rvo-button--secondary-action">
-          &larr; Vorige
+      <div class="rvo-layout-row rvo-layout-gap--md decision-gate__nav">
+        <button @click="$emit('prev')" class="rvo-button rvo-button--secondary">
+          ← Vorige
         </button>
         <button @click="onNext" class="rvo-button rvo-button--primary">
           {{ goAnswer === 'Ja, het systeem wordt ingezet' ? 'Naar Deel B – Implementatie →' : goAnswer === 'Nee, het systeem wordt niet ingezet' ? 'Naar samenvatting →' : 'Volgende →' }}
@@ -83,3 +83,27 @@ function onNext() {
   emit('next', go)
 }
 </script>
+
+<style scoped>
+.decision-gate {
+  padding-block: var(--rvo-space-2xl) var(--rvo-space-3xl);
+}
+
+.decision-gate__kicker {
+  color: var(--invulhulp-color-text-subtle);
+  margin: 0 0 var(--rvo-space-3xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.decision-gate__title {
+  color: var(--rvo-color-lintblauw);
+  margin: 0;
+}
+
+.decision-gate__nav {
+  justify-content: space-between;
+  border-block-start: 1px solid var(--invulhulp-color-border);
+  padding-block-start: var(--rvo-space-xl);
+}
+</style>

@@ -1,17 +1,17 @@
 <template>
-  <div style="min-height: 100vh; display: flex; flex-direction: column;">
+  <div class="assessment-shell">
     <AppHeader />
 
     <!-- Portal landing page (no form selected) -->
-    <main v-if="store.activeFormId === null" style="flex: 1; overflow-y: auto;">
+    <main v-if="store.activeFormId === null" class="assessment-shell__portal">
       <PortalPage @open="store.setActiveForm" />
     </main>
 
-    <div v-else-if="isLoading" style="display: flex; flex: 1; align-items: center; justify-content: center;">
-      <p class="rvo-text" style="color: #666;">Formulier laden...</p>
+    <div v-else-if="isLoading" class="assessment-shell__loading">
+      <p class="rvo-text assessment-shell__loading-text">Formulier laden...</p>
     </div>
 
-    <div v-else-if="formConfig" style="display: flex; flex: 1;">
+    <div v-else-if="formConfig" class="assessment-shell__layout">
       <!-- Sidebar (hidden on home) -->
       <SectionNav
         v-if="store.currentView !== 'home'"
@@ -19,11 +19,11 @@
         :nav-order="navOrder"
       />
 
-      <!-- Main content — padding-bottom leaves room for the fixed footer -->
-      <main style="flex: 1; overflow-y: auto; padding-bottom: 48px;">
+      <!-- Main content -->
+      <main class="assessment-shell__main">
 
         <!-- Home -->
-        <FormHomePage
+        <FormIntro
           v-if="store.currentView === 'home'"
           :form-config="formConfig"
           @start="startAssessment"
@@ -32,12 +32,11 @@
         <!-- AIIA-only: Forbidden onaanvaardbaar risk stop screen -->
         <div
           v-else-if="formConfig.features.riskClassification && store.riskLevel === 'onaanvaardbaar' && store.currentView !== 'risk'"
-          class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm"
-          style="padding-top: 48px; padding-bottom: 48px;"
+          class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm assessment-shell__forbidden"
         >
           <div class="rvo-layout-column rvo-layout-gap--xl">
-            <div class="rvo-alert rvo-alert--error" style="border-radius: 4px;">
-              <div class="rvo-alert__content">
+            <div class="rvo-alert rvo-alert--error rvo-alert--padding-md">
+              <div class="rvo-alert__container">
                 <strong>Dit AI-systeem is verboden</strong><br />
                 Op basis van de risicoclassificatie valt dit systeem in de categorie
                 <em>onaanvaardbaar risico</em> onder de EU AI-verordening (Art. 5).
@@ -45,7 +44,7 @@
               </div>
             </div>
             <div class="rvo-layout-row rvo-layout-gap--md">
-              <button @click="store.setCurrentView('risk')" class="rvo-button rvo-button--secondary-action">
+              <button @click="store.setCurrentView('risk')" class="rvo-button rvo-button--secondary">
                 Risicoclassificatie herzien
               </button>
               <button @click="store.setCurrentView('summary')" class="rvo-button rvo-button--primary">
@@ -101,7 +100,7 @@ import type { FormConfig, NavStepSubsections, NavStepSpecialView, Section } from
 import AppHeader from './AppHeader.vue'
 import AppFooter from './AppFooter.vue'
 import PortalPage from './PortalPage.vue'
-import FormHomePage from './FormHomePage.vue'
+import FormIntro from './FormIntro.vue'
 import SectionNav from './SectionNav.vue'
 import SectionView from './SectionView.vue'
 import RiskClassification from './RiskClassification.vue'
@@ -253,3 +252,42 @@ function onDecisionNext(go: boolean) {
   }
 }
 </script>
+
+<style scoped>
+.assessment-shell {
+  min-block-size: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.assessment-shell__portal {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.assessment-shell__loading {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+}
+
+.assessment-shell__loading-text {
+  color: var(--invulhulp-color-text-subtle);
+}
+
+.assessment-shell__layout {
+  display: flex;
+  flex: 1;
+}
+
+.assessment-shell__main {
+  flex: 1;
+  overflow-y: auto;
+  padding-block-end: var(--rvo-space-3xl);
+}
+
+.assessment-shell__forbidden {
+  padding-block: var(--rvo-space-3xl) var(--rvo-space-3xl);
+}
+</style>

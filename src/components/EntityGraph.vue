@@ -1,28 +1,58 @@
 <template>
-  <div class="entity-graph">
-    <div class="entity-graph-header">
+  <section :id="id" class="entity-graph" aria-labelledby="entity-graph-heading">
+    <div class="entity-graph__header">
       <div>
-        <h3 class="rvo-heading rvo-heading--md entity-graph-title">Entiteitengrafiek</h3>
-        <p class="rvo-text entity-graph-desc">
+        <h3 id="entity-graph-heading" class="rvo-heading rvo-heading--md entity-graph__title">
+          Entiteitengrafiek
+        </h3>
+        <p class="rvo-text rvo-text--sm entity-graph__desc">
           Verbindingen tussen entiteiten en brondocumenten. Entiteiten die in meerdere documenten voorkomen zijn extra groot weergegeven.
         </p>
       </div>
-      <button type="button" class="entity-graph-close" @click="$emit('close')">Sluiten</button>
+      <button
+        type="button"
+        class="rvo-button rvo-button--secondary rvo-button--size-sm"
+        @click="$emit('close')"
+      >
+        Sluiten
+      </button>
     </div>
 
-    <div class="entity-graph-controls">
-      <label v-for="cat in categories" :key="cat.key" class="entity-graph-filter">
-        <input type="checkbox" :checked="visible[cat.key]" @change="toggle(cat.key)" />
-        <span class="entity-graph-swatch" :style="{ background: cat.color }"></span>
+    <fieldset class="entity-graph__controls">
+      <legend class="invulhulp-visually-hidden">Categorieën filteren</legend>
+      <label v-for="cat in categories" :key="cat.key" class="entity-graph__filter">
+        <input
+          type="checkbox"
+          class="rvo-checkbox__input"
+          :checked="visible[cat.key]"
+          @change="toggle(cat.key)"
+        />
+        <span
+          class="entity-graph__swatch"
+          :style="{ background: cat.color }"
+          aria-hidden="true"
+        />
         {{ cat.label }}
       </label>
-    </div>
+    </fieldset>
 
-    <p v-if="!hasAnyEntities" class="entity-graph-empty">
+    <p v-if="!hasAnyEntities" class="entity-graph__empty rvo-text rvo-text--sm">
       Nog geen entiteiten beschikbaar — wacht tot indexering klaar is.
     </p>
-    <div v-show="hasAnyEntities" ref="graphContainer" class="entity-graph-canvas"></div>
-  </div>
+
+    <div
+      v-show="hasAnyEntities"
+      ref="graphContainer"
+      class="entity-graph__canvas"
+      role="img"
+      :aria-label="graphSummary"
+    />
+
+    <!-- Text alternative for screen readers -->
+    <ul v-if="hasAnyEntities" class="invulhulp-visually-hidden">
+      <li v-for="node in built.nodes" :key="node.id">{{ node.label }}</li>
+    </ul>
+  </section>
 </template>
 
 <script setup lang="ts">
@@ -31,7 +61,7 @@ import { Network } from 'vis-network/standalone'
 import { DataSet } from 'vis-data/standalone'
 import type { SourceDocument } from '../stores/assessmentStore'
 
-const props = defineProps<{ documents: SourceDocument[] }>()
+const props = defineProps<{ documents: SourceDocument[]; id?: string }>()
 defineEmits<{ close: [] }>()
 
 type CategoryKey = 'personen' | 'organisaties' | 'systemen' | 'datasoorten'
@@ -111,7 +141,6 @@ function build(): GraphData {
     }
   }
 
-  // Union-find clustering per category
   const parent = raws.map((_, i) => i)
   const find = (i: number): number => parent[i] === i ? i : (parent[i] = find(parent[i]))
   const union = (a: number, b: number) => { const ra = find(a), rb = find(b); if (ra !== rb) parent[ra] = rb }
@@ -120,13 +149,11 @@ function build(): GraphData {
     if (a.cat !== b.cat) return false
     if (a.base === b.base) return true
     const at = a.tokens, bt = b.tokens
-    // subset: one name's tokens fully contained in the other (e.g. "anouk" ⊂ "anouk de wit")
     const smaller = at.size <= bt.size ? at : bt
     const larger = at.size <= bt.size ? bt : at
     let contained = 0
     for (const t of smaller) if (larger.has(t)) contained++
     if (contained === smaller.size && smaller.size >= 1) return true
-    // shared ≥2 distinctive tokens
     if (contained >= 2) return true
     return false
   }
@@ -178,6 +205,12 @@ function build(): GraphData {
 const built = ref<GraphData>(build())
 const hasAnyEntities = computed(() => built.value.hasAny)
 
+const graphSummary = computed(() => {
+  const nodeCount = built.value.nodes.length
+  const edgeCount = built.value.edges.length
+  return `Grafiek met ${nodeCount} entiteit${nodeCount === 1 ? '' : 'en'} en ${edgeCount} verbinding${edgeCount === 1 ? '' : 'en'}.`
+})
+
 function render() {
   built.value = build()
   if (!graphContainer.value) return
@@ -221,61 +254,65 @@ watch(visible, render, { deep: true })
 
 <style scoped>
 .entity-graph {
-  margin-top: 1.5rem;
-  padding: 1.25rem;
-  border: 1px solid #d6d6d6;
-  border-radius: 8px;
-  background: #fafafa;
+  margin-block-start: var(--rvo-space-lg);
+  padding: var(--rvo-space-md);
+  border: 1px solid var(--invulhulp-color-border);
+  border-radius: var(--rvo-border-radius-md);
+  background: var(--rvo-color-grijs-050, #fafafa);
 }
-.entity-graph-header {
+
+.entity-graph__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
+  gap: var(--rvo-space-md);
+  margin-block-end: var(--rvo-space-sm);
 }
-.entity-graph-title { margin: 0 0 0.25rem 0; }
-.entity-graph-desc { margin: 0; color: #555; font-size: 0.9rem; }
-.entity-graph-close {
-  border: 1px solid #888;
-  background: white;
-  border-radius: 4px;
-  padding: 0.4rem 0.9rem;
-  cursor: pointer;
-  font-size: 0.9rem;
+
+.entity-graph__title { margin: 0 0 var(--rvo-space-3xs); }
+
+.entity-graph__desc {
+  margin: 0;
+  color: var(--invulhulp-color-text-subtle);
 }
-.entity-graph-close:hover { background: #efefef; }
-.entity-graph-controls {
+
+.entity-graph__controls {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem 1.25rem;
-  margin-bottom: 0.75rem;
+  gap: var(--rvo-space-sm) var(--rvo-space-md);
+  margin: 0 0 var(--rvo-space-sm);
+  padding: 0;
+  border: 0;
 }
-.entity-graph-filter {
+
+.entity-graph__filter {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.9rem;
+  gap: var(--rvo-space-2xs);
+  font-size: var(--rvo-font-size-sm);
   cursor: pointer;
   user-select: none;
 }
-.entity-graph-swatch {
+
+.entity-graph__swatch {
   display: inline-block;
-  width: 12px;
-  height: 12px;
+  inline-size: 12px;
+  block-size: 12px;
   border-radius: 50%;
-  border: 1px solid rgba(0,0,0,0.2);
+  border: 1px solid rgb(0 0 0 / 0.2);
 }
-.entity-graph-canvas {
-  width: 100%;
-  height: 560px;
-  background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 6px;
+
+.entity-graph__canvas {
+  inline-size: 100%;
+  block-size: 560px;
+  background: var(--rvo-color-wit);
+  border: 1px solid var(--invulhulp-color-border);
+  border-radius: var(--rvo-border-radius-md);
 }
-.entity-graph-empty {
-  margin: 1rem 0 0 0;
-  color: #666;
+
+.entity-graph__empty {
+  margin: var(--rvo-space-md) 0 0 0;
+  color: var(--invulhulp-color-text-subtle);
   font-style: italic;
 }
 </style>

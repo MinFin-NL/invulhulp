@@ -1,25 +1,42 @@
 <template>
-  <footer style="
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #FFF9C4;
-    color: #333;
-    border-top: 1px solid #F0E060;
-    z-index: 100;
-  ">
+  <footer class="invulhulp-footer" role="contentinfo" aria-label="Bèta-melding">
     <div
-      class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm"
-      style="padding: 10px 0;"
+      class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm invulhulp-footer__inner"
     >
-      <p style="font-size: 0.8rem; margin: 0; text-align: center;">
-        Dit is een bètaversie van dit hulpmiddel. Vragen of feedback?
-        <a
-          href="mailto:innovatiemanagamentfinancien@minfin.nl"
-          style="color: #154273; font-weight: 600;"
-        >innovatiemanagamentfinancien@minfin.nl</a>
-      </p>
+      <div class="rvo-alert rvo-alert--warning rvo-alert--padding-sm invulhulp-footer__alert">
+        <div class="rvo-alert__container">
+          <p class="rvo-text rvo-text--sm invulhulp-footer__text">
+            Dit is een bètaversie van dit hulpmiddel. Vragen of feedback?
+            <a
+              class="rvo-link"
+              href="mailto:innovatiemanagamentfinancien@minfin.nl"
+            >innovatiemanagamentfinancien@minfin.nl</a>
+          </p>
+        </div>
+      </div>
     </div>
   </footer>
 </template>
+
+<style scoped>
+.invulhulp-footer {
+  position: fixed;
+  inset-block-end: 0;
+  inset-inline: 0;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.invulhulp-footer__inner {
+  pointer-events: auto;
+  padding-block: var(--rvo-space-xs);
+}
+
+.invulhulp-footer__alert {
+  text-align: center;
+}
+
+.invulhulp-footer__text {
+  margin: 0;
+}
+</style>

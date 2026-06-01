@@ -1,5 +1,5 @@
 <template>
-  <div class="rvo-theme">
+  <div class="utrecht-document rvo-theme">
     <AssessmentForm />
   </div>
 </template>

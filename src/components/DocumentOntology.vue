@@ -94,22 +94,22 @@ const hasContent = computed(() => {
 
 <style scoped>
 .ontology {
-  margin-top: 6px;
-  border-top: 1px dashed #d4d8e0;
-  padding-top: 6px;
+  margin-block-start: var(--rvo-space-2xs);
+  border-block-start: 1px dashed var(--invulhulp-color-border);
+  padding-block-start: var(--rvo-space-2xs);
 }
 
 .ontology-toggle {
   background: none;
-  border: none;
-  padding: 4px 0;
+  border: 0;
+  padding: var(--rvo-space-3xs) 0;
   cursor: pointer;
-  font-size: 0.8rem;
-  color: #154273;
+  font-size: var(--rvo-font-size-sm);
+  color: var(--rvo-color-lintblauw);
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-weight: 500;
+  gap: var(--rvo-space-2xs);
+  font-weight: var(--rvo-font-weight-semibold);
 }
 
 .ontology-toggle:hover {
@@ -117,80 +117,80 @@ const hasContent = computed(() => {
 }
 
 .ontology-toggle-icon {
-  font-size: 0.7rem;
+  font-size: var(--rvo-font-size-xs);
 }
 
 .ontology-body {
-  margin-top: 8px;
-  padding: 10px 12px;
-  background: #f4f7fb;
-  border: 1px solid #d8e1ed;
-  border-radius: 4px;
-  font-size: 0.82rem;
-  color: #2a3a4f;
+  margin-block-start: var(--rvo-space-xs);
+  padding: var(--rvo-space-xs) var(--rvo-space-sm);
+  background: var(--rvo-color-hemelblauw-150);
+  border: 1px solid var(--rvo-color-hemelblauw-300);
+  border-radius: var(--rvo-border-radius-sm);
+  font-size: var(--rvo-font-size-sm);
+  color: var(--rvo-color-grijs-800);
 }
 
 .ontology-summary {
-  margin: 0 0 10px;
+  margin: 0 0 var(--rvo-space-xs);
   font-style: italic;
-  line-height: 1.45;
+  line-height: var(--rvo-line-height-md);
 }
 
 .ontology-row {
-  margin-bottom: 8px;
+  margin-block-end: var(--rvo-space-xs);
 }
 
 .ontology-row:last-child {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 
 .ontology-label {
   display: block;
-  font-size: 0.7rem;
+  font-size: var(--rvo-font-size-2xs);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-weight: 600;
-  color: #5a6d88;
-  margin-bottom: 4px;
+  font-weight: var(--rvo-font-weight-semibold);
+  color: var(--invulhulp-color-text-muted);
+  margin-block-end: var(--rvo-space-3xs);
 }
 
 .ontology-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px 6px;
+  gap: var(--rvo-space-3xs) var(--rvo-space-2xs);
 }
 
 .ontology-chip {
-  background: #e6edf6;
-  border: 1px solid #c8d4e3;
-  color: #154273;
+  background: var(--rvo-color-hemelblauw-150);
+  border: 1px solid var(--rvo-color-hemelblauw-300);
+  color: var(--rvo-color-lintblauw);
   border-radius: 999px;
   padding: 2px 9px;
-  font-size: 0.75rem;
+  font-size: var(--rvo-font-size-xs);
   line-height: 1.4;
 }
 
 .ontology-chip--ent {
-  background: #eaf3ec;
-  border-color: #bcd5c1;
-  color: #1a5b2e;
+  background: var(--rvo-color-groen-150);
+  border-color: var(--rvo-color-groen-300);
+  color: var(--rvo-color-groen-750);
 }
 
 .ontology-list {
   margin: 0;
-  padding-left: 18px;
-  line-height: 1.5;
+  padding-inline-start: var(--rvo-space-md);
+  line-height: var(--rvo-line-height-md);
 }
 
 .ontology-date {
-  color: #6b7a8c;
-  font-size: 0.75rem;
+  color: var(--invulhulp-color-text-subtle);
+  font-size: var(--rvo-font-size-xs);
 }
 
 .ontology-note {
-  margin: 8px 0 0;
-  font-size: 0.75rem;
-  color: #8a6d2e;
+  margin: var(--rvo-space-xs) 0 0;
+  font-size: var(--rvo-font-size-xs);
+  color: var(--rvo-color-oranje-750);
   font-style: italic;
 }
 </style>

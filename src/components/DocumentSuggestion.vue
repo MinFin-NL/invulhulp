@@ -1,91 +1,86 @@
 <template>
   <div v-if="documents.length > 0" class="doc-suggestion">
-    <div class="doc-header">
-      <span class="doc-label">Beschikbaar uit brondocumenten ({{ documents.length }})</span>
+    <div class="doc-suggestion__header">
+      <span class="doc-suggestion__label">
+        Beschikbaar uit brondocumenten ({{ documents.length }})
+      </span>
     </div>
 
     <!-- AI extraction panel -->
-    <div v-if="streamingText || suggestion !== null" class="doc-panel">
-      <div class="doc-panel-header">
-        <span class="suggestion-label">✦ Extractie uit brondocumenten</span>
-        <span v-if="rationale" class="suggestion-rationale">{{ rationale }}</span>
-      </div>
-
-      <!-- Live streaming view -->
-      <div v-if="isLoading" class="diff-view streaming-view">
-        <span v-if="streamingText">{{ streamingText }}<span class="streaming-cursor">▋</span></span>
-        <span v-else class="diff-no-changes">Verbinding maken…</span>
-      </div>
-
-      <!-- Final view -->
-      <template v-else-if="suggestion !== null">
-        <!-- Insufficient info -->
-        <div v-if="isInsufficient" class="diff-view diff-no-changes">
-          {{ suggestion }}
+    <div
+      v-if="streamingText || suggestion !== null"
+      class="rvo-alert rvo-alert--success rvo-alert--padding-sm doc-suggestion__panel"
+      :aria-busy="isLoading"
+    >
+      <div class="rvo-alert__container">
+        <div class="doc-suggestion__panel-header">
+          <span class="doc-suggestion__panel-label">✦ Extractie uit brondocumenten</span>
+          <span v-if="rationale" class="doc-suggestion__rationale">{{ rationale }}</span>
         </div>
 
-        <!-- Choice question (radio/checkbox): show suggested option as a pill -->
-        <div v-else-if="isChoiceType" class="choice-suggestion">
-          <div v-if="!matchedOption" class="diff-view diff-no-changes">
-            De AI stelde "{{ suggestion }}" voor, maar dit komt niet overeen met een van de beschikbare opties.
-          </div>
-          <template v-else>
-            <div class="choice-label">Voorgestelde keuze:</div>
-            <div class="choice-pill" :class="{ 'choice-pill--selected': isAlreadySelected }">
-              <span class="choice-pill-radio" aria-hidden="true">
-                <span v-if="isAlreadySelected" class="choice-pill-radio-dot"></span>
-              </span>
-              <span class="choice-pill-text">{{ matchedOption }}</span>
-              <span v-if="isAlreadySelected" class="choice-pill-current">(al geselecteerd)</span>
+        <!-- Live streaming view -->
+        <div v-if="isLoading" class="doc-diff doc-diff--streaming" aria-live="polite">
+          <span v-if="streamingText">{{ streamingText }}<span class="doc-diff__cursor" aria-hidden="true">▋</span></span>
+          <span v-else class="doc-diff__empty">Verbinding maken…</span>
+        </div>
+
+        <!-- Final view -->
+        <template v-else-if="suggestion !== null">
+          <div v-if="isInsufficient" class="doc-diff doc-diff__empty">{{ suggestion }}</div>
+
+          <div v-else-if="isChoiceType" class="doc-choice">
+            <div v-if="!matchedOption" class="doc-diff doc-diff__empty">
+              De AI stelde "{{ suggestion }}" voor, maar dit komt niet overeen met een van de beschikbare opties.
             </div>
-          </template>
-        </div>
+            <template v-else>
+              <div class="doc-choice__label">Voorgestelde keuze:</div>
+              <div class="doc-choice__pill" :class="{ 'doc-choice__pill--selected': isAlreadySelected }">
+                <span class="doc-choice__radio" aria-hidden="true">
+                  <span v-if="isAlreadySelected" class="doc-choice__radio-dot"></span>
+                </span>
+                <span class="doc-choice__text">{{ matchedOption }}</span>
+                <span v-if="isAlreadySelected" class="doc-choice__current">(al geselecteerd)</span>
+              </div>
+            </template>
+          </div>
 
-        <!-- Text question: diff view -->
-        <div v-else-if="noChanges" class="diff-view diff-no-changes">
-          Geen wijzigingen — het huidige antwoord dekt de documentinhoud al.
-        </div>
-        <div v-else class="diff-view" aria-label="Voorgestelde invulling">
-          <span
-            v-for="(part, i) in diffParts"
-            :key="i"
-            :class="part.added ? 'diff-add' : part.removed ? 'diff-del' : 'diff-eq'"
-          >{{ part.value }}</span>
-        </div>
+          <div v-else-if="noChanges" class="doc-diff doc-diff__empty">
+            Geen wijzigingen — het huidige antwoord dekt de documentinhoud al.
+          </div>
+          <div v-else class="doc-diff" aria-label="Voorgestelde invulling">
+            <span
+              v-for="(part, i) in diffParts"
+              :key="i"
+              :class="part.added ? 'doc-diff__add' : part.removed ? 'doc-diff__del' : ''"
+            >{{ part.value }}</span>
+          </div>
 
-        <!-- Action row -->
-        <div v-if="!isInsufficient" class="suggestion-actions">
-          <button
-            v-if="!isChoiceType || (matchedOption && !isAlreadySelected)"
-            type="button"
-            class="rvo-button rvo-button--primary"
-            style="font-size: 0.8rem; padding: 4px 12px;"
-            @click="acceptSuggestion"
-          >
-            {{ isChoiceType ? 'Selecteer deze optie' : 'Overnemen' }}
-          </button>
-          <button
-            type="button"
-            class="btn-reject"
-            style="font-size: 0.8rem;"
-            @click="rejectSuggestion"
-          >
-            {{ isChoiceType && isAlreadySelected ? 'Sluiten' : 'Afwijzen' }}
-          </button>
-        </div>
-        <div v-else class="suggestion-actions">
-          <button type="button" class="btn-reject" style="font-size: 0.8rem;" @click="rejectSuggestion">
-            Sluiten
-          </button>
-        </div>
-      </template>
+          <div class="doc-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
+            <button
+              v-if="!isInsufficient && (!isChoiceType || (matchedOption && !isAlreadySelected))"
+              type="button"
+              class="rvo-button rvo-button--primary rvo-button--size-sm"
+              @click="acceptSuggestion"
+            >
+              {{ isChoiceType ? 'Selecteer deze optie' : 'Overnemen' }}
+            </button>
+            <button
+              type="button"
+              class="rvo-button rvo-button--secondary rvo-button--size-sm"
+              @click="rejectSuggestion"
+            >
+              {{ isChoiceType && isAlreadySelected ? 'Sluiten' : 'Afwijzen' }}
+            </button>
+          </div>
+        </template>
+      </div>
     </div>
 
     <!-- Action button (hidden while streaming or when suggestion is shown) -->
-    <div v-if="canSuggest && suggestion === null && !streamingText" class="doc-actions">
+    <div v-if="canSuggest && suggestion === null && !streamingText" class="doc-suggestion__actions">
       <button
         type="button"
-        class="doc-btn doc-btn--ai"
+        class="rvo-button rvo-button--primary rvo-button--size-sm"
         :disabled="isLoading"
         @click="requestExtraction"
       >
@@ -95,7 +90,7 @@
       </button>
     </div>
 
-    <span v-if="error" class="improve-error" style="font-size: 0.8rem;">{{ error }}</span>
+    <span v-if="error" class="doc-suggestion__error rvo-text rvo-text--sm" role="alert">{{ error }}</span>
   </div>
 </template>
 
@@ -129,7 +124,6 @@ const isTextType = computed(() => props.questionType === 'text')
 const isChoiceType = computed(() => props.questionType === 'radio' || props.questionType === 'checkbox')
 const canSuggest = computed(() => isTextType.value || (isChoiceType.value && (props.questionOptions?.length ?? 0) > 0))
 
-// Match the LLM suggestion to one of the available options (case-insensitive)
 const matchedOption = computed((): string | null => {
   if (!isChoiceType.value || suggestion.value === null) return null
   const sug = suggestion.value.trim().toLowerCase()
@@ -138,7 +132,6 @@ const matchedOption = computed((): string | null => {
 
 const isAlreadySelected = computed(() => {
   if (!matchedOption.value) return false
-  // For radio, currentValue can include follow-up text after "\n---\n"
   const current = props.currentValue.split('\n---\n')[0]?.trim() ?? ''
   return current === matchedOption.value
 })
@@ -207,7 +200,6 @@ async function requestExtraction() {
 
 function acceptSuggestion() {
   if (suggestion.value === null) return
-  // For choice questions, emit the matched option (canonical form) so casing matches exactly
   const value = isChoiceType.value && matchedOption.value ? matchedOption.value : suggestion.value
   emit('apply-suggestion', value)
   suggestion.value = null
@@ -223,156 +215,135 @@ function rejectSuggestion() {
 
 <style scoped>
 .doc-suggestion {
-  margin-top: 12px;
-  border: 1px solid #d9c089;
-  border-radius: 6px;
-  background: #fdf8ec;
-  padding: 12px 14px;
-  font-size: 0.85rem;
+  margin-block-start: var(--rvo-space-sm);
+  border: 1px solid var(--rvo-color-donkergeel-300);
+  border-radius: var(--rvo-border-radius-md);
+  background: var(--rvo-color-donkergeel-150);
+  padding: var(--rvo-space-sm) var(--rvo-space-md);
+  font-size: var(--rvo-font-size-sm);
 }
 
-.doc-header {
+.doc-suggestion__header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: var(--rvo-space-xs);
+  margin-block-end: var(--rvo-space-xs);
 }
 
-.doc-label {
-  font-weight: 600;
-  color: #6b4e16;
-  font-size: 0.8rem;
+.doc-suggestion__label {
+  font-weight: var(--rvo-font-weight-semibold);
+  color: var(--rvo-color-oranje-750);
+  font-size: var(--rvo-font-size-xs);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
-.doc-actions {
+.doc-suggestion__panel {
+  margin-block: var(--rvo-space-2xs) var(--rvo-space-xs);
+}
+
+.doc-suggestion__panel-header {
   display: flex;
-  gap: 8px;
-  margin-top: 4px;
+  align-items: baseline;
+  gap: var(--rvo-space-xs);
+  margin-block-end: var(--rvo-space-xs);
   flex-wrap: wrap;
 }
 
-.doc-btn {
-  border: none;
-  border-radius: 4px;
-  padding: 5px 12px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  font-weight: 500;
-  transition: opacity 0.15s;
-}
-
-.doc-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.doc-btn--ai {
-  background: #8a6d2e;
-  color: white;
-}
-
-.doc-btn--ai:hover:not(:disabled) {
-  opacity: 0.88;
-}
-
-.doc-panel {
-  background: #f0faf4;
-  border: 1px solid #7ec8a0;
-  border-radius: 4px;
-  padding: 10px 12px;
-  margin-top: 4px;
-  margin-bottom: 10px;
-}
-
-.doc-panel-header {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.suggestion-label {
-  font-weight: 700;
-  font-size: 0.8rem;
-  color: #1a6b3a;
+.doc-suggestion__panel-label {
+  font-weight: var(--rvo-font-weight-bold);
+  font-size: var(--rvo-font-size-xs);
+  color: var(--rvo-color-groen-750);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
-.suggestion-rationale {
-  font-size: 0.75rem;
-  color: #3a7a52;
+.doc-suggestion__rationale {
+  font-size: var(--rvo-font-size-xs);
+  color: var(--rvo-color-groen-600);
   font-style: italic;
 }
 
-.diff-view {
-  font-size: 0.85rem;
-  line-height: 1.6;
+.doc-suggestion__actions {
+  margin-block-start: var(--rvo-space-xs);
+  align-items: center;
+}
+
+.doc-suggestion__error {
+  color: var(--rvo-color-rood);
+  margin-block-start: var(--rvo-space-2xs);
+  display: block;
+}
+
+.doc-diff {
+  font-size: var(--rvo-font-size-sm);
+  line-height: var(--rvo-line-height-md);
   white-space: pre-wrap;
   word-break: break-word;
-  background: #fafafa;
-  border-radius: 3px;
-  padding: 6px 8px;
-  margin-bottom: 8px;
+  background: var(--rvo-color-wit);
+  border-radius: var(--rvo-border-radius-sm);
+  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  margin-block-end: var(--rvo-space-xs);
 }
 
-.diff-no-changes {
-  color: #666;
+.doc-diff__empty {
+  color: var(--invulhulp-color-text-subtle);
   font-style: italic;
 }
 
-.diff-add {
-  background: #d4edda;
-  color: #155724;
+.doc-diff__cursor {
+  display: inline-block;
+  margin-inline-start: 2px;
+  color: var(--rvo-color-grijs-500);
+  animation: invulhulp-blink 1s steps(2, start) infinite;
 }
 
-.diff-del {
-  background: #f8d7da;
-  color: #721c24;
+.doc-diff__add {
+  background: var(--rvo-color-groen-150);
+  color: var(--rvo-color-groen-750);
+}
+
+.doc-diff__del {
+  background: var(--rvo-color-rood-150);
+  color: var(--rvo-color-rood-750);
   text-decoration: line-through;
 }
 
-.diff-eq {
-  color: #333;
+.doc-choice {
+  margin-block-end: var(--rvo-space-xs);
 }
 
-.choice-suggestion {
-  margin-bottom: 8px;
-}
-
-.choice-label {
-  font-size: 0.75rem;
-  color: #5a6d88;
-  font-weight: 500;
-  margin-bottom: 6px;
+.doc-choice__label {
+  font-size: var(--rvo-font-size-xs);
+  color: var(--invulhulp-color-text-muted);
+  font-weight: var(--rvo-font-weight-semibold);
+  margin-block-end: var(--rvo-space-2xs);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
-.choice-pill {
+.doc-choice__pill {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 14px;
-  background: white;
-  border: 2px solid #154273;
+  gap: var(--rvo-space-xs);
+  padding: var(--rvo-space-xs) var(--rvo-space-sm);
+  background: var(--rvo-color-wit);
+  border: 2px solid var(--rvo-color-lintblauw);
   border-radius: 999px;
-  font-size: 0.9rem;
-  color: #154273;
-  font-weight: 500;
+  font-size: var(--rvo-font-size-md);
+  color: var(--rvo-color-lintblauw);
+  font-weight: var(--rvo-font-weight-semibold);
 }
 
-.choice-pill--selected {
-  background: #e6f4ea;
-  border-color: #2e7d32;
-  color: #1b5e20;
+.doc-choice__pill--selected {
+  background: var(--rvo-color-groen-150);
+  border-color: var(--rvo-color-groen);
+  color: var(--rvo-color-groen-750);
 }
 
-.choice-pill-radio {
-  width: 16px;
-  height: 16px;
+.doc-choice__radio {
+  inline-size: 16px;
+  block-size: 16px;
   border-radius: 50%;
   border: 2px solid currentColor;
   display: inline-flex;
@@ -381,57 +352,16 @@ function rejectSuggestion() {
   flex-shrink: 0;
 }
 
-.choice-pill-radio-dot {
-  width: 7px;
-  height: 7px;
+.doc-choice__radio-dot {
+  inline-size: 7px;
+  block-size: 7px;
   background: currentColor;
   border-radius: 50%;
 }
 
-.choice-pill-text {
-  white-space: normal;
-}
-
-.choice-pill-current {
-  font-size: 0.75rem;
+.doc-choice__current {
+  font-size: var(--rvo-font-size-xs);
   font-style: italic;
-  color: #2e7d32;
-}
-
-.streaming-cursor {
-  display: inline-block;
-  margin-left: 2px;
-  color: #999;
-  animation: blink 1s steps(2, start) infinite;
-}
-
-@keyframes blink {
-  to { visibility: hidden; }
-}
-
-.suggestion-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.btn-reject {
-  background: none;
-  border: none;
-  color: #888;
-  cursor: pointer;
-  font-size: 0.8rem;
-  padding: 4px 8px;
-  text-decoration: underline;
-}
-
-.btn-reject:hover {
-  color: #333;
-}
-
-.improve-error {
-  color: #c0392b;
-  margin-top: 6px;
-  display: block;
+  color: var(--rvo-color-groen);
 }
 </style>

@@ -2,62 +2,91 @@
 @import '@nl-rvo/design-tokens/dist/index.css';
 @import '@nl-rvo/component-library-css/dist/index.css';
 
-/* IenW brand overrides */
-:root {
-  --rvo-color-primary: #154273;
-  --rvo-color-primary-hover: #0f3059;
+/* ── Project-wide aliases ────────────────────────────────────────────────── */
+/* RVO ships its color tokens scoped to .rvo-theme, so the aliases must live  */
+/* inside the same scope or they would resolve to `initial` (often black).    */
+.rvo-theme {
+  /* Legacy alias kept for any third-party consumers; canonical primary is lintblauw */
+  --rvo-color-primary: var(--rvo-color-lintblauw);
+
+  /* Project-internal aliases */
+  --invulhulp-color-mandatory: var(--rvo-color-hemelblauw);
+  --invulhulp-color-optional: var(--rvo-color-groen);
+  --invulhulp-color-page-bg: var(--rvo-color-grijs-100);
+  --invulhulp-color-border: var(--rvo-color-grijs-200);
+  --invulhulp-color-border-strong: var(--rvo-color-grijs-300);
+  --invulhulp-color-text-muted: var(--rvo-color-grijs-700);
+  --invulhulp-color-text-subtle: var(--rvo-color-grijs-600);
 }
 
 body {
   margin: 0;
-  background-color: #f5f5f5;
+  background-color: #f1f5f9; /* fallback before .rvo-theme mounts */
 }
 
-/* Question importance indicators */
-.question-mandatory {
-  border-left: 4px solid #0070bb;
-  padding-left: 12px;
+.rvo-theme {
+  background-color: var(--invulhulp-color-page-bg);
+  min-block-size: 100vh;
 }
 
-.question-optional {
-  border-left: 4px solid #39870c;
-  padding-left: 12px;
+/* ── Project utilities NL DS doesn't ship ────────────────────────────────── */
+
+.invulhulp-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-/* Risk level badges */
-.risk-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 4px;
-  font-weight: bold;
-  font-size: 0.875rem;
+.invulhulp-divider {
+  border: 0;
+  border-block-end: 1px solid var(--invulhulp-color-border);
+  margin-block: var(--rvo-space-md) 0;
 }
 
-.risk-onaanvaardbaar { background: #c0392b; color: white; }
-.risk-hoog { background: #e67e22; color: white; }
-.risk-beperkt { background: #2980b9; color: white; }
-.risk-minimaal { background: #27ae60; color: white; }
-
-/* Navigation sidebar */
-.nav-section {
-  padding: 6px 8px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.15s;
+.invulhulp-progress {
+  inline-size: 100%;
+  block-size: 10px;
+  appearance: none;
+  border: 1px solid var(--invulhulp-color-border-strong);
+  background-color: var(--rvo-color-grijs-200);
+  border-radius: var(--rvo-border-radius-md);
+  overflow: hidden;
 }
-.nav-section:hover { background: rgba(0,0,0,0.06); }
-.nav-section.active { background: rgba(21,66,115,0.12); font-weight: bold; }
-.nav-section.completed { color: #27ae60; }
-
-/* Progress bar */
-.progress-bar-fill {
-  height: 6px;
-  background: #154273;
-  border-radius: 3px;
-  transition: width 0.3s ease;
+.invulhulp-progress::-webkit-progress-bar {
+  background-color: var(--rvo-color-grijs-200);
+  border-radius: var(--rvo-border-radius-md);
+}
+.invulhulp-progress::-webkit-progress-value {
+  background-color: var(--rvo-color-lintblauw);
+  border-radius: var(--rvo-border-radius-md);
+  transition: inline-size 0.3s ease;
+}
+.invulhulp-progress::-moz-progress-bar {
+  background-color: var(--rvo-color-lintblauw);
+  border-radius: var(--rvo-border-radius-md);
 }
 
-/* ── Tiptap editor ─────────────────────────────────────────────────────────── */
+/* Inverse buttons for dark backgrounds (used in AppHeader). */
+[data-rvo-on-dark] .rvo-button--secondary,
+[data-rvo-on-dark] .rvo-button--tertiary {
+  --utrecht-button-background-color: transparent;
+  --utrecht-button-color: var(--rvo-color-wit);
+  --utrecht-button-border-color: rgb(255 255 255 / 0.6);
+}
+[data-rvo-on-dark] .rvo-button--secondary:hover,
+[data-rvo-on-dark] .rvo-button--tertiary:hover {
+  --utrecht-button-background-color: rgb(255 255 255 / 0.12);
+  --utrecht-button-border-color: var(--rvo-color-wit);
+}
+
+/* ── Tiptap (ProseMirror) baseline ───────────────────────────────────────── */
+/* ProseMirror is not an NL DS component; styling stays local but uses tokens. */
 
 .tiptap-wrapper {
   display: flex;
@@ -66,192 +95,38 @@ body {
 }
 
 .tiptap-editor {
-  width: 100%;
+  inline-size: 100%;
   box-sizing: border-box;
-  border: 1px solid #b3b3b3;
-  border-radius: 4px 4px 0 0;
-  background: white;
+  border: 1px solid var(--invulhulp-color-border-strong);
+  border-radius: var(--rvo-border-radius-sm) var(--rvo-border-radius-sm) 0 0;
+  background: var(--rvo-color-wit);
   transition: border-color 0.2s;
 }
 
 .tiptap-editor:focus-within {
-  border-color: #154273;
-  box-shadow: 0 0 0 2px rgba(21,66,115,0.2);
+  border-color: var(--rvo-color-lintblauw);
+  box-shadow: 0 0 0 2px rgb(21 66 115 / 0.2);
   outline: none;
 }
 
-/* The ProseMirror contenteditable div */
 .tiptap-editor .ProseMirror {
-  padding: 10px 12px;
-  min-height: 100px;
+  padding: var(--rvo-space-xs) var(--rvo-space-sm);
+  min-block-size: 100px;
   font-family: inherit;
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: var(--rvo-font-size-md);
+  line-height: var(--rvo-line-height-md);
   outline: none;
 }
 
-/* Placeholder text */
 .tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
-  color: #aaa;
+  color: var(--rvo-color-grijs-500);
   pointer-events: none;
   float: left;
-  height: 0;
+  block-size: 0;
 }
 
-/* ── Toolbar (Improve button) ──────────────────────────────────────────────── */
-
-.tiptap-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 6px 8px;
-  border: 1px solid #b3b3b3;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-  background: #fafafa;
-}
-
-.improve-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  font-size: 0.8125rem;
-  font-family: inherit;
-  font-weight: 500;
-  color: #154273;
-  background: white;
-  border: 1px solid #154273;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-.improve-btn:hover:not(:disabled) {
-  background: #154273;
-  color: white;
-}
-
-.improve-btn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-.improve-btn--loading {
-  opacity: 0.7;
-  cursor: wait;
-}
-
-.improve-error {
-  font-size: 0.8125rem;
-  color: #c0392b;
-}
-
-/* ── Suggestion / diff panel ───────────────────────────────────────────────── */
-
-.suggestion-panel {
-  border: 1px solid #b3b3b3;
-  border-top: none;
-  border-radius: 0 0 4px 4px;
-  background: #f8faff;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.suggestion-header {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.suggestion-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #154273;
-}
-
-.suggestion-rationale {
-  font-size: 0.8125rem;
-  color: #555;
-  font-style: italic;
-}
-
-/* Word-level diff display */
-.diff-view {
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  padding: 8px 10px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.diff-add {
-  background: #d4edda;
-  color: #155724;
-  border-radius: 2px;
-  padding: 0 1px;
-}
-
-.diff-del {
-  background: #f8d7da;
-  color: #721c24;
-  text-decoration: line-through;
-  border-radius: 2px;
-  padding: 0 1px;
-}
-
-.suggestion-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.suggestion-actions .btn-reject {
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 16px;
-  font-size: 1rem;
-  font-family: inherit;
-  font-weight: 500;
-  color: #154273;
-  background: white;
-  border: 2px solid #154273;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background 0.15s, color 0.15s;
-}
-
-.suggestion-actions .btn-reject:hover {
-  background: #154273;
-  color: white;
-}
-
-.diff-no-changes {
-  color: #555;
-  font-style: italic;
-}
-
-/* ── Streaming state ───────────────────────────────────────────────────────── */
-
-.streaming-view {
-  color: #333;
-}
-
-@keyframes blink {
+@keyframes invulhulp-blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
-}
-
-.streaming-cursor {
-  animation: blink 0.9s step-end infinite;
-  margin-left: 1px;
-  color: #154273;
 }

@@ -3,48 +3,54 @@
     <EditorContent :editor="editor" class="tiptap-editor" />
 
     <!-- Suggestion panel: visible while streaming or when a suggestion is ready -->
-    <div v-if="streamingText || suggestion !== null" class="suggestion-panel">
-      <div class="suggestion-header">
-        <span class="suggestion-label">AI-suggestie</span>
-        <span v-if="rationale" class="suggestion-rationale">{{ rationale }}</span>
+    <div
+      v-if="streamingText || suggestion !== null"
+      class="rvo-alert rvo-alert--info rvo-alert--padding-sm tiptap-suggestion"
+      :aria-busy="isLoading"
+    >
+      <div class="rvo-alert__container">
+        <div class="tiptap-suggestion__header">
+          <span class="tiptap-suggestion__label">AI-suggestie</span>
+          <span v-if="rationale" class="tiptap-suggestion__rationale">{{ rationale }}</span>
+        </div>
+
+        <!-- Live streaming view -->
+        <div v-if="isLoading" class="tiptap-diff tiptap-diff--streaming" aria-live="polite">
+          <span v-if="streamingText">{{ streamingText }}<span class="tiptap-diff__cursor" aria-hidden="true">▋</span></span>
+          <span v-else class="tiptap-diff__empty">Verbinding maken…</span>
+        </div>
+
+        <!-- Final diff view -->
+        <template v-else-if="suggestion !== null">
+          <div v-if="noChanges" class="tiptap-diff tiptap-diff__empty">
+            Geen wijzigingen voorgesteld – de tekst is al duidelijk genoeg.
+          </div>
+          <div v-else class="tiptap-diff" aria-label="Voorgestelde wijzigingen">
+            <span
+              v-for="(part, i) in diffParts"
+              :key="i"
+              :class="part.added ? 'tiptap-diff__add' : part.removed ? 'tiptap-diff__del' : ''"
+            >{{ part.value }}</span>
+          </div>
+
+          <div class="tiptap-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
+            <button
+              type="button"
+              class="rvo-button rvo-button--primary rvo-button--size-sm"
+              @click="acceptSuggestion"
+            >
+              Overnemen
+            </button>
+            <button
+              type="button"
+              class="rvo-button rvo-button--secondary rvo-button--size-sm"
+              @click="rejectSuggestion"
+            >
+              Afwijzen
+            </button>
+          </div>
+        </template>
       </div>
-
-      <!-- Live streaming view -->
-      <div v-if="isLoading" class="diff-view streaming-view">
-        <span v-if="streamingText">{{ streamingText }}<span class="streaming-cursor">▋</span></span>
-        <span v-else class="diff-no-changes">Verbinding maken…</span>
-      </div>
-
-      <!-- Final diff view -->
-      <template v-else-if="suggestion !== null">
-        <div v-if="noChanges" class="diff-view diff-no-changes">
-          Geen wijzigingen voorgesteld – de tekst is al duidelijk genoeg.
-        </div>
-        <div v-else class="diff-view" aria-label="Voorgestelde wijzigingen">
-          <span
-            v-for="(part, i) in diffParts"
-            :key="i"
-            :class="part.added ? 'diff-add' : part.removed ? 'diff-del' : 'diff-eq'"
-          >{{ part.value }}</span>
-        </div>
-
-        <div class="suggestion-actions">
-          <button
-            type="button"
-            class="rvo-button rvo-button--primary"
-            @click="acceptSuggestion"
-          >
-            Overnemen
-          </button>
-          <button
-            type="button"
-            class="btn-reject"
-            @click="rejectSuggestion"
-          >
-            Afwijzen
-          </button>
-        </div>
-      </template>
     </div>
 
     <!-- Toolbar row: improve button + error -->
@@ -53,14 +59,13 @@
         v-if="suggestion === null && !streamingText"
         type="button"
         :disabled="isLoading || !hasContent"
-        class="improve-btn"
-        :class="{ 'improve-btn--loading': isLoading }"
+        class="rvo-button rvo-button--tertiary rvo-button--size-sm"
         @click="requestImprovement"
       >
         <span v-if="isLoading">Bezig…</span>
         <span v-else>✦ Verbeter tekst</span>
       </button>
-      <span v-if="error" class="improve-error">{{ error }}</span>
+      <span v-if="error" class="tiptap-toolbar__error rvo-text rvo-text--sm" role="alert">{{ error }}</span>
     </div>
   </div>
 </template>
@@ -84,8 +89,6 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
-// ── Editor setup ─────────────────────────────────────────────────────────────
-
 const editor = useEditor({
   extensions: [
     StarterKit,
@@ -99,7 +102,6 @@ const editor = useEditor({
   },
 })
 
-// Keep editor in sync when modelValue changes from outside (e.g. store hydration)
 watch(
   () => props.modelValue,
   (newVal) => {
@@ -113,19 +115,14 @@ watch(
 
 onBeforeUnmount(() => editor.value?.destroy())
 
-// ── LLM improvement state ─────────────────────────────────────────────────────
-
 const suggestion = ref<string | null>(null)
 const rationale = ref('')
 const isLoading = ref(false)
 const error = ref('')
 const streamingRaw = ref('')
 
-const hasContent = computed(() => {
-  return (editor.value?.getText().trim().length ?? 0) > 0
-})
+const hasContent = computed(() => (editor.value?.getText().trim().length ?? 0) > 0)
 
-// Extract the content inside <verbeterd>…</verbeterd> for live display
 const streamingText = computed((): string => {
   if (!streamingRaw.value) return ''
   const afterOpen = streamingRaw.value.match(/<verbeterd>([\s\S]*)/i)
@@ -190,3 +187,88 @@ function rejectSuggestion() {
   error.value = ''
 }
 </script>
+
+<style scoped>
+.tiptap-suggestion {
+  border-radius: 0;
+  border-block-start: 0;
+}
+
+.tiptap-suggestion__header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--rvo-space-2xs);
+}
+
+.tiptap-suggestion__label {
+  font-size: var(--rvo-font-size-xs);
+  font-weight: var(--rvo-font-weight-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--rvo-color-lintblauw);
+}
+
+.tiptap-suggestion__rationale {
+  font-size: var(--rvo-font-size-sm);
+  color: var(--invulhulp-color-text-muted);
+  font-style: italic;
+}
+
+.tiptap-suggestion__actions {
+  margin-block-start: var(--rvo-space-xs);
+}
+
+.tiptap-diff {
+  font-size: var(--rvo-font-size-sm);
+  line-height: var(--rvo-line-height-md);
+  padding: var(--rvo-space-xs) var(--rvo-space-sm);
+  background: var(--rvo-color-wit);
+  border: 1px solid var(--invulhulp-color-border);
+  border-radius: var(--rvo-border-radius-sm);
+  white-space: pre-wrap;
+  word-break: break-word;
+  margin-block: var(--rvo-space-xs);
+}
+
+.tiptap-diff__empty {
+  color: var(--invulhulp-color-text-muted);
+  font-style: italic;
+}
+
+.tiptap-diff__cursor {
+  animation: invulhulp-blink 0.9s step-end infinite;
+  margin-inline-start: 1px;
+  color: var(--rvo-color-lintblauw);
+}
+
+.tiptap-diff__add {
+  background: var(--rvo-color-groen-150);
+  color: var(--rvo-color-groen-750);
+  border-radius: 2px;
+  padding-inline: 1px;
+}
+
+.tiptap-diff__del {
+  background: var(--rvo-color-rood-150);
+  color: var(--rvo-color-rood-750);
+  text-decoration: line-through;
+  border-radius: 2px;
+  padding-inline: 1px;
+}
+
+.tiptap-toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--rvo-space-xs);
+  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  border: 1px solid var(--invulhulp-color-border-strong);
+  border-block-start: 0;
+  border-radius: 0 0 var(--rvo-border-radius-sm) var(--rvo-border-radius-sm);
+  background: var(--rvo-color-grijs-050, #fafafa);
+}
+
+.tiptap-toolbar__error {
+  color: var(--rvo-color-rood);
+}
+</style>
