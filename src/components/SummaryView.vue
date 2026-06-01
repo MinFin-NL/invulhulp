@@ -92,7 +92,7 @@
               ></div>
               <div class="rvo-layout-column" style="gap: 4px; flex: 1;">
                 <p class="rvo-text rvo-text--sm" style="font-weight: 500; margin: 0; color: #333;">
-                  {{ question.id }}: {{ question.text }}
+                  {{ question.text }}
                 </p>
                 <p class="rvo-text rvo-text--sm" :style="{ color: hasAnswer(question.id) ? '#000' : '#999', fontStyle: hasAnswer(question.id) ? 'normal' : 'italic', margin: 0 }">
                   {{ formattedAnswer(question.id) }}
