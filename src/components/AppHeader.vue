@@ -122,6 +122,7 @@ function confirmReset() {
   margin: 0 -16px;
   padding: 0 16px;
   overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .tab-group {

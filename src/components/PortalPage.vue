@@ -76,7 +76,7 @@
             </button>
           </div>
           <p class="rvo-text docs-desc">
-            Upload achtergronddocumenten (notulen, brainstorms, agenda's) in .txt of .md formaat.
+            Upload achtergronddocumenten (notulen, brainstorms, agenda's) in .txt, .md, .docx of .xlsx formaat.
             Bij het invullen van een formulier kun je per vraag automatisch een antwoord laten extraheren uit deze documenten.
           </p>
         </div>
@@ -90,7 +90,7 @@
             <input
               ref="fileInput"
               type="file"
-              accept=".txt,.md,text/plain,text/markdown"
+              accept=".txt,.md,.docx,.xlsx,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
               multiple
               :disabled="isUploading"
               style="display: none;"
@@ -103,7 +103,7 @@
             <span v-if="isUploading">Bezig met inlezen…</span>
             <span v-else>Document(en) uploaden</span>
           </label>
-          <span class="docs-upload-hint">Klik op de knop om een of meer .txt / .md bestanden te kiezen</span>
+          <span class="docs-upload-hint">Klik op de knop om een of meer .txt / .md / .docx / .xlsx bestanden te kiezen</span>
         </div>
 
         <!-- Live status alerts (NL Design System) -->
@@ -267,18 +267,53 @@ async function onFilesSelected(e: Event) {
         ? `Inlezen van ${file.name} (${i + 1} van ${files.length})…`
         : `Inlezen van ${file.name}…`
 
-    if (file.size > MAX_DOC_BYTES) {
+    const ext = file.name.toLowerCase().split('.').pop() ?? ''
+    if (!['txt', 'md', 'docx', 'xlsx'].includes(ext)) {
+      errors.push(`${file.name}: alleen .txt, .md, .docx en .xlsx zijn toegestaan.`)
+      continue
+    }
+    // Size guard: text formats checked against MAX_DOC_BYTES; office formats are
+    // compressed, so we allow up to 4 MB raw and rely on the extracted-text length.
+    const isOffice = ext === 'docx' || ext === 'xlsx'
+    if (!isOffice && file.size > MAX_DOC_BYTES) {
       errors.push(`${file.name} is te groot (max 200 KB).`)
       continue
     }
-    const ext = file.name.toLowerCase().split('.').pop() ?? ''
-    if (!['txt', 'md'].includes(ext)) {
-      errors.push(`${file.name}: alleen .txt en .md zijn toegestaan.`)
+    if (isOffice && file.size > 4_000_000) {
+      errors.push(`${file.name} is te groot (max 4 MB voor .docx/.xlsx).`)
       continue
     }
     try {
-      const text = await file.text()
-      await store.addDocument(file.name, text)
+      let text: string
+      if (ext === 'docx') {
+        const mammoth = await import('mammoth/mammoth.browser')
+        const arrayBuffer = await file.arrayBuffer()
+        const result = await mammoth.extractRawText({ arrayBuffer })
+        text = result.value
+      } else if (ext === 'xlsx') {
+        const XLSX = await import('xlsx')
+        const arrayBuffer = await file.arrayBuffer()
+        const wb = XLSX.read(arrayBuffer, { type: 'array' })
+        const parts: string[] = []
+        for (const sheetName of wb.SheetNames) {
+          const sheet = wb.Sheets[sheetName]
+          const csv = XLSX.utils.sheet_to_csv(sheet, { blankrows: false })
+          if (csv.trim()) parts.push(`# ${sheetName}\n${csv}`)
+        }
+        text = parts.join('\n\n')
+      } else {
+        text = await file.text()
+      }
+      if (text.length > MAX_DOC_BYTES) {
+        errors.push(`${file.name}: tekstinhoud is te groot (max 200 KB na extractie).`)
+        continue
+      }
+      if (!text.trim()) {
+        errors.push(`${file.name}: geen tekst gevonden.`)
+        continue
+      }
+      const baseName = file.name.replace(/\.(docx|xlsx)$/i, '.txt')
+      await store.addDocument(baseName, text)
       addedNames.push(file.name)
     } catch {
       errors.push(`${file.name}: kon bestand niet inlezen.`)
