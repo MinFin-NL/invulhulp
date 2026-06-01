@@ -82,6 +82,8 @@ stages:
               BACKEND_APP: $(BACKEND_APP)
               RESOURCE_GROUP: $(RESOURCE_GROUP)
               CONTAINER_APP_ENV: $(CONTAINER_APP_ENV)
+              AZURE_OPENAI_EMBEDDING_ENDPOINT: $(AZURE_OPENAI_EMBEDDING_ENDPOINT)
+              AZURE_OPENAI_EMBEDDING_API_KEY: $(AZURE_OPENAI_EMBEDDING_API_KEY)
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
               scriptType: bash
@@ -97,8 +99,8 @@ stages:
                     --name "$BACKEND_APP" \
                     --resource-group "$RESOURCE_GROUP" \
                     --secrets \
-                      "openai-embedding-endpoint=$(AZURE_OPENAI_EMBEDDING_ENDPOINT)" \
-                      "openai-embedding-api-key=$(AZURE_OPENAI_EMBEDDING_API_KEY)"
+                      "openai-embedding-endpoint=${AZURE_OPENAI_EMBEDDING_ENDPOINT}" \
+                      "openai-embedding-api-key=${AZURE_OPENAI_EMBEDDING_API_KEY}"
 
                   az containerapp update \
                     --name "$BACKEND_APP" \
@@ -139,8 +141,8 @@ stages:
                     --secrets \
                       "openai-endpoint=" \
                       "openai-api-key=" \
-                      "openai-embedding-endpoint=$(AZURE_OPENAI_EMBEDDING_ENDPOINT)" \
-                      "openai-embedding-api-key=$(AZURE_OPENAI_EMBEDDING_API_KEY)" \
+                      "openai-embedding-endpoint=${AZURE_OPENAI_EMBEDDING_ENDPOINT}" \
+                      "openai-embedding-api-key=${AZURE_OPENAI_EMBEDDING_API_KEY}" \
                     --cpu 0.5 --memory 1.0Gi \
                     --min-replicas 1 --max-replicas 3
                 fi
