@@ -20,11 +20,16 @@
         <div class="rvo-alert__content">
           <strong>Verplichte vragen niet ingevuld ({{ unansweredMandatory.length }})</strong><br />
           De volgende verplichte vragen zijn nog niet beantwoord:
-          <ul style="margin: 8px 0 0; padding-left: 20px;">
-            <li v-for="q in unansweredMandatory" :key="q.id" class="rvo-text rvo-text--sm">
-              {{ q.id }}: {{ q.text.slice(0, 80) }}...
-            </li>
-          </ul>
+          <div v-for="group in unansweredGrouped" :key="group.sectionTitle" style="margin-top: 8px;">
+            <p class="rvo-text rvo-text--sm" style="margin: 4px 0; font-weight: 600;">
+              {{ group.sectionTitle }}
+            </p>
+            <ul style="margin: 0 0 8px; padding-left: 20px;">
+              <li v-for="q in group.questions" :key="q.id" class="rvo-text rvo-text--sm">
+                <em>{{ q.subsectionTitle }}</em> — {{ q.text }}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 
@@ -46,6 +51,9 @@
       <div class="rvo-layout-row rvo-layout-gap--md" style="flex-wrap: wrap;">
         <button @click="exportPdf" class="rvo-button rvo-button--primary">
           Download PDF rapport
+        </button>
+        <button @click="exportWord" class="rvo-button rvo-button--secondary">
+          Download Word rapport
         </button>
         <button @click="doExportJson" class="rvo-button rvo-button--secondary">
           Download JSON (hervatten)
@@ -103,6 +111,7 @@
 import { ref, computed } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { exportToPdf } from '../services/pdfExport'
+import { exportToWord } from '../services/wordExport'
 import { exportToJson, importFromJson } from '../services/dataExport'
 import type { FormConfig, Question } from '../models/Assessment'
 
@@ -123,11 +132,15 @@ const visibleSections = computed(() =>
   }),
 )
 
-const allQuestions = computed((): Question[] => {
-  const qs: Question[] = []
+type QuestionWithContext = Question & { sectionTitle: string; subsectionTitle: string }
+
+const allQuestions = computed((): QuestionWithContext[] => {
+  const qs: QuestionWithContext[] = []
   for (const section of visibleSections.value) {
     for (const sub of section.subsections) {
-      qs.push(...sub.questions)
+      for (const q of sub.questions) {
+        qs.push({ ...q, sectionTitle: section.title, subsectionTitle: sub.title })
+      }
     }
   }
   return qs
@@ -141,6 +154,19 @@ const unansweredMandatory = computed(() =>
     return !a || a.trim() === ''
   }),
 )
+
+const unansweredGrouped = computed(() => {
+  const groups: { sectionTitle: string; questions: QuestionWithContext[] }[] = []
+  for (const q of unansweredMandatory.value) {
+    let g = groups.find((x) => x.sectionTitle === q.sectionTitle)
+    if (!g) {
+      g = { sectionTitle: q.sectionTitle, questions: [] }
+      groups.push(g)
+    }
+    g.questions.push(q)
+  }
+  return groups
+})
 
 const riskInfo = computed(() =>
   store.riskLevel ? (props.formConfig.riskLevelInfo?.[store.riskLevel] ?? null) : null,
@@ -171,6 +197,16 @@ function formattedAnswer(id: string): string {
 
 function exportPdf() {
   exportToPdf(
+    store.answers,
+    props.formConfig,
+    store.riskLevel,
+    store.goDecision,
+    systemName.value || undefined,
+  )
+}
+
+function exportWord() {
+  exportToWord(
     store.answers,
     props.formConfig,
     store.riskLevel,
