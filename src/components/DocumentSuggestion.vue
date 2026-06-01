@@ -105,7 +105,7 @@ import { diffWords } from 'diff'
 import type { Change } from 'diff'
 import { storeToRefs } from 'pinia'
 import { useAssessmentStore } from '../stores/assessmentStore'
-import { extractFromDocumentsStream } from '../services/llmService'
+import { extractRagStream } from '../services/llmService'
 
 const props = defineProps<{
   targetQuestionText: string
@@ -119,7 +119,11 @@ const emit = defineEmits<{
 }>()
 
 const store = useAssessmentStore()
-const { documents } = storeToRefs(store)
+const { documents, sessionId } = storeToRefs(store)
+
+const readyDocIds = computed(() =>
+  documents.value.filter((d) => !d.indexing && d.chunkCount && d.chunkCount > 0).map((d) => d.id),
+)
 
 const isTextType = computed(() => props.questionType === 'text')
 const isChoiceType = computed(() => props.questionType === 'radio' || props.questionType === 'checkbox')
@@ -176,12 +180,13 @@ async function requestExtraction() {
   streamingRaw.value = ''
   rationale.value = ''
 
-  await extractFromDocumentsStream(
+  await extractRagStream(
     {
-      documents: documents.value.map((d) => ({ name: d.name, content: d.content })),
+      sessionId: sessionId.value,
       targetQuestion: props.targetQuestionText,
       options: props.questionOptions,
       questionType: props.questionType,
+      docIds: readyDocIds.value,
     },
     (chunk) => {
       streamingRaw.value += chunk

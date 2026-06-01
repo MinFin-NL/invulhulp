@@ -31,6 +31,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+import rag
+
 load_dotenv()
 
 CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")]
@@ -143,25 +145,46 @@ SYSTEM_PROMPT = (
 )
 
 EXTRACT_SYSTEM_PROMPT = (
-    "Je bent een assistent die helpt bij het invullen van compliance- en projectdocumenten "
-    "voor de Nederlandse overheid (Ministerie van Financiën - MinFin).\n\n"
-    "Je krijgt een of meer brondocumenten (bijvoorbeeld notulen, brainstorms of agenda's) "
-    "en een specifieke vraag uit een formulier. Jouw taak is om uit de brondocumenten de "
-    "relevante informatie te halen en daarmee een antwoord op de vraag te formuleren.\n\n"
-    "Regels:\n"
-    "1. Baseer je antwoord UITSLUITEND op feiten die expliciet in de brondocumenten staan. Verzin niks.\n"
-    "2. Als de brondocumenten onvoldoende informatie bevatten om de vraag te beantwoorden, "
-    "schrijf dan: 'Onvoldoende informatie in de brondocumenten.'\n"
-    "3. Schrijf in helder Nederlands, passend bij de toon van een compliance-document.\n"
-    "4. Vermeld in de toelichting uit welk(e) document(en) je de informatie hebt gehaald, "
-    "en bij een meerkeuzevraag ook waarom je voor die optie kiest.\n\n"
-    "Als bij de vraag een lijst met antwoordopties is meegegeven (meerkeuze):\n"
-    "- Kies precies één optie uit de lijst en geef die WOORDELIJK terug (exact dezelfde tekst).\n"
-    "- Wijk niet af van de gegeven opties, ook niet in spelling of hoofdletters.\n"
-    "- Als geen enkele optie past op basis van de brondocumenten, antwoord 'Onvoldoende informatie in de brondocumenten.'\n\n"
-    "Reageer uitsluitend in dit XML-formaat:\n"
+    "Je bent een assistent die ambtenaren van het Ministerie van Financiën helpt "
+    "bij het invullen van compliance- en projectdocumenten (zoals een AI Impact "
+    "Assessment, DPIA of projectplan).\n\n"
+    "Je krijgt een doelvraag uit een formulier en een set fragmenten die via "
+    "semantische zoekopdracht uit de brondocumenten zijn gehaald (notulen, "
+    "brainstorms, agenda's, projectplannen). Het zijn passages — niet de hele "
+    "documenten. Jouw taak is om met die fragmenten een passend antwoord op de "
+    "doelvraag te formuleren.\n\n"
+    "Regels voor de inhoud:\n"
+    "1. Baseer je antwoord UITSLUITEND op feiten die letterlijk in de fragmenten "
+    "staan. Verzin niks, vul niets aan met algemene kennis.\n"
+    "2. Wees concreet: gebruik specifieke namen, rollen, data, systemen, "
+    "afdelingen en datasoorten zoals ze in de fragmenten genoemd worden. "
+    "Vermijd vage formuleringen ('er is gesproken over...', 'er zijn risico's') "
+    "als de fragmenten concretere informatie bevatten.\n"
+    "3. Behoud kernbegrippen woordelijk (eigennamen, systeemnamen, juridische "
+    "termen, bedragen, datums). Parafraseer omliggende zinnen wel om bij de "
+    "toon van een formeel compliance-document te passen.\n"
+    "4. Als meerdere fragmenten tegenstrijdig zijn, kies de meest recente of "
+    "meest specifieke bron en vermeld dat kort in de toelichting.\n"
+    "5. Als de fragmenten de vraag niet of slechts gedeeltelijk dekken, "
+    "antwoord dan met: 'Onvoldoende informatie in de brondocumenten.' "
+    "Doe dat alleen als er écht geen bruikbaar fragment is — niet als de "
+    "informatie aanwezig maar onvolledig is (geef dan wat je wél hebt).\n"
+    "6. Schrijf in helder Nederlands, in de derde persoon, passend bij de toon "
+    "van een ambtelijk compliance-document.\n\n"
+    "Bij meerkeuzevragen (er staat een lijst antwoordopties bij de vraag):\n"
+    "- Kies precies één optie uit de lijst (of meerdere bij 'meerdere opties mogelijk') "
+    "en geef die WOORDELIJK terug — exact dezelfde tekst, spelling en hoofdletters.\n"
+    "- Wijk niet af van de gegeven opties.\n"
+    "- Als geen enkele optie past op basis van de fragmenten, antwoord "
+    "'Onvoldoende informatie in de brondocumenten.'\n\n"
+    "Toelichting:\n"
+    "- Noem in één zin welk(e) fragment(en) je hebt gebruikt (bv. 'fragment 1 uit "
+    "notulen-2026-04-12.md').\n"
+    "- Bij meerkeuze: geef in één zin de doorslaggevende reden voor je keuze.\n"
+    "- Bij tegenstrijdige fragmenten: vermeld kort welke je gevolgd hebt en waarom.\n\n"
+    "Reageer uitsluitend in dit XML-formaat (geen markdown, geen extra tekst):\n"
     "<suggestie>jouw antwoord hier</suggestie>\n"
-    "<toelichting>één zin over welk document(en) je hebt gebruikt en, bij meerkeuze, waarom je deze optie kiest</toelichting>"
+    "<toelichting>één à twee zinnen volgens bovenstaande richtlijnen</toelichting>"
 )
 
 SYNTHESIZE_SYSTEM_PROMPT = (
@@ -207,6 +230,34 @@ class ExtractRequest(BaseModel):
     target_question: str
     options: list[str] = []
     question_type: str = "text"
+
+
+class IndexDocumentRequest(BaseModel):
+    session_id: str
+    doc_id: str
+    name: str
+    content: str
+
+
+class IndexDocumentResponse(BaseModel):
+    doc_id: str
+    chunk_count: int
+    ontology: dict
+
+
+class RagExtractRequest(BaseModel):
+    session_id: str
+    target_question: str
+    options: list[str] = []
+    question_type: str = "text"
+    doc_ids: list[str] = []
+    top_k: int = 6
+
+
+def _embed_clients() -> dict:
+    if USE_AZURE:
+        return {"azure_client": _azure_client, "ollama_client": None}
+    return {"azure_client": None, "ollama_client": _ollama_client}
 
 
 def _improve_user_message(req: ImproveRequest) -> str:
@@ -356,6 +407,98 @@ async def extract_from_documents_stream(req: ExtractRequest) -> StreamingRespons
         raise HTTPException(status_code=400, detail="Doelvraag mag niet leeg zijn.")
     return StreamingResponse(
         _sse_stream(EXTRACT_SYSTEM_PROMPT, _extract_user_message(req), _parse_synthesize),
+        media_type="text/event-stream",
+        headers=_SSE_HEADERS,
+    )
+
+
+# ---------------------------------------------------------------------------
+# RAG endpoints
+# ---------------------------------------------------------------------------
+
+
+@app.post("/api/documents/index", response_model=IndexDocumentResponse)
+async def index_document(req: IndexDocumentRequest) -> IndexDocumentResponse:
+    if not req.content.strip():
+        raise HTTPException(status_code=400, detail="Document is leeg.")
+    try:
+        index_task = rag.index_document(
+            session_id=req.session_id,
+            doc_id=req.doc_id,
+            doc_name=req.name,
+            content=req.content,
+            **_embed_clients(),
+        )
+        ontology_task = rag.extract_ontology(req.name, req.content, chat)
+        index_result, ontology = await asyncio.gather(index_task, ontology_task)
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Indexering mislukt: {e}") from e
+    return IndexDocumentResponse(
+        doc_id=req.doc_id,
+        chunk_count=index_result["chunk_count"],
+        ontology=ontology,
+    )
+
+
+@app.delete("/api/documents/{doc_id}")
+async def remove_document(doc_id: str) -> dict:
+    rag.delete_document(doc_id)
+    return {"deleted": doc_id}
+
+
+@app.delete("/api/sessions/{session_id}")
+async def remove_session(session_id: str) -> dict:
+    rag.delete_session(session_id)
+    return {"deleted": session_id}
+
+
+def _rag_user_message(
+    target_question: str,
+    options: list[str],
+    question_type: str,
+    chunks: list[dict],
+) -> str:
+    options_block = ""
+    if options:
+        formatted = "\n".join(f"- {opt}" for opt in options)
+        kind = "meerdere opties mogelijk" if question_type == "checkbox" else "kies precies één optie"
+        options_block = (
+            f"\n\nDit is een meerkeuzevraag ({kind}). Beschikbare antwoordopties (kies woordelijk):\n{formatted}"
+        )
+
+    if not chunks:
+        excerpts_block = "(Geen relevante passages gevonden in de geïndexeerde documenten.)"
+    else:
+        excerpts_block = "\n\n".join(
+            f"=== Fragment {i + 1} — {c['doc_name']} (deel {c['chunk_index']}) ===\n{c['text'].strip()}"
+            for i, c in enumerate(chunks)
+        )
+
+    return (
+        f"Doelvraag waarvoor een antwoord nodig is:\n{target_question}"
+        f"{options_block}\n\n"
+        f"Relevante passages uit de brondocumenten:\n\n{excerpts_block}"
+    )
+
+
+@app.post("/api/extract/rag/stream")
+async def extract_rag_stream(req: RagExtractRequest) -> StreamingResponse:
+    if not req.target_question.strip():
+        raise HTTPException(status_code=400, detail="Doelvraag mag niet leeg zijn.")
+    try:
+        chunks = await rag.retrieve(
+            session_id=req.session_id,
+            query=req.target_question,
+            top_k=req.top_k,
+            doc_ids=req.doc_ids or None,
+            **_embed_clients(),
+        )
+    except Exception as e:
+        raise HTTPException(status_code=502, detail=f"Retrieval mislukt: {e}") from e
+
+    user_msg = _rag_user_message(req.target_question, req.options, req.question_type, chunks)
+    return StreamingResponse(
+        _sse_stream(EXTRACT_SYSTEM_PROMPT, user_msg, _parse_synthesize),
         media_type="text/event-stream",
         headers=_SSE_HEADERS,
     )

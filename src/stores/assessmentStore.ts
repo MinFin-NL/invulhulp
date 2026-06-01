@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Answers, RiskLevelValue } from '../models/Assessment'
+import { indexDocument, deleteDocument } from '../services/llmService'
 
 export type FormId = string
 
@@ -11,11 +12,30 @@ export interface FormState {
   goDecision: boolean | null
 }
 
+export interface DocumentOntology {
+  samenvatting?: string
+  onderwerpen?: string[]
+  entiteiten?: {
+    personen?: string[]
+    organisaties?: string[]
+    systemen?: string[]
+    datasoorten?: string[]
+  }
+  besluiten?: { tekst: string; datum?: string }[]
+  openstaande_vragen?: string[]
+  relaties?: { van: string; naar: string; type: string }[]
+  _parse_error?: boolean
+}
+
 export interface SourceDocument {
   id: string
   name: string
   content: string
   uploadedAt: number
+  indexing?: boolean
+  indexError?: string
+  chunkCount?: number
+  ontology?: DocumentOntology
 }
 
 function initialFormState(): FormState {
@@ -28,11 +48,19 @@ function initialFormState(): FormState {
   }
 }
 
+function generateSessionId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID()
+  }
+  return `s-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 export const useAssessmentStore = defineStore('assessment', {
   state: () => ({
     activeFormId: null as FormId | null,
     forms: {} as Record<FormId, FormState>,
     documents: [] as SourceDocument[],
+    sessionId: generateSessionId(),
   }),
 
   getters: {
@@ -95,17 +123,46 @@ export const useAssessmentStore = defineStore('assessment', {
       }
     },
 
-    addDocument(name: string, content: string) {
-      this.documents.push({
+    async addDocument(name: string, content: string): Promise<SourceDocument> {
+      const doc: SourceDocument = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         name,
         content,
         uploadedAt: Date.now(),
-      })
+        indexing: true,
+      }
+      this.documents.push(doc)
+
+      try {
+        const res = await indexDocument({
+          sessionId: this.sessionId,
+          docId: doc.id,
+          name,
+          content,
+        })
+        const stored = this.documents.find((d) => d.id === doc.id)
+        if (stored) {
+          stored.indexing = false
+          stored.chunkCount = res.chunkCount
+          stored.ontology = res.ontology
+        }
+      } catch (e) {
+        const stored = this.documents.find((d) => d.id === doc.id)
+        if (stored) {
+          stored.indexing = false
+          stored.indexError = e instanceof Error ? e.message : String(e)
+        }
+      }
+      return doc
     },
 
-    removeDocument(id: string) {
+    async removeDocument(id: string) {
       this.documents = this.documents.filter((d) => d.id !== id)
+      try {
+        await deleteDocument(id)
+      } catch {
+        // best-effort; UI removal already happened
+      }
     },
   },
 

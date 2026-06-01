@@ -76,16 +76,25 @@
             class="docs-item"
             :class="{ 'docs-item--new': recentlyAddedIds.has(doc.id) }"
           >
-            <div class="docs-item-info">
-              <span class="docs-item-check" aria-hidden="true">✓</span>
-              <div class="docs-item-text">
-                <span class="docs-item-name">{{ doc.name }}</span>
-                <span class="docs-item-meta">{{ formatSize(doc.content.length) }}</span>
+            <div class="docs-item-row">
+              <div class="docs-item-info">
+                <span class="docs-item-check" aria-hidden="true">✓</span>
+                <div class="docs-item-text">
+                  <span class="docs-item-name">{{ doc.name }}</span>
+                  <span class="docs-item-meta">
+                    {{ formatSize(doc.content.length) }}
+                    <template v-if="doc.indexing"> · indexeren…</template>
+                    <template v-else-if="doc.indexError"> · indexering mislukt</template>
+                    <template v-else-if="doc.chunkCount"> · {{ doc.chunkCount }} fragmenten</template>
+                  </span>
+                </div>
               </div>
+              <button type="button" class="docs-item-remove" @click="store.removeDocument(doc.id)">
+                Verwijderen
+              </button>
             </div>
-            <button type="button" class="docs-item-remove" @click="store.removeDocument(doc.id)">
-              Verwijderen
-            </button>
+            <DocumentOntology v-if="!doc.indexing && doc.ontology" :ontology="doc.ontology" />
+            <p v-else-if="doc.indexError" class="docs-item-error">{{ doc.indexError }}</p>
           </li>
         </ul>
         <p v-else-if="!isUploading" class="docs-empty">Nog geen documenten geüpload.</p>
@@ -127,6 +136,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
 import { useAssessmentStore } from '../stores/assessmentStore'
+import DocumentOntology from './DocumentOntology.vue'
 
 defineEmits<{ open: [id: string] }>()
 
@@ -176,7 +186,7 @@ async function onFilesSelected(e: Event) {
     }
     try {
       const text = await file.text()
-      store.addDocument(file.name, text)
+      await store.addDocument(file.name, text)
       addedNames.push(file.name)
     } catch {
       errors.push(`${file.name}: kon bestand niet inlezen.`)
@@ -450,13 +460,26 @@ const trackGroups = computed(() => {
 
 .docs-item {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 4px;
   padding: 8px 12px;
   background: #f8f9fb;
   border: 1px solid #e3e8ef;
   border-radius: 4px;
   transition: background 0.6s ease, border-color 0.6s ease;
+}
+
+.docs-item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.docs-item-error {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  color: #c0392b;
 }
 
 .docs-item--new {
