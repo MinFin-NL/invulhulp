@@ -454,7 +454,7 @@ async def index_document(req: IndexDocumentRequest) -> IndexDocumentResponse:
         ontology_task = rag.extract_ontology(req.name, req.content, chat)
         index_result, ontology = await asyncio.gather(index_task, ontology_task)
     except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Indexering mislukt: {e}") from e
+        raise HTTPException(status_code=502, detail=f"Indexering mislukt: [{type(e).__name__}] {e}") from e
     return IndexDocumentResponse(
         doc_id=req.doc_id,
         chunk_count=index_result["chunk_count"],
