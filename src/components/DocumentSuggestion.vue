@@ -242,10 +242,16 @@ function rejectSuggestion() {
   margin-block: var(--rvo-space-2xs) var(--rvo-space-xs);
 }
 
+.doc-suggestion__panel :deep(.rvo-alert__container) {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .doc-suggestion__panel-header {
   display: flex;
   align-items: baseline;
-  gap: var(--rvo-space-xs);
+  justify-content: space-between;
+  gap: var(--rvo-space-sm);
   margin-block-end: var(--rvo-space-xs);
   flex-wrap: wrap;
 }
@@ -256,12 +262,14 @@ function rejectSuggestion() {
   color: var(--rvo-color-groen-750);
   text-transform: uppercase;
   letter-spacing: 0.03em;
+  flex-shrink: 0;
 }
 
 .doc-suggestion__rationale {
   font-size: var(--rvo-font-size-xs);
   color: var(--rvo-color-groen-600);
   font-style: italic;
+  text-align: right;
 }
 
 .doc-suggestion__actions {
@@ -276,7 +284,7 @@ function rejectSuggestion() {
 }
 
 .doc-diff {
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--rvo-font-size-md);
   line-height: var(--rvo-line-height-md);
   white-space: pre-wrap;
   word-break: break-word;
