@@ -98,8 +98,8 @@ async def embed_texts(
         )
 
     async def _one(t: str) -> list[float]:
-        result = await asyncio.to_thread(
-            ollama_client.embeddings, model=OLLAMA_EMBEDDING_MODEL, prompt=t
+        result = await ollama_client.embeddings(
+            model=OLLAMA_EMBEDDING_MODEL, prompt=t
         )
         return list(result["embedding"])
 

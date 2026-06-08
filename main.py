@@ -31,6 +31,7 @@ import json
 import os
 import re
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
@@ -76,7 +77,7 @@ else:
 
     OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
     OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-    _ollama_client = ollama.Client(host=OLLAMA_BASE_URL)
+    _ollama_client = ollama.AsyncClient(host=OLLAMA_BASE_URL)
 
 
 async def chat(system: str, user: str) -> str:
@@ -93,13 +94,13 @@ async def chat(system: str, user: str) -> str:
         )
         return response.choices[0].message.content or ""
     else:
-        response = await asyncio.to_thread(
-            _ollama_client.chat,
+        response = await _ollama_client.chat(
             model=OLLAMA_MODEL,
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
+            keep_alive=-1,
         )
         return response.message.content
 
@@ -132,18 +133,44 @@ async def stream_chat(system: str, user: str) -> AsyncGenerator[str, None]:
             if chunk.choices and chunk.choices[0].delta.content:
                 yield chunk.choices[0].delta.content
     else:
-        response = await asyncio.to_thread(
-            _ollama_client.chat,
+        stream = await _ollama_client.chat(
             model=OLLAMA_MODEL,
             messages=[
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
+            stream=True,
+            keep_alive=-1,
         )
-        yield response.message.content
+        async for chunk in stream:
+            content = chunk.get("message", {}).get("content")
+            if content:
+                yield content
 
 
-app = FastAPI(title="AIIA PoC API", version="1.0.0")
+async def _warmup() -> None:
+    """Preload the model / warm the connection pool so the first real
+    request doesn't pay a cold-start penalty (TLS handshake for Azure,
+    model load into VRAM for Ollama)."""
+    try:
+        await chat("", "ping")
+    except Exception as e:
+        print(f"[warmup] chat warmup skipped: {e}")
+    try:
+        await rag.embed_texts(["ping"], **_embed_clients())
+    except Exception as e:
+        print(f"[warmup] embedding warmup skipped: {e}")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    # Run warmup in the background so startup isn't blocked.
+    task = asyncio.create_task(_warmup())
+    yield
+    task.cancel()
+
+
+app = FastAPI(title="AIIA PoC API", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
