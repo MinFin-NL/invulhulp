@@ -2,6 +2,7 @@
   "id": "quickscan",
   "version": "1.0",
   "title": "Quick scan BIO Baselinetoets",
+  "aiContext": "Dit is een Quick scan BIO Baselinetoets voor het Ministerie van Financiën: hiermee wordt het basisbeveiligingsniveau (BBN) bepaald op basis van beschikbaarheid, integriteit en vertrouwelijkheid, en wordt gescreend of een DPIA nodig is. Schrijf in informatiebeveiligings- en privacytermen.",
   "meta": {
     "homeComponent": "HomePage",
     "exportLabel": "Quick scan BIO",
@@ -48,38 +49,44 @@
               "id": "qs_a.organisatie",
               "text": "Organisatie",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             },
             {
               "id": "qs_a.afdeling",
               "text": "Afdeling",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             },
             {
               "id": "qs_a.systeemnaam",
               "text": "Naam van het proces of systeem",
               "guidance": "Beschrijf het object van de analyse: het systeem, de applicatie of het bedrijfsproces.",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             },
             {
               "id": "qs_a.opsteller",
               "text": "Naam en functie opsteller",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             },
             {
               "id": "qs_a.versienummer",
               "text": "Versienummer",
               "type": "text",
-              "importance": "optional"
+              "importance": "optional",
+              "format": "shorttext"
             },
             {
               "id": "qs_a.datum",
               "text": "Datum van de baselinetoets",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "date"
             }
           ]
         }

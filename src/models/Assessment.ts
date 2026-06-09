@@ -1,5 +1,8 @@
 export type QuestionType = 'text' | 'radio' | 'checkbox'
 export type QuestionImportance = 'mandatory' | 'optional'
+// Hint for AI extraction: tells the model (and client validation) what shape a
+// short text field should have. Untagged text fields are treated as 'longtext'.
+export type QuestionFormat = 'email' | 'phone' | 'date' | 'shorttext' | 'longtext'
 
 export interface Question {
   id: string
@@ -9,6 +12,7 @@ export interface Question {
   importance: QuestionImportance
   options?: string[]
   followUp?: string
+  format?: QuestionFormat
 }
 
 export interface Subsection {
@@ -102,6 +106,9 @@ export interface FormConfig {
   id: string
   version: string
   title: string
+  // One or two sentences describing the form's purpose, audience and tone,
+  // prepended to the AI extraction prompt so answers are framed correctly.
+  aiContext?: string
   meta: FormMeta
   features: FormFeatures
   navigation: NavStep[]

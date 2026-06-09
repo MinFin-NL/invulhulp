@@ -2,6 +2,7 @@
   "id": "aanbiedingsformulier",
   "version": "1.0",
   "title": "PPM Aanbiedingsformulier (Outline Businesscase)",
+  "aiContext": "Dit is een PPM-aanbiedingsformulier dat de outline business case voor een portfoliobesluit bij het Ministerie van Financiën beschrijft: nut en noodzaak, verwachte baten, kosten, risico's en planning van een initiatief. Schrijf zakelijk en onderbouwend.",
   "meta": {
     "homeComponent": "HomePage",
     "exportLabel": "Aanbiedingsformulier",
@@ -50,31 +51,36 @@
               "id": "aa_a.naam_project",
               "text": "Naam project / initiatief",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             },
             {
               "id": "aa_a.datum_aanmelden",
               "text": "Datum aanmelden",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "date"
             },
             {
               "id": "aa_a.naam_aanmelder",
               "text": "Naam aanmelder",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             },
             {
               "id": "aa_a.naam_projectleider",
               "text": "Naam projectleider",
               "type": "text",
-              "importance": "optional"
+              "importance": "optional",
+              "format": "shorttext"
             },
             {
               "id": "aa_a.naam_opdrachtgever",
               "text": "Naam opdrachtgever",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             }
           ]
         }

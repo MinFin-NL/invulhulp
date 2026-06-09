@@ -287,6 +287,13 @@ export const useAssessmentStore = defineStore('assessment', {
       return doc
     },
 
+    setAnswerForForm(formId: string, questionId: string, value: string | string[]) {
+      const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
+      if (!dossier) return
+      if (!dossier.forms[formId]) dossier.forms[formId] = initialFormState()
+      dossier.forms[formId].answers[questionId] = value
+    },
+
     async removeDocument(id: string) {
       const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
       if (!dossier) return

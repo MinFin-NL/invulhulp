@@ -2,6 +2,7 @@
   "id": "psa",
   "version": "1.0",
   "title": "Project Start Architectuur (PSA)",
+  "aiContext": "Dit is een Project Start Architectuur (PSA) voor het Ministerie van Financiën: het beschrijft de organisatie-, informatie-, applicatie- en technologielaag na afronding van het project, plus wet- en regelgeving, beveiliging en privacy. Schrijf in architectuur- en compliance-termen.",
   "meta": {
     "homeComponent": "HomePage",
     "exportLabel": "PSA",

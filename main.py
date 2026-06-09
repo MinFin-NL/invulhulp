@@ -75,7 +75,8 @@ if USE_AZURE:
 else:
     import ollama
 
-    OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
+    OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral")
+    # OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:14b")
     OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
     _ollama_client = ollama.AsyncClient(host=OLLAMA_BASE_URL)
 
@@ -85,12 +86,16 @@ async def chat(system: str, user: str) -> str:
     if USE_AZURE:
         is_reasoning_model = AZURE_DEPLOYMENT.startswith(("o1", "o3", "o4"))
         system_role = "developer" if is_reasoning_model else "system"
+        # Reasoning models reject an explicit temperature; everything else is
+        # pinned low so extraction is deterministic and stops inventing values.
+        extra = {} if is_reasoning_model else {"temperature": 0}
         response = await _azure_client.chat.completions.create(
             model=AZURE_DEPLOYMENT,
             messages=[
                 {"role": system_role, "content": system},
                 {"role": "user", "content": user},
             ],
+            **extra,
         )
         return response.choices[0].message.content or ""
     else:
@@ -101,6 +106,7 @@ async def chat(system: str, user: str) -> str:
                 {"role": "user", "content": user},
             ],
             keep_alive=-1,
+            options={"temperature": 0.1},
         )
         return response.message.content
 
@@ -128,6 +134,7 @@ async def stream_chat(system: str, user: str) -> AsyncGenerator[str, None]:
                 {"role": "user", "content": user},
             ],
             stream=True,
+            temperature=0,
         )
         async for chunk in stream:
             if chunk.choices and chunk.choices[0].delta.content:
@@ -141,6 +148,7 @@ async def stream_chat(system: str, user: str) -> AsyncGenerator[str, None]:
             ],
             stream=True,
             keep_alive=-1,
+            options={"temperature": 0.1},
         )
         async for chunk in stream:
             content = chunk.get("message", {}).get("content")
@@ -193,48 +201,91 @@ SYSTEM_PROMPT = (
     "<toelichting>één zin over wat je hebt verbeterd</toelichting>"
 )
 
-EXTRACT_SYSTEM_PROMPT = (
-    "Je bent een assistent die ambtenaren van het Ministerie van Financiën helpt "
-    "bij het invullen van compliance- en projectdocumenten (zoals een AI Impact "
-    "Assessment, DPIA of projectplan).\n\n"
-    "Je krijgt een doelvraag uit een formulier en een set fragmenten die via "
-    "semantische zoekopdracht uit de brondocumenten zijn gehaald (notulen, "
-    "brainstorms, agenda's, projectplannen). Het zijn passages — niet de hele "
-    "documenten. Jouw taak is om met die fragmenten een passend antwoord op de "
-    "doelvraag te formuleren.\n\n"
-    "Regels voor de inhoud:\n"
-    "1. Baseer je antwoord UITSLUITEND op feiten die letterlijk in de fragmenten "
-    "staan. Verzin niks, vul niets aan met algemene kennis.\n"
-    "2. Wees concreet: gebruik specifieke namen, rollen, data, systemen, "
-    "afdelingen en datasoorten zoals ze in de fragmenten genoemd worden. "
-    "Vermijd vage formuleringen ('er is gesproken over...', 'er zijn risico's') "
-    "als de fragmenten concretere informatie bevatten.\n"
-    "3. Behoud kernbegrippen woordelijk (eigennamen, systeemnamen, juridische "
-    "termen, bedragen, datums). Parafraseer omliggende zinnen wel om bij de "
-    "toon van een formeel compliance-document te passen.\n"
-    "4. Als meerdere fragmenten tegenstrijdig zijn, kies de meest recente of "
-    "meest specifieke bron en vermeld dat kort in de toelichting.\n"
-    "5. Als de fragmenten de vraag niet of slechts gedeeltelijk dekken, "
-    "antwoord dan met: 'Onvoldoende informatie in de brondocumenten.' "
-    "Doe dat alleen als er écht geen bruikbaar fragment is — niet als de "
-    "informatie aanwezig maar onvolledig is (geef dan wat je wél hebt).\n"
-    "6. Schrijf in helder Nederlands, in de derde persoon, passend bij de toon "
-    "van een ambtelijk compliance-document.\n\n"
-    "Bij meerkeuzevragen (er staat een lijst antwoordopties bij de vraag):\n"
-    "- Kies precies één optie uit de lijst (of meerdere bij 'meerdere opties mogelijk') "
-    "en geef die WOORDELIJK terug — exact dezelfde tekst, spelling en hoofdletters.\n"
-    "- Wijk niet af van de gegeven opties.\n"
-    "- Als geen enkele optie past op basis van de fragmenten, antwoord "
-    "'Onvoldoende informatie in de brondocumenten.'\n\n"
-    "Toelichting:\n"
-    "- Noem in één zin welk(e) fragment(en) je hebt gebruikt (bv. 'fragment 1 uit "
-    "notulen-2026-04-12.md').\n"
-    "- Bij meerkeuze: geef in één zin de doorslaggevende reden voor je keuze.\n"
-    "- Bij tegenstrijdige fragmenten: vermeld kort welke je gevolgd hebt en waarom.\n\n"
-    "Reageer uitsluitend in dit XML-formaat (geen markdown, geen extra tekst):\n"
-    "<suggestie>jouw antwoord hier</suggestie>\n"
-    "<toelichting>één à twee zinnen volgens bovenstaande richtlijnen</toelichting>"
+# The extraction system prompt is composed at request time from a short base
+# plus exactly ONE field-specific block. Smaller models (e.g. Mistral 7B) follow
+# a focused, relevant-only instruction set far more reliably than one long wall
+# of rules, so we never send blocks that don't apply to the current field.
+
+_EXTRACT_BASE = (
+    "Je helpt ambtenaren van het Ministerie van Financiën een formulier in te "
+    "vullen. Je krijgt één doelvraag en een set fragmenten uit brondocumenten "
+    "(notulen, brainstorms, agenda's). Beantwoord de doelvraag UITSLUITEND met "
+    "feiten die letterlijk in de fragmenten staan.\n\n"
+    "Harde regels:\n"
+    "1. Verzin niets en vul niets aan met algemene kennis.\n"
+    "2. Staat het antwoord niet letterlijk in de fragmenten? Antwoord dan exact: "
+    "'Onvoldoende informatie in de brondocumenten.' Gebruik NOOIT placeholders "
+    "zoals 'X', '[invullen]' of '…'.\n"
+    "3. Begin NOOIT met de vraag, een label of een herhaling van de vraag — geef "
+    "direct het antwoord.\n"
+    "4. Neem GEEN document-labels of koppen over ('Eerste gedachten:', "
+    "'Actiepunt:', 'Toelichting:'); parafraseer alleen de inhoud eronder.\n"
+    "5. Zet bronverwijzingen en uitleg ALLEEN in <toelichting>, nooit in <suggestie>.\n\n"
 )
+
+_EXTRACT_FORMAT_BLOCKS = {
+    "email": (
+        "Dit veld vraagt om een E-MAILADRES. Geef uitsluitend één e-mailadres in "
+        "de vorm naam@domein.nl, zonder label of extra tekst.\n"
+        "  Fout: 'E-mailadres: anouk.dewit@belastingdienst.nl'   Fout: 'Anouk de Wit'\n"
+        "  Goed: 'anouk.dewit@belastingdienst.nl'\n"
+        "Staat er geen geldig e-mailadres in de fragmenten? Antwoord dan "
+        "'Onvoldoende informatie in de brondocumenten.' — geef NOOIT een naam of "
+        "iets anders als vervanging.\n\n"
+    ),
+    "phone": (
+        "Dit veld vraagt om een TELEFOONNUMMER. Geef uitsluitend één geldig "
+        "telefoonnummer (cijfers, eventueel met spaties of een +), zonder label.\n"
+        "  Fout: 'Telefoonnummer: Anouk de Wit'   Goed: '06-12345678'\n"
+        "Staat er geen telefoonnummer in de fragmenten? Antwoord dan "
+        "'Onvoldoende informatie in de brondocumenten.'\n\n"
+    ),
+    "shorttext": (
+        "Dit is een KORT feitelijk veld (bijv. naam, afdeling, datum). Geef "
+        "uitsluitend de gevraagde waarde, zonder label en zonder extra zin.\n"
+        "  Fout: 'Naam opdrachtgever: Belastingdienst'   Goed: 'Belastingdienst'\n\n"
+    ),
+    "date": (
+        "Dit veld vraagt om een DATUM. Geef uitsluitend de datum zoals die in de "
+        "fragmenten staat, zonder label of extra tekst.\n\n"
+    ),
+    "longtext": (
+        "Schrijf een samenhangend antwoord van één of meer alinea's in formele, "
+        "ambtelijke stijl en in de derde persoon. Wees concreet: gebruik de "
+        "namen, systemen, bedragen en data uit de fragmenten. Sluit af zodra de "
+        "inhoud volledig is — herhaal niets en voeg geen samenvattende slotzin toe.\n\n"
+    ),
+    "choice": (
+        "Dit is een MEERKEUZEVRAAG. Kies uit de lijst antwoordopties bij de vraag "
+        "en geef de gekozen optie(s) WOORDELIJK terug — exact dezelfde tekst, "
+        "spelling en hoofdletters. Wijk niet af van de gegeven opties. Past geen "
+        "enkele optie op basis van de fragmenten, antwoord dan 'Onvoldoende "
+        "informatie in de brondocumenten.'\n\n"
+    ),
+}
+
+_EXTRACT_OUTPUT = (
+    "Reageer uitsluitend in dit XML-formaat (geen markdown, geen tekst buiten de tags):\n"
+    "<suggestie>jouw antwoord hier</suggestie>\n"
+    "<toelichting>één zin: welk(e) fragment(en) je gebruikte</toelichting>"
+)
+
+
+def _resolve_format(question_type: str, field_format: str) -> str:
+    """Pick which field-specific block applies to the current field."""
+    if question_type in ("radio", "checkbox"):
+        return "choice"
+    if field_format in _EXTRACT_FORMAT_BLOCKS:
+        return field_format
+    return "longtext"
+
+
+def _build_extract_system_prompt(
+    question_type: str, field_format: str, form_context: str
+) -> str:
+    context = f"Context van dit formulier: {form_context.strip()}\n\n" if form_context.strip() else ""
+    block = _EXTRACT_FORMAT_BLOCKS[_resolve_format(question_type, field_format)]
+    return context + _EXTRACT_BASE + block + _EXTRACT_OUTPUT
 
 SYNTHESIZE_SYSTEM_PROMPT = (
     "Je bent een assistent die helpt bij het invullen van projectmanagement- en compliance-documenten "
@@ -279,6 +330,8 @@ class ExtractRequest(BaseModel):
     target_question: str
     options: list[str] = []
     question_type: str = "text"
+    field_format: str = ""
+    form_context: str = ""
 
 
 class IndexDocumentRequest(BaseModel):
@@ -297,8 +350,11 @@ class IndexDocumentResponse(BaseModel):
 class RagExtractRequest(BaseModel):
     session_id: str
     target_question: str
+    guidance: str = ""
     options: list[str] = []
     question_type: str = "text"
+    field_format: str = ""
+    form_context: str = ""
     doc_ids: list[str] = []
     top_k: int = 6
 
@@ -357,6 +413,95 @@ def _parse_synthesize(raw: str) -> tuple[str, str]:
     m_s = re.search(r"<suggestie>(.*?)</suggestie>", raw, re.DOTALL | re.IGNORECASE)
     m_r = re.search(r"<toelichting>(.*?)</toelichting>", raw, re.DOTALL | re.IGNORECASE)
     return (m_s.group(1).strip() if m_s else ""), (m_r.group(1).strip() if m_r else "")
+
+
+_EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
+_PHONE_RE = re.compile(r"(?:\+?\d[\d\s().-]{6,}\d)")
+# Leading "Label:" / "Label -" prefix that weak models tend to echo back.
+_LABEL_PREFIX_RE = re.compile(r"^\s*[\wÀ-ÿ /()&'\".-]{1,60}?\s*[:–-]\s+")
+# A source-reference line that belongs in <toelichting>, not in the answer.
+_BRON_LINE_RE = re.compile(r"^\s*(bron|fragment\b|=== fragment).*$", re.IGNORECASE)
+# Literal placeholders the model sometimes copies straight from the XML template.
+_PLACEHOLDERS = {
+    "jouw antwoord hier",
+    "jouw verbeterde versie hier",
+    "antwoord hier",
+    "[invullen]",
+}
+
+
+def _digits(s: str) -> str:
+    return re.sub(r"\D", "", s)
+
+
+def _grounded(value: str, source_text: str) -> bool:
+    """True if the value verifiably appears in the retrieved source text. Used
+    only for short factual fields, where a value that isn't literally present is
+    almost certainly hallucinated (e.g. a stereotyped dummy phone number)."""
+    if not source_text:
+        return True  # nothing to check against — don't over-reject
+    return value.lower() in source_text.lower()
+
+
+def _validate_suggestion(
+    suggestion: str,
+    field_format: str,
+    question_text: str,
+    options: list[str],
+    source_text: str = "",
+) -> str:
+    """Deterministic safety net: strip leaked labels/template text and reject
+    values that don't match the field's expected shape or aren't grounded in the
+    source. Returns "" to blank the field, which the frontend maps to "leave
+    empty" — far safer than a confidently wrong value."""
+    text = suggestion.strip()
+    if not text or "onvoldoende informatie" in text.lower():
+        return ""
+    if text.lower().strip(".") in _PLACEHOLDERS:
+        return ""
+
+    # Multiple-choice answers must match an option verbatim; leave the wording
+    # to mapSuggestionToAnswer on the client and don't strip here.
+    if options:
+        return text
+
+    # Drop a leaked "Label:" prefix or a verbatim echo of the question.
+    stripped = _LABEL_PREFIX_RE.sub("", text, count=1).strip()
+    if stripped:
+        text = stripped
+    if question_text and text.lower().startswith(question_text.strip().lower()):
+        text = text[len(question_text.strip()):].lstrip(" :–-").strip()
+
+    if field_format == "email":
+        m = _EMAIL_RE.search(text)
+        value = m.group(0) if m else ""
+        return value if value and _grounded(value, source_text) else ""
+    if field_format == "phone":
+        m = _PHONE_RE.search(text)
+        value = m.group(0).strip() if m else ""
+        if not value:
+            return ""
+        # Compare on digits only so "06-21458877" matches "06 21458877" etc.
+        return value if (not source_text or _digits(value) in _digits(source_text)) else ""
+    if field_format in ("shorttext", "date"):
+        return text if _grounded(text, source_text) else ""
+
+    # Descriptive (longtext) fields: drop any leaked source-reference lines.
+    lines = [ln for ln in text.splitlines() if not _BRON_LINE_RE.match(ln)]
+    return "\n".join(lines).strip() or ""
+
+
+def _make_extract_parser(
+    field_format: str, question_text: str, options: list[str], source_text: str = ""
+):
+    def parse(raw: str) -> tuple[str, str]:
+        suggestion, rationale = _parse_synthesize(raw)
+        return (
+            _validate_suggestion(suggestion, field_format, question_text, options, source_text),
+            rationale,
+        )
+
+    return parse
 
 
 _SSE_HEADERS = {"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
@@ -438,11 +583,16 @@ async def extract_from_documents(req: ExtractRequest) -> ImproveResponse:
         raise HTTPException(status_code=400, detail="Geen brondocumenten opgegeven.")
     if not req.target_question.strip():
         raise HTTPException(status_code=400, detail="Doelvraag mag niet leeg zijn.")
+    system_prompt = _build_extract_system_prompt(req.question_type, req.field_format, req.form_context)
+    source_text = "\n".join(doc.content for doc in req.documents)
     try:
-        raw = await chat(EXTRACT_SYSTEM_PROMPT, _extract_user_message(req))
+        raw = await chat(system_prompt, _extract_user_message(req))
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"LLM fout: {e}") from e
     suggestion, rationale = _parse_synthesize(raw)
+    suggestion = _validate_suggestion(
+        suggestion, req.field_format, req.target_question, req.options, source_text
+    )
     if not suggestion:
         raise HTTPException(status_code=500, detail="Kon geen suggestie genereren.")
     return ImproveResponse(suggestion=suggestion, rationale=rationale)
@@ -454,8 +604,11 @@ async def extract_from_documents_stream(req: ExtractRequest) -> StreamingRespons
         raise HTTPException(status_code=400, detail="Geen brondocumenten opgegeven.")
     if not req.target_question.strip():
         raise HTTPException(status_code=400, detail="Doelvraag mag niet leeg zijn.")
+    system_prompt = _build_extract_system_prompt(req.question_type, req.field_format, req.form_context)
+    source_text = "\n".join(doc.content for doc in req.documents)
+    parse_fn = _make_extract_parser(req.field_format, req.target_question, req.options, source_text)
     return StreamingResponse(
-        _sse_stream(EXTRACT_SYSTEM_PROMPT, _extract_user_message(req), _parse_synthesize),
+        _sse_stream(system_prompt, _extract_user_message(req), parse_fn),
         media_type="text/event-stream",
         headers=_SSE_HEADERS,
     )
@@ -495,6 +648,18 @@ async def remove_document(doc_id: str) -> dict:
     return {"deleted": doc_id}
 
 
+class VerifyDocumentsRequest(BaseModel):
+    session_id: str
+    doc_ids: list[str]
+
+
+@app.post("/api/documents/verify")
+async def verify_documents(req: VerifyDocumentsRequest) -> dict:
+    """Return which doc_ids are actually present in the vector store."""
+    found = rag.get_indexed_doc_ids(req.session_id, req.doc_ids)
+    return {"found": found, "missing": [d for d in req.doc_ids if d not in found]}
+
+
 @app.delete("/api/sessions/{session_id}")
 async def remove_session(session_id: str) -> dict:
     rag.delete_session(session_id)
@@ -503,10 +668,22 @@ async def remove_session(session_id: str) -> dict:
 
 def _rag_user_message(
     target_question: str,
+    guidance: str,
     options: list[str],
     question_type: str,
     chunks: list[dict],
 ) -> str:
+    # Guidance is shown as an explicit instruction block so the model treats it
+    # as a format directive, not as content to copy into the answer.
+    if guidance.strip():
+        question_block = (
+            f"[SCHRIJFRICHTLIJN — neem deze tekst NIET op in je antwoord]\n"
+            f"{guidance}\n\n"
+            f"Doelvraag: {target_question}"
+        )
+    else:
+        question_block = f"Doelvraag: {target_question}"
+
     options_block = ""
     if options:
         formatted = "\n".join(f"- {opt}" for opt in options)
@@ -524,8 +701,7 @@ def _rag_user_message(
         )
 
     return (
-        f"Doelvraag waarvoor een antwoord nodig is:\n{target_question}"
-        f"{options_block}\n\n"
+        f"{question_block}{options_block}\n\n"
         f"Relevante passages uit de brondocumenten:\n\n{excerpts_block}"
     )
 
@@ -545,9 +721,12 @@ async def extract_rag_stream(req: RagExtractRequest) -> StreamingResponse:
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Retrieval mislukt: {e}") from e
 
-    user_msg = _rag_user_message(req.target_question, req.options, req.question_type, chunks)
+    user_msg = _rag_user_message(req.target_question, req.guidance, req.options, req.question_type, chunks)
+    system_prompt = _build_extract_system_prompt(req.question_type, req.field_format, req.form_context)
+    source_text = "\n".join(c["text"] for c in chunks)
+    parse_fn = _make_extract_parser(req.field_format, req.target_question, req.options, source_text)
     return StreamingResponse(
-        _sse_stream(EXTRACT_SYSTEM_PROMPT, user_msg, _parse_synthesize),
+        _sse_stream(system_prompt, user_msg, parse_fn),
         media_type="text/event-stream",
         headers=_SSE_HEADERS,
     )

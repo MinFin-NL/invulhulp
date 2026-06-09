@@ -29,7 +29,8 @@
 
 .invulhulp-footer__inner {
   pointer-events: auto;
-  padding-block: var(--rvo-space-xs);
+  padding-block: 3px;
+  padding-inline: var(--rvo-space-md);
 }
 
 .invulhulp-footer__alert {

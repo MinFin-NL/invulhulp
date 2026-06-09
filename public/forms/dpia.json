@@ -2,6 +2,7 @@
   "id": "dpia",
   "version": "1.0",
   "title": "Data Protection Impact Assessment",
+  "aiContext": "Dit is een volledige Data Protection Impact Assessment (DPIA) volgens artikel 35 AVG voor het Ministerie van Financiën: beschrijving van de verwerking, rechtmatigheid, noodzaak en proportionaliteit, risico's voor betrokkenen en mitigerende maatregelen. Schrijf juridisch nauwkeurig in AVG-terminologie.",
   "meta": {
     "homeComponent": "DpiaHomePage",
     "exportLabel": "DPIA",

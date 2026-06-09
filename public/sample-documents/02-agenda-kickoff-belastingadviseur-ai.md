@@ -3,6 +3,8 @@
 **Datum:** 8 april 2026, 10:00–12:00
 **Locatie:** Hofzaal, MinFin Den Haag (hybride)
 **Voorzitter:** Sanne Dijkstra (productowner)
+**Opdrachtgever:** Belastingdienst, Directie Particulieren
+**Aanspreekpunt project:** Anouk de Wit (architect) — anouk.dewit@belastingdienst.nl, 06-21458877
 
 ## Doel van de meeting
 

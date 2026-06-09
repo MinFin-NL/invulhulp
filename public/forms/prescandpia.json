@@ -2,6 +2,7 @@
   "id": "prescandpia",
   "version": "1.0",
   "title": "Prescan DPIA",
+  "aiContext": "Dit is een Prescan DPIA voor het Ministerie van Financiën: een snelle toets die op basis van risicofactoren (AP/EDPB-criteria) bepaalt of een volledige DPIA verplicht is. Schrijf in privacy- en AVG-termen.",
   "meta": {
     "homeComponent": "HomePage",
     "exportLabel": "Prescan DPIA",

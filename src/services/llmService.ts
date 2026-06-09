@@ -1,3 +1,5 @@
+import type { Question } from '../models/Assessment'
+
 export interface ImproveResponse {
   suggestion: string
   rationale: string
@@ -20,6 +22,8 @@ export interface ExtractRequest {
   targetQuestion: string
   options?: string[]
   questionType?: string
+  fieldFormat?: string
+  formContext?: string
 }
 
 async function parseSseStream(
@@ -152,11 +156,24 @@ export async function deleteDocument(docId: string): Promise<void> {
   await fetch(`/api/documents/${encodeURIComponent(docId)}`, { method: 'DELETE' })
 }
 
+export async function verifyDocuments(sessionId: string, docIds: string[]): Promise<{ found: string[]; missing: string[] }> {
+  const res = await fetch('/api/documents/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: sessionId, doc_ids: docIds }),
+  })
+  if (!res.ok) return { found: docIds, missing: [] } // fail open — don't block AI mode on verify errors
+  return res.json() as Promise<{ found: string[]; missing: string[] }>
+}
+
 export interface RagExtractRequest {
   sessionId: string
   targetQuestion: string
+  guidance?: string
   options?: string[]
   questionType?: string
+  fieldFormat?: string
+  formContext?: string
   docIds?: string[]
   topK?: number
 }
@@ -175,8 +192,11 @@ export async function extractRagStream(
       body: JSON.stringify({
         session_id: req.sessionId,
         target_question: req.targetQuestion,
+        guidance: req.guidance ?? '',
         options: req.options ?? [],
         question_type: req.questionType ?? 'text',
+        field_format: req.fieldFormat ?? '',
+        form_context: req.formContext ?? '',
         doc_ids: req.docIds ?? [],
         top_k: req.topK ?? 6,
       }),
@@ -190,7 +210,11 @@ export async function extractRagStream(
     onError((err as { detail?: string }).detail ?? `HTTP ${response.status}`)
     return
   }
-  await parseSseStream(response, onChunk, onDone, onError)
+  try {
+    await parseSseStream(response, onChunk, onDone, onError)
+  } catch (e) {
+    onError(e instanceof Error ? e.message : 'Stream verbroken')
+  }
 }
 
 export async function extractFromDocumentsStream(
@@ -209,6 +233,8 @@ export async function extractFromDocumentsStream(
         target_question: req.targetQuestion,
         options: req.options ?? [],
         question_type: req.questionType ?? 'text',
+        field_format: req.fieldFormat ?? '',
+        form_context: req.formContext ?? '',
       }),
     })
   } catch {
@@ -241,6 +267,114 @@ export async function synthesize(req: SynthesizeRequest): Promise<ImproveRespons
   }
 
   return response.json() as Promise<ImproveResponse>
+}
+
+const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/
+const PHONE_RE = /\+?\d[\d\s().-]{6,}\d/
+// Leading "Label:" / "Label -" prefix that weak models tend to echo back.
+const LABEL_PREFIX_RE = /^\s*[\wÀ-ſ /()&'".-]{1,60}?\s*[:–-]\s+/
+
+// Strip a leaked label prefix and any verbatim echo of the question text.
+function stripLabel(text: string, questionText: string): string {
+  let out = text.replace(LABEL_PREFIX_RE, '').trim() || text
+  const q = questionText.trim().toLowerCase()
+  if (q && out.toLowerCase().startsWith(q)) {
+    out = out.slice(questionText.trim().length).replace(/^[\s:–-]+/, '').trim()
+  }
+  return out
+}
+
+// Literal placeholders the model sometimes copies straight from the XML template.
+const PLACEHOLDERS = new Set(['jouw antwoord hier', 'jouw verbeterde versie hier', 'antwoord hier', '[invullen]'])
+
+function mapSuggestionToAnswer(question: Question, suggestion: string): string | string[] | null {
+  const text = suggestion.trim()
+  if (!text || /onvoldoende informatie/i.test(text)) return null
+  if (PLACEHOLDERS.has(text.toLowerCase().replace(/\.+$/, ''))) return null
+
+  if (question.type === 'radio' || question.type === 'checkbox') {
+    const matched = question.options?.find(
+      (opt) => opt.trim().toLowerCase() === text.toLowerCase(),
+    )
+    if (!matched) return null
+    return question.type === 'checkbox' ? [matched] : matched
+  }
+
+  if (question.type === 'text') {
+    // Short factual fields: strip labels and enforce the expected shape so a
+    // confidently-wrong value (e.g. a name in an email field) is dropped.
+    const isShort = question.format && question.format !== 'longtext'
+    if (isShort) {
+      const value = stripLabel(text, question.text)
+      if (question.format === 'email') {
+        const m = value.match(EMAIL_RE)
+        return m ? m[0] : null
+      }
+      if (question.format === 'phone') {
+        const m = value.match(PHONE_RE)
+        return m ? m[0].trim() : null
+      }
+      return value || null
+    }
+    // Descriptive fields: wrap paragraphs for Tiptap HTML content.
+    return text
+      .split(/\n{2,}/)
+      .map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+      .join('')
+  }
+
+  return null
+}
+
+export interface BulkExtractParams {
+  sessionId: string
+  docIds: string[]
+  questions: Question[]
+  formContext?: string
+  onAnswer: (qId: string, value: string | string[]) => void
+  onProgress: (filled: number, total: number) => void
+  isCancelled: () => boolean
+}
+
+export async function bulkExtractFromDocument(params: BulkExtractParams): Promise<number> {
+  const { sessionId, docIds, questions, formContext, onAnswer, onProgress, isCancelled } = params
+  let filled = 0
+
+  for (const question of questions) {
+    if (isCancelled()) break
+    onProgress(filled, questions.length)
+
+    await extractRagStream(
+      {
+        sessionId,
+        targetQuestion: question.text,
+        guidance: question.guidance,
+        options: question.options,
+        questionType: question.type,
+        fieldFormat: question.format,
+        formContext,
+        docIds,
+      },
+      () => {},
+      (result) => {
+        if (!isCancelled()) {
+          const value = mapSuggestionToAnswer(question, result.suggestion)
+          if (value !== null) {
+            onAnswer(question.id, value)
+            filled++
+          }
+        }
+      },
+      (err) => {
+        console.warn(`[AI mode] vraag "${question.text}" overgeslagen:`, err)
+      },
+    ).catch((err) => {
+      console.warn(`[AI mode] stream fout bij vraag "${question.text}":`, err)
+    })
+  }
+
+  onProgress(filled, questions.length)
+  return filled
 }
 
 export async function improveText(text: string, questionContext: string): Promise<ImproveResponse> {

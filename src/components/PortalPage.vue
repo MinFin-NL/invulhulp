@@ -182,17 +182,33 @@
             <div v-if="idx > 0" class="card-connector" aria-hidden="true">
               {{ group.track === 'assessment' ? '↔' : '→' }}
             </div>
-            <article class="rvo-card rvo-card--outline rvo-card--padding--md form-card">
+            <article
+              class="rvo-card rvo-card--outline rvo-card--padding--md form-card"
+              :class="{ 'form-card--ai-mode': aiModeActive.has(form.id) }"
+            >
               <div class="form-card__body">
                 <h3 class="rvo-heading rvo-heading--md form-card__title">{{ form.title }}</h3>
                 <p class="rvo-text rvo-text--sm form-card__desc">{{ form.shortDescription }}</p>
               </div>
-              <button
-                class="rvo-button rvo-button--primary rvo-button--size-sm form-card__btn"
-                @click="$emit('open', form.id)"
-              >
-                Openen
-              </button>
+              <div class="form-card__actions">
+                <button
+                  class="rvo-button rvo-button--primary rvo-button--size-sm form-card__btn"
+                  @click="$emit('open', form.id)"
+                >
+                  Openen
+                </button>
+                <AiModeToggle
+                  :form-id="form.id"
+                  :has-documents="readyDocIds.length > 0"
+                  :is-active="aiModeActive.has(form.id)"
+                  :is-done="form.id in aiModeDone"
+                  :done-filled-count="aiModeDone[form.id] ?? 0"
+                  :progress="aiModeProgress[form.id] ?? null"
+                  @activate="startAiMode"
+                  @cancel="cancelAiMode"
+                  @dismiss="dismissAiModeDone"
+                />
+              </div>
             </article>
           </template>
         </div>
@@ -200,6 +216,15 @@
 
     </div>
 
+    <ConfirmDialog
+      ref="aiModeErrorDialog"
+      title="Documenten niet bereikbaar"
+      message="De brondocumenten zijn niet meer beschikbaar in de index. Verwijder de documenten en upload ze opnieuw om AI Mode te gebruiken."
+      confirm-label="Sluiten"
+      cancel-label=""
+      @confirm="onAiModeErrorDismissed"
+      @cancel="onAiModeErrorDismissed"
+    />
     <ConfirmDialog
       ref="createDialog"
       title="Nieuw dossier"
@@ -230,13 +255,15 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import bevestigingIcon from '@nl-rvo/assets/icons/status/bevestiging.svg'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
 import { useAssessmentStore } from '../stores/assessmentStore'
+import { useAiMode } from '../composables/useAiMode'
 import DocumentOntology from './DocumentOntology.vue'
 import EntityGraph from './EntityGraph.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
+import AiModeToggle from './AiModeToggle.vue'
 
 defineEmits<{ open: [id: string] }>()
 
@@ -251,9 +278,21 @@ const recentlyAddedIds = ref<Set<string>>(new Set())
 const showGraph = ref(false)
 const hasAnyOntology = computed(() => store.documents.some(d => !!d.ontology))
 
+const { aiModeActive, aiModeProgress, aiModeDone, aiModeError, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone, dismissAiModeError } = useAiMode()
+
 const createDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const renameDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const deleteDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
+const aiModeErrorDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
+const aiModeErrorFormId = ref<string | null>(null)
+
+watch(aiModeError, (errors) => {
+  const formId = Object.keys(errors)[0]
+  if (formId && !aiModeErrorFormId.value) {
+    aiModeErrorFormId.value = formId
+    aiModeErrorDialog.value?.open()
+  }
+}, { deep: true })
 
 const deleteMessage = computed(() => {
   const current = store.activeDossierId ? store.dossiers[store.activeDossierId] : null
@@ -267,6 +306,13 @@ onMounted(async () => {
   store.ensureDossier()
   forms.value = await loadAvailableForms()
 })
+
+function onAiModeErrorDismissed() {
+  if (aiModeErrorFormId.value) {
+    dismissAiModeError(aiModeErrorFormId.value)
+    aiModeErrorFormId.value = null
+  }
+}
 
 function openCreateDialog() {
   createDialog.value?.open()
@@ -393,6 +439,7 @@ async function onFilesSelected(e: Event) {
 
   if (fileInput.value) fileInput.value.value = ''
 }
+
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -633,6 +680,7 @@ const trackGroups = computed(() => {
   100% { background: var(--rvo-color-groen-150); }
 }
 
+
 .docs-item__info {
   display: flex;
   align-items: center;
@@ -720,11 +768,33 @@ const trackGroups = computed(() => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition: box-shadow 0.15s, border-color 0.15s;
+  transition: box-shadow 0.15s, border-color 0.3s;
 }
 
 .form-card:hover {
   box-shadow: 0 2px 8px rgb(21 66 115 / 0.12);
+}
+
+/* AI Mode active: animated gradient border + pulsing glow */
+.form-card--ai-mode {
+  border: 2px solid transparent;
+  background-image:
+    linear-gradient(var(--rvo-color-wit), var(--rvo-color-wit)),
+    linear-gradient(135deg, #0f2d5c, #5b21b6, #0ea5e9, #5b21b6, #0f2d5c);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  background-size: 100%, 300% 100%;
+  animation: ai-border-shift 4s linear infinite, ai-card-glow 3s ease-in-out infinite;
+}
+
+@keyframes ai-border-shift {
+  0%   { background-position: 0 0, 0% 50%; }
+  100% { background-position: 0 0, 200% 50%; }
+}
+
+@keyframes ai-card-glow {
+  0%, 100% { box-shadow: 0 0 8px 3px rgba(91, 33, 182, 0.2); }
+  50%       { box-shadow: 0 0 22px 7px rgba(14, 165, 233, 0.35); }
 }
 
 .form-card__body {
@@ -739,6 +809,13 @@ const trackGroups = computed(() => {
 .form-card__desc {
   color: var(--invulhulp-color-text-subtle);
   line-height: var(--rvo-line-height-md);
+}
+
+.form-card__actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--rvo-space-xs);
 }
 
 .form-card__btn {

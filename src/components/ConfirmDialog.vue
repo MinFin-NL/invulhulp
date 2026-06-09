@@ -45,7 +45,7 @@
         >
           {{ confirmLabel }}
         </button>
-        <button type="button" class="rvo-button rvo-button--secondary" @click="cancel">
+        <button v-if="cancelLabel" type="button" class="rvo-button rvo-button--secondary" @click="cancel">
           {{ cancelLabel }}
         </button>
       </div>

@@ -101,13 +101,40 @@
         </button>
       </li>
     </ol>
+
+    <!-- AI Mode: always reachable while working in the form -->
+    <div class="invulhulp-nav__ai-mode">
+      <hr class="invulhulp-divider" />
+      <p class="rvo-text rvo-text--sm invulhulp-nav__ai-label">AI Mode</p>
+      <AiModeToggle
+        :form-id="formConfig.id"
+        :has-documents="readyDocIds.length > 0"
+        :is-active="aiModeActive.has(formConfig.id)"
+        :is-done="formConfig.id in aiModeDone"
+        :done-filled-count="aiModeDone[formConfig.id] ?? 0"
+        :progress="aiModeProgress[formConfig.id] ?? null"
+        @activate="startAiMode"
+        @cancel="cancelAiMode"
+        @dismiss="dismissAiModeDone"
+      />
+      <p class="rvo-text rvo-text--sm invulhulp-nav__ai-hint">
+        <template v-if="readyDocIds.length > 0">
+          Overschrijft alle antwoorden met AI op basis van {{ readyDocIds.length }} brondocument{{ readyDocIds.length === 1 ? '' : 'en' }}.
+        </template>
+        <template v-else>
+          Upload brondocumenten op de startpagina om AI Mode te gebruiken.
+        </template>
+      </p>
+    </div>
   </nav>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
+import { useAiMode } from '../composables/useAiMode'
 import type { FormConfig, NavStepSubsections, NavStepSpecialView, NavStep, Subsection } from '../models/Assessment'
+import AiModeToggle from './AiModeToggle.vue'
 
 const props = defineProps<{
   formConfig: FormConfig
@@ -115,6 +142,7 @@ const props = defineProps<{
 }>()
 
 const store = useAssessmentStore()
+const { aiModeActive, aiModeProgress, aiModeDone, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone } = useAiMode()
 
 const riskLabels: Record<string, string> = {
   onaanvaardbaar: 'Verboden',
@@ -245,5 +273,28 @@ function navigate(id: string) {
   font-size: var(--rvo-font-size-2xs);
   padding-inline: var(--rvo-space-2xs);
   margin-inline-start: var(--rvo-space-2xs);
+}
+
+.invulhulp-nav__ai-mode {
+  margin-block-start: var(--rvo-space-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--rvo-space-xs);
+}
+
+.invulhulp-nav__ai-label {
+  margin: 0;
+  font-weight: var(--rvo-font-weight-semibold);
+  color: var(--rvo-color-grijs-700);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: var(--rvo-font-size-2xs);
+}
+
+.invulhulp-nav__ai-hint {
+  margin: 0;
+  color: var(--invulhulp-color-text-subtle);
+  font-size: var(--rvo-font-size-2xs);
+  line-height: var(--rvo-line-height-md);
 }
 </style>

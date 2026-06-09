@@ -2,6 +2,7 @@
   "id": "aiia",
   "version": "2.0",
   "title": "AI Impact Assessment",
+  "aiContext": "Dit is een AI Impact Assessment (AIIA) voor het Ministerie van Financiën: het beoordeelt de verantwoorde inzet van een AI-systeem, inclusief risicoclassificatie onder de AI-verordening, impact op grondrechten, en waarborgen rond bias, nauwkeurigheid, transparantie en beveiliging. Schrijf in AI-governance- en compliance-termen.",
   "meta": {
     "homeComponent": "HomePage",
     "exportLabel": "AIIA",

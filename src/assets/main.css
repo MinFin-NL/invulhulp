@@ -29,6 +29,13 @@ body {
   min-block-size: 100vh;
 }
 
+/* ── Footer: don't overlap the sidebar nav ───────────────────────────────── */
+/* When .invulhulp-nav (the form sidebar) is present, push the footer past it */
+.rvo-theme:has(.invulhulp-nav) .invulhulp-footer {
+  inset-inline-start: 240px;
+  inset-inline-end: 240px;
+}
+
 /* ── Project utilities NL DS doesn't ship ────────────────────────────────── */
 
 .invulhulp-visually-hidden {

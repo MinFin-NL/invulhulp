@@ -38,10 +38,32 @@
         </ul>
       </section>
 
-      <div>
+      <div class="form-intro__actions">
         <button @click="$emit('start')" class="rvo-button rvo-button--primary form-intro__cta">
           {{ content.buttonLabel }}
         </button>
+
+        <div class="form-intro__ai-mode">
+          <AiModeToggle
+            :form-id="formConfig.id"
+            :has-documents="readyDocIds.length > 0"
+            :is-active="aiModeActive.has(formConfig.id)"
+            :is-done="formConfig.id in aiModeDone"
+            :done-filled-count="aiModeDone[formConfig.id] ?? 0"
+            :progress="aiModeProgress[formConfig.id] ?? null"
+            @activate="startAiMode"
+            @cancel="cancelAiMode"
+            @dismiss="dismissAiModeDone"
+          />
+          <p class="rvo-text rvo-text--sm form-intro__ai-hint">
+            <template v-if="readyDocIds.length > 0">
+              Vul alle vragen automatisch in op basis van je {{ readyDocIds.length }} brondocument{{ readyDocIds.length === 1 ? '' : 'en' }}.
+            </template>
+            <template v-else>
+              Upload brondocumenten om AI Mode te gebruiken.
+            </template>
+          </p>
+        </div>
       </div>
 
     </div>
@@ -51,6 +73,8 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { FormConfig, FormHomeContent } from '../models/Assessment'
+import { useAiMode } from '../composables/useAiMode'
+import AiModeToggle from './AiModeToggle.vue'
 
 const props = defineProps<{ formConfig: FormConfig }>()
 defineEmits<{ start: [] }>()
@@ -63,6 +87,8 @@ const FALLBACK: FormHomeContent = {
 }
 
 const content = computed(() => props.formConfig.meta.homeContent ?? FALLBACK)
+
+const { aiModeActive, aiModeProgress, aiModeDone, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone } = useAiMode()
 </script>
 
 <style scoped>
@@ -114,9 +140,32 @@ const content = computed(() => props.formConfig.meta.homeContent ?? FALLBACK)
   background: var(--invulhulp-color-optional);
 }
 
+.form-intro__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rvo-space-lg);
+}
+
 .form-intro__cta {
   font-size: var(--rvo-font-size-lg);
   padding-block: var(--rvo-space-sm);
   padding-inline: var(--rvo-space-2xl);
+  align-self: flex-start;
+}
+
+.form-intro__ai-mode {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rvo-space-2xs);
+  padding: var(--rvo-space-md) var(--rvo-space-lg);
+  background: linear-gradient(135deg, rgba(15, 45, 92, 0.04), rgba(91, 33, 182, 0.06));
+  border: 1px solid rgba(91, 33, 182, 0.2);
+  border-radius: var(--rvo-border-radius-md);
+  align-self: flex-start;
+}
+
+.form-intro__ai-hint {
+  margin: 0;
+  color: var(--invulhulp-color-text-subtle);
 }
 </style>

@@ -1,4 +1,4 @@
-import type { FormConfig, CrossFormMapping } from '../models/Assessment'
+import type { FormConfig, CrossFormMapping, Question } from '../models/Assessment'
 
 const cache = new Map<string, FormConfig>()
 let mappingsCache: CrossFormMapping[] | null = null
@@ -36,4 +36,8 @@ export async function loadCrossFormMappings(): Promise<CrossFormMapping[]> {
 
 export function getCachedForm(id: string): FormConfig | undefined {
   return cache.get(id)
+}
+
+export function flattenFormQuestions(form: FormConfig): Question[] {
+  return form.sections.flatMap((s) => s.subsections.flatMap((ss) => ss.questions))
 }

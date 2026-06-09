@@ -189,6 +189,28 @@ def delete_session(session_id: str) -> int:
     return 1
 
 
+def get_indexed_doc_ids(session_id: str, doc_ids: list[str]) -> list[str]:
+    """Return which of the given doc_ids are actually present in the vector store."""
+    if not doc_ids:
+        return []
+    db = _get_db()
+    if CHUNKS_TABLE not in db.table_names():  # table_names() returns a plain list
+        return []
+    table = db.open_table(CHUNKS_TABLE)
+    sid = _escape(session_id)
+    ids_sql = ", ".join(f"'{_escape(d)}'" for d in doc_ids)
+    try:
+        rows = (
+            table.search()
+            .where(f"session_id = '{sid}' AND doc_id IN ({ids_sql})", prefilter=True)
+            .limit(len(doc_ids) * 100)
+            .to_list()
+        )
+        return list({r["doc_id"] for r in rows})
+    except Exception:
+        return doc_ids  # fail open — don't block AI mode on verify errors
+
+
 async def retrieve(
     session_id: str,
     query: str,

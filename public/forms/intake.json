@@ -2,6 +2,7 @@
   "id": "intake",
   "version": "1.0",
   "title": "Intakeformulier nieuwe IV-verzoeken",
+  "aiContext": "Dit is een intakeformulier waarmee een organisatieonderdeel van het Ministerie van Financiën een nieuw IV-verzoek (IT-/informatievoorziening) aanmeldt bij het intakeboard. De antwoorden moeten zakelijk en feitelijk zijn en gaan over de opdrachtgever, het probleem dat wordt opgelost, de doelgroep, de urgentie en de benodigde middelen.",
   "meta": {
     "homeComponent": "HomePage",
     "exportLabel": "Intakeformulier",
@@ -48,31 +49,36 @@
               "id": "intake_a.naam_opdrachtgever",
               "text": "Naam opdrachtgever",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             },
             {
               "id": "intake_a.directie_afdeling",
               "text": "Directie / afdeling(en)",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             },
             {
               "id": "intake_a.contactpersoon",
               "text": "Naam contactpersoon",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             },
             {
               "id": "intake_a.email",
               "text": "E-mailadres contactpersoon",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "email"
             },
             {
               "id": "intake_a.telefoonnummer",
               "text": "Telefoonnummer contactpersoon",
               "type": "text",
-              "importance": "optional"
+              "importance": "optional",
+              "format": "phone"
             }
           ]
         }

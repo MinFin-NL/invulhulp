@@ -2,6 +2,7 @@
   "id": "ppm",
   "version": "1.0",
   "title": "PPM Projectplan",
+  "aiContext": "Dit is een PPM-projectplan voor het Ministerie van Financiën: het beschrijft de projectdefinitie, business case, aanpak, projectorganisatie en de op te leveren producten. Schrijf in formele projectmanagementtermen.",
   "meta": {
     "homeComponent": "HomePage",
     "exportLabel": "PPM Projectplan",
