@@ -86,16 +86,26 @@ async def chat(system: str, user: str) -> str:
     if USE_AZURE:
         is_reasoning_model = AZURE_DEPLOYMENT.startswith(("o1", "o3", "o4"))
         system_role = "developer" if is_reasoning_model else "system"
-        # Reasoning models reject an explicit temperature; everything else is
-        # pinned low so extraction is deterministic and stops inventing values.
-        extra = {} if is_reasoning_model else {"temperature": 0}
+        messages = [
+            {"role": system_role, "content": system},
+            {"role": "user", "content": user},
+        ]
+        # Reasoning models reject an explicit temperature; for others try
+        # temperature=0 first and fall back to the model default if rejected.
+        if not is_reasoning_model:
+            try:
+                response = await _azure_client.chat.completions.create(
+                    model=AZURE_DEPLOYMENT,
+                    messages=messages,
+                    temperature=0,
+                )
+                return response.choices[0].message.content or ""
+            except Exception as e:
+                if "temperature" not in str(e).lower():
+                    raise
         response = await _azure_client.chat.completions.create(
             model=AZURE_DEPLOYMENT,
-            messages=[
-                {"role": system_role, "content": system},
-                {"role": "user", "content": user},
-            ],
-            **extra,
+            messages=messages,
         )
         return response.choices[0].message.content or ""
     else:
@@ -127,15 +137,22 @@ async def stream_chat(system: str, user: str) -> AsyncGenerator[str, None]:
             )
             yield full.choices[0].message.content or ""
             return
-        stream = await _azure_client.chat.completions.create(
-            model=AZURE_DEPLOYMENT,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            stream=True,
-            temperature=0,
-        )
+        messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
+        try:
+            stream = await _azure_client.chat.completions.create(
+                model=AZURE_DEPLOYMENT,
+                messages=messages,
+                stream=True,
+                temperature=0,
+            )
+        except Exception as e:
+            if "temperature" not in str(e).lower():
+                raise
+            stream = await _azure_client.chat.completions.create(
+                model=AZURE_DEPLOYMENT,
+                messages=messages,
+                stream=True,
+            )
         async for chunk in stream:
             if chunk.choices and chunk.choices[0].delta.content:
                 yield chunk.choices[0].delta.content
