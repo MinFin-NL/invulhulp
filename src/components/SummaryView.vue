@@ -22,17 +22,19 @@
       <!-- Unanswered mandatory -->
       <div v-if="unansweredMandatory.length > 0" class="rvo-alert rvo-alert--warning rvo-alert--padding-md">
         <div class="rvo-alert__container">
-          <strong>Verplichte vragen niet ingevuld ({{ unansweredMandatory.length }})</strong><br />
-          De volgende verplichte vragen zijn nog niet beantwoord:
-          <div v-for="group in unansweredGrouped" :key="group.sectionTitle" class="summary-view__unanswered-group">
-            <p class="rvo-text rvo-text--sm summary-view__unanswered-section">
-              {{ group.sectionTitle }}
-            </p>
-            <ul class="summary-view__unanswered-list">
-              <li v-for="q in group.questions" :key="q.id" class="rvo-text rvo-text--sm">
-                <em>{{ q.subsectionTitle }}</em> — {{ q.text }}
-              </li>
-            </ul>
+          <div class="summary-view__unanswered-content">
+            <strong>Verplichte vragen niet ingevuld ({{ unansweredMandatory.length }})</strong>
+            <p class="rvo-text rvo-text--sm summary-view__unanswered-intro">De volgende verplichte vragen zijn nog niet beantwoord:</p>
+            <div v-for="group in unansweredGrouped" :key="group.sectionTitle" class="summary-view__unanswered-group">
+              <p class="rvo-text rvo-text--sm summary-view__unanswered-section">
+                {{ group.sectionTitle }}
+              </p>
+              <ul class="summary-view__unanswered-list">
+                <li v-for="q in group.questions" :key="q.id" class="rvo-text rvo-text--sm">
+                  <em>{{ q.subsectionTitle }}</em> — {{ q.text }}
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -194,11 +196,15 @@ function hasAnswer(id: string): boolean {
   return typeof a === 'string' && a.trim() !== ''
 }
 
+function stripHtml(html: string): string {
+  return html.replace(/<[^>]*>/g, '').trim()
+}
+
 function formattedAnswer(id: string): string {
   const a = store.getAnswer(id)
   if (!a) return '(niet ingevuld)'
   if (Array.isArray(a)) return a.length > 0 ? a.join(', ') : '(niet ingevuld)'
-  const clean = a.replace('\n---\n', ' — ')
+  const clean = stripHtml(a).replace('\n---\n', ' — ')
   return clean.trim() || '(niet ingevuld)'
 }
 
@@ -275,8 +281,18 @@ async function handleImport(event: Event) {
   margin: 0;
 }
 
+.summary-view__unanswered-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rvo-space-2xs);
+}
+
+.summary-view__unanswered-intro {
+  margin: 0;
+}
+
 .summary-view__unanswered-group {
-  margin-block-start: var(--rvo-space-xs);
+  margin-block-start: var(--rvo-space-2xs);
 }
 
 .summary-view__unanswered-section {

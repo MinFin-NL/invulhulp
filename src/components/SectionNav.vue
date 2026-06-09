@@ -50,7 +50,7 @@
                 :aria-current="store.currentView === sub.id ? 'page' : undefined"
                 @click="navigate(sub.id)"
               >
-                <span v-if="store.isSectionCompleted(sub.id)" class="invulhulp-nav__check" aria-hidden="true">✓</span>
+                <svg v-if="store.isSectionCompleted(sub.id)" class="invulhulp-nav__check" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="currentColor" d="m41.262 6.164c-1.133-.836-2.707-.676-3.641.367l-15.879 17.77-9.547-8.27a2.7 2.7 0 0 0 -3.516-.027 2.71 2.71 0 0 0 -.586 3.469l11.563 19.301a2.72 2.72 0 0 0 2.316 1.316c.957 0 1.836-.492 2.328-1.301l17.66-29.043c.727-1.195.426-2.75-.699-3.582zm0 0"/></svg>
                 {{ sub.title }}
               </button>
             </li>
@@ -73,7 +73,7 @@
               :aria-current="store.currentView === step.viewId ? 'page' : undefined"
               @click="navigate(step.viewId)"
             >
-              <span v-if="store.isSectionCompleted(completionId(step))" class="invulhulp-nav__check" aria-hidden="true">✓</span>
+              <svg v-if="store.isSectionCompleted(completionId(step))" class="invulhulp-nav__check" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="currentColor" d="m41.262 6.164c-1.133-.836-2.707-.676-3.641.367l-15.879 17.77-9.547-8.27a2.7 2.7 0 0 0 -3.516-.027 2.71 2.71 0 0 0 -.586 3.469l11.563 19.301a2.72 2.72 0 0 0 2.316 1.316c.957 0 1.836-.492 2.328-1.301l17.66-29.043c.727-1.195.426-2.75-.699-3.582zm0 0"/></svg>
               {{ step.navLabel ?? step.viewId }}
               <span
                 v-if="step.viewId === 'risk' && store.riskLevel"
@@ -266,6 +266,9 @@ function navigate(id: string) {
   color: var(--invulhulp-color-optional);
 }
 .invulhulp-nav__check {
+  inline-size: 1em;
+  block-size: 1em;
+  flex-shrink: 0;
   color: var(--invulhulp-color-optional);
 }
 
