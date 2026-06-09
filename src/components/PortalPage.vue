@@ -300,7 +300,6 @@ const deleteMessage = computed(() => {
   return `Dossier "${current.name}" verwijderen? Alle formulierantwoorden en brondocumenten in dit dossier gaan verloren.`
 })
 
-const MAX_DOC_BYTES = 200_000
 
 onMounted(async () => {
   store.ensureDossier()
@@ -373,14 +372,6 @@ async function onFilesSelected(e: Event) {
       continue
     }
     const isOffice = ext === 'docx' || ext === 'xlsx'
-    if (!isOffice && file.size > MAX_DOC_BYTES) {
-      errors.push(`${file.name} is te groot (max 200 KB).`)
-      continue
-    }
-    if (isOffice && file.size > 4_000_000) {
-      errors.push(`${file.name} is te groot (max 4 MB voor .docx/.xlsx).`)
-      continue
-    }
     try {
       let text: string
       if (ext === 'docx') {
@@ -401,10 +392,6 @@ async function onFilesSelected(e: Event) {
         text = parts.join('\n\n')
       } else {
         text = await file.text()
-      }
-      if (text.length > MAX_DOC_BYTES) {
-        errors.push(`${file.name}: tekstinhoud is te groot (max 200 KB na extractie).`)
-        continue
       }
       if (!text.trim()) {
         errors.push(`${file.name}: geen tekst gevonden.`)
