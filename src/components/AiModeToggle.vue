@@ -2,8 +2,10 @@
   <div class="ai-mode-toggle">
     <!-- Done state -->
     <div v-if="isDone" class="ai-mode-done" role="status">
-      <span class="ai-mode-done__icon" aria-hidden="true">✓</span>
-      <span class="ai-mode-done__text">{{ doneFilledCount }} vragen ingevuld</span>
+      <span class="ai-mode-done__info">
+        <span class="ai-mode-done__icon" aria-hidden="true">✓</span>
+        <span class="ai-mode-done__text">{{ doneFilledCount }} ingevuld</span>
+      </span>
       <button
         type="button"
         class="rvo-button rvo-button--tertiary rvo-button--size-sm ai-mode-done__close"
@@ -15,12 +17,20 @@
 
     <!-- Active / scanning state -->
     <div v-else-if="isActive" class="ai-mode-active" role="status" aria-live="polite">
-      <span class="ai-mode-active__spinner" aria-hidden="true">◉</span>
+      <span class="ai-mode-active__spinner" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 2 22.5 22" width="16" height="16" aria-hidden="true">
+          <defs>
+            <linearGradient id="ai-spin-grad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#0f2d5c"/>
+              <stop offset="50%" stop-color="#5b21b6"/>
+              <stop offset="100%" stop-color="#0ea5e9"/>
+            </linearGradient>
+          </defs>
+          <path d="m 10.55,20.49 0.6,1.81 0.6,-1.81 c 1.04,-3.11 3.48,-5.55 6.59,-6.59 l 1.81,-0.6 -1.81,-0.6 C 15.23,11.66 12.79,9.22 11.75,6.11 L 11.15,4.3 10.55,6.11 C 9.51,9.22 7.07,11.66 3.96,12.7 l -1.81,0.6 1.81,0.6 c 3.11,1.04 5.55,3.48 6.59,6.59" fill="url(#ai-spin-grad)"/>
+        </svg>
+      </span>
       <span class="ai-mode-active__label">
-        AI Mode
-        <template v-if="progress">
-          — {{ progress.filled }}&thinsp;/&thinsp;{{ progress.total }}
-        </template>
+        AI Mode<template v-if="progress"><span class="ai-mode-active__progress">{{ progress.filled }}/{{ progress.total }}</span></template>
       </span>
       <button
         type="button"
@@ -40,7 +50,11 @@
       :title="hasDocuments ? 'Vul dit formulier automatisch in met AI op basis van je brondocumenten' : 'Upload eerst brondocumenten'"
       @click="$emit('activate', formId)"
     >
-      <span class="ai-mode-btn__icon" aria-hidden="true">✦</span>
+      <span class="ai-mode-btn__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 2 22.5 22" width="16" height="16" aria-hidden="true">
+          <path d="m 10.55,20.49 0.6,1.81 0.6,-1.81 c 1.04,-3.11 3.48,-5.55 6.59,-6.59 l 1.81,-0.6 -1.81,-0.6 C 15.23,11.66 12.79,9.22 11.75,6.11 L 11.15,4.3 10.55,6.11 C 9.51,9.22 7.07,11.66 3.96,12.7 l -1.81,0.6 1.81,0.6 c 3.11,1.04 5.55,3.48 6.59,6.59" fill="white"/>
+        </svg>
+      </span>
       AI Mode
     </button>
   </div>
@@ -66,6 +80,7 @@ defineEmits<{
 <style scoped>
 .ai-mode-toggle {
   margin-block-start: var(--rvo-space-sm);
+  width: 100%;
 }
 
 /* ── Idle button ─────────────────────────────────────────────────────────── */
@@ -104,51 +119,86 @@ defineEmits<{
 }
 
 .ai-mode-btn__icon {
-  font-style: normal;
+  display: inline-flex;
+  align-items: center;
   animation: ai-star-pulse 3s ease-in-out infinite;
 }
 
 /* ── Active / scanning state ─────────────────────────────────────────────── */
 
 .ai-mode-active {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
+  justify-content: space-between;
+  gap: var(--rvo-space-2xs);
   padding: var(--rvo-space-2xs) var(--rvo-space-sm);
   background: linear-gradient(135deg, rgba(15, 45, 92, 0.08), rgba(91, 33, 182, 0.12));
   border: 1px solid rgba(91, 33, 182, 0.4);
   border-radius: 999px;
   font-size: var(--rvo-font-size-sm);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .ai-mode-active__spinner {
-  display: inline-block;
-  color: #5b21b6;
+  display: inline-flex;
+  align-items: center;
   animation: ai-spin 1.8s linear infinite;
-  font-style: normal;
   flex-shrink: 0;
+  flex-grow: 0;
 }
 
 .ai-mode-active__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rvo-space-2xs);
   font-weight: var(--rvo-font-weight-semibold);
   color: #0f2d5c;
+  white-space: nowrap;
+  flex-shrink: 0;
+  flex-grow: 1;
+}
+
+.ai-mode-active__progress {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  background: rgba(91, 33, 182, 0.12);
+  border-radius: 999px;
+  font-size: 0.8em;
+  font-weight: var(--rvo-font-weight-bold);
+  color: #5b21b6;
+  letter-spacing: 0.02em;
 }
 
 .ai-mode-stop-btn {
   color: var(--rvo-color-rood) !important;
+  flex-shrink: 0;
+  flex-grow: 0;
 }
 
 /* ── Done state ──────────────────────────────────────────────────────────── */
 
 .ai-mode-done {
-  display: inline-flex;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--rvo-space-xs);
   padding: var(--rvo-space-2xs) var(--rvo-space-sm);
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(15, 45, 92, 0.1));
   border: 1px solid rgba(14, 165, 233, 0.45);
   border-radius: 999px;
   font-size: var(--rvo-font-size-sm);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ai-mode-done__info {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rvo-space-2xs);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .ai-mode-done__icon {
