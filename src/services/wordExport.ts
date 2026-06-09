@@ -17,10 +17,24 @@ import {
 import { saveAs } from 'file-saver'
 import type { Answers, RiskLevelValue, FormConfig } from '../models/Assessment'
 
+function stripHtml(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 function formatAnswer(value: string | string[] | undefined): string {
   if (!value) return '(niet ingevuld)'
-  if (Array.isArray(value)) return value.join(', ') || '(niet ingevuld)'
-  return value.trim() || '(niet ingevuld)'
+  if (Array.isArray(value)) return value.map(stripHtml).join(', ') || '(niet ingevuld)'
+  return stripHtml(value) || '(niet ingevuld)'
 }
 
 function riskColor(level: RiskLevelValue): string {

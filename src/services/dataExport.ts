@@ -77,10 +77,24 @@ export function importFromJson(file: File): Promise<ExportData> {
   })
 }
 
+function stripHtml(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}
+
 function formatAnswerMd(value: string | string[] | undefined): string {
   if (!value) return '*(niet ingevuld)*'
-  if (Array.isArray(value)) return value.length > 0 ? value.join(', ') : '*(niet ingevuld)*'
-  const clean = value.replace(/\n---\n/g, '\n\n---\n\n').trim()
+  if (Array.isArray(value)) return value.length > 0 ? value.map(stripHtml).join(', ') : '*(niet ingevuld)*'
+  const clean = stripHtml(value).replace(/\n---\n/g, '\n\n---\n\n')
   return clean || '*(niet ingevuld)*'
 }
 
