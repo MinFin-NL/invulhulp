@@ -108,7 +108,7 @@ function build(): GraphData {
       size: 26,
       borderWidth: 2,
       color: { background: '#1d3a5f', border: '#0b1e35', highlight: { background: '#2a4f7c', border: '#0b1e35' } },
-      font: { color: '#ffffff', size: 14, face: 'sans-serif' },
+      font: { color: '#1d3a5f', size: 14, face: 'sans-serif' },
     })
   }
 
@@ -192,7 +192,7 @@ function build(): GraphData {
       size: shared ? 22 + Math.min(c.docIds.size * 3, 14) : 14,
       borderWidth: shared ? 3 : 1,
       color: { background: color, border: shared ? '#111' : color, highlight: { background: color, border: '#111' } },
-      font: { color: '#111', size: shared ? 14 : 12, face: 'sans-serif' },
+      font: { color: '#111111', size: shared ? 14 : 12, face: 'sans-serif' },
     })
     for (const docId of c.docIds) {
       edges.push({ from: `doc::${docId}`, to: id })
@@ -294,17 +294,28 @@ watch(visible, render, { deep: true })
   user-select: none;
 }
 
+.entity-graph__filter input[type='checkbox'] {
+  appearance: auto;
+  -webkit-appearance: auto;
+  accent-color: #154273;
+  inline-size: 1rem;
+  block-size: 1rem;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
 .entity-graph__swatch {
   display: inline-block;
-  inline-size: 12px;
-  block-size: 12px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
   border: 1px solid rgb(0 0 0 / 0.2);
+  flex-shrink: 0;
 }
 
 .entity-graph__canvas {
-  inline-size: 100%;
-  block-size: 560px;
+  width: 100%;
+  height: 560px;
   background: var(--rvo-color-wit);
   border: 1px solid var(--invulhulp-color-border);
   border-radius: var(--rvo-border-radius-md);
