@@ -371,7 +371,6 @@ async function onFilesSelected(e: Event) {
       errors.push(`${file.name}: alleen .txt, .md, .docx en .xlsx zijn toegestaan.`)
       continue
     }
-    const isOffice = ext === 'docx' || ext === 'xlsx'
     try {
       let text: string
       if (ext === 'docx') {
