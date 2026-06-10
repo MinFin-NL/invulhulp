@@ -1,34 +1,31 @@
 """
-RAG module: chunking, embeddings, vector store (LanceDB) and ontology extraction.
+RAG module: chunking, vector store (LanceDB) and ontology extraction.
+
+Embeddings are provided by the caller as `embed_fn(texts) -> vectors`
+(see llm.LLMBackend.embed) — this module doesn't know which provider is used.
 
 Environment variables:
-    LANCEDB_PATH                          — storage path (default: ./data/lancedb)
-
-    # Embeddings — Azure
-    AZURE_OPENAI_EMBEDDING_DEPLOYMENT     — Azure embedding deployment name
-                                            (e.g. "text-embedding-3-small").
-                                            If unset, falls back to Ollama.
-
-    # Embeddings — Ollama
-    OLLAMA_EMBEDDING_MODEL                — default: "nomic-embed-text"
+    LANCEDB_PATH — storage path (default: ./data/lancedb)
 """
 
 from __future__ import annotations
 
 import asyncio
+import functools
 import json
 import os
 import re
 import uuid
+from collections.abc import Awaitable, Callable
 from typing import Any
 
 import lancedb
 import pyarrow as pa
+from dotenv import load_dotenv
 
+load_dotenv()
 
 LANCEDB_PATH = os.environ.get("LANCEDB_PATH", "./data/lancedb")
-AZURE_EMBEDDING_DEPLOYMENT = os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", "")
-OLLAMA_EMBEDDING_MODEL = os.environ.get("OLLAMA_EMBEDDING_MODEL", "nomic-embed-text")
 
 CHUNKS_TABLE = "chunks"
 
@@ -37,10 +34,24 @@ CHUNK_TARGET_CHARS = 1600   # ~400 tokens
 CHUNK_MAX_CHARS = 3200      # ~800 tokens
 CHUNK_MIN_CHARS = 200       # merge anything smaller into the next chunk
 
+# Embedder signature: a batch of texts in, one vector per text out.
+EmbedFn = Callable[[list[str]], Awaitable[list[list[float]]]]
 
+# NOTE: all LanceDB operations are synchronous, so they run via
+# asyncio.to_thread() to keep the event loop free during indexing/search.
+# TODO: once the chunks table grows past a few tens of thousands of rows,
+# add an ANN vector index plus a scalar index on session_id — every search
+# is currently a brute-force scan, which is fine at PoC scale.
+
+
+@functools.lru_cache(maxsize=1)
 def _get_db() -> lancedb.DBConnection:
     os.makedirs(LANCEDB_PATH, exist_ok=True)
     return lancedb.connect(LANCEDB_PATH)
+
+
+def _escape(s: str) -> str:
+    return s.replace("'", "''")
 
 
 def chunk_document(text: str) -> list[str]:
@@ -75,37 +86,6 @@ def chunk_document(text: str) -> list[str]:
     return chunks
 
 
-async def embed_texts(
-    texts: list[str],
-    azure_client: Any = None,
-    ollama_client: Any = None,
-) -> list[list[float]]:
-    """Embed a list of texts via Azure OpenAI or Ollama."""
-    if not texts:
-        return []
-
-    if AZURE_EMBEDDING_DEPLOYMENT and azure_client is not None:
-        response = await azure_client.embeddings.create(
-            model=AZURE_EMBEDDING_DEPLOYMENT,
-            input=texts,
-        )
-        return [d.embedding for d in response.data]
-
-    if ollama_client is None:
-        raise RuntimeError(
-            "No embedding backend configured. Set AZURE_OPENAI_EMBEDDING_DEPLOYMENT "
-            "or run with Ollama."
-        )
-
-    async def _one(t: str) -> list[float]:
-        result = await ollama_client.embeddings(
-            model=OLLAMA_EMBEDDING_MODEL, prompt=t
-        )
-        return list(result["embedding"])
-
-    return await asyncio.gather(*(_one(t) for t in texts))
-
-
 def _table_for_dim(dim: int) -> Any:
     db = _get_db()
     if CHUNKS_TABLE in db.table_names():
@@ -124,31 +104,31 @@ def _table_for_dim(dim: int) -> Any:
     return db.create_table(CHUNKS_TABLE, schema=schema)
 
 
+def _replace_doc_rows(doc_id: str, rows: list[dict], dim: int) -> None:
+    table = _table_for_dim(dim)
+    # Remove any pre-existing rows for this doc_id (idempotent re-index)
+    try:
+        table.delete(f"doc_id = '{_escape(doc_id)}'")
+    except Exception:
+        pass
+    table.add(rows)
+
+
 async def index_document(
     session_id: str,
     doc_id: str,
     doc_name: str,
     content: str,
-    azure_client: Any = None,
-    ollama_client: Any = None,
+    embed_fn: EmbedFn,
 ) -> dict[str, Any]:
     """Chunk, embed, and store a document. Returns {chunk_count, chunks}."""
     chunks = chunk_document(content)
     if not chunks:
         return {"chunk_count": 0, "chunks": []}
 
-    vectors = await embed_texts(chunks, azure_client, ollama_client)
+    vectors = await embed_fn(chunks)
     if not vectors:
         return {"chunk_count": 0, "chunks": []}
-
-    dim = len(vectors[0])
-    table = _table_for_dim(dim)
-
-    # Remove any pre-existing rows for this doc_id (idempotent re-index)
-    try:
-        table.delete(f"doc_id = '{doc_id}'")
-    except Exception:
-        pass
 
     rows = [
         {
@@ -162,7 +142,7 @@ async def index_document(
         }
         for i, (chunk, vec) in enumerate(zip(chunks, vectors, strict=True))
     ]
-    table.add(rows)
+    await asyncio.to_thread(_replace_doc_rows, doc_id, rows, len(vectors[0]))
 
     return {
         "chunk_count": len(chunks),
@@ -170,29 +150,24 @@ async def index_document(
     }
 
 
-def delete_document(doc_id: str) -> int:
+def _delete_where(predicate: str) -> int:
+    db = _get_db()
+    if CHUNKS_TABLE not in db.table_names():
+        return 0
+    db.open_table(CHUNKS_TABLE).delete(predicate)
+    return 1
+
+
+async def delete_document(doc_id: str) -> int:
     """Remove all chunks for a doc_id. Returns number of tables touched."""
-    db = _get_db()
-    if CHUNKS_TABLE not in db.table_names():
-        return 0
-    table = db.open_table(CHUNKS_TABLE)
-    table.delete(f"doc_id = '{doc_id}'")
-    return 1
+    return await asyncio.to_thread(_delete_where, f"doc_id = '{_escape(doc_id)}'")
 
 
-def delete_session(session_id: str) -> int:
-    db = _get_db()
-    if CHUNKS_TABLE not in db.table_names():
-        return 0
-    table = db.open_table(CHUNKS_TABLE)
-    table.delete(f"session_id = '{session_id}'")
-    return 1
+async def delete_session(session_id: str) -> int:
+    return await asyncio.to_thread(_delete_where, f"session_id = '{_escape(session_id)}'")
 
 
-def get_indexed_doc_ids(session_id: str, doc_ids: list[str]) -> list[str]:
-    """Return which of the given doc_ids are actually present in the vector store."""
-    if not doc_ids:
-        return []
+def _indexed_doc_ids_sync(session_id: str, doc_ids: list[str]) -> list[str]:
     db = _get_db()
     if CHUNKS_TABLE not in db.table_names():  # table_names() returns a plain list
         return []
@@ -203,6 +178,7 @@ def get_indexed_doc_ids(session_id: str, doc_ids: list[str]) -> list[str]:
         rows = (
             table.search()
             .where(f"session_id = '{sid}' AND doc_id IN ({ids_sql})", prefilter=True)
+            .select(["doc_id"])
             .limit(len(doc_ids) * 100)
             .to_list()
         )
@@ -211,33 +187,45 @@ def get_indexed_doc_ids(session_id: str, doc_ids: list[str]) -> list[str]:
         return doc_ids  # fail open — don't block AI mode on verify errors
 
 
-async def retrieve(
-    session_id: str,
-    query: str,
-    top_k: int = 6,
-    doc_ids: list[str] | None = None,
-    azure_client: Any = None,
-    ollama_client: Any = None,
-) -> list[dict[str, Any]]:
-    """Return top-k most similar chunks for the query, scoped to session."""
+async def get_indexed_doc_ids(session_id: str, doc_ids: list[str]) -> list[str]:
+    """Return which of the given doc_ids are actually present in the vector store."""
+    if not doc_ids:
+        return []
+    return await asyncio.to_thread(_indexed_doc_ids_sync, session_id, doc_ids)
+
+
+def _search_sync(query_vec: list[float], where: str, top_k: int) -> list[dict]:
     db = _get_db()
     if CHUNKS_TABLE not in db.table_names():
         return []
     table = db.open_table(CHUNKS_TABLE)
+    return (
+        table.search(query_vec)
+        .where(where, prefilter=True)
+        # Skip the vector column; "_distance" must be requested explicitly
+        # in newer LanceDB versions.
+        .select(["doc_id", "doc_name", "chunk_index", "text", "_distance"])
+        .limit(top_k)
+        .to_list()
+    )
 
-    [query_vec] = await embed_texts([query], azure_client, ollama_client)
+
+async def retrieve(
+    session_id: str,
+    query: str,
+    embed_fn: EmbedFn,
+    top_k: int = 6,
+    doc_ids: list[str] | None = None,
+) -> list[dict[str, Any]]:
+    """Return top-k most similar chunks for the query, scoped to session."""
+    [query_vec] = await embed_fn([query])
 
     where = f"session_id = '{_escape(session_id)}'"
     if doc_ids:
         ids = ", ".join(f"'{_escape(d)}'" for d in doc_ids)
         where += f" AND doc_id IN ({ids})"
 
-    results = (
-        table.search(query_vec)
-        .where(where, prefilter=True)
-        .limit(top_k)
-        .to_list()
-    )
+    results = await asyncio.to_thread(_search_sync, query_vec, where, top_k)
     return [
         {
             "doc_id": r["doc_id"],
@@ -248,10 +236,6 @@ async def retrieve(
         }
         for r in results
     ]
-
-
-def _escape(s: str) -> str:
-    return s.replace("'", "''")
 
 
 # ---------------------------------------------------------------------------

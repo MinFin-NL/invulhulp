@@ -5,25 +5,10 @@ Run:
     uvicorn main:app --reload
 
 Environment variables (can be set via .env file):
-    # Local (Ollama) — used when AZURE_OPENAI_ENDPOINT is not set
-    OLLAMA_MODEL      — model name (default: llama3.2)
-    OLLAMA_BASE_URL   — Ollama server URL (default: http://localhost:11434)
-
-    # Azure OpenAI — used when AZURE_OPENAI_ENDPOINT is set
-    AZURE_OPENAI_ENDPOINT        — e.g. https://oai-foundation-inno-d.openai.azure.com/
-    AZURE_OPENAI_API_KEY         — API key
-    AZURE_OPENAI_DEPLOYMENT      — deployment name (default: gpt-5.3-chat)
-    AZURE_OPENAI_API_VERSION     — API version (default: 2025-04-01-preview)
-
-    # Azure OpenAI embeddings — optional separate resource for embeddings.
-    # If AZURE_OPENAI_EMBEDDING_ENDPOINT is unset, the chat endpoint/key/version above are reused.
-    AZURE_OPENAI_EMBEDDING_ENDPOINT      — e.g. https://oai-embedding-inno-d.openai.azure.com/
-    AZURE_OPENAI_EMBEDDING_API_KEY       — API key for the embedding resource
-    AZURE_OPENAI_EMBEDDING_API_VERSION   — API version (falls back to AZURE_OPENAI_API_VERSION)
-    AZURE_OPENAI_EMBEDDING_DEPLOYMENT    — embedding deployment name (read by rag.py)
-
-    # Shared
     CORS_ORIGINS      — comma-separated allowed origins (default: http://localhost:5173)
+
+    LLM/embedding backend selection and configuration: see llm.py.
+    Vector store configuration: see rag.py.
 """
 
 import asyncio
@@ -39,138 +24,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+import llm
 import rag
 
 load_dotenv()
 
 CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")]
 
-AZURE_OPENAI_ENDPOINT = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
-USE_AZURE = bool(AZURE_OPENAI_ENDPOINT)
-
-if USE_AZURE:
-    from openai import AsyncAzureOpenAI
-
-    _azure_client = AsyncAzureOpenAI(
-        azure_endpoint=AZURE_OPENAI_ENDPOINT,
-        api_key=os.environ.get("AZURE_OPENAI_API_KEY", ""),
-        api_version=os.environ.get("AZURE_OPENAI_API_VERSION", "2025-04-01-preview"),
-    )
-    AZURE_DEPLOYMENT = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-5.3-chat")
-
-    # Embeddings may live on a different Azure OpenAI resource with its own endpoint/key.
-    # If AZURE_OPENAI_EMBEDDING_ENDPOINT is set, use a dedicated client; otherwise reuse the chat client.
-    AZURE_EMBEDDING_ENDPOINT = os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOINT", "")
-    if AZURE_EMBEDDING_ENDPOINT:
-        _azure_embedding_client = AsyncAzureOpenAI(
-            azure_endpoint=AZURE_EMBEDDING_ENDPOINT,
-            api_key=os.environ.get("AZURE_OPENAI_EMBEDDING_API_KEY", ""),
-            api_version=os.environ.get(
-                "AZURE_OPENAI_EMBEDDING_API_VERSION",
-                os.environ.get("AZURE_OPENAI_API_VERSION", "2025-04-01-preview"),
-            ),
-        )
-    else:
-        _azure_embedding_client = _azure_client
-else:
-    import ollama
-
-    OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral")
-    # OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:14b")
-    OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434")
-    _ollama_client = ollama.AsyncClient(host=OLLAMA_BASE_URL)
-
-
-async def chat(system: str, user: str) -> str:
-    """Send a chat message and return the full response content."""
-    if USE_AZURE:
-        is_reasoning_model = AZURE_DEPLOYMENT.startswith(("o1", "o3", "o4"))
-        system_role = "developer" if is_reasoning_model else "system"
-        messages = [
-            {"role": system_role, "content": system},
-            {"role": "user", "content": user},
-        ]
-        # Reasoning models reject an explicit temperature; for others try
-        # temperature=0 first and fall back to the model default if rejected.
-        if not is_reasoning_model:
-            try:
-                response = await _azure_client.chat.completions.create(
-                    model=AZURE_DEPLOYMENT,
-                    messages=messages,
-                    temperature=0,
-                )
-                return response.choices[0].message.content or ""
-            except Exception as e:
-                if "temperature" not in str(e).lower():
-                    raise
-        response = await _azure_client.chat.completions.create(
-            model=AZURE_DEPLOYMENT,
-            messages=messages,
-        )
-        return response.choices[0].message.content or ""
-    else:
-        response = await _ollama_client.chat(
-            model=OLLAMA_MODEL,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            keep_alive=-1,
-            options={"temperature": 0.1},
-        )
-        return response.message.content
-
-
-async def stream_chat(system: str, user: str) -> AsyncGenerator[str, None]:
-    """Yield raw text chunks from the LLM as they arrive."""
-    if USE_AZURE:
-        is_reasoning_model = AZURE_DEPLOYMENT.startswith(("o1", "o3", "o4"))
-        system_role = "developer" if is_reasoning_model else "system"
-        # o-series reasoning models do not support streaming
-        if is_reasoning_model:
-            full = await _azure_client.chat.completions.create(
-                model=AZURE_DEPLOYMENT,
-                messages=[
-                    {"role": system_role, "content": system},
-                    {"role": "user", "content": user},
-                ],
-            )
-            yield full.choices[0].message.content or ""
-            return
-        messages = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-        try:
-            stream = await _azure_client.chat.completions.create(
-                model=AZURE_DEPLOYMENT,
-                messages=messages,
-                stream=True,
-                temperature=0,
-            )
-        except Exception as e:
-            if "temperature" not in str(e).lower():
-                raise
-            stream = await _azure_client.chat.completions.create(
-                model=AZURE_DEPLOYMENT,
-                messages=messages,
-                stream=True,
-            )
-        async for chunk in stream:
-            if chunk.choices and chunk.choices[0].delta.content:
-                yield chunk.choices[0].delta.content
-    else:
-        stream = await _ollama_client.chat(
-            model=OLLAMA_MODEL,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": user},
-            ],
-            stream=True,
-            keep_alive=-1,
-            options={"temperature": 0.1},
-        )
-        async for chunk in stream:
-            content = chunk.get("message", {}).get("content")
-            if content:
-                yield content
+backend = llm.create_backend()
 
 
 async def _warmup() -> None:
@@ -178,11 +39,11 @@ async def _warmup() -> None:
     request doesn't pay a cold-start penalty (TLS handshake for Azure,
     model load into VRAM for Ollama)."""
     try:
-        await chat("", "ping")
+        await backend.chat("", "ping")
     except Exception as e:
         print(f"[warmup] chat warmup skipped: {e}")
     try:
-        await rag.embed_texts(["ping"], **_embed_clients())
+        await backend.embed(["ping"])
     except Exception as e:
         print(f"[warmup] embedding warmup skipped: {e}")
 
@@ -376,12 +237,6 @@ class RagExtractRequest(BaseModel):
     top_k: int = 6
 
 
-def _embed_clients() -> dict:
-    if USE_AZURE:
-        return {"azure_client": _azure_embedding_client, "ollama_client": None}
-    return {"azure_client": None, "ollama_client": _ollama_client}
-
-
 def _improve_user_message(req: ImproveRequest) -> str:
     return (
         f"Vraag in het formulier: {req.question_context}\n\n"
@@ -531,7 +386,7 @@ async def _sse_stream(
 ) -> AsyncGenerator[str, None]:
     raw = ""
     try:
-        async for chunk in stream_chat(system_prompt, user_message):
+        async for chunk in backend.stream(system_prompt, user_message):
             raw += chunk
             yield f"event: chunk\ndata: {json.dumps({'text': chunk}, ensure_ascii=False)}\n\n"
         suggestion, rationale = parse_fn(raw)
@@ -548,7 +403,7 @@ async def improve_text(req: ImproveRequest) -> ImproveResponse:
     if len(text) > 8000:
         raise HTTPException(status_code=400, detail="Tekst is te lang (max 8000 tekens).")
     try:
-        raw = await chat(SYSTEM_PROMPT, _improve_user_message(req))
+        raw = await backend.chat(SYSTEM_PROMPT, _improve_user_message(req))
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"LLM fout: {e}") from e
     suggestion, rationale = _parse_improve(raw, text)
@@ -574,7 +429,7 @@ async def synthesize_from_source(req: SynthesizeRequest) -> ImproveResponse:
     if not req.source_answers:
         raise HTTPException(status_code=400, detail="Geen bronantwoorden opgegeven.")
     try:
-        raw = await chat(SYNTHESIZE_SYSTEM_PROMPT, _synthesize_user_message(req))
+        raw = await backend.chat(SYNTHESIZE_SYSTEM_PROMPT, _synthesize_user_message(req))
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"LLM fout: {e}") from e
     suggestion, rationale = _parse_synthesize(raw)
@@ -603,7 +458,7 @@ async def extract_from_documents(req: ExtractRequest) -> ImproveResponse:
     system_prompt = _build_extract_system_prompt(req.question_type, req.field_format, req.form_context)
     source_text = "\n".join(doc.content for doc in req.documents)
     try:
-        raw = await chat(system_prompt, _extract_user_message(req))
+        raw = await backend.chat(system_prompt, _extract_user_message(req))
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"LLM fout: {e}") from e
     suggestion, rationale = _parse_synthesize(raw)
@@ -646,9 +501,9 @@ async def index_document(req: IndexDocumentRequest) -> IndexDocumentResponse:
             doc_id=req.doc_id,
             doc_name=req.name,
             content=req.content,
-            **_embed_clients(),
+            embed_fn=backend.embed,
         )
-        ontology_task = rag.extract_ontology(req.name, req.content, chat)
+        ontology_task = rag.extract_ontology(req.name, req.content, backend.chat)
         index_result, ontology = await asyncio.gather(index_task, ontology_task)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Indexering mislukt: [{type(e).__name__}] {e}") from e
@@ -661,7 +516,7 @@ async def index_document(req: IndexDocumentRequest) -> IndexDocumentResponse:
 
 @app.delete("/api/documents/{doc_id}")
 async def remove_document(doc_id: str) -> dict:
-    rag.delete_document(doc_id)
+    await rag.delete_document(doc_id)
     return {"deleted": doc_id}
 
 
@@ -673,13 +528,13 @@ class VerifyDocumentsRequest(BaseModel):
 @app.post("/api/documents/verify")
 async def verify_documents(req: VerifyDocumentsRequest) -> dict:
     """Return which doc_ids are actually present in the vector store."""
-    found = rag.get_indexed_doc_ids(req.session_id, req.doc_ids)
+    found = await rag.get_indexed_doc_ids(req.session_id, req.doc_ids)
     return {"found": found, "missing": [d for d in req.doc_ids if d not in found]}
 
 
 @app.delete("/api/sessions/{session_id}")
 async def remove_session(session_id: str) -> dict:
-    rag.delete_session(session_id)
+    await rag.delete_session(session_id)
     return {"deleted": session_id}
 
 
@@ -733,7 +588,7 @@ async def extract_rag_stream(req: RagExtractRequest) -> StreamingResponse:
             query=req.target_question,
             top_k=req.top_k,
             doc_ids=req.doc_ids or None,
-            **_embed_clients(),
+            embed_fn=backend.embed,
         )
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Retrieval mislukt: {e}") from e
