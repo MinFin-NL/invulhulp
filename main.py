@@ -468,6 +468,7 @@ async def _sse_stream(
     *,
     allow_clarification: bool = False,
     allow_diagram: bool = False,
+    sources: list[dict] | None = None,
 ) -> AsyncGenerator[str, None]:
     raw = ""
     try:
@@ -485,7 +486,10 @@ async def _sse_stream(
             if m and m.group(1).strip():
                 yield f"event: diagram\ndata: {json.dumps({'mermaid': m.group(1).strip()}, ensure_ascii=False)}\n\n"
         suggestion, rationale = parse_fn(raw)
-        yield f"event: done\ndata: {json.dumps({'suggestion': suggestion, 'rationale': rationale}, ensure_ascii=False)}\n\n"
+        done_payload: dict = {"suggestion": suggestion, "rationale": rationale}
+        if sources is not None:
+            done_payload["sources"] = sources
+        yield f"event: done\ndata: {json.dumps(done_payload, ensure_ascii=False)}\n\n"
     except Exception as e:
         yield f"event: error\ndata: {json.dumps({'detail': str(e)}, ensure_ascii=False)}\n\n"
 
@@ -699,8 +703,18 @@ async def extract_rag_stream(req: RagExtractRequest) -> StreamingResponse:
     system_prompt = _build_extract_system_prompt(req.question_type, req.field_format, req.form_context)
     source_text = "\n".join(c["text"] for c in chunks)
     parse_fn = _make_extract_parser(req.field_format, req.target_question, req.options, source_text)
+    sources = [
+        {
+            "docId": c["doc_id"],
+            "docName": c["doc_name"],
+            "chunkIndex": c["chunk_index"],
+            "text": c["text"],
+            "score": c["score"],
+        }
+        for c in chunks
+    ]
     return StreamingResponse(
-        _sse_stream(system_prompt, user_msg, parse_fn),
+        _sse_stream(system_prompt, user_msg, parse_fn, sources=sources),
         media_type="text/event-stream",
         headers=_SSE_HEADERS,
     )

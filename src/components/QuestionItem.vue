@@ -88,6 +88,17 @@
       </div>
     </fieldset>
 
+    <!-- Persisted citations for AI-extracted answers (AI Mode / accepted suggestions) -->
+    <SourcePanel
+      v-if="sourceMeta"
+      :sources="sourceMeta.sources"
+      :answer-text="persistedAnswerText"
+      :grounded="sourceMeta.grounded"
+      @show-document="showSourceDocument"
+      @dismiss-warning="store.dismissSourceWarning(question.id)"
+    />
+    <DocumentViewerModal v-if="sourceMeta" ref="docViewer" />
+
     <!-- One suggestion panel per source form that has a mapping for this question -->
     <CrossFormSuggestion
       v-for="mapping in matchingMappings"
@@ -112,13 +123,16 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { Question } from '../models/Assessment'
+import { computed, ref } from 'vue'
+import type { AnswerSource, AnswerSourceMeta, Question } from '../models/Assessment'
 import TiptapEditor from './TiptapEditor.vue'
 import CrossFormSuggestion from './CrossFormSuggestion.vue'
 import DocumentSuggestion from './DocumentSuggestion.vue'
+import SourcePanel from './SourcePanel.vue'
+import DocumentViewerModal from './DocumentViewerModal.vue'
 import { useCrossFormMappings } from '../composables/useCrossFormMappings'
 import { useAssessmentStore } from '../stores/assessmentStore'
+import { answerPlainText } from '../utils/sourceMatching'
 
 const props = defineProps<{
   question: Question
@@ -138,12 +152,21 @@ const matchingMappings = computed(() =>
   ),
 )
 
+const sourceMeta = computed(() => store.answerSourcesFor(props.question.id))
+const persistedAnswerText = computed(() => answerPlainText(props.modelValue))
+const docViewer = ref<InstanceType<typeof DocumentViewerModal> | null>(null)
+
+function showSourceDocument(source: AnswerSource) {
+  docViewer.value?.open(source, persistedAnswerText.value)
+}
+
 const textModel = computed({
   get() {
     return typeof props.modelValue === 'string' ? props.modelValue : ''
   },
   set(val: string) {
     emit('update:modelValue', val)
+    store.dismissSourceWarning(props.question.id)
   },
 })
 
@@ -175,10 +198,12 @@ function onRadioSelect(option: string) {
   const current = typeof props.modelValue === 'string' ? props.modelValue : ''
   const followUp = current.split('\n---\n')[1] ?? ''
   emit('update:modelValue', followUp ? `${option}\n---\n${followUp}` : option)
+  store.dismissSourceWarning(props.question.id)
 }
 
-function onApplySuggestion(value: string) {
+function onApplySuggestion(value: string, meta?: AnswerSourceMeta) {
   emit('update:modelValue', value)
+  if (meta) store.setAnswerSources(props.question.id, meta)
 }
 
 const checkboxValues = computed(() =>
@@ -191,6 +216,7 @@ function onCheckboxToggle(option: string) {
   if (idx === -1) current.push(option)
   else current.splice(idx, 1)
   emit('update:modelValue', current)
+  store.dismissSourceWarning(props.question.id)
 }
 </script>
 

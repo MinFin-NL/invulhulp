@@ -33,6 +33,24 @@ export interface Answers {
   [questionId: string]: string | string[]
 }
 
+// A RAG chunk that was given to the model when it produced an answer.
+// `text` is self-contained so the citation survives document deletion.
+export interface AnswerSource {
+  docId: string
+  docName: string
+  chunkIndex: number
+  text: string
+  score: number
+}
+
+export interface AnswerSourceMeta {
+  sources: AnswerSource[]
+  // false ⇒ the answer could not be matched to any source passage and the
+  // field shows a hallucination warning until the user reviews/edits it.
+  grounded: boolean
+  createdAt: number
+}
+
 export type RiskLevelValue = 'onaanvaardbaar' | 'hoog' | 'beperkt' | 'minimaal' | null
 
 export interface RiskLevel {

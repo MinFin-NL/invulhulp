@@ -1,8 +1,13 @@
-import type { Question } from '../models/Assessment'
+import type { AnswerSource, AnswerSourceMeta, Question } from '../models/Assessment'
+import { answerPlainText, filterSupportingSources, topRetrievedSources } from '../utils/sourceMatching'
 
 export interface ImproveResponse {
   suggestion: string
   rationale: string
+}
+
+export interface RagExtractResult extends ImproveResponse {
+  sources?: AnswerSource[]
 }
 
 export interface SynthesizeRequest {
@@ -29,7 +34,7 @@ export interface ExtractRequest {
 async function parseSseStream(
   response: Response,
   onChunk: (text: string) => void,
-  onDone: (result: ImproveResponse) => void,
+  onDone: (result: RagExtractResult) => void,
   onError: (message: string) => void,
   onClarification?: (question: string) => void,
   onDiagram?: (mermaid: string) => void,
@@ -57,7 +62,7 @@ async function parseSseStream(
       try {
         const parsed = JSON.parse(data)
         if (eventType === 'chunk') onChunk(parsed.text ?? '')
-        else if (eventType === 'done') onDone(parsed as ImproveResponse)
+        else if (eventType === 'done') onDone(parsed as RagExtractResult)
         else if (eventType === 'clarification') onClarification?.(parsed.question ?? '')
         else if (eventType === 'diagram') onDiagram?.(parsed.mermaid ?? '')
         else if (eventType === 'error') onError(parsed.detail ?? 'Onbekende fout')
@@ -200,7 +205,7 @@ export interface RagExtractRequest {
 export async function extractRagStream(
   req: RagExtractRequest,
   onChunk: (text: string) => void,
-  onDone: (result: ImproveResponse) => void,
+  onDone: (result: RagExtractResult) => void,
   onError: (message: string) => void,
 ): Promise<void> {
   let response: Response
@@ -351,12 +356,36 @@ export interface BulkExtractParams {
   questions: Question[]
   formContext?: string
   onAnswer: (qId: string, value: string | string[]) => void
+  onSources?: (qId: string, meta: AnswerSourceMeta) => void
   onProgress: (filled: number, total: number) => void
   isCancelled: () => boolean
 }
 
+/** Build the source metadata for an accepted answer, keeping only the chunks
+ *  that actually support it. Choice questions are exempt from the grounding
+ *  warning (option labels rarely appear verbatim in source documents) and
+ *  fall back to the closest retrieval matches. */
+export function buildAnswerSourceMeta(
+  sources: AnswerSource[] | undefined,
+  value: string | string[],
+  questionType: string,
+): AnswerSourceMeta | null {
+  if (!sources || sources.length === 0) return null
+  const supporting = filterSupportingSources(answerPlainText(value), sources)
+  const isChoice = questionType === 'radio' || questionType === 'checkbox'
+  if (isChoice) {
+    return {
+      sources: supporting.length > 0 ? supporting : topRetrievedSources(sources),
+      grounded: true,
+      createdAt: Date.now(),
+    }
+  }
+  // No supporting passage ⇒ persist the warning, without irrelevant citations.
+  return { sources: supporting, grounded: supporting.length > 0, createdAt: Date.now() }
+}
+
 export async function bulkExtractFromDocument(params: BulkExtractParams): Promise<number> {
-  const { sessionId, docIds, questions, formContext, onAnswer, onProgress, isCancelled } = params
+  const { sessionId, docIds, questions, formContext, onAnswer, onSources, onProgress, isCancelled } = params
   let filled = 0
 
   for (const question of questions) {
@@ -380,6 +409,8 @@ export async function bulkExtractFromDocument(params: BulkExtractParams): Promis
           const value = mapSuggestionToAnswer(question, result.suggestion)
           if (value !== null) {
             onAnswer(question.id, value)
+            const meta = buildAnswerSourceMeta(result.sources, value, question.type)
+            if (meta) onSources?.(question.id, meta)
             filled++
           }
         }

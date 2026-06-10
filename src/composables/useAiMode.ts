@@ -52,6 +52,7 @@ export function useAiMode() {
       questions,
       formContext: formConfig.aiContext,
       onAnswer: (qId, value) => store.setAnswerForForm(formId, qId, value),
+      onSources: (qId, meta) => store.setAnswerSourcesForForm(formId, qId, meta),
       onProgress: (f, t) => {
         aiModeProgress.value = { ...aiModeProgress.value, [formId]: { filled: f, total: t } }
       },

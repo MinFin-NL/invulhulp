@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import type { Answers, RiskLevelValue } from '../models/Assessment'
+import type { Answers, AnswerSourceMeta, RiskLevelValue } from '../models/Assessment'
 import { indexDocument, deleteDocument } from '../services/llmService'
 
 export type FormId = string
@@ -7,6 +7,9 @@ export type DossierId = string
 
 export interface FormState {
   answers: Answers
+  // Per-question source citations for AI-extracted answers (optional: absent
+  // in dossiers persisted before this feature existed).
+  answerSources?: Record<string, AnswerSourceMeta>
   currentView: string
   completedSections: string[]
   riskLevel: RiskLevelValue
@@ -52,6 +55,7 @@ export interface Dossier {
 function initialFormState(): FormState {
   return {
     answers: {},
+    answerSources: {},
     currentView: 'home',
     completedSections: [],
     riskLevel: null,
@@ -123,6 +127,9 @@ export const useAssessmentStore = defineStore('assessment', {
 
     getAnswer(): (questionId: string) => string | string[] {
       return (questionId: string) => this.activeForm.answers[questionId] ?? ''
+    },
+    answerSourcesFor(): (questionId: string) => AnswerSourceMeta | undefined {
+      return (questionId: string) => this.activeForm.answerSources?.[questionId]
     },
     isSectionCompleted(): (sectionId: string) => boolean {
       return (sectionId: string) => this.activeForm.completedSections.includes(sectionId)
@@ -292,6 +299,27 @@ export const useAssessmentStore = defineStore('assessment', {
       if (!dossier) return
       if (!dossier.forms[formId]) dossier.forms[formId] = initialFormState()
       dossier.forms[formId].answers[questionId] = value
+    },
+
+    setAnswerSourcesForForm(formId: string, questionId: string, meta: AnswerSourceMeta) {
+      const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
+      if (!dossier) return
+      if (!dossier.forms[formId]) dossier.forms[formId] = initialFormState()
+      const form = dossier.forms[formId]
+      if (!form.answerSources) form.answerSources = {}
+      form.answerSources[questionId] = meta
+    },
+
+    setAnswerSources(questionId: string, meta: AnswerSourceMeta) {
+      const id = this.activeDossier.activeFormId
+      if (id) this.setAnswerSourcesForForm(id, questionId, meta)
+    },
+
+    // The user touched the answer: the hallucination warning is no longer
+    // relevant, but the citations remain useful.
+    dismissSourceWarning(questionId: string) {
+      const meta = this.currentFormMutable()?.answerSources?.[questionId]
+      if (meta) meta.grounded = true
     },
 
     async removeDocument(id: string) {

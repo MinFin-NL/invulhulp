@@ -55,6 +55,17 @@
             >{{ part.value }}</span>
           </div>
 
+          <!-- Source passages, so the user can verify before accepting -->
+          <SourcePanel
+            v-if="!isInsufficient && (displaySources.length > 0 || !suggestionGrounded)"
+            :sources="displaySources"
+            :answer-text="suggestionPlainText"
+            :grounded="suggestionGrounded"
+            :default-open="true"
+            @show-document="showDocument"
+            @dismiss-warning="suggestionWarningDismissed = true"
+          />
+
           <div class="doc-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
             <button
               v-if="!isInsufficient && (!isChoiceType || (matchedOption && !isAlreadySelected))"
@@ -91,6 +102,8 @@
     </div>
 
     <span v-if="error" class="doc-suggestion__error rvo-text rvo-text--sm" role="alert">{{ error }}</span>
+
+    <DocumentViewerModal ref="docViewer" />
   </div>
 </template>
 
@@ -101,6 +114,10 @@ import type { Change } from 'diff'
 import { storeToRefs } from 'pinia'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { extractRagStream } from '../services/llmService'
+import type { AnswerSource, AnswerSourceMeta } from '../models/Assessment'
+import { answerPlainText, filterSupportingSources, topRetrievedSources } from '../utils/sourceMatching'
+import SourcePanel from './SourcePanel.vue'
+import DocumentViewerModal from './DocumentViewerModal.vue'
 
 const props = defineProps<{
   targetQuestionText: string
@@ -110,7 +127,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  'apply-suggestion': [value: string]
+  'apply-suggestion': [value: string, meta?: AnswerSourceMeta]
 }>()
 
 const store = useAssessmentStore()
@@ -138,9 +155,38 @@ const isAlreadySelected = computed(() => {
 
 const suggestion = ref<string | null>(null)
 const rationale = ref('')
+const sources = ref<AnswerSource[]>([])
+const suggestionWarningDismissed = ref(false)
+const docViewer = ref<InstanceType<typeof DocumentViewerModal> | null>(null)
 const isLoading = ref(false)
 const error = ref('')
 const streamingRaw = ref('')
+
+const suggestionPlainText = computed(() =>
+  suggestion.value === null ? '' : answerPlainText(suggestion.value),
+)
+
+const supportingSources = computed((): AnswerSource[] =>
+  suggestion.value === null ? [] : filterSupportingSources(suggestionPlainText.value, sources.value),
+)
+
+// Retrieval returns the K nearest chunks regardless of relevance; only show
+// the ones that actually back the suggestion. Choice questions fall back to
+// the closest retrieval matches (option labels rarely appear verbatim).
+const displaySources = computed((): AnswerSource[] => {
+  if (supportingSources.value.length > 0) return supportingSources.value
+  return isChoiceType.value ? topRetrievedSources(sources.value) : []
+})
+
+const suggestionGrounded = computed(() => {
+  if (suggestionWarningDismissed.value || isChoiceType.value) return true
+  if (suggestion.value === null || sources.value.length === 0) return true
+  return supportingSources.value.length > 0
+})
+
+function showDocument(source: AnswerSource) {
+  docViewer.value?.open(source, suggestionPlainText.value)
+}
 
 const streamingText = computed((): string => {
   if (!streamingRaw.value) return ''
@@ -172,6 +218,8 @@ async function requestExtraction() {
   suggestion.value = null
   streamingRaw.value = ''
   rationale.value = ''
+  sources.value = []
+  suggestionWarningDismissed.value = false
 
   await extractRagStream(
     {
@@ -187,6 +235,7 @@ async function requestExtraction() {
     (result) => {
       suggestion.value = result.suggestion
       rationale.value = result.rationale
+      sources.value = result.sources ?? []
       streamingRaw.value = ''
       isLoading.value = false
     },
@@ -201,14 +250,19 @@ async function requestExtraction() {
 function acceptSuggestion() {
   if (suggestion.value === null) return
   const value = isChoiceType.value && matchedOption.value ? matchedOption.value : suggestion.value
-  emit('apply-suggestion', value)
+  const meta: AnswerSourceMeta | undefined = displaySources.value.length > 0 || !suggestionGrounded.value
+    ? { sources: displaySources.value, grounded: suggestionGrounded.value, createdAt: Date.now() }
+    : undefined
+  emit('apply-suggestion', value, meta)
   suggestion.value = null
   rationale.value = ''
+  sources.value = []
 }
 
 function rejectSuggestion() {
   suggestion.value = null
   rationale.value = ''
+  sources.value = []
   error.value = ''
 }
 </script>
