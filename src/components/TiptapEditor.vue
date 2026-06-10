@@ -2,20 +2,51 @@
   <div class="tiptap-wrapper">
     <EditorContent :editor="editor" class="tiptap-editor" />
 
-    <!-- Suggestion panel: visible while streaming or when a suggestion is ready -->
+    <!-- Suggestion panel: visible while streaming, when a suggestion is ready
+         or when the AI asks a clarification question -->
     <div
-      v-if="streamingText || suggestion !== null"
+      v-if="streamingText || suggestion !== null || pendingClarification !== null"
       class="rvo-alert rvo-alert--info rvo-alert--padding-sm tiptap-suggestion"
       :aria-busy="isLoading"
     >
       <div class="rvo-alert__container">
         <div class="tiptap-suggestion__header">
-          <span class="tiptap-suggestion__label">AI-suggestie</span>
+          <span class="tiptap-suggestion__label">{{ pendingClarification !== null ? 'AI-vraag' : 'AI-suggestie' }}</span>
           <span v-if="rationale" class="tiptap-suggestion__rationale">{{ rationale }}</span>
         </div>
 
+        <!-- Clarification: the AI needs extra input before it can improve -->
+        <template v-if="pendingClarification !== null">
+          <p class="tiptap-clarification__question">{{ pendingClarification }}</p>
+          <input
+            v-model="clarificationInput"
+            type="text"
+            class="utrecht-textbox utrecht-textbox--md"
+            placeholder="Uw antwoord…"
+            aria-label="Antwoord op de vraag van de AI"
+            @keydown.enter.prevent="submitClarification"
+          />
+          <div class="tiptap-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
+            <button
+              type="button"
+              class="rvo-button rvo-button--primary rvo-button--size-sm"
+              :disabled="!clarificationInput.trim()"
+              @click="submitClarification"
+            >
+              Verstuur
+            </button>
+            <button
+              type="button"
+              class="rvo-button rvo-button--secondary rvo-button--size-sm"
+              @click="cancelClarification"
+            >
+              Annuleer
+            </button>
+          </div>
+        </template>
+
         <!-- Live streaming view -->
-        <div v-if="isLoading" class="tiptap-diff tiptap-diff--streaming" aria-live="polite">
+        <div v-else-if="isLoading" class="tiptap-diff tiptap-diff--streaming" aria-live="polite">
           <span v-if="streamingText">{{ streamingText }}<span class="tiptap-diff__cursor" aria-hidden="true">▋</span></span>
           <span v-else class="tiptap-diff__empty">Verbinding maken…</span>
         </div>
@@ -32,6 +63,15 @@
               :class="part.added ? 'tiptap-diff__add' : part.removed ? 'tiptap-diff__del' : ''"
             >{{ part.value }}</span>
           </div>
+
+          <!-- Optional mermaid diagram accompanying the suggestion -->
+          <div
+            v-if="diagramSvg"
+            class="tiptap-diagram"
+            role="img"
+            aria-label="Diagram bij de suggestie"
+            v-html="diagramSvg"
+          ></div>
 
           <div class="tiptap-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
             <button
@@ -56,7 +96,7 @@
     <!-- Toolbar row: improve button + error -->
     <div class="tiptap-toolbar">
       <button
-        v-if="suggestion === null && !streamingText"
+        v-if="suggestion === null && !streamingText && pendingClarification === null"
         type="button"
         :disabled="isLoading || !hasContent"
         class="rvo-button rvo-button--tertiary rvo-button--size-sm"
@@ -78,6 +118,17 @@ import Placeholder from '@tiptap/extension-placeholder'
 import { diffWords } from 'diff'
 import type { Change } from 'diff'
 import { improveTextStream } from '../services/llmService'
+
+// Mermaid is heavy (~1.5 MB of chunks); load it lazily, only when the model
+// actually returns a diagram.
+let mermaidReady: Promise<typeof import('mermaid')['default']> | null = null
+function loadMermaid() {
+  mermaidReady ??= import('mermaid').then(({ default: m }) => {
+    m.initialize({ startOnLoad: false, theme: 'neutral' })
+    return m
+  })
+  return mermaidReady
+}
 
 const props = defineProps<{
   modelValue: string
@@ -120,6 +171,9 @@ const rationale = ref('')
 const isLoading = ref(false)
 const error = ref('')
 const streamingRaw = ref('')
+const pendingClarification = ref<string | null>(null)
+const clarificationInput = ref('')
+const diagramSvg = ref('')
 
 const hasContent = computed(() => (editor.value?.getText().trim().length ?? 0) > 0)
 
@@ -142,7 +196,7 @@ const noChanges = computed(() =>
   suggestion.value !== null && suggestion.value === (editor.value?.getText() ?? ''),
 )
 
-async function requestImprovement() {
+async function runImprove(clarification?: { question: string; answer: string }) {
   if (!editor.value) return
   const text = editor.value.getText().trim()
   if (!text) return
@@ -152,6 +206,7 @@ async function requestImprovement() {
   suggestion.value = null
   streamingRaw.value = ''
   rationale.value = ''
+  diagramSvg.value = ''
 
   await improveTextStream(
     text,
@@ -170,7 +225,47 @@ async function requestImprovement() {
       streamingRaw.value = ''
       isLoading.value = false
     },
+    {
+      clarification,
+      onClarification: (question) => {
+        pendingClarification.value = question
+        clarificationInput.value = ''
+        streamingRaw.value = ''
+        isLoading.value = false
+      },
+      onDiagram: renderDiagram,
+    },
   )
+}
+
+function requestImprovement() {
+  return runImprove()
+}
+
+function submitClarification() {
+  const answer = clarificationInput.value.trim()
+  if (!answer || pendingClarification.value === null) return
+  const question = pendingClarification.value
+  pendingClarification.value = null
+  clarificationInput.value = ''
+  void runImprove({ question, answer })
+}
+
+function cancelClarification() {
+  pendingClarification.value = null
+  clarificationInput.value = ''
+}
+
+async function renderDiagram(code: string) {
+  try {
+    const mermaid = await loadMermaid()
+    const { svg } = await mermaid.render(`tiptap-mmd-${Date.now()}`, code)
+    diagramSvg.value = svg
+  } catch (e) {
+    // Invalid mermaid from the model — show the suggestion without a diagram.
+    console.warn('[tiptap] mermaid render mislukt:', e)
+    diagramSvg.value = ''
+  }
 }
 
 function acceptSuggestion() {
@@ -179,12 +274,14 @@ function acceptSuggestion() {
   emit('update:modelValue', suggestion.value)
   suggestion.value = null
   rationale.value = ''
+  diagramSvg.value = ''
 }
 
 function rejectSuggestion() {
   suggestion.value = null
   rationale.value = ''
   error.value = ''
+  diagramSvg.value = ''
 }
 </script>
 
@@ -270,5 +367,24 @@ function rejectSuggestion() {
 
 .tiptap-toolbar__error {
   color: var(--rvo-color-rood);
+}
+
+.tiptap-clarification__question {
+  font-size: var(--rvo-font-size-sm);
+  margin-block: var(--rvo-space-2xs) var(--rvo-space-xs);
+}
+
+.tiptap-diagram {
+  background: var(--rvo-color-wit);
+  border: 1px solid var(--invulhulp-color-border);
+  border-radius: var(--rvo-border-radius-sm);
+  padding: var(--rvo-space-xs);
+  margin-block-end: var(--rvo-space-xs);
+  overflow-x: auto;
+}
+
+.tiptap-diagram :deep(svg) {
+  max-width: 100%;
+  height: auto;
 }
 </style>

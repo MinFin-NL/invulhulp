@@ -31,6 +31,8 @@ async function parseSseStream(
   onChunk: (text: string) => void,
   onDone: (result: ImproveResponse) => void,
   onError: (message: string) => void,
+  onClarification?: (question: string) => void,
+  onDiagram?: (mermaid: string) => void,
 ): Promise<void> {
   const reader = response.body!.getReader()
   const decoder = new TextDecoder()
@@ -56,6 +58,8 @@ async function parseSseStream(
         const parsed = JSON.parse(data)
         if (eventType === 'chunk') onChunk(parsed.text ?? '')
         else if (eventType === 'done') onDone(parsed as ImproveResponse)
+        else if (eventType === 'clarification') onClarification?.(parsed.question ?? '')
+        else if (eventType === 'diagram') onDiagram?.(parsed.mermaid ?? '')
         else if (eventType === 'error') onError(parsed.detail ?? 'Onbekende fout')
       } catch {
         // ignore malformed SSE events
@@ -64,19 +68,34 @@ async function parseSseStream(
   }
 }
 
+export interface ImproveStreamOptions {
+  /** Answer to a clarification question the model asked in a previous round. */
+  clarification?: { question: string; answer: string }
+  /** Called when the model asks for extra input instead of returning a suggestion. */
+  onClarification?: (question: string) => void
+  /** Called when the model includes a mermaid diagram alongside the suggestion. */
+  onDiagram?: (mermaid: string) => void
+}
+
 export async function improveTextStream(
   text: string,
   questionContext: string,
   onChunk: (text: string) => void,
   onDone: (result: ImproveResponse) => void,
   onError: (message: string) => void,
+  opts?: ImproveStreamOptions,
 ): Promise<void> {
   let response: Response
   try {
     response = await fetch('/api/improve/stream', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, question_context: questionContext }),
+      body: JSON.stringify({
+        text,
+        question_context: questionContext,
+        clarification_question: opts?.clarification?.question ?? '',
+        clarification_answer: opts?.clarification?.answer ?? '',
+      }),
     })
   } catch {
     onError('Verbindingsfout')
@@ -87,7 +106,7 @@ export async function improveTextStream(
     onError((err as { detail?: string }).detail ?? `HTTP ${response.status}`)
     return
   }
-  await parseSseStream(response, onChunk, onDone, onError)
+  await parseSseStream(response, onChunk, onDone, onError, opts?.onClarification, opts?.onDiagram)
 }
 
 export async function synthesizeStream(

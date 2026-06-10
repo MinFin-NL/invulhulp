@@ -85,7 +85,17 @@ SYSTEM_PROMPT = (
     "een kop of een label NIET op in je antwoord.\n\n"
     "Reageer uitsluitend in dit XML-formaat:\n"
     "<verbeterd>jouw verbeterde versie hier</verbeterd>\n"
-    "<toelichting>één zin over wat je hebt verbeterd</toelichting>"
+    "<toelichting>één zin over wat je hebt verbeterd</toelichting>\n\n"
+    "Twee uitzonderingen op dit formaat:\n"
+    "- Is de invoer zó onduidelijk of dubbelzinnig dat je hem niet kunt "
+    "verbeteren zonder een aanname te doen over de betekenis? Stel dan in "
+    "plaats van bovenstaand formaat precies één korte vraag aan de gebruiker:\n"
+    "<verduidelijking>jouw vraag hier</verduidelijking>\n"
+    "- Beschrijft de tekst een proces, gegevensstroom of architectuur met "
+    "meerdere stappen of onderdelen? Voeg dan NA de toelichting-tag een "
+    "mermaid-diagram toe dat die stappen visualiseert (gebruik uitsluitend "
+    "feiten uit de tekst):\n"
+    "<mermaid>flowchart TD\n  A[Eerste stap] --> B[Volgende stap]</mermaid>"
 )
 
 # The extraction system prompt is composed at request time from a short base
@@ -227,6 +237,9 @@ SYNTHESIZE_SYSTEM_PROMPT = (
 class ImproveRequest(BaseModel):
     text: str
     question_context: str = ""
+    # Follow-up round after the model asked a <verduidelijking> question.
+    clarification_question: str = ""
+    clarification_answer: str = ""
 
 
 class ImproveResponse(BaseModel):
@@ -281,10 +294,18 @@ class RagExtractRequest(BaseModel):
 
 
 def _improve_user_message(req: ImproveRequest) -> str:
-    return (
+    msg = (
         f"Vraag in het formulier: {req.question_context}\n\n"
         f"Te verbeteren tekst:\n{req.text.strip()}"
     )
+    if req.clarification_question.strip() and req.clarification_answer.strip():
+        msg += (
+            f"\n\nJe stelde eerder deze verduidelijkingsvraag: {req.clarification_question.strip()}\n"
+            f"Antwoord van de gebruiker: {req.clarification_answer.strip()}\n"
+            "Verwerk dit antwoord en geef nu de verbeterde tekst. "
+            "Stel geen nieuwe verduidelijkingsvraag."
+        )
+    return msg
 
 
 def _synthesize_user_message(req: SynthesizeRequest) -> str:
@@ -436,17 +457,33 @@ def _make_extract_parser(
 
 _SSE_HEADERS = {"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
 
+_CLARIFICATION_RE = re.compile(r"<verduidelijking>(.*?)</verduidelijking>", re.DOTALL | re.IGNORECASE)
+_MERMAID_RE = re.compile(r"<mermaid>(.*?)</mermaid>", re.DOTALL | re.IGNORECASE)
+
 
 async def _sse_stream(
     system_prompt: str,
     user_message: str,
     parse_fn,
+    *,
+    allow_clarification: bool = False,
+    allow_diagram: bool = False,
 ) -> AsyncGenerator[str, None]:
     raw = ""
     try:
         async for chunk in backend.stream(system_prompt, user_message):
             raw += chunk
             yield f"event: chunk\ndata: {json.dumps({'text': chunk}, ensure_ascii=False)}\n\n"
+        if allow_clarification:
+            m = _CLARIFICATION_RE.search(raw)
+            if m and m.group(1).strip():
+                # The model needs more input; the client answers and re-requests.
+                yield f"event: clarification\ndata: {json.dumps({'question': m.group(1).strip()}, ensure_ascii=False)}\n\n"
+                return
+        if allow_diagram:
+            m = _MERMAID_RE.search(raw)
+            if m and m.group(1).strip():
+                yield f"event: diagram\ndata: {json.dumps({'mermaid': m.group(1).strip()}, ensure_ascii=False)}\n\n"
         suggestion, rationale = parse_fn(raw)
         yield f"event: done\ndata: {json.dumps({'suggestion': suggestion, 'rationale': rationale}, ensure_ascii=False)}\n\n"
     except Exception as e:
@@ -476,7 +513,14 @@ async def improve_text_stream(req: ImproveRequest) -> StreamingResponse:
     if len(text) > 8000:
         raise HTTPException(status_code=400, detail="Tekst is te lang (max 8000 tekens).")
     return StreamingResponse(
-        _sse_stream(SYSTEM_PROMPT, _improve_user_message(req), lambda raw: _parse_improve(raw, text)),
+        _sse_stream(
+            SYSTEM_PROMPT,
+            _improve_user_message(req),
+            lambda raw: _parse_improve(raw, text),
+            # Never re-ask after a clarification round, to avoid loops.
+            allow_clarification=not req.clarification_answer.strip(),
+            allow_diagram=True,
+        ),
         media_type="text/event-stream",
         headers=_SSE_HEADERS,
     )
