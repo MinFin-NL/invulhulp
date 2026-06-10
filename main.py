@@ -68,12 +68,21 @@ app.add_middleware(
 SYSTEM_PROMPT = (
     "Je bent een assistent die helpt bij het invullen van AI Impact Assessments "
     "voor de Nederlandse overheid (Ministerie van Financiën - MinFin).\n\n"
-    "Jouw taak is UITSLUITEND om tekst beter leesbaar en duidelijker te maken. "
-    "Je mag NOOIT nieuwe feiten, claims of informatie toevoegen die de gebruiker "
-    "niet zelf heeft geschreven. Bewaar altijd de stem, toon en intentie van de "
-    "gebruiker. Verbeter alleen grammatica, zinsstructuur en formulering.\n\n"
-    "Schrijf in dezelfde taal als de invoer (bijna altijd Nederlands).\n"
-    "Houd de lengte vergelijkbaar met het origineel.\n\n"
+    "Jouw taak is UITSLUITEND om tekst beter leesbaar en duidelijker te maken.\n\n"
+    "Harde regels:\n"
+    "1. Voeg NOOIT nieuwe feiten, namen, aantallen of claims toe die niet in de "
+    "invoer staan, laat geen feiten weg en verander de betekenis niet (wat nu "
+    "gebeurt blijft nu, wat gepland is blijft gepland).\n"
+    "2. Herschrijf naar correcte, formele ambtelijke stijl: verwijder spreektaal "
+    "en vulwoorden ('ofzo', 'best wel', 'gewoon') en herstel grammatica en "
+    "zinsbouw. Twijfel je over een formulering, kies dan de eenvoudigste "
+    "correcte zin.\n"
+    "3. Bewaar de intentie en inhoud van de gebruiker; het is hun tekst, niet "
+    "de jouwe.\n"
+    "4. Schrijf in dezelfde taal als de invoer (bijna altijd Nederlands) en "
+    "houd de lengte vergelijkbaar met het origineel.\n"
+    "5. Begin direct met de verbeterde tekst zelf — neem de formuliervraag, "
+    "een kop of een label NIET op in je antwoord.\n\n"
     "Reageer uitsluitend in dit XML-formaat:\n"
     "<verbeterd>jouw verbeterde versie hier</verbeterd>\n"
     "<toelichting>één zin over wat je hebt verbeterd</toelichting>"
@@ -91,14 +100,19 @@ _EXTRACT_BASE = (
     "feiten die letterlijk in de fragmenten staan.\n\n"
     "Harde regels:\n"
     "1. Verzin niets en vul niets aan met algemene kennis.\n"
-    "2. Staat het antwoord niet letterlijk in de fragmenten? Antwoord dan exact: "
-    "'Onvoldoende informatie in de brondocumenten.' Gebruik NOOIT placeholders "
-    "zoals 'X', '[invullen]' of '…'.\n"
-    "3. Begin NOOIT met de vraag, een label of een herhaling van de vraag — geef "
+    "2. Staat het antwoord niet letterlijk in de fragmenten? Antwoord dan exact "
+    "en uitsluitend: 'Onvoldoende informatie in de brondocumenten.' Schrijf "
+    "GEEN eigen variant zoals 'dit wordt niet genoemd in de documenten' en "
+    "gebruik NOOIT placeholders zoals 'X', '[invullen]' of '…'.\n"
+    "3. Geef NOOIT een verwante maar andere waarde als de gevraagde waarde "
+    "ontbreekt (vraagt het veld om een leverancier en noemen de fragmenten er "
+    "geen, geef dan NIET een andere organisatie die toevallig wél genoemd "
+    "wordt). Ook dan geldt: 'Onvoldoende informatie in de brondocumenten.'\n"
+    "4. Begin NOOIT met de vraag, een label of een herhaling van de vraag — geef "
     "direct het antwoord.\n"
-    "4. Neem GEEN document-labels of koppen over ('Eerste gedachten:', "
+    "5. Neem GEEN document-labels of koppen over ('Eerste gedachten:', "
     "'Actiepunt:', 'Toelichting:'); parafraseer alleen de inhoud eronder.\n"
-    "5. Zet bronverwijzingen en uitleg ALLEEN in <toelichting>, nooit in <suggestie>.\n\n"
+    "6. Zet bronverwijzingen en uitleg ALLEEN in <toelichting>, nooit in <suggestie>.\n\n"
 )
 
 _EXTRACT_FORMAT_BLOCKS = {
@@ -121,7 +135,14 @@ _EXTRACT_FORMAT_BLOCKS = {
     "shorttext": (
         "Dit is een KORT feitelijk veld (bijv. naam, afdeling, datum). Geef "
         "uitsluitend de gevraagde waarde, zonder label en zonder extra zin.\n"
-        "  Fout: 'Naam opdrachtgever: Belastingdienst'   Goed: 'Belastingdienst'\n\n"
+        "  Fout: 'Naam opdrachtgever: Belastingdienst'   Goed: 'Belastingdienst'\n"
+        "Let op: de waarde moet precies datgene zijn waar het veld om vraagt. "
+        "Controleer vóór je antwoordt: staat er in de fragmenten een waarde "
+        "die EXPLICIET deze rol of dit kenmerk heeft? Voorbeeld: vraagt het "
+        "veld om de 'externe leverancier' en noemen de fragmenten alleen een "
+        "opdrachtgever of afdeling, dan is het antwoord 'Onvoldoende "
+        "informatie in de brondocumenten.' — vul NOOIT een naam of organisatie "
+        "in die wel genoemd wordt maar een andere rol heeft.\n\n"
     ),
     "date": (
         "Dit veld vraagt om een DATUM. Geef uitsluitend de datum zoals die in de "
@@ -129,16 +150,30 @@ _EXTRACT_FORMAT_BLOCKS = {
     ),
     "longtext": (
         "Schrijf een samenhangend antwoord van één of meer alinea's in formele, "
-        "ambtelijke stijl en in de derde persoon. Wees concreet: gebruik de "
-        "namen, systemen, bedragen en data uit de fragmenten. Sluit af zodra de "
-        "inhoud volledig is — herhaal niets en voeg geen samenvattende slotzin toe.\n\n"
+        "ambtelijke stijl en in de derde persoon. Wees volledig én concreet: "
+        "neem ALLE feiten, maatregelen en aantallen uit de fragmenten op die de "
+        "vraag beantwoorden — sla er geen over. Noemen de fragmenten "
+        "bijvoorbeeld drie maatregelen, beschrijf dan alle drie. Gebruik de "
+        "namen, systemen, bedragen, percentages en data uit de fragmenten. "
+        "Herhaal niets en voeg geen samenvattende slotzin toe.\n\n"
     ),
     "choice": (
-        "Dit is een MEERKEUZEVRAAG. Kies uit de lijst antwoordopties bij de vraag "
-        "en geef de gekozen optie(s) WOORDELIJK terug — exact dezelfde tekst, "
-        "spelling en hoofdletters. Wijk niet af van de gegeven opties. Past geen "
-        "enkele optie op basis van de fragmenten, antwoord dan 'Onvoldoende "
-        "informatie in de brondocumenten.'\n\n"
+        "Dit is een MEERKEUZEVRAAG. Werk zo:\n"
+        "1. Zoek de relevante feiten in de fragmenten.\n"
+        "2. Kies de optie(s) uit de lijst waarvan de betekenis bij die feiten "
+        "past — óók als de fragmenten andere woorden gebruiken. Voorbeeld: "
+        "noemen de fragmenten 'naam en adres' en is er een optie 'NAW-gegevens', "
+        "kies dan 'NAW-gegevens'.\n"
+        "3. Mogen er meerdere opties gekozen worden? Loop dan ELKE optie uit de "
+        "lijst langs en kies álle opties die door de fragmenten worden "
+        "ondersteund, niet alleen de eerste die past.\n"
+        "4. Geef de gekozen optie(s) WOORDELIJK terug — exact dezelfde tekst, "
+        "spelling en hoofdletters als in de lijst. Meerdere opties scheid je "
+        "met '; '.\n"
+        "Neem NOOIT woorden uit de fragmenten over die niet in de optielijst "
+        "staan en verzin geen nieuwe opties. Past geen enkele optie op basis "
+        "van de fragmenten, antwoord dan 'Onvoldoende informatie in de "
+        "brondocumenten.'\n\n"
     ),
 }
 
@@ -172,9 +207,17 @@ SYNTHESIZE_SYSTEM_PROMPT = (
     "Jouw taak is om een volledig nieuw antwoord te schrijven dat:\n"
     "1. Uitsluitend gebaseerd is op de feiten uit de bronantwoorden (voeg geen nieuwe feiten toe)\n"
     "2. De doelvraag direct en volledig beantwoordt in de context van dat document\n"
-    "3. De juiste terminologie gebruikt die past bij het doeldocument\n"
-    "4. Inhoudelijk anders geformuleerd is dan de brontekst — het gaat om een ander document met een andere focus\n\n"
-    "Schrijf in het Nederlands. Het antwoord mag korter of langer zijn dan de brontekst als dat passend is.\n\n"
+    "3. Alle concrete feiten uit de bronantwoorden behoudt die relevant zijn voor "
+    "de doelvraag: namen, aantallen, soorten gegevens (zoals BSN of medische "
+    "gegevens), percentages en data. Vat deze niet weg in algemene bewoordingen\n"
+    "4. De juiste terminologie gebruikt die past bij het doeldocument\n"
+    "5. Inhoudelijk anders geformuleerd is dan de brontekst — het gaat om een ander document met een andere focus\n\n"
+    "Schrijf in het Nederlands. Het antwoord mag korter of langer zijn dan de "
+    "brontekst als dat passend is. Neem labels zoals 'Bronvraag:' of "
+    "'Antwoord:' nooit over in je antwoord.\n\n"
+    "Controleer vóór je afsluit: staan alle namen, aantallen, soorten gegevens "
+    "en percentages uit de bronantwoorden die relevant zijn voor de doelvraag "
+    "ook echt in je antwoord? Zo nee, vul ze aan.\n\n"
     "Reageer uitsluitend in dit XML-formaat:\n"
     "<suggestie>jouw antwoord hier</suggestie>\n"
     "<toelichting>één zin over welke broninformatie je hebt vertaald naar de doelcontext</toelichting>"
@@ -300,6 +343,15 @@ _PLACEHOLDERS = {
     "antwoord hier",
     "[invullen]",
 }
+# Paraphrased refusals ("dit wordt niet in de brondocumenten genoemd") that the
+# model writes instead of the exact 'Onvoldoende informatie...' sentence. Only
+# applied to short answers — a real longtext answer can mention these words too.
+_NO_INFO_PARAPHRASE_RE = re.compile(
+    r"\b(?:niet|geen|nergens)\b[^.\n]{0,80}\b(?:brondocument\w*|fragment\w*|bronnen|documenten)"
+    r"|\b(?:wordt|worden|is|zijn|staat|staan)\s+(?:niet|nergens)\s+"
+    r"(?:genoemd|vermeld|beschreven|gespecificeerd|bekend|beschikbaar)",
+    re.IGNORECASE,
+)
 
 
 def _digits(s: str) -> str:
@@ -331,16 +383,22 @@ def _validate_suggestion(
         return ""
     if text.lower().strip(".") in _PLACEHOLDERS:
         return ""
+    if len(text) < 250 and _NO_INFO_PARAPHRASE_RE.search(text):
+        return ""
 
     # Multiple-choice answers must match an option verbatim; leave the wording
     # to mapSuggestionToAnswer on the client and don't strip here.
     if options:
         return text
 
-    # Drop a leaked "Label:" prefix or a verbatim echo of the question.
-    stripped = _LABEL_PREFIX_RE.sub("", text, count=1).strip()
-    if stripped:
-        text = stripped
+    # Drop a leaked "Label:" prefix — but only for short factual fields: a
+    # longtext answer may legitimately open with "Er zijn drie risico's: ...",
+    # and chopping at the colon would destroy it.
+    if field_format in ("email", "phone", "shorttext", "date"):
+        stripped = _LABEL_PREFIX_RE.sub("", text, count=1).strip()
+        if stripped:
+            text = stripped
+    # A verbatim echo of the question is never content, regardless of field.
     if question_text and text.lower().startswith(question_text.strip().lower()):
         text = text[len(question_text.strip()):].lstrip(" :–-").strip()
 
