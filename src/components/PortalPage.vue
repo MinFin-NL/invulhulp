@@ -84,7 +84,7 @@
             </button>
           </div>
           <p class="rvo-text portal-card__desc">
-            Upload achtergronddocumenten (notulen, brainstorms, agenda's) in .txt, .md, .docx of .xlsx formaat.
+            Upload achtergronddocumenten (notulen, brainstorms, agenda's) in .txt, .md, .docx, .xlsx of .pptx formaat.
             Bij het invullen van een formulier kun je per vraag automatisch een antwoord laten extraheren uit deze documenten.
           </p>
         </div>
@@ -98,7 +98,7 @@
             <input
               ref="fileInput"
               type="file"
-              accept=".txt,.md,.docx,.xlsx,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              accept=".txt,.md,.docx,.xlsx,.pptx,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.presentationml.presentation"
               multiple
               :disabled="isUploading"
               class="invulhulp-visually-hidden"
@@ -108,9 +108,21 @@
             <span v-if="isUploading">Bezig met inlezen…</span>
             <span v-else>Document(en) uploaden</span>
           </label>
-          <span class="docs-upload-hint rvo-text rvo-text--sm">
-            Klik op de knop om een of meer .txt / .md / .docx / .xlsx bestanden te kiezen
-          </span>
+
+          <details class="rvo-expandable-content rvo-expandable-content--subtle docs-info-details">
+            <summary class="rvo-expandable-content__summary rvo-text rvo-text--sm">
+              <img :src="infoIcon" class="docs-info-icon" aria-hidden="true" alt="" />
+              Ondersteunde bestandstypen
+            </summary>
+            <div class="rvo-expandable-content__details">
+              <ul class="rvo-ul rvo-text rvo-text--sm docs-info-list">
+                <li><strong>.txt / .md</strong> — platte tekst, volledig gebruikt</li>
+                <li><strong>.docx</strong> — Word-document, tekst en opmaak worden gelezen</li>
+                <li><strong>.xlsx</strong> — Excel-spreadsheet, celinhoud per blad</li>
+                <li><strong>.pptx</strong> — PowerPoint-presentatie, alleen de tekst uit de dia's wordt gelezen (geen afbeeldingen of grafieken)</li>
+              </ul>
+            </div>
+          </details>
         </div>
 
         <!-- Live status alerts -->
@@ -257,6 +269,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import bevestigingIcon from '@nl-rvo/assets/icons/status/bevestiging.svg'
+import infoIcon from '@nl-rvo/assets/icons/functioneel/info.svg'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAiMode } from '../composables/useAiMode'
@@ -346,6 +359,28 @@ function onDeleteConfirmed() {
   store.deleteDossier(store.activeDossierId)
 }
 
+async function extractPptxText(file: File): Promise<string> {
+  const JSZip = (await import('jszip')).default
+  const zip = await JSZip.loadAsync(await file.arrayBuffer())
+  const slideFiles = Object.keys(zip.files)
+    .filter((name) => /^ppt\/slides\/slide\d+\.xml$/.test(name))
+    .sort((a, b) => {
+      const n = (s: string) => parseInt(s.match(/\d+/)?.[0] ?? '0', 10)
+      return n(a) - n(b)
+    })
+  const parts: string[] = []
+  for (const slidePath of slideFiles) {
+    const xml = await zip.files[slidePath].async('string')
+    const matches = xml.match(/<a:t[^>]*>([^<]*)<\/a:t>/g) ?? []
+    const slideText = matches
+      .map((m) => m.replace(/<[^>]+>/g, '').trim())
+      .filter(Boolean)
+      .join(' ')
+    if (slideText) parts.push(slideText)
+  }
+  return parts.join('\n\n')
+}
+
 async function onFilesSelected(e: Event) {
   const target = e.target as HTMLInputElement
   const files = target.files ? Array.from(target.files) : []
@@ -367,8 +402,8 @@ async function onFilesSelected(e: Event) {
         : `Inlezen van ${file.name}…`
 
     const ext = file.name.toLowerCase().split('.').pop() ?? ''
-    if (!['txt', 'md', 'docx', 'xlsx'].includes(ext)) {
-      errors.push(`${file.name}: alleen .txt, .md, .docx en .xlsx zijn toegestaan.`)
+    if (!['txt', 'md', 'docx', 'xlsx', 'pptx'].includes(ext)) {
+      errors.push(`${file.name}: alleen .txt, .md, .docx, .xlsx en .pptx zijn toegestaan.`)
       continue
     }
     try {
@@ -389,6 +424,8 @@ async function onFilesSelected(e: Event) {
           if (csv.trim()) parts.push(`# ${sheetName}\n${csv}`)
         }
         text = parts.join('\n\n')
+      } else if (ext === 'pptx') {
+        text = await extractPptxText(file)
       } else {
         text = await file.text()
       }
@@ -396,7 +433,7 @@ async function onFilesSelected(e: Event) {
         errors.push(`${file.name}: geen tekst gevonden.`)
         continue
       }
-      const baseName = file.name.replace(/\.(docx|xlsx)$/i, '.txt')
+      const baseName = file.name.replace(/\.(docx|xlsx|pptx)$/i, '.txt')
       await store.addDocument(baseName, text)
       addedNames.push(file.name)
     } catch {
@@ -612,8 +649,24 @@ const trackGroups = computed(() => {
   pointer-events: none;
 }
 
-.docs-upload-hint {
-  color: var(--invulhulp-color-text-subtle);
+.docs-info-details {
+  align-self: center;
+}
+
+.docs-info-details :deep(.rvo-expandable-content__summary::after) {
+  display: none;
+}
+
+.docs-info-icon {
+  inline-size: 16px;
+  block-size: 16px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.docs-info-list {
+  margin-block-start: var(--rvo-space-2xs);
+  margin-block-end: 0;
 }
 
 .docs-alerts {
