@@ -105,7 +105,7 @@
     <!-- AI Mode: always reachable while working in the form -->
     <div class="invulhulp-nav__ai-mode">
       <hr class="invulhulp-divider" />
-      <p class="rvo-text rvo-text--sm invulhulp-nav__ai-label">AI Mode</p>
+      <p class="rvo-text rvo-text--sm invulhulp-nav__ai-label">AI Modus</p>
       <AiModeToggle
         :form-id="formConfig.id"
         :has-documents="readyDocIds.length > 0"
@@ -122,7 +122,7 @@
           Overschrijft alle antwoorden met AI op basis van {{ readyDocIds.length }} brondocument{{ readyDocIds.length === 1 ? '' : 'en' }}.
         </template>
         <template v-else>
-          Upload brondocumenten op de startpagina om AI Mode te gebruiken.
+          Upload brondocumenten op de startpagina om AI Modus te gebruiken.
         </template>
       </p>
     </div>

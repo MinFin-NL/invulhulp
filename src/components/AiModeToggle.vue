@@ -30,7 +30,7 @@
         </svg>
       </span>
       <span class="ai-mode-active__label">
-        AI Mode<template v-if="progress"><span class="ai-mode-active__progress">{{ progress.filled }}/{{ progress.total }}</span></template>
+        AI Modus<template v-if="progress"><span class="ai-mode-active__progress">{{ progress.filled }}/{{ progress.total }}</span></template>
       </span>
       <button
         type="button"
@@ -55,7 +55,7 @@
           <path d="m 10.55,20.49 0.6,1.81 0.6,-1.81 c 1.04,-3.11 3.48,-5.55 6.59,-6.59 l 1.81,-0.6 -1.81,-0.6 C 15.23,11.66 12.79,9.22 11.75,6.11 L 11.15,4.3 10.55,6.11 C 9.51,9.22 7.07,11.66 3.96,12.7 l -1.81,0.6 1.81,0.6 c 3.11,1.04 5.55,3.48 6.59,6.59" fill="white"/>
         </svg>
       </span>
-      AI Mode
+      AI Modus
     </button>
   </div>
 </template>
@@ -131,7 +131,7 @@ defineEmits<{
   align-items: center;
   justify-content: space-between;
   gap: var(--rvo-space-2xs);
-  padding: var(--rvo-space-2xs) var(--rvo-space-sm);
+  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
   background: linear-gradient(135deg, rgba(15, 45, 92, 0.08), rgba(91, 33, 182, 0.12));
   border: 1px solid rgba(91, 33, 182, 0.4);
   border-radius: 999px;
@@ -155,8 +155,9 @@ defineEmits<{
   font-weight: var(--rvo-font-weight-semibold);
   color: #0f2d5c;
   white-space: nowrap;
-  flex-shrink: 0;
+  flex-shrink: 1;
   flex-grow: 1;
+  min-width: 0;
 }
 
 .ai-mode-active__progress {
@@ -175,6 +176,8 @@ defineEmits<{
   color: var(--rvo-color-rood) !important;
   flex-shrink: 0;
   flex-grow: 0;
+  padding-inline: var(--rvo-space-xs) !important;
+  min-inline-size: 0 !important;
 }
 
 /* ── Done state ──────────────────────────────────────────────────────────── */

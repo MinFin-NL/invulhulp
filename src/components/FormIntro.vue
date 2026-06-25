@@ -60,7 +60,7 @@
               Vul alle vragen automatisch in op basis van je {{ readyDocIds.length }} brondocument{{ readyDocIds.length === 1 ? '' : 'en' }}.
             </template>
             <template v-else>
-              Upload brondocumenten om AI Mode te gebruiken.
+              Upload brondocumenten om AI Modus te gebruiken.
             </template>
           </p>
         </div>

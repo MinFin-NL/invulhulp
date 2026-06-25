@@ -231,7 +231,7 @@
     <ConfirmDialog
       ref="aiModeErrorDialog"
       title="Documenten niet bereikbaar"
-      message="De brondocumenten zijn niet meer beschikbaar in de index. Verwijder de documenten en upload ze opnieuw om AI Mode te gebruiken."
+      message="De brondocumenten zijn niet meer beschikbaar in de index. Verwijder de documenten en upload ze opnieuw om AI Modus te gebruiken."
       confirm-label="Sluiten"
       cancel-label=""
       @confirm="onAiModeErrorDismissed"

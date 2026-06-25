@@ -1,6 +1,33 @@
 <template>
-  <div class="assessment-shell">
+  <div class="assessment-shell" :class="{ 'assessment-shell--ai-active': isAiActive }">
     <AppHeader />
+
+    <!-- AI Mode banner: prominent, sticky indicator while AI fills this form -->
+    <Transition name="ai-banner">
+      <div v-if="isAiActive" class="ai-banner" role="status" aria-live="polite">
+        <div class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm ai-banner__inner">
+          <span class="ai-banner__spinner" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 2 22.5 22" width="22" height="22" aria-hidden="true">
+              <path d="m 10.55,20.49 0.6,1.81 0.6,-1.81 c 1.04,-3.11 3.48,-5.55 6.59,-6.59 l 1.81,-0.6 -1.81,-0.6 C 15.23,11.66 12.79,9.22 11.75,6.11 L 11.15,4.3 10.55,6.11 C 9.51,9.22 7.07,11.66 3.96,12.7 l -1.81,0.6 1.81,0.6 c 3.11,1.04 5.55,3.48 6.59,6.59" fill="#fff"/>
+            </svg>
+          </span>
+          <div class="ai-banner__body">
+            <span class="ai-banner__title">AI Modus vult dit formulier in…</span>
+            <span v-if="aiProgress" class="ai-banner__count">{{ aiProgress.filled }}/{{ aiProgress.total }} velden</span>
+          </div>
+          <div v-if="aiProgress" class="ai-banner__bar" aria-hidden="true">
+            <div class="ai-banner__bar-fill" :style="{ width: aiProgressPct + '%' }" />
+          </div>
+          <button
+            type="button"
+            class="ai-banner__stop"
+            @click="store.activeFormId && cancelAiMode(store.activeFormId)"
+          >
+            Stop
+          </button>
+        </div>
+      </div>
+    </Transition>
 
     <!-- Portal landing page (no form selected) -->
     <main v-if="store.activeFormId === null" class="assessment-shell__portal">
@@ -96,6 +123,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { loadForm } from '../services/formLoader'
 import { useAssessmentStore } from '../stores/assessmentStore'
+import { useAiMode } from '../composables/useAiMode'
 import type { FormConfig, NavStepSubsections, NavStepSpecialView, Section } from '../models/Assessment'
 import AppHeader from './AppHeader.vue'
 import AppFooter from './AppFooter.vue'
@@ -108,8 +136,21 @@ import DecisionGate from './DecisionGate.vue'
 import SummaryView from './SummaryView.vue'
 
 const store = useAssessmentStore()
+const { aiModeActive, aiModeProgress, cancelAiMode } = useAiMode()
 const formConfig = ref<FormConfig | null>(null)
 const isLoading = ref(true)
+
+const isAiActive = computed(
+  () => store.activeFormId !== null && aiModeActive.value.has(store.activeFormId),
+)
+const aiProgress = computed(() =>
+  store.activeFormId ? aiModeProgress.value[store.activeFormId] ?? null : null,
+)
+const aiProgressPct = computed(() => {
+  const p = aiProgress.value
+  if (!p || p.total === 0) return 0
+  return Math.round((p.filled / p.total) * 100)
+})
 
 async function loadActiveForm() {
   if (!store.activeFormId) {
@@ -289,5 +330,144 @@ function onDecisionNext(go: boolean) {
 
 .assessment-shell__forbidden {
   padding-block: var(--rvo-space-3xl) var(--rvo-space-3xl);
+}
+
+/* ── AI Mode banner ──────────────────────────────────────────────────────── */
+
+.ai-banner {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: linear-gradient(135deg, #0f2d5c, #5b21b6, #0ea5e9, #5b21b6, #0f2d5c);
+  background-size: 200% 100%;
+  color: #fff;
+  box-shadow: 0 2px 16px rgba(91, 33, 182, 0.45);
+  animation: ai-banner-shift 8s linear infinite, ai-banner-glow 2.4s ease-in-out infinite;
+}
+
+.ai-banner__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--rvo-space-sm);
+  padding-block: var(--rvo-space-sm);
+}
+
+.ai-banner__spinner {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  animation: ai-banner-spin 1.8s linear infinite;
+}
+
+.ai-banner__body {
+  display: flex;
+  align-items: baseline;
+  gap: var(--rvo-space-sm);
+  flex-wrap: wrap;
+  min-inline-size: 0;
+}
+
+.ai-banner__title {
+  font-weight: var(--rvo-font-weight-bold);
+  font-size: var(--rvo-font-size-md);
+  letter-spacing: 0.01em;
+}
+
+.ai-banner__count {
+  font-size: var(--rvo-font-size-sm);
+  font-weight: var(--rvo-font-weight-semibold);
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+}
+
+.ai-banner__bar {
+  flex: 1;
+  min-inline-size: 80px;
+  block-size: 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+  overflow: hidden;
+}
+
+.ai-banner__bar-fill {
+  block-size: 100%;
+  border-radius: 999px;
+  background: #fff;
+  transition: width 0.4s ease;
+}
+
+.ai-banner__stop {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.95);
+  color: var(--rvo-color-rood, #d52b1e);
+  border: 0;
+  border-radius: 999px;
+  padding: var(--rvo-space-2xs) var(--rvo-space-md);
+  font: inherit;
+  font-size: var(--rvo-font-size-sm);
+  font-weight: var(--rvo-font-weight-bold);
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.1s;
+}
+.ai-banner__stop:hover {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);
+}
+.ai-banner__stop:active {
+  transform: scale(0.97);
+}
+.ai-banner__stop:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+/* Subtle glow on the whole shell while AI is working */
+.assessment-shell--ai-active .assessment-shell__main {
+  position: relative;
+}
+.assessment-shell--ai-active .assessment-shell__main::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 2px rgba(91, 33, 182, 0.25);
+  animation: ai-main-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes ai-banner-shift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: -200% 50%; }
+}
+@keyframes ai-banner-glow {
+  0%, 100% { box-shadow: 0 2px 12px rgba(91, 33, 182, 0.4); }
+  50%      { box-shadow: 0 2px 22px rgba(14, 165, 233, 0.6); }
+}
+@keyframes ai-banner-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes ai-main-glow {
+  0%, 100% { box-shadow: inset 0 0 0 2px rgba(91, 33, 182, 0.18); }
+  50%      { box-shadow: inset 0 0 24px 2px rgba(14, 165, 233, 0.22); }
+}
+
+/* Banner enter/leave transition */
+.ai-banner-enter-active,
+.ai-banner-leave-active {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.ai-banner-enter-from,
+.ai-banner-leave-to {
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ai-banner,
+  .ai-banner__spinner,
+  .assessment-shell--ai-active .assessment-shell__main::before {
+    animation: none;
+  }
 }
 </style>
