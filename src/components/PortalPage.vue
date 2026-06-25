@@ -651,10 +651,25 @@ const trackGroups = computed(() => {
 
 .docs-info-details {
   align-self: center;
+  position: relative;
 }
 
 .docs-info-details :deep(.rvo-expandable-content__summary::after) {
   display: none;
+}
+
+.docs-info-details :deep(.rvo-expandable-content__details) {
+  position: absolute;
+  inset-block-start: calc(100% + var(--rvo-space-2xs));
+  inset-inline-start: 0;
+  z-index: 100;
+  background: var(--rvo-color-wit);
+  border: 1px solid var(--invulhulp-color-border);
+  border-radius: var(--rvo-border-radius-sm);
+  box-shadow: 0 4px 12px rgb(21 66 115 / 0.12);
+  padding: var(--rvo-space-xs) var(--rvo-space-sm);
+  min-inline-size: 280px;
+  max-inline-size: 380px;
 }
 
 .docs-info-icon {
