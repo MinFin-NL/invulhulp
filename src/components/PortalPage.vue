@@ -215,6 +215,7 @@
                   :is-active="aiModeActive.has(form.id)"
                   :is-done="form.id in aiModeDone"
                   :done-filled-count="aiModeDone[form.id] ?? 0"
+                  :done-total-count="aiModeTotal[form.id] ?? 0"
                   :progress="aiModeProgress[form.id] ?? null"
                   @activate="startAiMode"
                   @cancel="cancelAiMode"
@@ -291,7 +292,7 @@ const recentlyAddedIds = ref<Set<string>>(new Set())
 const showGraph = ref(false)
 const hasAnyOntology = computed(() => store.documents.some(d => !!d.ontology))
 
-const { aiModeActive, aiModeProgress, aiModeDone, aiModeError, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone, dismissAiModeError } = useAiMode()
+const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModeError, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone, dismissAiModeError } = useAiMode()
 
 const createDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const renameDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)

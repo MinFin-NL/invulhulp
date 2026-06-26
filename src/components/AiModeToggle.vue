@@ -1,17 +1,49 @@
 <template>
   <div class="ai-mode-toggle">
-    <!-- Done state -->
-    <div v-if="isDone" class="ai-mode-done" role="status">
-      <span class="ai-mode-done__info">
-        <span class="ai-mode-done__icon" aria-hidden="true">✓</span>
-        <span class="ai-mode-done__text">{{ doneFilledCount }} ingevuld</span>
+    <!-- Empty-result state: AI ran but filled nothing -->
+    <div v-if="isDone && doneFilledCount === 0" class="ai-mode-empty" role="status">
+      <span class="ai-mode-empty__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+          <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 5a1.25 1.25 0 1 1 0 2.5A1.25 1.25 0 0 1 12 7Zm1.25 10h-2.5v-6h2.5Z"/>
+        </svg>
+      </span>
+      <span class="ai-mode-empty__body">
+        <span class="ai-mode-empty__title">AI vond geen antwoorden</span>
+        <span class="ai-mode-empty__hint">Controleer of je de juiste brondocumenten hebt geüpload.</span>
+      </span>
+      <span class="ai-mode-empty__actions">
+        <button
+          type="button"
+          class="rvo-button rvo-button--secondary rvo-button--size-sm"
+          @click="$emit('activate', formId)"
+        >
+          Probeer opnieuw
+        </button>
+        <button
+          type="button"
+          class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+          @click="$emit('dismiss', formId)"
+        >
+          Sluiten
+        </button>
+      </span>
+    </div>
+
+    <!-- Done state: AI filled at least one answer -->
+    <div v-else-if="isDone" class="ai-mode-done" role="status">
+      <span class="ai-mode-done__icon" aria-hidden="true">✓</span>
+      <span class="ai-mode-done__text">
+        <span class="ai-mode-done__count">{{ doneFilledCount }} ingevuld</span>
+        <template v-if="doneSkippedCount > 0"><span class="ai-mode-done__skipped">{{ doneSkippedCount }} zonder antwoord</span></template>
       </span>
       <button
         type="button"
-        class="rvo-button rvo-button--tertiary rvo-button--size-sm ai-mode-done__close"
+        class="ai-mode-done__close"
+        aria-label="Sluiten"
+        title="Sluiten"
         @click="$emit('dismiss', formId)"
       >
-        Sluiten
+        ×
       </button>
     </div>
 
@@ -61,14 +93,22 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+import { computed } from 'vue'
+
+const props = defineProps<{
   formId: string
   hasDocuments: boolean
   isActive: boolean
   isDone: boolean
   doneFilledCount: number
+  doneTotalCount: number
   progress: { filled: number; total: number } | null
 }>()
+
+// Questions the AI attempted but left without an answer.
+const doneSkippedCount = computed(() =>
+  Math.max(0, props.doneTotalCount - props.doneFilledCount),
+)
 
 defineEmits<{
   activate: [formId: string]
@@ -185,33 +225,117 @@ defineEmits<{
 .ai-mode-done {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--rvo-space-xs);
-  padding: var(--rvo-space-2xs) var(--rvo-space-sm);
+  gap: var(--rvo-space-2xs);
+  padding: var(--rvo-space-2xs) var(--rvo-space-xs) var(--rvo-space-2xs) var(--rvo-space-sm);
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(15, 45, 92, 0.1));
   border: 1px solid rgba(14, 165, 233, 0.45);
-  border-radius: 999px;
+  border-radius: var(--rvo-border-radius-md, 8px);
   font-size: var(--rvo-font-size-sm);
   width: 100%;
   box-sizing: border-box;
 }
 
-.ai-mode-done__info {
+.ai-mode-done__icon {
+  color: #0ea5e9;
+  font-weight: bold;
+  flex-shrink: 0;
+  margin-block-start: 1px;
+  align-self: flex-start;
+}
+
+.ai-mode-done__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.ai-mode-done__count {
+  font-weight: var(--rvo-font-weight-semibold);
+  color: #0f2d5c;
+}
+
+.ai-mode-done__skipped {
+  font-weight: var(--rvo-font-weight-normal);
+  font-size: var(--rvo-font-size-xs);
+  color: var(--invulhulp-color-text-subtle, #6b7280);
+}
+
+.ai-mode-done__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  inline-size: 22px;
+  block-size: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--invulhulp-color-text-subtle, #6b7280);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ai-mode-done__close:hover {
+  background: rgba(15, 45, 92, 0.1);
+  color: #0f2d5c;
+}
+
+.ai-mode-done__close:focus-visible {
+  outline: 2px solid #0ea5e9;
+  outline-offset: 1px;
+}
+
+/* ── Empty-result state ──────────────────────────────────────────────────── */
+
+.ai-mode-empty {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--rvo-space-xs);
+  padding: var(--rvo-space-xs) var(--rvo-space-sm);
+  background: #fdf6ec;
+  border: 1px solid #e0b561;
+  border-radius: var(--rvo-border-radius-md, 8px);
+  font-size: var(--rvo-font-size-sm);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ai-mode-empty__icon {
+  display: inline-flex;
+  align-items: center;
+  color: #b8860b;
+  flex-shrink: 0;
+  margin-block-start: 1px;
+}
+
+.ai-mode-empty__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.ai-mode-empty__title {
+  font-weight: var(--rvo-font-weight-semibold);
+  color: #7a5b06;
+}
+
+.ai-mode-empty__hint {
+  color: #8a6d3b;
+  font-size: var(--rvo-font-size-xs);
+}
+
+.ai-mode-empty__actions {
   display: inline-flex;
   align-items: center;
   gap: var(--rvo-space-2xs);
   flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.ai-mode-done__icon {
-  color: #0ea5e9;
-  font-weight: bold;
-}
-
-.ai-mode-done__text {
-  font-weight: var(--rvo-font-weight-semibold);
-  color: #0f2d5c;
 }
 
 /* ── Keyframes ───────────────────────────────────────────────────────────── */

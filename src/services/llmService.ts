@@ -357,6 +357,8 @@ export interface BulkExtractParams {
   formContext?: string
   onAnswer: (qId: string, value: string | string[]) => void
   onSources?: (qId: string, meta: AnswerSourceMeta) => void
+  /** Called when the model responded but produced no usable answer for a question. */
+  onEmpty?: (qId: string) => void
   onProgress: (filled: number, total: number) => void
   isCancelled: () => boolean
 }
@@ -385,7 +387,7 @@ export function buildAnswerSourceMeta(
 }
 
 export async function bulkExtractFromDocument(params: BulkExtractParams): Promise<number> {
-  const { sessionId, docIds, questions, formContext, onAnswer, onSources, onProgress, isCancelled } = params
+  const { sessionId, docIds, questions, formContext, onAnswer, onSources, onEmpty, onProgress, isCancelled } = params
   let filled = 0
 
   for (const question of questions) {
@@ -412,6 +414,9 @@ export async function bulkExtractFromDocument(params: BulkExtractParams): Promis
             const meta = buildAnswerSourceMeta(result.sources, value, question.type)
             if (meta) onSources?.(question.id, meta)
             filled++
+          } else {
+            // Model answered but found nothing usable in the documents.
+            onEmpty?.(question.id)
           }
         }
       },

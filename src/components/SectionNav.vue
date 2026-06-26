@@ -112,6 +112,7 @@
         :is-active="aiModeActive.has(formConfig.id)"
         :is-done="formConfig.id in aiModeDone"
         :done-filled-count="aiModeDone[formConfig.id] ?? 0"
+        :done-total-count="aiModeTotal[formConfig.id] ?? 0"
         :progress="aiModeProgress[formConfig.id] ?? null"
         @activate="startAiMode"
         @cancel="cancelAiMode"
@@ -142,7 +143,7 @@ const props = defineProps<{
 }>()
 
 const store = useAssessmentStore()
-const { aiModeActive, aiModeProgress, aiModeDone, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone } = useAiMode()
+const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone } = useAiMode()
 
 const riskLabels: Record<string, string> = {
   onaanvaardbaar: 'Verboden',

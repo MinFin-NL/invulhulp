@@ -88,6 +88,16 @@
       </div>
     </fieldset>
 
+    <!-- AI Mode looked at this question but couldn't find an answer -->
+    <p v-if="showAiUnanswered" class="invulhulp-question__ai-empty" role="note">
+      <span class="invulhulp-question__ai-empty-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15">
+          <path fill="currentColor" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm0 5a1.25 1.25 0 1 1 0 2.5A1.25 1.25 0 0 1 12 7Zm1.25 10h-2.5v-6h2.5Z"/>
+        </svg>
+      </span>
+      AI vond hier geen antwoord — vul deze vraag zelf in.
+    </p>
+
     <!-- Persisted citations for AI-extracted answers (AI Mode / accepted suggestions) -->
     <SourcePanel
       v-if="sourceMeta"
@@ -131,6 +141,7 @@ import DocumentSuggestion from './DocumentSuggestion.vue'
 import SourcePanel from './SourcePanel.vue'
 import DocumentViewerModal from './DocumentViewerModal.vue'
 import { useCrossFormMappings } from '../composables/useCrossFormMappings'
+import { useAiMode } from '../composables/useAiMode'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { answerPlainText } from '../utils/sourceMatching'
 
@@ -145,6 +156,20 @@ const emit = defineEmits<{
 
 const store = useAssessmentStore()
 const mappings = useCrossFormMappings()
+const { isAiUnanswered, clearAiUnanswered } = useAiMode()
+
+// True while AI Mode flagged this question as unanswerable and the user hasn't
+// filled it in yet.
+const showAiUnanswered = computed(() => {
+  const formId = store.activeFormId
+  if (!formId || !isAiUnanswered(formId, props.question.id)) return false
+  return answerPlainText(props.modelValue).trim() === ''
+})
+
+function clearUnanswered() {
+  const formId = store.activeFormId
+  if (formId) clearAiUnanswered(formId, props.question.id)
+}
 
 const matchingMappings = computed(() =>
   mappings.value.filter(
@@ -167,6 +192,7 @@ const textModel = computed({
   set(val: string) {
     emit('update:modelValue', val)
     store.dismissSourceWarning(props.question.id)
+    clearUnanswered()
   },
 })
 
@@ -199,11 +225,13 @@ function onRadioSelect(option: string) {
   const followUp = current.split('\n---\n')[1] ?? ''
   emit('update:modelValue', followUp ? `${option}\n---\n${followUp}` : option)
   store.dismissSourceWarning(props.question.id)
+  clearUnanswered()
 }
 
 function onApplySuggestion(value: string, meta?: AnswerSourceMeta) {
   emit('update:modelValue', value)
   if (meta) store.setAnswerSources(props.question.id, meta)
+  clearUnanswered()
 }
 
 const checkboxValues = computed(() =>
@@ -217,6 +245,7 @@ function onCheckboxToggle(option: string) {
   else current.splice(idx, 1)
   emit('update:modelValue', current)
   store.dismissSourceWarning(props.question.id)
+  clearUnanswered()
 }
 </script>
 
@@ -289,5 +318,25 @@ function onCheckboxToggle(option: string) {
 
 .invulhulp-question__followup {
   margin-block-start: var(--rvo-space-xs);
+}
+
+.invulhulp-question__ai-empty {
+  display: flex;
+  align-items: center;
+  gap: var(--rvo-space-2xs);
+  margin: var(--rvo-space-xs) 0 0;
+  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  background: #fdf6ec;
+  border-inline-start: 3px solid #e0b561;
+  border-radius: var(--rvo-border-radius-sm, 4px);
+  font-size: var(--rvo-font-size-sm);
+  color: #8a6d3b;
+}
+
+.invulhulp-question__ai-empty-icon {
+  display: inline-flex;
+  align-items: center;
+  color: #b8860b;
+  flex-shrink: 0;
 }
 </style>
