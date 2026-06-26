@@ -31,11 +31,7 @@
             @click="auth.logout()"
             class="rvo-button rvo-button--secondary rvo-button--size-sm invulhulp-header__logout"
           >
-            <span
-              class="invulhulp-header__logout-icon"
-              :style="{ '--icon': `url(${inloggenIcon})` }"
-              aria-hidden="true"
-            />
+            <span class="invulhulp-header__logout-icon" aria-hidden="true" />
             Uitloggen
           </button>
         </div>
@@ -85,7 +81,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import emblemUrl from '@nl-rvo/assets/images/emblem.svg'
-import inloggenIcon from '@nl-rvo/assets/icons/functioneel/inloggen.svg'
 import type { FormId } from '../stores/assessmentStore'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAuthStore } from '../stores/authStore'
@@ -160,15 +155,18 @@ function openResetDialog() {
   gap: var(--rvo-space-xs);
 }
 
-/* Mirror the "inloggen" glyph so the arrow points out the door = uitloggen */
+/* Mirror the "inloggen" glyph so the arrow points out the door = uitloggen.
+   The mask URL is a static stylesheet reference so Vite resolves and encodes
+   the NL Design System icon correctly in the production build (a runtime
+   `url(${dataUri})` breaks once Vite inlines the SVG). */
 .invulhulp-header__logout-icon {
   display: inline-block;
   inline-size: 1.125rem;
   block-size: 1.125rem;
   flex-shrink: 0;
   background-color: currentColor;
-  -webkit-mask: var(--icon) center / contain no-repeat;
-  mask: var(--icon) center / contain no-repeat;
+  -webkit-mask: url('@nl-rvo/assets/icons/functioneel/inloggen.svg') center / contain no-repeat;
+  mask: url('@nl-rvo/assets/icons/functioneel/inloggen.svg') center / contain no-repeat;
   transform: scaleX(-1);
 }
 

@@ -23,7 +23,7 @@
 
           <div class="findocs-hero__cta">
             <button class="rvo-button rvo-button--primary findocs-cta-btn" @click="auth.login()">
-              <span class="findocs-cta-btn__icon" :style="{ '--icon': `url(${inloggenIcon})` }" aria-hidden="true" />
+              <span class="findocs-cta-btn__icon" aria-hidden="true" />
               Inloggen met SSO
             </button>
             <span class="findocs-hero__cta-note">Inloggen vereist · alleen voor medewerkers van het ministerie</span>
@@ -50,7 +50,6 @@ import { onMounted } from 'vue'
 import AssessmentForm from './components/AssessmentForm.vue'
 import { useAssessmentStore } from './stores/assessmentStore'
 import { useAuthStore } from './stores/authStore'
-import inloggenIcon from '@nl-rvo/assets/icons/functioneel/inloggen.svg'
 import emblemUrl from '@nl-rvo/assets/images/emblem.svg'
 import brondocIcon from '@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg'
 import aiIcon from '@nl-rvo/assets/icons/computer-en-internet/digitalisering.svg'
@@ -232,8 +231,10 @@ onMounted(async () => {
   block-size: 1.25rem;
   flex-shrink: 0;
   background-color: currentColor;
-  -webkit-mask: var(--icon) center / contain no-repeat;
-  mask: var(--icon) center / contain no-repeat;
+  /* Static stylesheet url() so Vite resolves/encodes the NLDS icon correctly
+     in production; a runtime `url(${dataUri})` renders as a white square. */
+  -webkit-mask: url('@nl-rvo/assets/icons/functioneel/inloggen.svg') center / contain no-repeat;
+  mask: url('@nl-rvo/assets/icons/functioneel/inloggen.svg') center / contain no-repeat;
 }
 
 .findocs-hero__cta-note {
