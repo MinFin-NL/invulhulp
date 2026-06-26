@@ -20,6 +20,11 @@ variables:
     value: ca-invulhulp-backend-inno-d
   - name: FRONTEND_APP
     value: ca-invulhulp-frontend-inno-d
+  - name: KEYCLOAK_APP
+    value: ca-keycloak-inno-d
+  # PUBLIC_URL (frontend external URL) is supplied by the invulhulp-secrets variable
+  # group. It drives the OIDC redirect/logout URIs and must match the redirectUris
+  # baked into the Keycloak findocs realm.
 
 
 stages:
@@ -84,6 +89,12 @@ stages:
               CONTAINER_APP_ENV: $(CONTAINER_APP_ENV)
               AZURE_OPENAI_EMBEDDING_ENDPOINT: $(AZURE_OPENAI_EMBEDDING_ENDPOINT)
               AZURE_OPENAI_EMBEDDING_API_KEY: $(AZURE_OPENAI_EMBEDDING_API_KEY)
+              KEYCLOAK_APP: $(KEYCLOAK_APP)
+              # From the invulhulp-secrets variable group. OIDC_CLIENT_SECRET MUST
+              # equal Keycloak's FINDOCS_BFF_CLIENT_SECRET.
+              PUBLIC_URL: $(PUBLIC_URL)
+              OIDC_CLIENT_SECRET: $(OIDC_CLIENT_SECRET)
+              SESSION_SECRET: $(SESSION_SECRET)
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
               scriptType: bash
@@ -94,13 +105,26 @@ stages:
                 ACR_USER=$(az acr credential show --name "$ACR_NAME" --query username -o tsv)
                 ACR_PASS=$(az acr credential show --name "$ACR_NAME" --query "passwords[0].value" -o tsv)
 
+                # OIDC discovery points at the Keycloak app the keycloak pipeline
+                # deploys into this same environment. Its FQDN isn't known until it
+                # exists, so look it up at deploy time.
+                KC_FQDN=$(az containerapp show --name "$KEYCLOAK_APP" --resource-group "$RESOURCE_GROUP" --query "properties.configuration.ingress.fqdn" -o tsv 2>/dev/null || true)
+                if [ -z "$KC_FQDN" ]; then
+                  echo "##[error]Keycloak app '$KEYCLOAK_APP' not found in $RESOURCE_GROUP. Deploy the keycloak pipeline first." >&2
+                  exit 1
+                fi
+                OIDC_DISCOVERY_URL="https://${KC_FQDN}/realms/findocs/.well-known/openid-configuration"
+                echo "Using Keycloak discovery: $OIDC_DISCOVERY_URL"
+
                 if az containerapp show --name "$BACKEND_APP" --resource-group "$RESOURCE_GROUP" &>/dev/null; then
                   az containerapp secret set \
                     --name "$BACKEND_APP" \
                     --resource-group "$RESOURCE_GROUP" \
                     --secrets \
                       "openai-embedding-endpoint=${AZURE_OPENAI_EMBEDDING_ENDPOINT}" \
-                      "openai-embedding-api-key=${AZURE_OPENAI_EMBEDDING_API_KEY}"
+                      "openai-embedding-api-key=${AZURE_OPENAI_EMBEDDING_API_KEY}" \
+                      "oidc-client-secret=${OIDC_CLIENT_SECRET}" \
+                      "session-secret=${SESSION_SECRET}"
 
                   az containerapp update \
                     --name "$BACKEND_APP" \
@@ -116,7 +140,15 @@ stages:
                       "AZURE_OPENAI_EMBEDDING_ENDPOINT=secretref:openai-embedding-endpoint" \
                       "AZURE_OPENAI_EMBEDDING_API_KEY=secretref:openai-embedding-api-key" \
                       "AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3-large" \
-                      "AZURE_OPENAI_EMBEDDING_API_VERSION=2024-02-01"
+                      "AZURE_OPENAI_EMBEDDING_API_VERSION=2024-02-01" \
+                      "OIDC_DISCOVERY_URL=${OIDC_DISCOVERY_URL}" \
+                      "OIDC_CLIENT_ID=findocs-bff" \
+                      "OIDC_CLIENT_SECRET=secretref:oidc-client-secret" \
+                      "OIDC_REDIRECT_URI=${PUBLIC_URL}/api/auth/callback" \
+                      "OIDC_POST_LOGIN_REDIRECT=${PUBLIC_URL}/" \
+                      "OIDC_POST_LOGOUT_REDIRECT=${PUBLIC_URL}/" \
+                      "SESSION_SECRET=secretref:session-secret" \
+                      "SESSION_HTTPS_ONLY=true"
                 else
                   az containerapp create \
                     --name "$BACKEND_APP" \
@@ -138,11 +170,21 @@ stages:
                       "AZURE_OPENAI_EMBEDDING_API_KEY=secretref:openai-embedding-api-key" \
                       "AZURE_OPENAI_EMBEDDING_DEPLOYMENT=text-embedding-3-large" \
                       "AZURE_OPENAI_EMBEDDING_API_VERSION=2024-02-01" \
+                      "OIDC_DISCOVERY_URL=${OIDC_DISCOVERY_URL}" \
+                      "OIDC_CLIENT_ID=findocs-bff" \
+                      "OIDC_CLIENT_SECRET=secretref:oidc-client-secret" \
+                      "OIDC_REDIRECT_URI=${PUBLIC_URL}/api/auth/callback" \
+                      "OIDC_POST_LOGIN_REDIRECT=${PUBLIC_URL}/" \
+                      "OIDC_POST_LOGOUT_REDIRECT=${PUBLIC_URL}/" \
+                      "SESSION_SECRET=secretref:session-secret" \
+                      "SESSION_HTTPS_ONLY=true" \
                     --secrets \
                       "openai-endpoint=" \
                       "openai-api-key=" \
                       "openai-embedding-endpoint=${AZURE_OPENAI_EMBEDDING_ENDPOINT}" \
                       "openai-embedding-api-key=${AZURE_OPENAI_EMBEDDING_API_KEY}" \
+                      "oidc-client-secret=${OIDC_CLIENT_SECRET}" \
+                      "session-secret=${SESSION_SECRET}" \
                     --cpu 0.5 --memory 1.0Gi \
                     --min-replicas 1 --max-replicas 3
                 fi
