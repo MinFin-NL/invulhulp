@@ -3,6 +3,7 @@ AIIA PoC – FastAPI backend
 
 Run:
     uvicorn main:app --reload
+    python main.py --dev      # auto-reload + bypass Keycloak login (local only)
 
 Environment variables (can be set via .env file):
     CORS_ORIGINS      — comma-separated allowed origins (default: http://localhost:5173)
@@ -15,21 +16,33 @@ import asyncio
 import json
 import os
 import re
+import sys
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
+from starlette.middleware.sessions import SessionMiddleware
 
+# `--dev` turns off the Keycloak login for local work. Set before importing
+# auth, whose DEV_AUTH_BYPASS constant is evaluated at import time. The flag is
+# inherited by uvicorn's reloader subprocess via the environment.
+if "--dev" in sys.argv:
+    os.environ["DEV_AUTH_BYPASS"] = "true"
+
+import auth
 import llm
 import rag
 
 load_dotenv()
 
 CORS_ORIGINS = [o.strip() for o in os.environ.get("CORS_ORIGINS", "http://localhost:5173").split(",")]
+SESSION_SECRET = os.environ.get("SESSION_SECRET", "dev-session-secret-change-me")
+# HttpOnly session cookie only over HTTPS in production.
+SESSION_HTTPS_ONLY = os.environ.get("SESSION_HTTPS_ONLY", "false").lower() == "true"
 
 backend = llm.create_backend()
 
@@ -56,14 +69,33 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     task.cancel()
 
 
-app = FastAPI(title="AIIA PoC API", version="1.0.0", lifespan=lifespan)
+# Every route requires a logged-in session except /api/auth/* (handled inside
+# require_user). The BFF flow lives in auth.py.
+app = FastAPI(
+    title="AIIA PoC API",
+    version="1.0.0",
+    lifespan=lifespan,
+    dependencies=[Depends(auth.require_user)],
+)
+
+# SessionMiddleware backs request.session — both the OIDC flow state and the
+# logged-in user identity live in this signed, HttpOnly cookie.
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SESSION_SECRET,
+    same_site="lax",
+    https_only=SESSION_HTTPS_ONLY,
+)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
-    allow_methods=["POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
+
+app.include_router(auth.router)
 
 SYSTEM_PROMPT = (
     "Je bent een assistent die helpt bij het invullen van AI Impact Assessments "
@@ -718,3 +750,12 @@ async def extract_rag_stream(req: RagExtractRequest) -> StreamingResponse:
         media_type="text/event-stream",
         headers=_SSE_HEADERS,
     )
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    dev = "--dev" in sys.argv
+    if dev:
+        print("⚠️  --dev: Keycloak login bypassed, every request runs as the dev user.")
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=dev)

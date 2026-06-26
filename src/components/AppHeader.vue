@@ -16,13 +16,29 @@
             </div>
           </div>
         </button>
-        <button
-          v-if="store.activeFormId !== null && store.currentView !== 'home'"
-          @click="openResetDialog"
-          class="rvo-button rvo-button--secondary rvo-button--size-sm"
-        >
-          Opnieuw beginnen
-        </button>
+        <div class="invulhulp-header__actions">
+          <button
+            v-if="store.activeFormId !== null && store.currentView !== 'home'"
+            @click="openResetDialog"
+            class="rvo-button rvo-button--secondary rvo-button--size-sm"
+          >
+            Opnieuw beginnen
+          </button>
+          <span v-if="auth.user" class="invulhulp-header__user">
+            {{ auth.user.name ?? auth.user.email }}
+          </span>
+          <button
+            @click="auth.logout()"
+            class="rvo-button rvo-button--secondary rvo-button--size-sm invulhulp-header__logout"
+          >
+            <span
+              class="invulhulp-header__logout-icon"
+              :style="{ '--icon': `url(${inloggenIcon})` }"
+              aria-hidden="true"
+            />
+            Uitloggen
+          </button>
+        </div>
       </div>
 
       <!-- Grouped form tabs with track labels and sequence arrows -->
@@ -69,12 +85,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import emblemUrl from '@nl-rvo/assets/images/emblem.svg'
+import inloggenIcon from '@nl-rvo/assets/icons/functioneel/inloggen.svg'
 import type { FormId } from '../stores/assessmentStore'
 import { useAssessmentStore } from '../stores/assessmentStore'
+import { useAuthStore } from '../stores/authStore'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
 import ConfirmDialog from './ConfirmDialog.vue'
 
 const store = useAssessmentStore()
+const auth = useAuthStore()
 const availableForms = ref<FormIndexEntry[]>([])
 const resetDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 
@@ -129,6 +148,35 @@ function openResetDialog() {
   padding-block: var(--rvo-space-sm);
   align-items: center;
   justify-content: space-between;
+}
+
+.invulhulp-header__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rvo-space-sm);
+}
+
+.invulhulp-header__logout {
+  gap: var(--rvo-space-xs);
+}
+
+/* Mirror the "inloggen" glyph so the arrow points out the door = uitloggen */
+.invulhulp-header__logout-icon {
+  display: inline-block;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  flex-shrink: 0;
+  background-color: currentColor;
+  -webkit-mask: var(--icon) center / contain no-repeat;
+  mask: var(--icon) center / contain no-repeat;
+  transform: scaleX(-1);
+}
+
+.invulhulp-header__user {
+  font-size: var(--rvo-font-size-sm);
+  font-weight: var(--rvo-font-weight-semibold);
+  color: rgb(255 255 255 / 0.9);
+  white-space: nowrap;
 }
 
 .invulhulp-header__logo-btn {

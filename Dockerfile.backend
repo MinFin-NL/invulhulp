@@ -10,7 +10,7 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 
 # Copy application
-COPY main.py llm.py rag.py ./
+COPY main.py auth.py llm.py rag.py ./
 
 EXPOSE 8000
 

@@ -3,8 +3,8 @@ services:
     image: ollama/ollama
     volumes:
       - ollama_data:/root/.ollama
-    ports:
-      - "11434:11434"
+    # No host port published: the backend reaches Ollama in-network at
+    # http://ollama:11434. Publishing 11434 clashes with a native Ollama on the host.
     healthcheck:
       test: ["CMD", "ollama", "list"]
       interval: 10s
@@ -19,9 +19,21 @@ services:
       OLLAMA_MODEL: ${OLLAMA_MODEL:-llama3.2}
       OLLAMA_BASE_URL: http://ollama:11434
       CORS_ORIGINS: http://localhost:8080
+      # OIDC / Keycloak BFF — Keycloak runs in the separate keycloak/ stack and
+      # is reached over the shared `keycloak-shared` network at keycloak:8080.
+      OIDC_DISCOVERY_URL: http://keycloak:8080/realms/findocs/.well-known/openid-configuration
+      OIDC_CLIENT_ID: findocs-bff
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-dev-secret-change-me}
+      OIDC_REDIRECT_URI: http://localhost:8080/api/auth/callback
+      OIDC_POST_LOGIN_REDIRECT: http://localhost:8080/
+      OIDC_POST_LOGOUT_REDIRECT: http://localhost:8080/
+      SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-change-me-please}
     depends_on:
       ollama:
         condition: service_healthy
+    networks:
+      - default
+      - keycloak
 
   frontend:
     build:
@@ -36,3 +48,10 @@ services:
 
 volumes:
   ollama_data:
+
+networks:
+  default:
+  # Created by the keycloak/ stack; start that first (docker compose up there).
+  keycloak:
+    name: keycloak-shared
+    external: true
