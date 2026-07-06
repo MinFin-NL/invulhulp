@@ -22,15 +22,18 @@ variables:
     value: ca-invulhulp-frontend-inno-d
   - name: KEYCLOAK_APP
     value: ca-keycloak-inno-d
-  # Persistent storage for the backend (/data): LanceDB chunks + per-user
-  # document store survive redeploys via an Azure Files share mounted on the
-  # Container Apps environment.
+  # Persistent storage for the backend. Per-user document store lives on an
+  # Azure Files share mounted at /data. LanceDB chunks live in a Blob
+  # container (az:// URI) — NOT on the Files share: Lance commits manifests
+  # with rename-if-not-exists, which the SMB mount rejects (errno 95).
   - name: STORAGE_ACCOUNT
     value: stinvulhulpinnod
   - name: FILE_SHARE
     value: invulhulp-data
   - name: STORAGE_MOUNT_NAME
     value: invulhulp-data
+  - name: LANCEDB_BLOB_CONTAINER
+    value: lancedb
   # PUBLIC_URL (frontend external URL) is supplied by the invulhulp-secrets variable
   # group. It drives the OIDC redirect/logout URIs and must match the redirectUris
   # baked into the Keycloak findocs realm.
@@ -96,6 +99,7 @@ stages:
               STORAGE_ACCOUNT: $(STORAGE_ACCOUNT)
               FILE_SHARE: $(FILE_SHARE)
               STORAGE_MOUNT_NAME: $(STORAGE_MOUNT_NAME)
+              LANCEDB_BLOB_CONTAINER: $(LANCEDB_BLOB_CONTAINER)
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
               scriptType: bash
@@ -126,6 +130,13 @@ stages:
                   --quota 16 \
                   --output none
 
+                # Blob container for LanceDB (accessed via az:// from the app).
+                az storage container create \
+                  --account-name "$STORAGE_ACCOUNT" \
+                  --account-key "$STORAGE_KEY" \
+                  --name "$LANCEDB_BLOB_CONTAINER" \
+                  --output none
+
                 # Register the share on the Container Apps environment so apps
                 # can mount it as an AzureFile volume.
                 az containerapp env storage set \
@@ -147,6 +158,8 @@ stages:
               RESOURCE_GROUP: $(RESOURCE_GROUP)
               CONTAINER_APP_ENV: $(CONTAINER_APP_ENV)
               STORAGE_MOUNT_NAME: $(STORAGE_MOUNT_NAME)
+              STORAGE_ACCOUNT: $(STORAGE_ACCOUNT)
+              LANCEDB_BLOB_CONTAINER: $(LANCEDB_BLOB_CONTAINER)
               AZURE_OPENAI_EMBEDDING_ENDPOINT: $(AZURE_OPENAI_EMBEDDING_ENDPOINT)
               AZURE_OPENAI_EMBEDDING_API_KEY: $(AZURE_OPENAI_EMBEDDING_API_KEY)
               KEYCLOAK_APP: $(KEYCLOAK_APP)
@@ -176,6 +189,14 @@ stages:
                 OIDC_DISCOVERY_URL="https://${KC_FQDN}/realms/findocs/.well-known/openid-configuration"
                 echo "Using Keycloak discovery: $OIDC_DISCOVERY_URL"
 
+                # LanceDB lives in Blob storage (the SMB /data mount can't host
+                # it — see the storage comment in the variables block).
+                STORAGE_KEY=$(az storage account keys list \
+                  --account-name "$STORAGE_ACCOUNT" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --query "[0].value" -o tsv)
+                LANCEDB_URI="az://${LANCEDB_BLOB_CONTAINER}"
+
                 if az containerapp show --name "$BACKEND_APP" --resource-group "$RESOURCE_GROUP" &>/dev/null; then
                   az containerapp secret set \
                     --name "$BACKEND_APP" \
@@ -184,7 +205,8 @@ stages:
                       "openai-embedding-endpoint=${AZURE_OPENAI_EMBEDDING_ENDPOINT}" \
                       "openai-embedding-api-key=${AZURE_OPENAI_EMBEDDING_API_KEY}" \
                       "oidc-client-secret=${OIDC_CLIENT_SECRET}" \
-                      "session-secret=${SESSION_SECRET}"
+                      "session-secret=${SESSION_SECRET}" \
+                      "storage-key=${STORAGE_KEY}"
 
                   az containerapp update \
                     --name "$BACKEND_APP" \
@@ -194,7 +216,9 @@ stages:
                     --max-replicas 1 \
                     --set-env-vars \
                       "CORS_ORIGINS=*" \
-                      "LANCEDB_PATH=/data/lancedb" \
+                      "LANCEDB_PATH=${LANCEDB_URI}" \
+                      "AZURE_STORAGE_ACCOUNT_NAME=${STORAGE_ACCOUNT}" \
+                      "AZURE_STORAGE_ACCOUNT_KEY=secretref:storage-key" \
                       "DOCS_PATH=/data/docs" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
                       "AZURE_OPENAI_DEPLOYMENT=gpt-5.3-chat" \
@@ -225,7 +249,9 @@ stages:
                     --target-port 8000 \
                     --env-vars \
                       "CORS_ORIGINS=*" \
-                      "LANCEDB_PATH=/data/lancedb" \
+                      "LANCEDB_PATH=${LANCEDB_URI}" \
+                      "AZURE_STORAGE_ACCOUNT_NAME=${STORAGE_ACCOUNT}" \
+                      "AZURE_STORAGE_ACCOUNT_KEY=secretref:storage-key" \
                       "DOCS_PATH=/data/docs" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
                       "AZURE_OPENAI_DEPLOYMENT=gpt-5.3-chat" \
@@ -250,6 +276,7 @@ stages:
                       "openai-embedding-api-key=${AZURE_OPENAI_EMBEDDING_API_KEY}" \
                       "oidc-client-secret=${OIDC_CLIENT_SECRET}" \
                       "session-secret=${SESSION_SECRET}" \
+                      "storage-key=${STORAGE_KEY}" \
                     --cpu 0.5 --memory 1.0Gi \
                     --min-replicas 1 --max-replicas 1
                 fi
