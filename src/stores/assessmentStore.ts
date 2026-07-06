@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import type { Answers, AnswerSourceMeta, RiskLevelValue } from '../models/Assessment'
-import { indexDocument, deleteDocument } from '../services/llmService'
+import { indexDocument, deleteDocument, listDocuments } from '../services/llmService'
 
 export type FormId = string
 export type DossierId = string
@@ -178,7 +178,35 @@ export const useAssessmentStore = defineStore('assessment', {
     },
 
     switchDossier(id: DossierId) {
-      if (this.dossiers[id]) this.activeDossierId = id
+      if (this.dossiers[id]) {
+        this.activeDossierId = id
+        this.syncDocumentsFromServer()
+      }
+    },
+
+    /** Merge documents the backend has persisted for the active dossier into
+     *  local state — restores uploads after a wiped localStorage or on a new
+     *  device. Local documents are never removed; best-effort (an older
+     *  backend without the endpoint just leaves local state as-is). */
+    async syncDocumentsFromServer() {
+      const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
+      if (!dossier) return
+      try {
+        const serverDocs = await listDocuments(dossier.sessionId)
+        for (const d of serverDocs) {
+          if (dossier.documents.some((local) => local.id === d.doc_id)) continue
+          dossier.documents.push({
+            id: d.doc_id,
+            name: d.name,
+            content: d.content,
+            uploadedAt: d.uploaded_at ?? Date.now(),
+            chunkCount: d.chunk_count,
+            ontology: d.ontology as DocumentOntology,
+          })
+        }
+      } catch {
+        // offline or older backend — keep local state
+      }
     },
 
     renameDossier(id: DossierId, name: string) {
@@ -277,6 +305,7 @@ export const useAssessmentStore = defineStore('assessment', {
           docId: doc.id,
           name,
           content,
+          uploadedAt: doc.uploadedAt,
         })
         const stored = dossier.documents.find((d) => d.id === doc.id)
         if (stored) {

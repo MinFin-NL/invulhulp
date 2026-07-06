@@ -21,7 +21,7 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -34,6 +34,7 @@ if "--dev" in sys.argv:
     os.environ["DEV_AUTH_BYPASS"] = "true"
 
 import auth
+import docstore
 import llm
 import rag
 
@@ -305,6 +306,7 @@ class IndexDocumentRequest(BaseModel):
     doc_id: str
     name: str
     content: str
+    uploaded_at: int | None = None  # ms epoch, client clock — display only
 
 
 class IndexDocumentResponse(BaseModel):
@@ -630,7 +632,7 @@ async def extract_from_documents_stream(req: ExtractRequest) -> StreamingRespons
 
 
 @app.post("/api/documents/index", response_model=IndexDocumentResponse)
-async def index_document(req: IndexDocumentRequest) -> IndexDocumentResponse:
+async def index_document(req: IndexDocumentRequest, request: Request) -> IndexDocumentResponse:
     if not req.content.strip():
         raise HTTPException(status_code=400, detail="Document is leeg.")
     try:
@@ -645,6 +647,23 @@ async def index_document(req: IndexDocumentRequest) -> IndexDocumentResponse:
         index_result, ontology = await asyncio.gather(index_task, ontology_task)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Indexering mislukt: [{type(e).__name__}] {e}") from e
+    # Persist the source text per user so a fresh browser (or wiped
+    # localStorage) can restore the dossier's documents from the server.
+    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    try:
+        await asyncio.to_thread(
+            docstore.save_document,
+            user_sub=user_sub,
+            session_id=req.session_id,
+            doc_id=req.doc_id,
+            name=req.name,
+            content=req.content,
+            ontology=ontology,
+            chunk_count=index_result["chunk_count"],
+            uploaded_at=req.uploaded_at,
+        )
+    except Exception as e:
+        print(f"[docstore] opslaan van {req.doc_id} mislukt: {e}")  # index succeeded — don't fail the upload
     return IndexDocumentResponse(
         doc_id=req.doc_id,
         chunk_count=index_result["chunk_count"],
@@ -652,9 +671,19 @@ async def index_document(req: IndexDocumentRequest) -> IndexDocumentResponse:
     )
 
 
+@app.get("/api/documents")
+async def list_documents(session_id: str, request: Request) -> dict:
+    """The logged-in user's stored documents for one dossier (session)."""
+    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    docs = await asyncio.to_thread(docstore.list_documents, user_sub, session_id)
+    return {"documents": docs}
+
+
 @app.delete("/api/documents/{doc_id}")
-async def remove_document(doc_id: str) -> dict:
+async def remove_document(doc_id: str, request: Request) -> dict:
     await rag.delete_document(doc_id)
+    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    await asyncio.to_thread(docstore.delete_document, user_sub, doc_id)
     return {"deleted": doc_id}
 
 
@@ -671,8 +700,10 @@ async def verify_documents(req: VerifyDocumentsRequest) -> dict:
 
 
 @app.delete("/api/sessions/{session_id}")
-async def remove_session(session_id: str) -> dict:
+async def remove_session(session_id: str, request: Request) -> dict:
     await rag.delete_session(session_id)
+    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    await asyncio.to_thread(docstore.delete_session, user_sub, session_id)
     return {"deleted": session_id}
 
 

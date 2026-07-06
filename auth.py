@@ -108,6 +108,14 @@ async def logout(request: Request):
     return RedirectResponse(url=f"{end_session}?{params}")
 
 
+def current_user(request: Request) -> dict:
+    """The logged-in user's claims (sub/name/email). require_user has already
+    gated the request, so outside the dev bypass this never returns empty."""
+    if DEV_AUTH_BYPASS:
+        return DEV_USER
+    return request.session.get("user") or {}
+
+
 def require_user(request: Request) -> None:
     """Global dependency: let /api/auth/* through, gate everything else.
 

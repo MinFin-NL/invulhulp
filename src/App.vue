@@ -78,7 +78,9 @@ const features = [
 onMounted(async () => {
   await auth.fetchMe()
   if (auth.status === 'authenticated') {
-    useAssessmentStore().ensureDossier()
+    const store = useAssessmentStore()
+    store.ensureDossier()
+    store.syncDocumentsFromServer()
   }
 })
 </script>

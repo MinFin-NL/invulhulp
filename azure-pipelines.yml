@@ -22,6 +22,15 @@ variables:
     value: ca-invulhulp-frontend-inno-d
   - name: KEYCLOAK_APP
     value: ca-keycloak-inno-d
+  # Persistent storage for the backend (/data): LanceDB chunks + per-user
+  # document store survive redeploys via an Azure Files share mounted on the
+  # Container Apps environment.
+  - name: STORAGE_ACCOUNT
+    value: stinvulhulpinnod
+  - name: FILE_SHARE
+    value: invulhulp-data
+  - name: STORAGE_MOUNT_NAME
+    value: invulhulp-data
   # PUBLIC_URL (frontend external URL) is supplied by the invulhulp-secrets variable
   # group. It drives the OIDC redirect/logout URIs and must match the redirectUris
   # baked into the Keycloak findocs realm.
@@ -80,6 +89,56 @@ stages:
         displayName: Deploy backend and frontend
         steps:
           - task: AzureCLI@2
+            displayName: Provision persistent storage
+            env:
+              RESOURCE_GROUP: $(RESOURCE_GROUP)
+              CONTAINER_APP_ENV: $(CONTAINER_APP_ENV)
+              STORAGE_ACCOUNT: $(STORAGE_ACCOUNT)
+              FILE_SHARE: $(FILE_SHARE)
+              STORAGE_MOUNT_NAME: $(STORAGE_MOUNT_NAME)
+            inputs:
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptType: bash
+              scriptLocation: inlineScript
+              inlineScript: |
+                set -euo pipefail
+                LOCATION=$(az group show --name "$RESOURCE_GROUP" --query location -o tsv)
+
+                # Idempotent: create returns the existing account unchanged.
+                az storage account create \
+                  --name "$STORAGE_ACCOUNT" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --location "$LOCATION" \
+                  --sku Standard_LRS \
+                  --kind StorageV2 \
+                  --min-tls-version TLS1_2 \
+                  --output none
+
+                STORAGE_KEY=$(az storage account keys list \
+                  --account-name "$STORAGE_ACCOUNT" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --query "[0].value" -o tsv)
+
+                az storage share-rm create \
+                  --storage-account "$STORAGE_ACCOUNT" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --name "$FILE_SHARE" \
+                  --quota 16 \
+                  --output none
+
+                # Register the share on the Container Apps environment so apps
+                # can mount it as an AzureFile volume.
+                az containerapp env storage set \
+                  --name "$CONTAINER_APP_ENV" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --storage-name "$STORAGE_MOUNT_NAME" \
+                  --azure-file-account-name "$STORAGE_ACCOUNT" \
+                  --azure-file-account-key "$STORAGE_KEY" \
+                  --azure-file-share-name "$FILE_SHARE" \
+                  --access-mode ReadWrite \
+                  --output none
+
+          - task: AzureCLI@2
             displayName: Deploy backend
             env:
               IMAGE_TAG: $(Build.SourceVersion)
@@ -87,6 +146,7 @@ stages:
               BACKEND_APP: $(BACKEND_APP)
               RESOURCE_GROUP: $(RESOURCE_GROUP)
               CONTAINER_APP_ENV: $(CONTAINER_APP_ENV)
+              STORAGE_MOUNT_NAME: $(STORAGE_MOUNT_NAME)
               AZURE_OPENAI_EMBEDDING_ENDPOINT: $(AZURE_OPENAI_EMBEDDING_ENDPOINT)
               AZURE_OPENAI_EMBEDDING_API_KEY: $(AZURE_OPENAI_EMBEDDING_API_KEY)
               KEYCLOAK_APP: $(KEYCLOAK_APP)
@@ -131,8 +191,11 @@ stages:
                     --resource-group "$RESOURCE_GROUP" \
                     --image "$ACR_LOGIN_SERVER/$BACKEND_IMAGE:$IMAGE_TAG" \
                     --min-replicas 1 \
+                    --max-replicas 1 \
                     --set-env-vars \
                       "CORS_ORIGINS=*" \
+                      "LANCEDB_PATH=/data/lancedb" \
+                      "DOCS_PATH=/data/docs" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
                       "AZURE_OPENAI_DEPLOYMENT=gpt-5.3-chat" \
                       "AZURE_OPENAI_API_VERSION=2025-04-01-preview" \
@@ -162,6 +225,8 @@ stages:
                     --target-port 8000 \
                     --env-vars \
                       "CORS_ORIGINS=*" \
+                      "LANCEDB_PATH=/data/lancedb" \
+                      "DOCS_PATH=/data/docs" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
                       "AZURE_OPENAI_DEPLOYMENT=gpt-5.3-chat" \
                       "AZURE_OPENAI_API_VERSION=2025-04-01-preview" \
@@ -186,8 +251,35 @@ stages:
                       "oidc-client-secret=${OIDC_CLIENT_SECRET}" \
                       "session-secret=${SESSION_SECRET}" \
                     --cpu 0.5 --memory 1.0Gi \
-                    --min-replicas 1 --max-replicas 3
+                    --min-replicas 1 --max-replicas 1
                 fi
+
+                # Mount the Azure Files share at /data. The CLI has no flag for
+                # volume mounts, so patch the app definition via --yaml (the
+                # show output in JSON is valid YAML). Idempotent per deploy.
+                az containerapp show \
+                  --name "$BACKEND_APP" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  -o json > /tmp/backend-app.json
+                python3 - "$STORAGE_MOUNT_NAME" <<'PY'
+                import json, sys
+                mount_name = sys.argv[1]
+                with open("/tmp/backend-app.json") as f:
+                    app = json.load(f)
+                template = app["properties"]["template"]
+                template["volumes"] = [
+                    {"name": "data", "storageName": mount_name, "storageType": "AzureFile"}
+                ]
+                for container in template["containers"]:
+                    container["volumeMounts"] = [{"volumeName": "data", "mountPath": "/data"}]
+                with open("/tmp/backend-app.json", "w") as f:
+                    json.dump(app, f)
+                PY
+                az containerapp update \
+                  --name "$BACKEND_APP" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --yaml /tmp/backend-app.json \
+                  --output none
 
                 az containerapp ingress access-restriction remove \
                   --name "$BACKEND_APP" \

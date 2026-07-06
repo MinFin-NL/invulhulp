@@ -149,6 +149,7 @@ export interface IndexDocumentRequest {
   docId: string
   name: string
   content: string
+  uploadedAt?: number
 }
 
 export interface IndexDocumentResponse {
@@ -166,6 +167,7 @@ export async function indexDocument(req: IndexDocumentRequest): Promise<IndexDoc
       doc_id: req.docId,
       name: req.name,
       content: req.content,
+      uploaded_at: req.uploadedAt ?? Date.now(),
     }),
   })
   if (!response.ok) {
@@ -174,6 +176,24 @@ export async function indexDocument(req: IndexDocumentRequest): Promise<IndexDoc
   }
   const data = (await response.json()) as { doc_id: string; chunk_count: number; ontology: Record<string, unknown> }
   return { docId: data.doc_id, chunkCount: data.chunk_count, ontology: data.ontology }
+}
+
+export interface ServerDocument {
+  doc_id: string
+  session_id: string
+  name: string
+  content: string
+  ontology: Record<string, unknown>
+  chunk_count: number
+  uploaded_at: number | null
+}
+
+/** Documents the backend has persisted for this user + dossier (session). */
+export async function listDocuments(sessionId: string): Promise<ServerDocument[]> {
+  const res = await fetch(`/api/documents?session_id=${encodeURIComponent(sessionId)}`)
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const data = (await res.json()) as { documents: ServerDocument[] }
+  return data.documents
 }
 
 export async function deleteDocument(docId: string): Promise<void> {
