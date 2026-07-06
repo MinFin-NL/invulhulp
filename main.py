@@ -267,6 +267,40 @@ SYNTHESIZE_SYSTEM_PROMPT = (
 )
 
 
+# The smoothing pass runs after AI Modus filled a form: per-question extraction
+# calls are isolated, so answers restate the same facts. Smoothing rewrites one
+# section's longtext answers per call, with earlier (already smoothed) sections
+# passed as read-only context — dedup is one-directional (a fact stays in the
+# earliest answer), so a rewritten answer never needs to grow.
+SMOOTH_SYSTEM_PROMPT = (
+    "Je bent eindredacteur van een ingevuld formulier voor de Nederlandse "
+    "overheid (Ministerie van Financiën - MinFin). Je krijgt de antwoorden van "
+    "één sectie van het formulier, plus ter context antwoorden uit eerdere "
+    "secties. Herschrijf UITSLUITEND de sectie-antwoorden om herhaling en "
+    "breedsprakigheid te verwijderen.\n\n"
+    "Harde regels:\n"
+    "1. Voeg NOOIT nieuwe feiten, namen, aantallen of claims toe en verander "
+    "de betekenis niet. Je mag alleen inkorten, herformuleren en herhaling "
+    "schrappen.\n"
+    "2. Elk uniek feit blijft ten minste één keer behouden. Staat een feit al "
+    "in een contextantwoord of in een eerder antwoord binnen deze sectie, "
+    "schrap dan de herhaling in het latere antwoord of vat die samen in één "
+    "korte zin.\n"
+    "3. Elk antwoord blijft zelfstandig leesbaar onder zijn eigen vraag: "
+    "minimaal één volledige zin, en verwijs NOOIT naar andere antwoorden "
+    "('zie boven', 'zoals eerder genoemd bij vraag X').\n"
+    "4. Behoud de formele ambtelijke stijl, de derde persoon en de taal van "
+    "de invoer (bijna altijd Nederlands).\n"
+    "5. Neem een antwoord ALLEEN op in je uitvoer als je er daadwerkelijk "
+    "herhaling uit schrapt of het duidelijk inkort. Herformuleer nooit alleen "
+    "voor de stijl: een antwoord dat al beknopt is en niets herhaalt laat je "
+    "volledig WEG uit je uitvoer. Geef nooit een leeg antwoord terug.\n\n"
+    "Reageer uitsluitend in dit formaat, één blok per GEWIJZIGD antwoord, met "
+    "exact het vraag-ID uit de invoer en geen tekst buiten de tags:\n"
+    '<antwoord id="VRAAG_ID">de herschreven tekst</antwoord>'
+)
+
+
 class ImproveRequest(BaseModel):
     text: str
     question_context: str = ""
@@ -285,6 +319,18 @@ class SynthesizeRequest(BaseModel):
     source_questions: dict[str, str]
     target_question: str
     synthesis_hint: str = ""
+
+
+class SmoothAnswer(BaseModel):
+    question_id: str
+    question_text: str
+    answer: str  # plaintext, HTML stripped client-side
+
+
+class SmoothRequest(BaseModel):
+    section_title: str = ""
+    answers: list[SmoothAnswer]  # answers of this section — rewrite these
+    context_answers: list[SmoothAnswer] = []  # earlier sections — read-only
 
 
 class ExtractDocument(BaseModel):
@@ -352,6 +398,56 @@ def _synthesize_user_message(req: SynthesizeRequest) -> str:
         f"Doelvraag waarvoor een suggestie nodig is:\n{req.target_question}\n\n"
         f"Beschikbare broninformatie:{hint}\n\n" + "\n\n".join(context_parts)
     )
+
+
+# Context answers only need to carry enough of each fact for dedup awareness;
+# truncating keeps the rolling prompt bounded on large forms.
+_SMOOTH_CONTEXT_CHARS = 400
+
+
+def _smooth_user_message(req: SmoothRequest) -> str:
+    def block(entries: list[SmoothAnswer], truncate: int = 0) -> str:
+        parts = []
+        for a in entries:
+            answer = a.answer.strip()
+            if truncate and len(answer) > truncate:
+                answer = answer[:truncate].rstrip() + "…"
+            parts.append(f"[{a.question_id}] Vraag: {a.question_text}\nAntwoord: {answer}")
+        return "\n\n".join(parts)
+
+    context = (
+        block(req.context_answers, truncate=_SMOOTH_CONTEXT_CHARS)
+        if req.context_answers
+        else "(geen)"
+    )
+    section = f"Sectie: {req.section_title}\n\n" if req.section_title.strip() else ""
+    return (
+        "Context — antwoorden uit eerdere secties (NIET herschrijven):\n\n"
+        f"{context}\n\n"
+        f"{section}Te herschrijven antwoorden:\n\n{block(req.answers)}"
+    )
+
+
+_ANTWOORD_RE = re.compile(r'<antwoord id="([^"]+)">(.*?)</antwoord>', re.DOTALL | re.IGNORECASE)
+
+
+def _parse_smooth(raw: str, originals: dict[str, str]) -> dict[str, str]:
+    """Map question id → final answer text. Smoothing may only shrink or keep
+    an answer: any missing, empty, template-echoed, or suspiciously grown
+    rewrite falls back to the original — worst case is a no-op, never data
+    loss. Ids not present in the request are ignored."""
+    result = dict(originals)
+    for m in _ANTWOORD_RE.finditer(raw):
+        qid, text = m.group(1).strip(), m.group(2).strip()
+        original = originals.get(qid)
+        if original is None:
+            continue
+        if not text or text.lower() in ("de herschreven tekst", "vraag_id"):
+            continue
+        if len(text) > 1.5 * len(original):
+            continue
+        result[qid] = text
+    return result
 
 
 def _parse_improve(raw: str, fallback: str) -> tuple[str, str]:
@@ -584,6 +680,41 @@ async def synthesize_stream(req: SynthesizeRequest) -> StreamingResponse:
         raise HTTPException(status_code=400, detail="Geen bronantwoorden opgegeven.")
     return StreamingResponse(
         _sse_stream(SYNTHESIZE_SYSTEM_PROMPT, _synthesize_user_message(req), _parse_synthesize),
+        media_type="text/event-stream",
+        headers=_SSE_HEADERS,
+    )
+
+
+async def _smooth_sse_stream(req: SmoothRequest) -> AsyncGenerator[str, None]:
+    """Sibling of _sse_stream with a different done shape: the full id → final
+    answer map instead of a single suggestion."""
+    originals = {a.question_id: a.answer.strip() for a in req.answers}
+    raw = ""
+    try:
+        async for chunk in backend.stream(SMOOTH_SYSTEM_PROMPT, _smooth_user_message(req)):
+            raw += chunk
+            yield f"event: chunk\ndata: {json.dumps({'text': chunk}, ensure_ascii=False)}\n\n"
+        answers = _parse_smooth(raw, originals)
+        yield f"event: done\ndata: {json.dumps({'answers': answers}, ensure_ascii=False)}\n\n"
+    except Exception as e:
+        yield f"event: error\ndata: {json.dumps({'detail': str(e)}, ensure_ascii=False)}\n\n"
+
+
+@app.post("/api/smooth/stream")
+async def smooth_answers_stream(req: SmoothRequest) -> StreamingResponse:
+    if not req.answers:
+        raise HTTPException(status_code=400, detail="Geen antwoorden opgegeven.")
+    # Defense-in-depth: the client already truncates context answers.
+    for ctx in req.context_answers:
+        if len(ctx.answer) > _SMOOTH_CONTEXT_CHARS:
+            ctx.answer = ctx.answer[:_SMOOTH_CONTEXT_CHARS]
+    total_chars = sum(len(a.answer) for a in req.answers) + sum(
+        len(a.answer) for a in req.context_answers
+    )
+    if total_chars > 30000:
+        raise HTTPException(status_code=400, detail="Sectie is te groot (max 30000 tekens).")
+    return StreamingResponse(
+        _smooth_sse_stream(req),
         media_type="text/event-stream",
         headers=_SSE_HEADERS,
     )

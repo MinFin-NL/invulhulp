@@ -31,10 +31,10 @@ export interface ExtractRequest {
   formContext?: string
 }
 
-async function parseSseStream(
+async function parseSseStream<T = RagExtractResult>(
   response: Response,
   onChunk: (text: string) => void,
-  onDone: (result: RagExtractResult) => void,
+  onDone: (result: T) => void,
   onError: (message: string) => void,
   onClarification?: (question: string) => void,
   onDiagram?: (mermaid: string) => void,
@@ -62,7 +62,7 @@ async function parseSseStream(
       try {
         const parsed = JSON.parse(data)
         if (eventType === 'chunk') onChunk(parsed.text ?? '')
-        else if (eventType === 'done') onDone(parsed as RagExtractResult)
+        else if (eventType === 'done') onDone(parsed as T)
         else if (eventType === 'clarification') onClarification?.(parsed.question ?? '')
         else if (eventType === 'diagram') onDiagram?.(parsed.mermaid ?? '')
         else if (eventType === 'error') onError(parsed.detail ?? 'Onbekende fout')
@@ -331,6 +331,14 @@ function stripLabel(text: string, questionText: string): string {
 // Literal placeholders the model sometimes copies straight from the XML template.
 const PLACEHOLDERS = new Set(['jouw antwoord hier', 'jouw verbeterde versie hier', 'antwoord hier', '[invullen]'])
 
+/** Wrap plaintext paragraphs into the Tiptap HTML shape answers are stored in. */
+export function plainTextToHtml(text: string): string {
+  return text
+    .split(/\n{2,}/)
+    .map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`)
+    .join('')
+}
+
 function mapSuggestionToAnswer(question: Question, suggestion: string): string | string[] | null {
   const text = suggestion.trim()
   if (!text || /onvoldoende informatie/i.test(text)) return null
@@ -361,10 +369,7 @@ function mapSuggestionToAnswer(question: Question, suggestion: string): string |
       return value || null
     }
     // Descriptive fields: wrap paragraphs for Tiptap HTML content.
-    return text
-      .split(/\n{2,}/)
-      .map((p) => `<p>${p.replace(/\n/g, '<br>')}</p>`)
-      .join('')
+    return plainTextToHtml(text)
   }
 
   return null
@@ -450,6 +455,122 @@ export async function bulkExtractFromDocument(params: BulkExtractParams): Promis
 
   onProgress(filled, questions.length)
   return filled
+}
+
+export interface SmoothAnswerInput {
+  questionId: string
+  questionText: string
+  /** Plaintext — HTML must be stripped before building the input. */
+  answer: string
+}
+
+export interface SmoothSection {
+  title: string
+  answers: SmoothAnswerInput[]
+}
+
+interface SmoothStreamResult {
+  answers: Record<string, string>
+}
+
+// Context answers only need enough of each fact for dedup awareness; keep the
+// rolling prompt bounded on large forms (mirrored server-side).
+const SMOOTH_CONTEXT_CHARS = 400
+
+async function smoothAnswersStream(
+  section: SmoothSection,
+  contextAnswers: SmoothAnswerInput[],
+  onDone: (answers: Record<string, string>) => void,
+  onError: (message: string) => void,
+): Promise<void> {
+  let response: Response
+  try {
+    response = await fetch('/api/smooth/stream', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        section_title: section.title,
+        answers: section.answers.map((a) => ({
+          question_id: a.questionId,
+          question_text: a.questionText,
+          answer: a.answer,
+        })),
+        context_answers: contextAnswers.map((a) => ({
+          question_id: a.questionId,
+          question_text: a.questionText,
+          answer: a.answer,
+        })),
+      }),
+    })
+  } catch {
+    onError('Verbindingsfout')
+    return
+  }
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({ detail: 'Onbekende fout' }))
+    onError((err as { detail?: string }).detail ?? `HTTP ${response.status}`)
+    return
+  }
+  await parseSseStream<SmoothStreamResult>(
+    response,
+    () => {},
+    (result) => onDone(result.answers ?? {}),
+    onError,
+  )
+}
+
+export interface SmoothFormParams {
+  sections: SmoothSection[]
+  onRewrite: (qId: string, html: string) => void
+  onSectionProgress: (current: number, total: number) => void
+  isCancelled: () => boolean
+}
+
+/** Post-AI-Modus smoothing pass: rewrite each section's longtext answers to
+ *  remove duplication, feeding earlier sections' (smoothed) answers along as
+ *  read-only context. A failing section is skipped — originals stay in place.
+ *  Returns the number of answers that were rewritten. */
+export async function smoothFormAnswers(params: SmoothFormParams): Promise<number> {
+  const { sections, onRewrite, onSectionProgress, isCancelled } = params
+  const contextAnswers: SmoothAnswerInput[] = []
+  let rewritten = 0
+
+  for (let i = 0; i < sections.length; i++) {
+    if (isCancelled()) break
+    onSectionProgress(i, sections.length)
+    const section = sections[i]
+    const finalTexts = new Map(section.answers.map((a) => [a.questionId, a.answer]))
+
+    await smoothAnswersStream(
+      section,
+      contextAnswers,
+      (answers) => {
+        if (isCancelled()) return
+        for (const a of section.answers) {
+          const text = answers[a.questionId]?.trim()
+          if (text && text !== a.answer) {
+            finalTexts.set(a.questionId, text)
+            onRewrite(a.questionId, plainTextToHtml(text))
+            rewritten++
+          }
+        }
+      },
+      (err) => {
+        console.warn(`[AI mode] gladstrijken van sectie "${section.title}" overgeslagen:`, err)
+      },
+    ).catch((err) => {
+      console.warn(`[AI mode] stream fout bij gladstrijken van sectie "${section.title}":`, err)
+    })
+
+    // Later sections dedup against what the document now actually says.
+    for (const a of section.answers) {
+      const text = finalTexts.get(a.questionId) ?? a.answer
+      contextAnswers.push({ ...a, answer: text.slice(0, SMOOTH_CONTEXT_CHARS) })
+    }
+  }
+
+  onSectionProgress(sections.length, sections.length)
+  return rewritten
 }
 
 export async function improveText(text: string, questionContext: string): Promise<ImproveResponse> {

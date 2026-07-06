@@ -1,7 +1,10 @@
 import { ref, computed } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { loadForm, flattenFormQuestions } from '../services/formLoader'
-import { bulkExtractFromDocument, verifyDocuments } from '../services/llmService'
+import { bulkExtractFromDocument, smoothFormAnswers, verifyDocuments } from '../services/llmService'
+import type { SmoothSection } from '../services/llmService'
+import { stripHtml } from '../utils/sourceMatching'
+import type { FormConfig } from '../models/Assessment'
 
 // Module-level singleton — shared across all component instances
 const aiModeActive = ref<Set<string>>(new Set())
@@ -15,6 +18,15 @@ const aiModeTotal = ref<Record<string, number>>({})
 const aiModeUnanswered = ref<Record<string, Set<string>>>({})
 const aiModeError = ref<Record<string, string>>({})
 const aiModeCancelled: Record<string, boolean> = {}
+// Final AI Modus phase: deduplicating/tightening the filled longtext answers,
+// one section per LLM call. Drives the "Antwoorden gladstrijken…" banner text.
+const aiModePhase = ref<Record<string, { current: number; total: number } | null>>({})
+// Pre-smoothing originals per form, session-only — powers the one-click undo.
+const aiModePreSmooth = ref<Record<string, Record<string, string>>>({})
+
+// Answers with markup beyond plain paragraphs (lists, bold, …) are usually
+// user-authored; smoothing works on plaintext and would flatten them.
+const RICH_HTML_RE = /<(?!\/?(p|br)\b)[a-z]/i
 
 export function useAiMode() {
   const store = useAssessmentStore()
@@ -72,6 +84,10 @@ export function useAiMode() {
       isCancelled: () => aiModeCancelled[formId] === true,
     })
 
+    if (!aiModeCancelled[formId]) {
+      await smoothForm(formId, formConfig)
+    }
+
     aiModeActive.value = new Set([...aiModeActive.value].filter((id) => id !== formId))
 
     if (!aiModeCancelled[formId]) {
@@ -83,6 +99,72 @@ export function useAiMode() {
       }
     }
     delete aiModeCancelled[formId]
+  }
+
+  /** Final AI Modus phase: rewrite the form's longtext answers section by
+   *  section to remove duplication across answers. Applies rewrites directly
+   *  to the store; originals are snapshotted for a one-click undo. */
+  async function smoothForm(formId: string, formConfig: FormConfig) {
+    const answers = store.forms[formId]?.answers ?? {}
+    const originals: Record<string, string> = {}
+    const sections: SmoothSection[] = []
+
+    for (const section of formConfig.sections) {
+      const eligible: SmoothSection['answers'] = []
+      for (const q of section.subsections.flatMap((ss) => ss.questions)) {
+        if (q.type !== 'text' || (q.format && q.format !== 'longtext')) continue
+        const value = answers[q.id]
+        if (typeof value !== 'string' || !value.trim()) continue
+        if (RICH_HTML_RE.test(value)) continue
+        const plain = stripHtml(value).trim()
+        if (!plain) continue
+        eligible.push({ questionId: q.id, questionText: q.text, answer: plain })
+        originals[q.id] = value
+      }
+      if (eligible.length > 0) sections.push({ title: section.title, answers: eligible })
+    }
+
+    // A single answer has nothing to be deduplicated against.
+    if (Object.keys(originals).length < 2) return
+
+    aiModePreSmooth.value = { ...aiModePreSmooth.value, [formId]: originals }
+    aiModePhase.value = { ...aiModePhase.value, [formId]: { current: 0, total: sections.length } }
+    let rewritten = 0
+    try {
+      rewritten = await smoothFormAnswers({
+        sections,
+        onRewrite: (qId, html) => store.setAnswerForForm(formId, qId, html),
+        onSectionProgress: (current, total) => {
+          aiModePhase.value = { ...aiModePhase.value, [formId]: { current, total } }
+        },
+        isCancelled: () => aiModeCancelled[formId] === true,
+      })
+    } finally {
+      const phases = { ...aiModePhase.value }
+      delete phases[formId]
+      aiModePhase.value = phases
+      if (rewritten === 0) clearSmoothingUndo(formId)
+    }
+  }
+
+  function hasSmoothingUndo(formId: string): boolean {
+    return !!aiModePreSmooth.value[formId]
+  }
+
+  /** Restore the pre-smoothing answers of the last AI Modus run. */
+  function undoSmoothing(formId: string) {
+    const originals = aiModePreSmooth.value[formId]
+    if (!originals) return
+    for (const [qId, value] of Object.entries(originals)) {
+      store.setAnswerForForm(formId, qId, value)
+    }
+    clearSmoothingUndo(formId)
+  }
+
+  function clearSmoothingUndo(formId: string) {
+    const next = { ...aiModePreSmooth.value }
+    delete next[formId]
+    aiModePreSmooth.value = next
   }
 
   /** Whether the AI looked at this question but couldn't answer it. */
@@ -116,7 +198,9 @@ export function useAiMode() {
     delete totals[formId]
     aiModeTotal.value = totals
     // Per-question markers persist until the user fills each question, so they
-    // survive dismissing the banner.
+    // survive dismissing the banner. The undo affordance lives in the banner,
+    // so its snapshot goes with it.
+    clearSmoothingUndo(formId)
   }
 
   function dismissAiModeError(formId: string) {
@@ -132,6 +216,7 @@ export function useAiMode() {
     aiModeTotal,
     aiModeUnanswered,
     aiModeError,
+    aiModePhase,
     readyDocIds,
     startAiMode,
     cancelAiMode,
@@ -139,5 +224,7 @@ export function useAiMode() {
     dismissAiModeError,
     isAiUnanswered,
     clearAiUnanswered,
+    hasSmoothingUndo,
+    undoSmoothing,
   }
 }

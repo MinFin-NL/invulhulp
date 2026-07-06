@@ -35,6 +35,14 @@
       <span class="ai-mode-done__text">
         <span class="ai-mode-done__count">{{ doneFilledCount }} ingevuld</span>
         <template v-if="doneSkippedCount > 0"><span class="ai-mode-done__skipped">{{ doneSkippedCount }} zonder antwoord</span></template>
+        <button
+          v-if="canUndoSmoothing"
+          type="button"
+          class="ai-mode-done__undo"
+          @click="$emit('undoSmoothing', formId)"
+        >
+          Gladstrijken ongedaan maken
+        </button>
       </span>
       <button
         type="button"
@@ -62,7 +70,8 @@
         </svg>
       </span>
       <span class="ai-mode-active__label">
-        AI Modus<template v-if="progress"><span class="ai-mode-active__progress">{{ progress.filled }}/{{ progress.total }}</span></template>
+        <template v-if="phase">Gladstrijken<span class="ai-mode-active__progress">{{ Math.min(phase.current + 1, phase.total) }}/{{ phase.total }}</span></template>
+        <template v-else>AI Modus<template v-if="progress"><span class="ai-mode-active__progress">{{ progress.filled }}/{{ progress.total }}</span></template></template>
       </span>
       <button
         type="button"
@@ -103,6 +112,10 @@ const props = defineProps<{
   doneFilledCount: number
   doneTotalCount: number
   progress: { filled: number; total: number } | null
+  /** Set during the final smoothing phase (sections done / sections total). */
+  phase?: { current: number; total: number } | null
+  /** Show the "undo smoothing" affordance in the done state. */
+  canUndoSmoothing?: boolean
 }>()
 
 // Questions the AI attempted but left without an answer.
@@ -114,6 +127,7 @@ defineEmits<{
   activate: [formId: string]
   cancel: [formId: string]
   dismiss: [formId: string]
+  undoSmoothing: [formId: string]
 }>()
 </script>
 
@@ -260,6 +274,21 @@ defineEmits<{
   font-weight: var(--rvo-font-weight-normal);
   font-size: var(--rvo-font-size-xs);
   color: var(--invulhulp-color-text-subtle, #6b7280);
+}
+
+.ai-mode-done__undo {
+  align-self: flex-start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #0f2d5c;
+  font-size: var(--rvo-font-size-xs);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.ai-mode-done__undo:hover {
+  color: #5b21b6;
 }
 
 .ai-mode-done__close {

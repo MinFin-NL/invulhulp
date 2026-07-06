@@ -142,6 +142,13 @@ def check_option_verbatim(options: list[str], expected: list[str]):
     return c
 
 
+def check_max_occurrences(needle: str, n: int):
+    def c(raw_suggestion: str):
+        count = raw_suggestion.lower().count(needle.lower())
+        return count <= n, f"'{needle}' komt {count}x voor (max {n})"
+    return c
+
+
 def check_max_words(n: int):
     def c(raw_suggestion: str):
         words = len(raw_suggestion.split())
@@ -305,6 +312,106 @@ SYNTH_CASES = [
     ),
 ]
 
+SMOOTH_CASES = [
+    dict(
+        id="smooth-dedup",
+        section_title="Doel en aanpak",
+        context_answers=[],
+        answers=[
+            dict(
+                question_id="q1",
+                question_text="Omschrijving van het IV-verzoek",
+                answer=(
+                    "Het project Slimme Documentstromen zet het classificatiemodel "
+                    "DocFlow-ML in om circa 40.000 burgerbrieven per maand automatisch "
+                    "toe te wijzen aan behandelteams. De afhandeling van burgerbrieven "
+                    "duurt nu gemiddeld 8 werkdagen doordat het sorteren handmatig "
+                    "gebeurt; met automatische classificatie wordt de doorlooptijd "
+                    "naar verwachting gehalveerd."
+                ),
+            ),
+            dict(
+                question_id="q2",
+                question_text="Wat is de aanleiding van het project?",
+                answer=(
+                    "De aanleiding is dat de afhandeling van burgerbrieven op dit "
+                    "moment gemiddeld 8 werkdagen duurt, omdat het sorteren en "
+                    "doorzetten van de circa 40.000 brieven per maand handmatig "
+                    "gebeurt. Het project Slimme Documentstromen wil daarom een "
+                    "classificatiemodel inzetten om binnenkomende burgerbrieven "
+                    "automatisch toe te wijzen aan behandelteams, zodat de "
+                    "doorlooptijd wordt gehalveerd."
+                ),
+            ),
+            dict(
+                question_id="q3",
+                question_text="Welke omvang heeft de verwerking?",
+                answer=(
+                    "De verwerking betreft circa 40.000 burgerbrieven per maand die "
+                    "automatisch worden toegewezen aan behandelteams. De afhandeling "
+                    "duurt nu gemiddeld 8 werkdagen en het project verwacht de "
+                    "doorlooptijd met automatische classificatie te halveren."
+                ),
+            ),
+        ],
+        # Every unique fact survives at least once and repetition shrinks. The
+        # volume may legitimately appear twice: q3 asks for it directly, and
+        # q1's project description reasonably states it too. The input has 3.
+        checks_joined=[
+            check_contains_all("40.000", "8 werkdagen"),
+            check_max_occurrences("40.000", 2),
+            check_max_occurrences("gehalveerd", 2),
+            check_not_contains("zie boven", "zoals eerder genoemd"),
+        ],
+    ),
+    dict(
+        id="smooth-no-hallucination",
+        section_title="Risico's",
+        context_answers=[
+            dict(
+                question_id="c1",
+                question_text="Omschrijving van het IV-verzoek",
+                answer=(
+                    "Het project Slimme Documentstromen wijst met het model DocFlow-ML "
+                    "circa 40.000 burgerbrieven per maand automatisch toe aan "
+                    "behandelteams."
+                ),
+            ),
+        ],
+        answers=[
+            dict(
+                question_id="q1",
+                question_text="Welke risico's zijn geïdentificeerd?",
+                answer=(
+                    "De geïdentificeerde risico's zijn verkeerde toewijzing van "
+                    "gevoelige brieven zoals bezwaarschriften, overmatig vertrouwen "
+                    "op het model zonder menselijke controle, en beperkte "
+                    "datakwaliteit van het scanproces. Het model DocFlow-ML wijst "
+                    "circa 40.000 burgerbrieven per maand automatisch toe aan "
+                    "behandelteams."
+                ),
+            ),
+            dict(
+                question_id="q2",
+                question_text="Welke beheersmaatregelen zijn voorzien?",
+                answer=(
+                    "Toewijzingen met minder dan 85% zekerheid gaan naar een "
+                    "medewerker, 5% van alle toewijzingen wordt steekproefsgewijs "
+                    "gecontroleerd en er komt een maandelijkse bias-rapportage."
+                ),
+            ),
+        ],
+        # q1 repeats the context fact and should shrink; q2 is already tight —
+        # ideally omitted (unchanged), but a cosmetic rewrite is acceptable as
+        # long as it keeps every fact and doesn't grow.
+        checks_joined=[
+            check_contains_all("85%", "bezwaarschriften"),
+            check_not_contains("gpt", "95%", "2027", "dpia"),
+        ],
+        expect_tight={"q2": ["85%", "5%", "maandelijkse"]},
+    ),
+]
+
 ONTOLOGY_CASES = [
     dict(
         id="ontology-notulen",
@@ -369,6 +476,47 @@ async def run_synth(case: dict) -> dict:
     return score(case, raw, suggestion, suggestion, rationale, dt)
 
 
+async def run_smooth(case: dict) -> dict:
+    req = main.SmoothRequest(
+        section_title=case["section_title"],
+        answers=[main.SmoothAnswer(**a) for a in case["answers"]],
+        context_answers=[main.SmoothAnswer(**a) for a in case["context_answers"]],
+    )
+    originals = {a.question_id: a.answer for a in req.answers}
+    t0 = time.monotonic()
+    raw = await backend.chat(main.SMOOTH_SYSTEM_PROMPT, main._smooth_user_message(req))
+    dt = time.monotonic() - t0
+    final = main._parse_smooth(raw, originals)
+
+    notes, passed = [], []
+
+    def add(ok: bool, note: str):
+        passed.append(ok)
+        notes.append(("PASS " if ok else "FAIL ") + note)
+
+    joined = "\n\n".join(final[qid] for qid in originals)
+    for chk in case["checks_joined"]:
+        ok, note = chk(joined)
+        add(ok, note)
+    for qid in originals:
+        add(bool(final[qid].strip()), f"antwoord {qid} niet leeg")
+        add(len(final[qid]) <= 1.5 * len(originals[qid]), f"antwoord {qid} niet gegroeid")
+    for qid, needles in case.get("expect_tight", {}).items():
+        if final[qid] == originals[qid]:
+            add(True, f"antwoord {qid} ongewijzigd (weggelaten)")
+        else:
+            kept = all(n.lower() in final[qid].lower() for n in needles)
+            add(kept and len(final[qid]) <= len(originals[qid]),
+                f"antwoord {qid} herschreven zonder feitverlies of groei")
+    # The suite's dedup goal only counts if something actually changed.
+    add(any(final[qid] != originals[qid] for qid in originals) or not case.get("checks_joined"),
+        "minstens één antwoord herschreven")
+    return {
+        "id": case["id"], "ok": all(passed), "time": dt, "notes": notes,
+        "raw": raw[:600], "suggestion": joined[:600], "final": joined[:600],
+    }
+
+
 async def run_ontology(case: dict) -> dict:
     t0 = time.monotonic()
     onto = await rag.extract_ontology(case["doc_name"], case["content"], backend.chat)
@@ -417,6 +565,7 @@ SUITES = {
     "extract": (EXTRACT_CASES, run_extract),
     "improve": (IMPROVE_CASES, run_improve),
     "synthesize": (SYNTH_CASES, run_synth),
+    "smooth": (SMOOTH_CASES, run_smooth),
     "ontology": (ONTOLOGY_CASES, run_ontology),
 }
 

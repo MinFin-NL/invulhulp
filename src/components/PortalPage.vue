@@ -217,9 +217,12 @@
                   :done-filled-count="aiModeDone[form.id] ?? 0"
                   :done-total-count="aiModeTotal[form.id] ?? 0"
                   :progress="aiModeProgress[form.id] ?? null"
+                  :phase="aiModePhase[form.id] ?? null"
+                  :can-undo-smoothing="hasSmoothingUndo(form.id)"
                   @activate="startAiMode"
                   @cancel="cancelAiMode"
                   @dismiss="dismissAiModeDone"
+                  @undo-smoothing="undoSmoothing"
                 />
               </div>
             </article>
@@ -292,7 +295,7 @@ const recentlyAddedIds = ref<Set<string>>(new Set())
 const showGraph = ref(false)
 const hasAnyOntology = computed(() => store.documents.some(d => !!d.ontology))
 
-const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModeError, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone, dismissAiModeError } = useAiMode()
+const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModeError, aiModePhase, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone, dismissAiModeError, hasSmoothingUndo, undoSmoothing } = useAiMode()
 
 const createDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const renameDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
