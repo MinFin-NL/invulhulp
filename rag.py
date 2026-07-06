@@ -5,7 +5,12 @@ Embeddings are provided by the caller as `embed_fn(texts) -> vectors`
 (see llm.LLMBackend.embed) — this module doesn't know which provider is used.
 
 Environment variables:
-    LANCEDB_PATH — storage path (default: ./data/lancedb)
+    LANCEDB_PATH — storage path (default: ./data/lancedb). May be a local
+        directory or an object-store URI such as az://<container>/<path>.
+        Azure Files (SMB) mounts are NOT supported: Lance commits manifests
+        with rename-if-not-exists, which CIFS rejects (errno 95). In Azure,
+        point this at Blob storage and provide AZURE_STORAGE_ACCOUNT_NAME /
+        AZURE_STORAGE_ACCOUNT_KEY, which Lance reads from the environment.
 """
 
 from __future__ import annotations
@@ -46,7 +51,8 @@ EmbedFn = Callable[[list[str]], Awaitable[list[list[float]]]]
 
 @functools.lru_cache(maxsize=1)
 def _get_db() -> lancedb.DBConnection:
-    os.makedirs(LANCEDB_PATH, exist_ok=True)
+    if "://" not in LANCEDB_PATH:  # object-store URIs need no local directory
+        os.makedirs(LANCEDB_PATH, exist_ok=True)
     return lancedb.connect(LANCEDB_PATH)
 
 
