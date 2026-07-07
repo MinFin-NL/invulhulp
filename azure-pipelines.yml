@@ -8,6 +8,10 @@ pool:
 
 variables:
   - group: invulhulp-secrets
+  # Provides FINDOCS_ADMIN_CLIENT_SECRET (the findocs-admin service-account
+  # secret) — the backend needs the same value as OIDC_ADMIN_CLIENT_SECRET
+  # for user management via the Keycloak Admin API.
+  - group: keycloak-secrets
   - name: BACKEND_IMAGE
     value: invulhulp-backend
   - name: FRONTEND_IMAGE
@@ -167,6 +171,9 @@ stages:
               # equal Keycloak's FINDOCS_BFF_CLIENT_SECRET.
               PUBLIC_URL: $(PUBLIC_URL)
               OIDC_CLIENT_SECRET: $(OIDC_CLIENT_SECRET)
+              # From the keycloak-secrets variable group; must equal the secret
+              # Keycloak renders into the findocs-admin client.
+              OIDC_ADMIN_CLIENT_SECRET: $(FINDOCS_ADMIN_CLIENT_SECRET)
               SESSION_SECRET: $(SESSION_SECRET)
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
@@ -205,6 +212,7 @@ stages:
                       "openai-embedding-endpoint=${AZURE_OPENAI_EMBEDDING_ENDPOINT}" \
                       "openai-embedding-api-key=${AZURE_OPENAI_EMBEDDING_API_KEY}" \
                       "oidc-client-secret=${OIDC_CLIENT_SECRET}" \
+                      "oidc-admin-client-secret=${OIDC_ADMIN_CLIENT_SECRET}" \
                       "session-secret=${SESSION_SECRET}" \
                       "storage-key=${STORAGE_KEY}"
 
@@ -231,6 +239,8 @@ stages:
                       "OIDC_DISCOVERY_URL=${OIDC_DISCOVERY_URL}" \
                       "OIDC_CLIENT_ID=findocs-bff" \
                       "OIDC_CLIENT_SECRET=secretref:oidc-client-secret" \
+                      "OIDC_ADMIN_CLIENT_ID=findocs-admin" \
+                      "OIDC_ADMIN_CLIENT_SECRET=secretref:oidc-admin-client-secret" \
                       "OIDC_REDIRECT_URI=${PUBLIC_URL}/api/auth/callback" \
                       "OIDC_POST_LOGIN_REDIRECT=${PUBLIC_URL}/" \
                       "OIDC_POST_LOGOUT_REDIRECT=${PUBLIC_URL}/" \
@@ -264,6 +274,8 @@ stages:
                       "OIDC_DISCOVERY_URL=${OIDC_DISCOVERY_URL}" \
                       "OIDC_CLIENT_ID=findocs-bff" \
                       "OIDC_CLIENT_SECRET=secretref:oidc-client-secret" \
+                      "OIDC_ADMIN_CLIENT_ID=findocs-admin" \
+                      "OIDC_ADMIN_CLIENT_SECRET=secretref:oidc-admin-client-secret" \
                       "OIDC_REDIRECT_URI=${PUBLIC_URL}/api/auth/callback" \
                       "OIDC_POST_LOGIN_REDIRECT=${PUBLIC_URL}/" \
                       "OIDC_POST_LOGOUT_REDIRECT=${PUBLIC_URL}/" \
@@ -275,6 +287,7 @@ stages:
                       "openai-embedding-endpoint=${AZURE_OPENAI_EMBEDDING_ENDPOINT}" \
                       "openai-embedding-api-key=${AZURE_OPENAI_EMBEDDING_API_KEY}" \
                       "oidc-client-secret=${OIDC_CLIENT_SECRET}" \
+                      "oidc-admin-client-secret=${OIDC_ADMIN_CLIENT_SECRET}" \
                       "session-secret=${SESSION_SECRET}" \
                       "storage-key=${STORAGE_KEY}" \
                     --cpu 0.5 --memory 1.0Gi \
