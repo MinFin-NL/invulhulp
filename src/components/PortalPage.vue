@@ -84,7 +84,7 @@
             </button>
           </div>
           <p class="rvo-text portal-card__desc">
-            Upload achtergronddocumenten (notulen, brainstorms, agenda's) in .txt, .md, .docx, .xlsx of .pptx formaat.
+            Upload achtergronddocumenten (notulen, brainstorms, agenda's) in .txt, .md, .docx, .xlsx, .pptx of .pdf formaat.
             Bij het invullen van een formulier kun je per vraag automatisch een antwoord laten extraheren uit deze documenten.
           </p>
         </div>
@@ -98,7 +98,7 @@
             <input
               ref="fileInput"
               type="file"
-              accept=".txt,.md,.docx,.xlsx,.pptx,text/plain,text/markdown,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+              accept=".txt,.md,.docx,.xlsx,.pptx,.pdf,text/plain,text/markdown,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.openxmlformats-officedocument.presentationml.presentation"
               multiple
               :disabled="isUploading"
               class="invulhulp-visually-hidden"
@@ -120,6 +120,7 @@
                 <li><strong>.docx</strong> — Word-document, tekst en opmaak worden gelezen</li>
                 <li><strong>.xlsx</strong> — Excel-spreadsheet, celinhoud per blad</li>
                 <li><strong>.pptx</strong> — PowerPoint-presentatie, alleen de tekst uit de dia's wordt gelezen (geen afbeeldingen of grafieken)</li>
+                <li><strong>.pdf</strong> — alleen tekst-PDF's (bijv. geëxporteerd uit Word); gescande PDF's met alleen afbeeldingen worden geweigerd</li>
               </ul>
             </div>
           </details>
@@ -385,6 +386,37 @@ async function extractPptxText(file: File): Promise<string> {
   return parts.join('\n\n')
 }
 
+/**
+ * Extracts the embedded text layer from a PDF. Works for "born-digital" PDFs
+ * (exported from Word, etc.). Scanned/image-only PDFs have no text layer, so
+ * this throws PDF_NO_TEXT — we deliberately do not OCR.
+ */
+async function extractPdfText(file: File): Promise<string> {
+  const pdfjs = await import('pdfjs-dist')
+  const worker = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default
+  pdfjs.GlobalWorkerOptions.workerSrc = worker
+
+  const doc = await pdfjs.getDocument({ data: await file.arrayBuffer() }).promise
+  const parts: string[] = []
+  try {
+    for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
+      const page = await doc.getPage(pageNum)
+      const content = await page.getTextContent()
+      const pageText = content.items
+        .map((item) => ('str' in item ? item.str : ''))
+        .join(' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+      if (pageText) parts.push(pageText)
+    }
+  } finally {
+    await doc.destroy()
+  }
+  const text = parts.join('\n\n')
+  if (!text.trim()) throw new Error('PDF_NO_TEXT')
+  return text
+}
+
 async function onFilesSelected(e: Event) {
   const target = e.target as HTMLInputElement
   const files = target.files ? Array.from(target.files) : []
@@ -406,8 +438,8 @@ async function onFilesSelected(e: Event) {
         : `Inlezen van ${file.name}…`
 
     const ext = file.name.toLowerCase().split('.').pop() ?? ''
-    if (!['txt', 'md', 'docx', 'xlsx', 'pptx'].includes(ext)) {
-      errors.push(`${file.name}: alleen .txt, .md, .docx, .xlsx en .pptx zijn toegestaan.`)
+    if (!['txt', 'md', 'docx', 'xlsx', 'pptx', 'pdf'].includes(ext)) {
+      errors.push(`${file.name}: alleen .txt, .md, .docx, .xlsx, .pptx en .pdf zijn toegestaan.`)
       continue
     }
     try {
@@ -430,6 +462,8 @@ async function onFilesSelected(e: Event) {
         text = parts.join('\n\n')
       } else if (ext === 'pptx') {
         text = await extractPptxText(file)
+      } else if (ext === 'pdf') {
+        text = await extractPdfText(file)
       } else {
         text = await file.text()
       }
@@ -437,11 +471,17 @@ async function onFilesSelected(e: Event) {
         errors.push(`${file.name}: geen tekst gevonden.`)
         continue
       }
-      const baseName = file.name.replace(/\.(docx|xlsx|pptx)$/i, '.txt')
+      const baseName = file.name.replace(/\.(docx|xlsx|pptx|pdf)$/i, '.txt')
       await store.addDocument(baseName, text)
       addedNames.push(file.name)
-    } catch {
-      errors.push(`${file.name}: kon bestand niet inlezen.`)
+    } catch (err) {
+      if (err instanceof Error && err.message === 'PDF_NO_TEXT') {
+        errors.push(
+          `${file.name}: dit is een gescande PDF (alleen afbeeldingen) — er kon geen tekst uit worden gehaald. Upload een tekst-PDF of het originele Word-bestand.`,
+        )
+      } else {
+        errors.push(`${file.name}: kon bestand niet inlezen.`)
+      }
     }
   }
 

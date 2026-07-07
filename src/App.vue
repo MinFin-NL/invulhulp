@@ -61,7 +61,7 @@ const features = [
   {
     icon: brondocIcon,
     title: 'Brondocumenten',
-    desc: 'Upload notulen, agenda’s en brainstorms in .docx, .xlsx, .pptx, .txt of .md. FinDocs leest en indexeert ze automatisch.',
+    desc: 'Upload notulen, agenda’s en brainstorms in .docx, .xlsx, .pptx, .pdf, .txt of .md. FinDocs leest en indexeert ze automatisch.',
   },
   {
     icon: aiIcon,
