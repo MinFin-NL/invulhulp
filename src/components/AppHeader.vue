@@ -5,7 +5,7 @@
       <div class="rvo-layout-row rvo-layout-gap--md invulhulp-header__topbar">
         <button
           type="button"
-          @click="store.goToPortal()"
+          @click="goHome"
           class="invulhulp-header__logo-btn"
           aria-label="Ga naar startpagina"
         >
@@ -23,6 +23,14 @@
             class="rvo-button rvo-button--secondary rvo-button--size-sm"
           >
             Opnieuw beginnen
+          </button>
+          <button
+            v-if="auth.isAdmin"
+            @click="auth.userManagementOpen = !auth.userManagementOpen"
+            class="rvo-button rvo-button--secondary rvo-button--size-sm"
+            :aria-pressed="auth.userManagementOpen"
+          >
+            {{ auth.userManagementOpen ? 'Terug naar formulieren' : 'Gebruikersbeheer' }}
           </button>
           <span v-if="auth.user" class="invulhulp-header__user">
             {{ auth.user.name ?? auth.user.email }}
@@ -124,7 +132,13 @@ const resetTitle = computed(() => {
 })
 
 function switchTo(id: FormId) {
+  auth.userManagementOpen = false
   store.setActiveForm(id)
+}
+
+function goHome() {
+  auth.userManagementOpen = false
+  store.goToPortal()
 }
 
 function openResetDialog() {

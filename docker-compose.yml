@@ -24,6 +24,9 @@ services:
       OIDC_DISCOVERY_URL: http://keycloak:8080/realms/findocs/.well-known/openid-configuration
       OIDC_CLIENT_ID: findocs-bff
       OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-dev-secret-change-me}
+      # Service-account client voor gebruikersbeheer (Keycloak Admin API).
+      OIDC_ADMIN_CLIENT_ID: findocs-admin
+      OIDC_ADMIN_CLIENT_SECRET: ${OIDC_ADMIN_CLIENT_SECRET:-dev-admin-secret-change-me}
       OIDC_REDIRECT_URI: http://localhost:8080/api/auth/callback
       OIDC_POST_LOGIN_REDIRECT: http://localhost:8080/
       OIDC_POST_LOGOUT_REDIRECT: http://localhost:8080/

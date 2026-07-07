@@ -29,7 +29,17 @@ OIDC_DISCOVERY_URL = os.environ.get(
 # Dev bypass: when started with `python main.py --dev`, skip Keycloak entirely
 # and treat every request as a fixed local developer. NEVER enable in production.
 DEV_AUTH_BYPASS = os.environ.get("DEV_AUTH_BYPASS", "false").lower() == "true"
-DEV_USER = {"sub": "dev", "name": "Ontwikkelaar (dev)", "email": "dev@localhost"}
+DEV_USER = {
+    "sub": "dev",
+    "name": "Ontwikkelaar (dev)",
+    "email": "dev@localhost",
+    "roles": ["gebruiker", "beheerder"],
+}
+
+# Realm roles the app kent; andere Keycloak-rollen (offline_access e.d.)
+# worden niet in de sessie opgeslagen.
+APP_ROLES = {"gebruiker", "beheerder"}
+ADMIN_ROLE = "beheerder"
 
 OIDC_CLIENT_ID = os.environ.get("OIDC_CLIENT_ID", "findocs-bff")
 OIDC_CLIENT_SECRET = os.environ.get("OIDC_CLIENT_SECRET", "dev-secret-change-me")
@@ -70,10 +80,14 @@ async def callback(request: Request):
     except OAuthError as exc:
         raise HTTPException(status_code=401, detail=f"Authenticatie mislukt: {exc.error}")
     claims = token.get("userinfo") or {}
+    # Realm-rollen komen via de "roles" protocol mapper op de findocs-bff
+    # client in het ID-token; fallback op de standaard realm_access claim.
+    raw_roles = claims.get("roles") or (claims.get("realm_access") or {}).get("roles") or []
     request.session["user"] = {
         "sub": claims.get("sub"),
         "name": claims.get("name") or claims.get("preferred_username"),
         "email": claims.get("email"),
+        "roles": sorted(APP_ROLES.intersection(raw_roles)),
     }
     return RedirectResponse(url=POST_LOGIN_REDIRECT)
 
@@ -128,3 +142,9 @@ def require_user(request: Request) -> None:
         return
     if not request.session.get("user"):
         raise HTTPException(status_code=401, detail="Niet ingelogd")
+
+
+def require_admin(request: Request) -> None:
+    """Route-dependency voor beheer-endpoints: alleen de rol 'beheerder'."""
+    if ADMIN_ROLE not in (current_user(request).get("roles") or []):
+        raise HTTPException(status_code=403, detail="Geen beheerdersrechten")

@@ -33,6 +33,7 @@ from starlette.middleware.sessions import SessionMiddleware
 if "--dev" in sys.argv:
     os.environ["DEV_AUTH_BYPASS"] = "true"
 
+import admin_users
 import auth
 import docstore
 import llm
@@ -91,12 +92,13 @@ app.add_middleware(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=CORS_ORIGINS,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
     allow_credentials=True,
 )
 
 app.include_router(auth.router)
+app.include_router(admin_users.router)
 
 SYSTEM_PROMPT = (
     "Je bent een assistent die helpt bij het invullen van AI Impact Assessments "

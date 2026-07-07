@@ -4,6 +4,7 @@ export interface AuthUser {
   sub: string
   name: string | null
   email: string | null
+  roles?: string[]
 }
 
 type AuthStatus = 'loading' | 'authenticated' | 'anonymous'
@@ -12,7 +13,12 @@ type AuthStatus = 'loading' | 'authenticated' | 'anonymous'
 // VITE_AUTH_BYPASS=true) the login gate is skipped and a fixed local user is
 // assumed. Production builds never see this flag. Mirrors auth.py's DEV_USER.
 export const AUTH_BYPASS = import.meta.env.VITE_AUTH_BYPASS === 'true'
-const DEV_USER: AuthUser = { sub: 'dev', name: 'Ontwikkelaar (dev)', email: 'dev@localhost' }
+const DEV_USER: AuthUser = {
+  sub: 'dev',
+  name: 'Ontwikkelaar (dev)',
+  email: 'dev@localhost',
+  roles: ['gebruiker', 'beheerder'],
+}
 
 /**
  * Mirror of the BFF session. The SPA never holds a token — it only asks the
@@ -24,7 +30,12 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null as AuthUser | null,
     status: 'loading' as AuthStatus,
+    // App-brede UI-vlag: toont de gebruikersbeheer-pagina i.p.v. de formulieren.
+    userManagementOpen: false,
   }),
+  getters: {
+    isAdmin: (state) => state.user?.roles?.includes('beheerder') ?? false,
+  },
   actions: {
     async fetchMe() {
       if (AUTH_BYPASS) {

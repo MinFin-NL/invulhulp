@@ -35,8 +35,13 @@
       </div>
     </Transition>
 
+    <!-- Gebruikersbeheer (alleen beheerders, via de header-knop) -->
+    <main v-if="auth.userManagementOpen" class="assessment-shell__portal">
+      <UserManagement />
+    </main>
+
     <!-- Portal landing page (no form selected) -->
-    <main v-if="store.activeFormId === null" class="assessment-shell__portal">
+    <main v-else-if="store.activeFormId === null" class="assessment-shell__portal">
       <PortalPage @open="store.setActiveForm" />
     </main>
 
@@ -129,6 +134,7 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { loadForm } from '../services/formLoader'
 import { useAssessmentStore } from '../stores/assessmentStore'
+import { useAuthStore } from '../stores/authStore'
 import { useAiMode } from '../composables/useAiMode'
 import type { FormConfig, NavStepSubsections, NavStepSpecialView, Section } from '../models/Assessment'
 import AppHeader from './AppHeader.vue'
@@ -140,8 +146,10 @@ import SectionView from './SectionView.vue'
 import RiskClassification from './RiskClassification.vue'
 import DecisionGate from './DecisionGate.vue'
 import SummaryView from './SummaryView.vue'
+import UserManagement from './UserManagement.vue'
 
 const store = useAssessmentStore()
+const auth = useAuthStore()
 const { aiModeActive, aiModeProgress, aiModePhase, cancelAiMode } = useAiMode()
 const formConfig = ref<FormConfig | null>(null)
 const isLoading = ref(true)
