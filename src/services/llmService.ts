@@ -31,6 +31,25 @@ export interface ExtractRequest {
   formContext?: string
 }
 
+function postJson(url: string, body: unknown): Promise<Response> {
+  return fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+}
+
+async function readErrorDetail(response: Response): Promise<string> {
+  const err = await response.json().catch(() => ({ detail: 'Onbekende fout' }))
+  return (err as { detail?: string }).detail ?? `HTTP ${response.status}`
+}
+
+async function postJsonOrThrow<T>(url: string, body: unknown): Promise<T> {
+  const response = await postJson(url, body)
+  if (!response.ok) throw new Error(await readErrorDetail(response))
+  return response.json() as Promise<T>
+}
+
 async function parseSseStream<T = RagExtractResult>(
   response: Response,
   onChunk: (text: string) => void,
@@ -73,6 +92,32 @@ async function parseSseStream<T = RagExtractResult>(
   }
 }
 
+/** POST the body and hand the SSE response to parseSseStream. Network errors
+ *  and non-2xx responses are reported via onError, mirroring every stream
+ *  endpoint's shared error contract. */
+async function postSse<T>(
+  url: string,
+  body: unknown,
+  onChunk: (text: string) => void,
+  onDone: (result: T) => void,
+  onError: (message: string) => void,
+  onClarification?: (question: string) => void,
+  onDiagram?: (mermaid: string) => void,
+): Promise<void> {
+  let response: Response
+  try {
+    response = await postJson(url, body)
+  } catch {
+    onError('Verbindingsfout')
+    return
+  }
+  if (!response.ok) {
+    onError(await readErrorDetail(response))
+    return
+  }
+  await parseSseStream<T>(response, onChunk, onDone, onError, onClarification, onDiagram)
+}
+
 export interface ImproveStreamOptions {
   /** Answer to a clarification question the model asked in a previous round. */
   clarification?: { question: string; answer: string }
@@ -90,28 +135,29 @@ export async function improveTextStream(
   onError: (message: string) => void,
   opts?: ImproveStreamOptions,
 ): Promise<void> {
-  let response: Response
-  try {
-    response = await fetch('/api/improve/stream', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        text,
-        question_context: questionContext,
-        clarification_question: opts?.clarification?.question ?? '',
-        clarification_answer: opts?.clarification?.answer ?? '',
-      }),
-    })
-  } catch {
-    onError('Verbindingsfout')
-    return
+  await postSse(
+    '/api/improve/stream',
+    {
+      text,
+      question_context: questionContext,
+      clarification_question: opts?.clarification?.question ?? '',
+      clarification_answer: opts?.clarification?.answer ?? '',
+    },
+    onChunk,
+    onDone,
+    onError,
+    opts?.onClarification,
+    opts?.onDiagram,
+  )
+}
+
+function synthesizeBody(req: SynthesizeRequest) {
+  return {
+    source_answers: req.sourceAnswers,
+    source_questions: req.sourceQuestions,
+    target_question: req.targetQuestion,
+    synthesis_hint: req.synthesisHint ?? '',
   }
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({ detail: 'Onbekende fout' }))
-    onError((err as { detail?: string }).detail ?? `HTTP ${response.status}`)
-    return
-  }
-  await parseSseStream(response, onChunk, onDone, onError, opts?.onClarification, opts?.onDiagram)
 }
 
 export async function synthesizeStream(
@@ -120,28 +166,7 @@ export async function synthesizeStream(
   onDone: (result: ImproveResponse) => void,
   onError: (message: string) => void,
 ): Promise<void> {
-  let response: Response
-  try {
-    response = await fetch('/api/synthesize/stream', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        source_answers: req.sourceAnswers,
-        source_questions: req.sourceQuestions,
-        target_question: req.targetQuestion,
-        synthesis_hint: req.synthesisHint ?? '',
-      }),
-    })
-  } catch {
-    onError('Verbindingsfout')
-    return
-  }
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({ detail: 'Onbekende fout' }))
-    onError((err as { detail?: string }).detail ?? `HTTP ${response.status}`)
-    return
-  }
-  await parseSseStream(response, onChunk, onDone, onError)
+  await postSse('/api/synthesize/stream', synthesizeBody(req), onChunk, onDone, onError)
 }
 
 export interface IndexDocumentRequest {
@@ -159,22 +184,16 @@ export interface IndexDocumentResponse {
 }
 
 export async function indexDocument(req: IndexDocumentRequest): Promise<IndexDocumentResponse> {
-  const response = await fetch('/api/documents/index', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
+  const data = await postJsonOrThrow<{ doc_id: string; chunk_count: number; ontology: Record<string, unknown> }>(
+    '/api/documents/index',
+    {
       session_id: req.sessionId,
       doc_id: req.docId,
       name: req.name,
       content: req.content,
       uploaded_at: req.uploadedAt ?? Date.now(),
-    }),
-  })
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({ detail: 'Onbekende fout' }))
-    throw new Error((err as { detail?: string }).detail ?? `HTTP ${response.status}`)
-  }
-  const data = (await response.json()) as { doc_id: string; chunk_count: number; ontology: Record<string, unknown> }
+    },
+  )
   return { docId: data.doc_id, chunkCount: data.chunk_count, ontology: data.ontology }
 }
 
@@ -201,11 +220,7 @@ export async function deleteDocument(docId: string): Promise<void> {
 }
 
 export async function verifyDocuments(sessionId: string, docIds: string[]): Promise<{ found: string[]; missing: string[] }> {
-  const res = await fetch('/api/documents/verify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ session_id: sessionId, doc_ids: docIds }),
-  })
+  const res = await postJson('/api/documents/verify', { session_id: sessionId, doc_ids: docIds })
   if (!res.ok) return { found: docIds, missing: [] } // fail open — don't block AI mode on verify errors
   return res.json() as Promise<{ found: string[]; missing: string[] }>
 }
@@ -228,12 +243,10 @@ export async function extractRagStream(
   onDone: (result: RagExtractResult) => void,
   onError: (message: string) => void,
 ): Promise<void> {
-  let response: Response
   try {
-    response = await fetch('/api/extract/rag/stream', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
+    await postSse(
+      '/api/extract/rag/stream',
+      {
         session_id: req.sessionId,
         target_question: req.targetQuestion,
         guidance: req.guidance ?? '',
@@ -243,19 +256,11 @@ export async function extractRagStream(
         form_context: req.formContext ?? '',
         doc_ids: req.docIds ?? [],
         top_k: req.topK ?? 6,
-      }),
-    })
-  } catch {
-    onError('Verbindingsfout')
-    return
-  }
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({ detail: 'Onbekende fout' }))
-    onError((err as { detail?: string }).detail ?? `HTTP ${response.status}`)
-    return
-  }
-  try {
-    await parseSseStream(response, onChunk, onDone, onError)
+      },
+      onChunk,
+      onDone,
+      onError,
+    )
   } catch (e) {
     onError(e instanceof Error ? e.message : 'Stream verbroken')
   }
@@ -267,50 +272,24 @@ export async function extractFromDocumentsStream(
   onDone: (result: ImproveResponse) => void,
   onError: (message: string) => void,
 ): Promise<void> {
-  let response: Response
-  try {
-    response = await fetch('/api/extract/stream', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        documents: req.documents,
-        target_question: req.targetQuestion,
-        options: req.options ?? [],
-        question_type: req.questionType ?? 'text',
-        field_format: req.fieldFormat ?? '',
-        form_context: req.formContext ?? '',
-      }),
-    })
-  } catch {
-    onError('Verbindingsfout')
-    return
-  }
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({ detail: 'Onbekende fout' }))
-    onError((err as { detail?: string }).detail ?? `HTTP ${response.status}`)
-    return
-  }
-  await parseSseStream(response, onChunk, onDone, onError)
+  await postSse(
+    '/api/extract/stream',
+    {
+      documents: req.documents,
+      target_question: req.targetQuestion,
+      options: req.options ?? [],
+      question_type: req.questionType ?? 'text',
+      field_format: req.fieldFormat ?? '',
+      form_context: req.formContext ?? '',
+    },
+    onChunk,
+    onDone,
+    onError,
+  )
 }
 
 export async function synthesize(req: SynthesizeRequest): Promise<ImproveResponse> {
-  const response = await fetch('/api/synthesize', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      source_answers: req.sourceAnswers,
-      source_questions: req.sourceQuestions,
-      target_question: req.targetQuestion,
-      synthesis_hint: req.synthesisHint ?? '',
-    }),
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({ detail: 'Onbekende fout' }))
-    throw new Error((err as { detail?: string }).detail ?? `HTTP ${response.status}`)
-  }
-
-  return response.json() as Promise<ImproveResponse>
+  return postJsonOrThrow<ImproveResponse>('/api/synthesize', synthesizeBody(req))
 }
 
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/
@@ -483,36 +462,18 @@ async function smoothAnswersStream(
   onDone: (answers: Record<string, string>) => void,
   onError: (message: string) => void,
 ): Promise<void> {
-  let response: Response
-  try {
-    response = await fetch('/api/smooth/stream', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        section_title: section.title,
-        answers: section.answers.map((a) => ({
-          question_id: a.questionId,
-          question_text: a.questionText,
-          answer: a.answer,
-        })),
-        context_answers: contextAnswers.map((a) => ({
-          question_id: a.questionId,
-          question_text: a.questionText,
-          answer: a.answer,
-        })),
-      }),
-    })
-  } catch {
-    onError('Verbindingsfout')
-    return
-  }
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({ detail: 'Onbekende fout' }))
-    onError((err as { detail?: string }).detail ?? `HTTP ${response.status}`)
-    return
-  }
-  await parseSseStream<SmoothStreamResult>(
-    response,
+  const toSnake = (a: SmoothAnswerInput) => ({
+    question_id: a.questionId,
+    question_text: a.questionText,
+    answer: a.answer,
+  })
+  await postSse<SmoothStreamResult>(
+    '/api/smooth/stream',
+    {
+      section_title: section.title,
+      answers: section.answers.map(toSnake),
+      context_answers: contextAnswers.map(toSnake),
+    },
     () => {},
     (result) => onDone(result.answers ?? {}),
     onError,
@@ -574,16 +535,5 @@ export async function smoothFormAnswers(params: SmoothFormParams): Promise<numbe
 }
 
 export async function improveText(text: string, questionContext: string): Promise<ImproveResponse> {
-  const response = await fetch('/api/improve', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text, question_context: questionContext }),
-  })
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({ detail: 'Onbekende fout' }))
-    throw new Error((err as { detail?: string }).detail ?? `HTTP ${response.status}`)
-  }
-
-  return response.json() as Promise<ImproveResponse>
+  return postJsonOrThrow<ImproveResponse>('/api/improve', { text, question_context: questionContext })
 }

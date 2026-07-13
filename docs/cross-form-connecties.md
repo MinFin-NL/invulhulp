@@ -25,8 +25,8 @@ Quick scan BIO → Prescan DPIA ────────────────
 | Bronvraag (Intake) | Doelvraag (Aanbiedingsformulier) |
 |---|---|
 | Omschrijving van het IV-verzoek | Projectbeschrijving algemeen (strategische doelstelling / noodzaak) |
-| Nut / noodzaak / organisatiedoelstelling + Urgentie | Politieke en bestuurlijke urgentie |
-| Doelgroep en omvang toekomstige gebruikers | Impact op de gebruikersorganisatie |
+| Aanleiding | Politieke en bestuurlijke urgentie |
+| Mogelijke impact | Impact op de gebruikersorganisatie |
 
 ---
 
@@ -34,8 +34,8 @@ Quick scan BIO → Prescan DPIA ────────────────
 
 | Bronvraag (Intake) | Doelvraag (PPM Projectplan) |
 |---|---|
-| Omschrijving van het IV-verzoek + Nut / noodzaak | Achtergrond |
-| Nut / noodzaak / organisatiedoelstelling | Redenen om te starten met het project |
+| Omschrijving van het IV-verzoek + Aanleiding | Achtergrond |
+| Aanleiding + Doelstelling | Redenen om te starten met het project |
 | Relatie en/of afhankelijkheid met andere activiteiten of projecten | Afhankelijkheden van andere projecten of activiteiten |
 
 ---

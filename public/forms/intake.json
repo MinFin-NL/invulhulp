@@ -1,8 +1,8 @@
 {
   "id": "intake",
-  "version": "1.0",
+  "version": "2.0",
   "title": "Intakeformulier nieuwe IV-verzoeken",
-  "aiContext": "Dit is een intakeformulier waarmee een organisatieonderdeel van het Ministerie van Financiën een nieuw IV-verzoek (IT-/informatievoorziening) aanmeldt bij het intakeboard. De antwoorden moeten zakelijk en feitelijk zijn en gaan over de opdrachtgever, het probleem dat wordt opgelost, de doelgroep, de urgentie en de benodigde middelen.",
+  "aiContext": "Dit is een intakeformulier waarmee een organisatieonderdeel van het Ministerie van Financiën een nieuw IV-verzoek (IT-/informatievoorziening) aanmeldt bij het intakeboard. De antwoorden moeten zakelijk en feitelijk zijn en gaan over de opdrachtgever, het probleem dat wordt opgelost, de aanleiding, de doelstelling, de doelgroep, de urgentie, de afhankelijkheden en het benodigde budget.",
   "meta": {
     "homeComponent": "HomePage",
     "exportLabel": "Intakeformulier",
@@ -15,9 +15,11 @@
       "description": "Het intakeformulier wordt gebruikt om nieuwe IV-verzoeken aan te melden voor beoordeling door het intakeboard. Op basis van dit formulier wordt bepaald of het verzoek wordt toegelaten tot het reguliere dienstverlening-, project- of innovatieportfolioproces.",
       "steps": [
         "Gegevens opdrachtgever en contactpersoon",
-        "Details van het IV-verzoek: omschrijving, noodzaak en doelgroep",
-        "Typering van de aanvraag",
-        "Planning en resources: urgentie, kosten en budget"
+        "Details van de aanvraag: omschrijving, aanleiding, doelstelling en impact",
+        "Planning en resources",
+        "Afhankelijkheden en risico's",
+        "Budget",
+        "Beoordeling en besluit door het intakeboard (servicemanager)"
       ],
       "buttonLabel": "Starten met het intakeformulier"
     }
@@ -32,6 +34,8 @@
     { "type": "subsections", "sectionId": "intake_b" },
     { "type": "subsections", "sectionId": "intake_c" },
     { "type": "subsections", "sectionId": "intake_d" },
+    { "type": "subsections", "sectionId": "intake_e" },
+    { "type": "subsections", "sectionId": "intake_f" },
     { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
   ],
   "sections": [
@@ -79,6 +83,31 @@
               "type": "text",
               "importance": "optional",
               "format": "phone"
+            },
+            {
+              "id": "intake_a.topdesk_nummer",
+              "text": "Melding nummer ITS Topdesk",
+              "type": "text",
+              "importance": "optional",
+              "format": "shorttext"
+            },
+            {
+              "id": "intake_a.datum_aanlevering",
+              "text": "Datum aanlevering intakeformulier",
+              "type": "text",
+              "importance": "mandatory",
+              "format": "date"
+            },
+            {
+              "id": "intake_a.behandeling_aanvraag",
+              "text": "Behandeling aanvraag",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": [
+                "Ter beoordeling",
+                "Ter info",
+                "Ter advisering"
+              ]
             }
           ]
         }
@@ -92,33 +121,40 @@
         {
           "id": "intake_b1",
           "title": "2. Inhoud van het IV-verzoek",
-          "description": "Beschrijf wat er wordt aangevraagd, waarom dit noodzakelijk is en voor wie de oplossing bestemd is.",
+          "description": "Beschrijf wat er wordt aangevraagd, wat de aanleiding en doelstelling zijn en welke impact dit heeft.",
           "questions": [
             {
               "id": "intake_b.omschrijving",
-              "text": "Omschrijving van het IV-verzoek (doelstelling / noodzaak / probleemstelling)",
-              "guidance": "Beschrijf wat het verzoek inhoudt, welk probleem er wordt opgelost en wat het beoogde resultaat is.",
+              "text": "Omschrijving IV-verzoek",
+              "guidance": "Geef hier een algemene omschrijving van het IV-verzoek. Noem daarbij in elk geval wat het probleem is en wat je met het IV-verzoek wilt bereiken.",
               "type": "text",
               "importance": "mandatory"
             },
             {
-              "id": "intake_b.alternatieven",
-              "text": "Aanvullende informatie, mogelijke oplossingen en overwogen alternatieven",
-              "guidance": "Zijn er al mogelijke oplossingsrichtingen in beeld? Welke alternatieven zijn overwogen?",
+              "id": "intake_b.aanleiding",
+              "text": "Aanleiding",
+              "guidance": "Op te lossen problemen, urgentie, wettelijke verplichtingen, doelstellingen organisatie etc.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "intake_b.doelstelling",
+              "text": "Doelstelling",
+              "guidance": "Wanneer is het succesvol, hoe draagt het bij aan de organisatie.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "intake_b.oplossingen",
+              "text": "Mogelijke oplossingen",
+              "guidance": "Geef hier aan of er al onderzoek is gedaan naar mogelijke oplossingen of alternatieven en welke andere zaken van belang zijn om te weten.",
               "type": "text",
               "importance": "optional"
             },
             {
-              "id": "intake_b.noodzaak",
-              "text": "Nut / noodzaak / organisatiedoelstelling (o.a. wettelijk kader)",
-              "guidance": "Aan welke organisatiedoelstelling draagt dit verzoek bij? Is er een wettelijke verplichting of politieke toezegging van toepassing?",
-              "type": "text",
-              "importance": "mandatory"
-            },
-            {
-              "id": "intake_b.doelgroep",
-              "text": "Doelgroep en omvang toekomstige gebruikers",
-              "guidance": "Wie gaat de oplossing gebruiken en hoeveel gebruikers worden er verwacht?",
+              "id": "intake_b.impact",
+              "text": "Mogelijke impact",
+              "guidance": "Doelgroep, omvang toekomstige gebruikers, benodigde wijzigingen in systemen, organisatie en processen.",
               "type": "text",
               "importance": "mandatory"
             }
@@ -128,25 +164,27 @@
     },
     {
       "id": "intake_c",
-      "title": "Deel 3: Typering aanvraag",
-      "part": "C",
+      "title": "Deel 3: Planning en resources",
+      "part": "B",
       "subsections": [
         {
           "id": "intake_c1",
-          "title": "3. Classificatie",
-          "description": "Geef aan hoe het IV-verzoek getypeerd wordt.",
+          "title": "3. Planning en resources",
+          "description": "Geef inzicht in de gewenste planning en de resources die naar verwachting nodig zijn.",
           "questions": [
             {
-              "id": "intake_c.classificatie",
-              "text": "Classificatie van de aanvraag",
-              "guidance": "Valt dit verzoek onder de reguliere dienstverlening, het projectportfolioproces of het innovatieportfolioproces?",
-              "type": "radio",
-              "importance": "mandatory",
-              "options": [
-                "Regulier dienstverlening",
-                "Project portfolioproces",
-                "Innovatie portfolioproces"
-              ]
+              "id": "intake_c.planning",
+              "text": "Beoogde start-/einddatum indien van toepassing",
+              "guidance": "Bijv. onderbouwing deadlines in verband met nieuwe wetgeving.",
+              "type": "text",
+              "importance": "optional"
+            },
+            {
+              "id": "intake_c.resources",
+              "text": "Welke resources zijn er naar verwachting nodig voor de vervolgstappen?",
+              "guidance": "Zowel IT- als business-resources benoemen.",
+              "type": "text",
+              "importance": "mandatory"
             }
           ]
         }
@@ -154,47 +192,169 @@
     },
     {
       "id": "intake_d",
-      "title": "Deel 4: Planning en resources",
-      "part": "D",
+      "title": "Deel 4: Afhankelijkheden",
+      "part": "B",
       "subsections": [
         {
           "id": "intake_d1",
-          "title": "4. Planning, resources en budget",
-          "description": "Geef inzicht in de planning, benodigde resources en beschikbaar budget.",
+          "title": "4. Afhankelijkheden",
+          "description": "Beschrijf relaties, afhankelijkheden en risico's van dit initiatief.",
           "questions": [
             {
               "id": "intake_d.afhankelijkheden",
-              "text": "Is er een relatie en/of afhankelijkheid met andere activiteiten of projecten?",
-              "guidance": "Beschrijf de afhankelijkheden met andere lopende of geplande projecten.",
+              "text": "Is er een relatie en/of afhankelijkheid met andere activiteiten/projecten?",
               "type": "text",
               "importance": "optional"
             },
             {
-              "id": "intake_d.urgentie",
-              "text": "Urgentie: is er een noodzaak en een moment in de tijd waarop de oplossing gereed moet zijn?",
-              "guidance": "Licht toe waarom er een bepaalde deadline is of waarom het verzoek urgent is.",
+              "id": "intake_d.risicos",
+              "text": "Zijn er risico's of andere factoren die belangrijk zijn voor het succesvol afronden van dit initiatief?",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "optional"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intake_e",
+      "title": "Deel 5: Budget",
+      "part": "B",
+      "subsections": [
+        {
+          "id": "intake_e1",
+          "title": "5. Budget",
+          "description": "Geef aan welk type budget van toepassing is en hoe het vervolgtraject wordt aangepakt.",
+          "questions": [
+            {
+              "id": "intake_e.budget_type",
+              "text": "Geef aan welk type budget van toepassing is en of dit later moet worden aangevraagd",
+              "type": "checkbox",
+              "importance": "mandatory",
+              "options": [
+                "Centraal projectenbudget",
+                "Centraal beheerbudget",
+                "Innovatie budget",
+                "Decentraal lijnbudget"
+              ]
             },
             {
-              "id": "intake_d.resources",
-              "text": "Welke resources zijn naar verwachting nodig voor de vervolgstappen? Geef indien mogelijk een globale raming van de kosten.",
-              "guidance": "Denk aan personele inzet, licenties, hardware en externe inhuur. Geef ook aan hoe de kosten worden gefinancierd.",
+              "id": "intake_e.kosten_raming",
+              "text": "Geef indien mogelijk een globale raming van de kosten",
               "type": "text",
               "importance": "optional"
             },
             {
-              "id": "intake_d.budget",
-              "text": "Beschikbaarheid van budget",
-              "guidance": "Is er decentraal budget beschikbaar bij de opdrachtgever, of wordt een beroep gedaan op centrale budgetten?",
+              "id": "intake_e.opvolging",
+              "text": "Verzoek tot opvolging",
+              "guidance": "Hoe wil de aanvrager het vervolgtraject aanpakken.",
+              "type": "radio",
+              "importance": "mandatory",
+              "options": [
+                "Project",
+                "Innovatie",
+                "Reguliere dienstverlening"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "intake_f",
+      "title": "Deel 6: Beoordeling en besluit Intakeboard",
+      "part": "D",
+      "subsections": [
+        {
+          "id": "intake_f1",
+          "title": "6. Beoordeling en besluit Intakeboard",
+          "description": "In te vullen door de servicemanager, na beoordeling van de aanvraag door het intakeboard.",
+          "questions": [
+            {
+              "id": "intake_f.criteria_geheel",
+              "text": "Voldoet de aanvraag geheel aan de geëiste criteriapunten?",
+              "guidance": "Bij 'Ja': GO Regulier/Project/Innovatie.",
               "type": "radio",
               "importance": "optional",
-              "options": [
-                "Decentraal budget bij opdrachtgever",
-                "Centraal budget bij CDIO",
-                "Innovatie- of portfolioboard",
-                "Nog niet bepaald"
-              ]
+              "options": ["Ja", "Nee"]
+            },
+            {
+              "id": "intake_f.criteria_gedeeltelijk",
+              "text": "Voldoet de aanvraag gedeeltelijk aan de geëiste criteriapunten?",
+              "guidance": "Bij 'Ja': GO onder voorbehoud.",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Ja", "Nee"]
+            },
+            {
+              "id": "intake_f.criteria_niet",
+              "text": "Voldoet de aanvraag niet aan de geëiste criteriapunten?",
+              "guidance": "Bij 'Ja': NO-GO, afwijzing.",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Ja", "Nee"]
+            },
+            {
+              "id": "intake_f.toelichting_besluit",
+              "text": "Toelichting",
+              "type": "text",
+              "importance": "optional"
+            }
+          ]
+        },
+        {
+          "id": "intake_f2",
+          "title": "Criteria inzet WEM (indien als oplossing aangevraagd)",
+          "questions": [
+            {
+              "id": "intake_f.wem_1",
+              "text": "1. Het is uitsluitend ter ondersteuning van taken binnen Financiën?",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Ja", "Nee"]
+            },
+            {
+              "id": "intake_f.wem_2",
+              "text": "2. Het is uitsluitend ter ondersteuning van niet kritische bedrijfsprocessen?*",
+              "guidance": "* Dit proces speelt een primaire rol voor doelstelling van de organisatie. Het bestaansrecht van de organisatie wordt aan dit proces ontleend. Als de activiteit langer dan één week stilvalt of niet goed verloopt heeft dit ernstige gevolgen voor het voortbestaan van de organisatie, c.q. het brengt de organisatie in een hachelijke positie.",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Ja", "Nee"]
+            },
+            {
+              "id": "intake_f.wem_3",
+              "text": "3. Er zijn geen standaardmarktproducten of Rijksvoorzieningen beschikbaar/bekend?",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Ja", "Nee"]
+            },
+            {
+              "id": "intake_f.wem_4",
+              "text": "4. Het is ten behoeve van ondersteunende, repeterende, eenvoudige processen die herhaaldelijk worden uitgevoerd en niet complex van aard zijn (dus bijv. geen ketenproces) en één eindverantwoordelijke hebben?",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Ja", "Nee"]
+            },
+            {
+              "id": "intake_f.wem_5",
+              "text": "5. Het is uitsluitend bedoeld voor taakondersteuning van medewerkers (front-end applicatie)?",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Ja", "Nee"]
+            },
+            {
+              "id": "intake_f.wem_6",
+              "text": "6. De applicatie is niet bedoeld voor archiveringsdoeleinden?",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Ja", "Nee"]
+            },
+            {
+              "id": "intake_f.wem_7",
+              "text": "7. Er is sprake van een beperkt aantal geautomatiseerde koppelvlakken met de omgeving?",
+              "type": "radio",
+              "importance": "optional",
+              "options": ["Ja", "Nee"]
             }
           ]
         }

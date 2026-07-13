@@ -375,6 +375,17 @@ class RagExtractRequest(BaseModel):
     top_k: int = 6
 
 
+def _options_block(options: list[str], question_type: str) -> str:
+    """The multiple-choice instruction block shared by all extract prompts."""
+    if not options:
+        return ""
+    formatted = "\n".join(f"- {opt}" for opt in options)
+    kind = "meerdere opties mogelijk" if question_type == "checkbox" else "kies precies één optie"
+    return (
+        f"\n\nDit is een meerkeuzevraag ({kind}). Beschikbare antwoordopties (kies woordelijk):\n{formatted}"
+    )
+
+
 def _improve_user_message(req: ImproveRequest) -> str:
     msg = (
         f"Vraag in het formulier: {req.question_context}\n\n"
@@ -452,10 +463,14 @@ def _parse_smooth(raw: str, originals: dict[str, str]) -> dict[str, str]:
     return result
 
 
+def _xml_tag(raw: str, tag: str) -> str:
+    """Content of the first <tag>…</tag> block in an LLM response, or ""."""
+    m = re.search(rf"<{tag}>(.*?)</{tag}>", raw, re.DOTALL | re.IGNORECASE)
+    return m.group(1).strip() if m else ""
+
+
 def _parse_improve(raw: str, fallback: str) -> tuple[str, str]:
-    m_s = re.search(r"<verbeterd>(.*?)</verbeterd>", raw, re.DOTALL | re.IGNORECASE)
-    m_r = re.search(r"<toelichting>(.*?)</toelichting>", raw, re.DOTALL | re.IGNORECASE)
-    return (m_s.group(1).strip() if m_s else fallback), (m_r.group(1).strip() if m_r else "")
+    return _xml_tag(raw, "verbeterd") or fallback, _xml_tag(raw, "toelichting")
 
 
 def _extract_user_message(req: ExtractRequest) -> str:
@@ -463,24 +478,15 @@ def _extract_user_message(req: ExtractRequest) -> str:
         f"=== Document: {doc.name} ===\n{doc.content.strip()}"
         for doc in req.documents
     ]
-    options_block = ""
-    if req.options:
-        formatted = "\n".join(f"- {opt}" for opt in req.options)
-        kind = "meerdere opties mogelijk" if req.question_type == "checkbox" else "kies precies één optie"
-        options_block = (
-            f"\n\nDit is een meerkeuzevraag ({kind}). Beschikbare antwoordopties (kies woordelijk):\n{formatted}"
-        )
     return (
         f"Doelvraag waarvoor een antwoord nodig is:\n{req.target_question}"
-        f"{options_block}\n\n"
+        f"{_options_block(req.options, req.question_type)}\n\n"
         f"Brondocumenten:\n\n" + "\n\n".join(doc_parts)
     )
 
 
 def _parse_synthesize(raw: str) -> tuple[str, str]:
-    m_s = re.search(r"<suggestie>(.*?)</suggestie>", raw, re.DOTALL | re.IGNORECASE)
-    m_r = re.search(r"<toelichting>(.*?)</toelichting>", raw, re.DOTALL | re.IGNORECASE)
-    return (m_s.group(1).strip() if m_s else ""), (m_r.group(1).strip() if m_r else "")
+    return _xml_tag(raw, "suggestie"), _xml_tag(raw, "toelichting")
 
 
 _EMAIL_RE = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
@@ -589,9 +595,6 @@ def _make_extract_parser(
 
 _SSE_HEADERS = {"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
 
-_CLARIFICATION_RE = re.compile(r"<verduidelijking>(.*?)</verduidelijking>", re.DOTALL | re.IGNORECASE)
-_MERMAID_RE = re.compile(r"<mermaid>(.*?)</mermaid>", re.DOTALL | re.IGNORECASE)
-
 
 async def _sse_stream(
     system_prompt: str,
@@ -608,15 +611,15 @@ async def _sse_stream(
             raw += chunk
             yield f"event: chunk\ndata: {json.dumps({'text': chunk}, ensure_ascii=False)}\n\n"
         if allow_clarification:
-            m = _CLARIFICATION_RE.search(raw)
-            if m and m.group(1).strip():
+            question = _xml_tag(raw, "verduidelijking")
+            if question:
                 # The model needs more input; the client answers and re-requests.
-                yield f"event: clarification\ndata: {json.dumps({'question': m.group(1).strip()}, ensure_ascii=False)}\n\n"
+                yield f"event: clarification\ndata: {json.dumps({'question': question}, ensure_ascii=False)}\n\n"
                 return
         if allow_diagram:
-            m = _MERMAID_RE.search(raw)
-            if m and m.group(1).strip():
-                yield f"event: diagram\ndata: {json.dumps({'mermaid': m.group(1).strip()}, ensure_ascii=False)}\n\n"
+            mermaid = _xml_tag(raw, "mermaid")
+            if mermaid:
+                yield f"event: diagram\ndata: {json.dumps({'mermaid': mermaid}, ensure_ascii=False)}\n\n"
         suggestion, rationale = parse_fn(raw)
         done_payload: dict = {"suggestion": suggestion, "rationale": rationale}
         if sources is not None:
@@ -626,13 +629,29 @@ async def _sse_stream(
         yield f"event: error\ndata: {json.dumps({'detail': str(e)}, ensure_ascii=False)}\n\n"
 
 
-@app.post("/api/improve", response_model=ImproveResponse)
-async def improve_text(req: ImproveRequest) -> ImproveResponse:
+def _validated_improve_text(req: ImproveRequest) -> str:
     text = req.text.strip()
     if not text:
         raise HTTPException(status_code=400, detail="Tekst mag niet leeg zijn.")
     if len(text) > 8000:
         raise HTTPException(status_code=400, detail="Tekst is te lang (max 8000 tekens).")
+    return text
+
+
+def _prepare_extract(req: ExtractRequest) -> tuple[str, str]:
+    """Shared prep for both extract endpoints: (system_prompt, source_text)."""
+    if not req.documents:
+        raise HTTPException(status_code=400, detail="Geen brondocumenten opgegeven.")
+    if not req.target_question.strip():
+        raise HTTPException(status_code=400, detail="Doelvraag mag niet leeg zijn.")
+    system_prompt = _build_extract_system_prompt(req.question_type, req.field_format, req.form_context)
+    source_text = "\n".join(doc.content for doc in req.documents)
+    return system_prompt, source_text
+
+
+@app.post("/api/improve", response_model=ImproveResponse)
+async def improve_text(req: ImproveRequest) -> ImproveResponse:
+    text = _validated_improve_text(req)
     try:
         raw = await backend.chat(SYSTEM_PROMPT, _improve_user_message(req))
     except Exception as e:
@@ -643,11 +662,7 @@ async def improve_text(req: ImproveRequest) -> ImproveResponse:
 
 @app.post("/api/improve/stream")
 async def improve_text_stream(req: ImproveRequest) -> StreamingResponse:
-    text = req.text.strip()
-    if not text:
-        raise HTTPException(status_code=400, detail="Tekst mag niet leeg zijn.")
-    if len(text) > 8000:
-        raise HTTPException(status_code=400, detail="Tekst is te lang (max 8000 tekens).")
+    text = _validated_improve_text(req)
     return StreamingResponse(
         _sse_stream(
             SYSTEM_PROMPT,
@@ -724,12 +739,7 @@ async def smooth_answers_stream(req: SmoothRequest) -> StreamingResponse:
 
 @app.post("/api/extract", response_model=ImproveResponse)
 async def extract_from_documents(req: ExtractRequest) -> ImproveResponse:
-    if not req.documents:
-        raise HTTPException(status_code=400, detail="Geen brondocumenten opgegeven.")
-    if not req.target_question.strip():
-        raise HTTPException(status_code=400, detail="Doelvraag mag niet leeg zijn.")
-    system_prompt = _build_extract_system_prompt(req.question_type, req.field_format, req.form_context)
-    source_text = "\n".join(doc.content for doc in req.documents)
+    system_prompt, source_text = _prepare_extract(req)
     try:
         raw = await backend.chat(system_prompt, _extract_user_message(req))
     except Exception as e:
@@ -745,12 +755,7 @@ async def extract_from_documents(req: ExtractRequest) -> ImproveResponse:
 
 @app.post("/api/extract/stream")
 async def extract_from_documents_stream(req: ExtractRequest) -> StreamingResponse:
-    if not req.documents:
-        raise HTTPException(status_code=400, detail="Geen brondocumenten opgegeven.")
-    if not req.target_question.strip():
-        raise HTTPException(status_code=400, detail="Doelvraag mag niet leeg zijn.")
-    system_prompt = _build_extract_system_prompt(req.question_type, req.field_format, req.form_context)
-    source_text = "\n".join(doc.content for doc in req.documents)
+    system_prompt, source_text = _prepare_extract(req)
     parse_fn = _make_extract_parser(req.field_format, req.target_question, req.options, source_text)
     return StreamingResponse(
         _sse_stream(system_prompt, _extract_user_message(req), parse_fn),
@@ -858,14 +863,6 @@ def _rag_user_message(
     else:
         question_block = f"Doelvraag: {target_question}"
 
-    options_block = ""
-    if options:
-        formatted = "\n".join(f"- {opt}" for opt in options)
-        kind = "meerdere opties mogelijk" if question_type == "checkbox" else "kies precies één optie"
-        options_block = (
-            f"\n\nDit is een meerkeuzevraag ({kind}). Beschikbare antwoordopties (kies woordelijk):\n{formatted}"
-        )
-
     if not chunks:
         excerpts_block = "(Geen relevante passages gevonden in de geïndexeerde documenten.)"
     else:
@@ -875,7 +872,7 @@ def _rag_user_message(
         )
 
     return (
-        f"{question_block}{options_block}\n\n"
+        f"{question_block}{_options_block(options, question_type)}\n\n"
         f"Relevante passages uit de brondocumenten:\n\n{excerpts_block}"
     )
 

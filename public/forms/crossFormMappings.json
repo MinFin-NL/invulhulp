@@ -157,29 +157,29 @@
     "targetFormId": "aanbiedingsformulier",
     "targetQuestionId": "aa_b.urgentie",
     "sourceFormId": "intake",
-    "sourceQuestionIds": ["intake_b.noodzaak", "intake_d.urgentie"],
-    "synthesisHint": "Combineer de nut/noodzaak en urgentie uit het intakeformulier tot een beschrijving van de politieke en bestuurlijke urgentie van het project."
+    "sourceQuestionIds": ["intake_b.aanleiding"],
+    "synthesisHint": "Herschrijf de aanleiding uit het intakeformulier tot een beschrijving van de politieke en bestuurlijke urgentie van het project."
   },
   {
     "targetFormId": "aanbiedingsformulier",
     "targetQuestionId": "aa_e.impact_gebruikersorg",
     "sourceFormId": "intake",
-    "sourceQuestionIds": ["intake_b.doelgroep"],
-    "synthesisHint": "Vertaal de doelgroepbeschrijving uit het intakeformulier naar een beschrijving van de impact op de gebruikersorganisatie voor het aanbiedingsformulier."
+    "sourceQuestionIds": ["intake_b.impact"],
+    "synthesisHint": "Vertaal de mogelijke impact uit het intakeformulier naar een beschrijving van de impact op de gebruikersorganisatie voor het aanbiedingsformulier."
   },
   {
     "targetFormId": "ppm",
     "targetQuestionId": "ppm_a.achtergrond",
     "sourceFormId": "intake",
-    "sourceQuestionIds": ["intake_b.omschrijving", "intake_b.noodzaak"],
-    "synthesisHint": "Combineer de omschrijving en nut/noodzaak uit het intakeformulier tot een projectachtergrond voor het PPM-projectplan."
+    "sourceQuestionIds": ["intake_b.omschrijving", "intake_b.aanleiding"],
+    "synthesisHint": "Combineer de omschrijving en aanleiding uit het intakeformulier tot een projectachtergrond voor het PPM-projectplan."
   },
   {
     "targetFormId": "ppm",
     "targetQuestionId": "ppm_b.redenen",
     "sourceFormId": "intake",
-    "sourceQuestionIds": ["intake_b.noodzaak"],
-    "synthesisHint": "Herschrijf de nut/noodzaak uit het intakeformulier als zakelijke redenen om het project te starten, inclusief bijdrage aan bedrijfsdoelstellingen."
+    "sourceQuestionIds": ["intake_b.aanleiding", "intake_b.doelstelling"],
+    "synthesisHint": "Herschrijf de aanleiding en doelstelling uit het intakeformulier als zakelijke redenen om het project te starten, inclusief bijdrage aan bedrijfsdoelstellingen."
   },
   {
     "targetFormId": "ppm",
