@@ -27,17 +27,18 @@
           <button
             v-if="auth.isAdmin"
             @click="auth.userManagementOpen = !auth.userManagementOpen"
-            class="rvo-button rvo-button--secondary rvo-button--size-sm"
+            class="invulhulp-header__ghost-btn"
             :aria-pressed="auth.userManagementOpen"
           >
             {{ auth.userManagementOpen ? 'Terug naar formulieren' : 'Gebruikersbeheer' }}
           </button>
+          <span v-if="auth.isAdmin" class="invulhulp-header__divider" aria-hidden="true" />
           <span v-if="auth.user" class="invulhulp-header__user">
             {{ auth.user.name ?? auth.user.email }}
           </span>
           <button
             @click="auth.logout()"
-            class="rvo-button rvo-button--secondary rvo-button--size-sm invulhulp-header__logout"
+            class="invulhulp-header__ghost-btn invulhulp-header__logout"
           >
             <span class="invulhulp-header__logout-icon" aria-hidden="true" />
             Uitloggen
@@ -165,6 +166,36 @@ function openResetDialog() {
   gap: var(--rvo-space-sm);
 }
 
+/* Ghost-style buttons for secondary header actions (gebruikersbeheer, uitloggen):
+   plain translucent text like the user-name label and tab links, instead of a
+   bordered rvo-button that reads as the primary action on the dark header. */
+.invulhulp-header__ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rvo-space-xs);
+  border: 0;
+  background: transparent;
+  color: rgb(255 255 255 / 0.75);
+  font: inherit;
+  font-size: var(--rvo-font-size-sm);
+  font-weight: var(--rvo-font-weight-semibold);
+  white-space: nowrap;
+  padding: var(--rvo-space-3xs) var(--rvo-space-xs);
+  border-radius: var(--rvo-radius-md, 4px);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.invulhulp-header__ghost-btn:hover {
+  background: rgb(255 255 255 / 0.12);
+  color: var(--rvo-color-wit);
+}
+
+.invulhulp-header__ghost-btn:focus-visible {
+  outline: 2px solid var(--rvo-color-wit);
+  outline-offset: 2px;
+}
+
 .invulhulp-header__logout {
   gap: var(--rvo-space-xs);
 }
@@ -182,6 +213,12 @@ function openResetDialog() {
   -webkit-mask: url('@nl-rvo/assets/icons/functioneel/inloggen.svg') center / contain no-repeat;
   mask: url('@nl-rvo/assets/icons/functioneel/inloggen.svg') center / contain no-repeat;
   transform: scaleX(-1);
+}
+
+.invulhulp-header__divider {
+  inline-size: 1px;
+  block-size: 1.25rem;
+  background: rgb(255 255 255 / 0.25);
 }
 
 .invulhulp-header__user {
