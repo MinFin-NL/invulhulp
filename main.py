@@ -17,6 +17,7 @@ import json
 import os
 import re
 import sys
+import unicodedata
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -229,6 +230,39 @@ _EXTRACT_OUTPUT = (
 )
 
 
+def _table_format_block(columns: list["TableColumn"]) -> str:
+    """Field block for table questions, built at request time because the
+    column schema comes from the form JSON. Output contract: one pipe-separated
+    row per line, optional whole-table note after a line that is exactly
+    '---' — the same delimiter the client already uses for radio follow-ups."""
+    col_lines = "\n".join(
+        f"{i + 1}. {c.label}" + (f" — {c.hint}" if c.hint else "")
+        for i, c in enumerate(columns)
+    )
+    example_header = " | ".join(c.label for c in columns[:2]) or "Naam | Rol"
+    return (
+        "Dit is een TABELVRAAG. Vul een tabel met exact deze kolommen, in deze "
+        f"volgorde:\n{col_lines}\n"
+        "Werk zo:\n"
+        "- Geef per gevonden item precies één regel; scheid de celwaarden met ' | '.\n"
+        "- Geef GEEN kopregel met kolomnamen, geen regel met streepjes en geen "
+        "opsommingstekens.\n"
+        "- Neem celwaarden letterlijk over uit de fragmenten. Staat een waarde "
+        "voor een cel niet in de fragmenten, laat die cel dan leeg — verzin "
+        "NOOIT een waarde. Gebruik het teken '|' nooit binnen een celwaarde.\n"
+        "- Neem alleen rijen op die aantoonbaar uit de fragmenten komen.\n"
+        "- Wil je een korte toelichting bij de hele tabel geven, zet dan na de "
+        "laatste rij één regel met precies '---' en daarna de toelichting.\n"
+        f"Voorbeeld met kolommen '{example_header}':\n"
+        "Anouk de Wit | Projectleider\n"
+        "Belastingdienst | Opdrachtgever\n"
+        "---\n"
+        "Beide rollen staan in de notulen van 12 maart.\n"
+        "Staat er geen enkel passend item in de fragmenten? Antwoord dan "
+        "uitsluitend 'Onvoldoende informatie in de brondocumenten.'\n\n"
+    )
+
+
 def _resolve_format(question_type: str, field_format: str) -> str:
     """Pick which field-specific block applies to the current field."""
     if question_type in ("radio", "checkbox"):
@@ -239,10 +273,16 @@ def _resolve_format(question_type: str, field_format: str) -> str:
 
 
 def _build_extract_system_prompt(
-    question_type: str, field_format: str, form_context: str
+    question_type: str,
+    field_format: str,
+    form_context: str,
+    columns: list["TableColumn"] | None = None,
 ) -> str:
     context = f"Context van dit formulier: {form_context.strip()}\n\n" if form_context.strip() else ""
-    block = _EXTRACT_FORMAT_BLOCKS[_resolve_format(question_type, field_format)]
+    if question_type == "table" and columns:
+        block = _table_format_block(columns)
+    else:
+        block = _EXTRACT_FORMAT_BLOCKS[_resolve_format(question_type, field_format)]
     return context + _EXTRACT_BASE + block + _EXTRACT_OUTPUT
 
 SYNTHESIZE_SYSTEM_PROMPT = (
@@ -340,6 +380,12 @@ class ExtractDocument(BaseModel):
     content: str
 
 
+class TableColumn(BaseModel):
+    id: str
+    label: str
+    hint: str = ""
+
+
 class ExtractRequest(BaseModel):
     documents: list[ExtractDocument]
     target_question: str
@@ -347,6 +393,7 @@ class ExtractRequest(BaseModel):
     question_type: str = "text"
     field_format: str = ""
     form_context: str = ""
+    columns: list[TableColumn] = []  # table questions only
 
 
 class IndexDocumentRequest(BaseModel):
@@ -371,6 +418,7 @@ class RagExtractRequest(BaseModel):
     question_type: str = "text"
     field_format: str = ""
     form_context: str = ""
+    columns: list[TableColumn] = []  # table questions only
     doc_ids: list[str] = []
     top_k: int = 6
 
@@ -593,6 +641,90 @@ def _make_extract_parser(
     return parse
 
 
+_MAX_TABLE_ROWS = 25
+# A markdown separator row cell: only dashes/colons/whitespace.
+_TABLE_SEPARATOR_CELL_RE = re.compile(r"^[-–—\s:]*$")
+
+
+def _normalize_for_grounding(text: str) -> str:
+    return unicodedata.normalize("NFD", text.lower())
+
+
+def _table_cell_grounded(cell: str, source_text: str) -> bool:
+    """Grounding check for one table cell. Short cells must appear literally in
+    the sources (same rule as shorttext); longer cells may be lightly rephrased,
+    so we accept them when enough of their content words appear in the source."""
+    if _grounded(cell, source_text):
+        return True
+    if len(cell) <= 30:
+        return False
+    words = {
+        w for w in re.split(r"[^\w@.+-]+", _normalize_for_grounding(cell)) if len(w) >= 4
+    }
+    if not words:
+        return False
+    source_norm = _normalize_for_grounding(source_text)
+    found = sum(1 for w in words if w in source_norm)
+    return found / len(words) >= 0.6
+
+
+def _validate_table_suggestion(
+    suggestion: str, columns: list[TableColumn], source_text: str = ""
+) -> str:
+    """Table sibling of _validate_suggestion — kept separate because the label
+    and question-echo stripping there would mangle pipe-separated rows. Blanks
+    ungrounded cells, drops empty rows, and returns "" when nothing survives.
+    Output: validated pipe rows, optionally followed by '---' and the note."""
+    text = suggestion.strip()
+    if not text or "onvoldoende informatie" in text.lower():
+        return ""
+    if text.lower().strip(".") in _PLACEHOLDERS:
+        return ""
+    if len(text) < 250 and _NO_INFO_PARAPHRASE_RE.search(text):
+        return ""
+
+    rows_part, _, notes_part = text.partition("\n---\n")
+    labels = {c.label.strip().lower() for c in columns}
+
+    rows: list[list[str]] = []
+    for line in rows_part.splitlines():
+        line = line.strip().strip("|").strip()
+        if not line:
+            continue
+        cells = [c.strip() for c in line.split("|")]
+        # Drop markdown separator rows and header rows echoing column labels.
+        if all(_TABLE_SEPARATOR_CELL_RE.match(c) for c in cells):
+            continue
+        if all(c.lower() in labels or not c for c in cells) and any(cells):
+            continue
+        cells = (cells + [""] * len(columns))[: len(columns)]
+        cells = [c if _table_cell_grounded(c, source_text) else "" for c in cells]
+        if any(cells):
+            rows.append(cells)
+        if len(rows) >= _MAX_TABLE_ROWS:
+            break
+    if not rows:
+        return ""
+
+    note_lines = [ln for ln in notes_part.splitlines() if not _BRON_LINE_RE.match(ln)]
+    notes = "\n".join(note_lines).strip()
+    if notes and "onvoldoende informatie" in notes.lower():
+        notes = ""
+    if notes and len(notes) < 250 and _NO_INFO_PARAPHRASE_RE.search(notes):
+        notes = ""
+
+    result = "\n".join(" | ".join(row) for row in rows)
+    return f"{result}\n---\n{notes}" if notes else result
+
+
+def _make_table_extract_parser(columns: list[TableColumn], source_text: str = ""):
+    def parse(raw: str) -> tuple[str, str]:
+        suggestion, rationale = _parse_synthesize(raw)
+        return _validate_table_suggestion(suggestion, columns, source_text), rationale
+
+    return parse
+
+
 _SSE_HEADERS = {"Cache-Control": "no-cache", "X-Accel-Buffering": "no"}
 
 
@@ -644,9 +776,18 @@ def _prepare_extract(req: ExtractRequest) -> tuple[str, str]:
         raise HTTPException(status_code=400, detail="Geen brondocumenten opgegeven.")
     if not req.target_question.strip():
         raise HTTPException(status_code=400, detail="Doelvraag mag niet leeg zijn.")
-    system_prompt = _build_extract_system_prompt(req.question_type, req.field_format, req.form_context)
+    system_prompt = _build_extract_system_prompt(
+        req.question_type, req.field_format, req.form_context, req.columns
+    )
     source_text = "\n".join(doc.content for doc in req.documents)
     return system_prompt, source_text
+
+
+def _extract_parser_for(req: "ExtractRequest | RagExtractRequest", source_text: str):
+    """Table questions get their own validator; everything else the default."""
+    if req.question_type == "table" and req.columns:
+        return _make_table_extract_parser(req.columns, source_text)
+    return _make_extract_parser(req.field_format, req.target_question, req.options, source_text)
 
 
 @app.post("/api/improve", response_model=ImproveResponse)
@@ -744,10 +885,7 @@ async def extract_from_documents(req: ExtractRequest) -> ImproveResponse:
         raw = await backend.chat(system_prompt, _extract_user_message(req))
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"LLM fout: {e}") from e
-    suggestion, rationale = _parse_synthesize(raw)
-    suggestion = _validate_suggestion(
-        suggestion, req.field_format, req.target_question, req.options, source_text
-    )
+    suggestion, rationale = _extract_parser_for(req, source_text)(raw)
     if not suggestion:
         raise HTTPException(status_code=500, detail="Kon geen suggestie genereren.")
     return ImproveResponse(suggestion=suggestion, rationale=rationale)
@@ -756,7 +894,7 @@ async def extract_from_documents(req: ExtractRequest) -> ImproveResponse:
 @app.post("/api/extract/stream")
 async def extract_from_documents_stream(req: ExtractRequest) -> StreamingResponse:
     system_prompt, source_text = _prepare_extract(req)
-    parse_fn = _make_extract_parser(req.field_format, req.target_question, req.options, source_text)
+    parse_fn = _extract_parser_for(req, source_text)
     return StreamingResponse(
         _sse_stream(system_prompt, _extract_user_message(req), parse_fn),
         media_type="text/event-stream",
@@ -893,9 +1031,11 @@ async def extract_rag_stream(req: RagExtractRequest) -> StreamingResponse:
         raise HTTPException(status_code=502, detail=f"Retrieval mislukt: {e}") from e
 
     user_msg = _rag_user_message(req.target_question, req.guidance, req.options, req.question_type, chunks)
-    system_prompt = _build_extract_system_prompt(req.question_type, req.field_format, req.form_context)
+    system_prompt = _build_extract_system_prompt(
+        req.question_type, req.field_format, req.form_context, req.columns
+    )
     source_text = "\n".join(c["text"] for c in chunks)
-    parse_fn = _make_extract_parser(req.field_format, req.target_question, req.options, source_text)
+    parse_fn = _extract_parser_for(req, source_text)
     sources = [
         {
             "docId": c["doc_id"],

@@ -99,8 +99,13 @@
             {
               "id": "d2.2",
               "text": "Beschrijf per categorie welke specifieke persoonsgegevens worden verzameld en wat de bron hiervan is.",
-              "type": "text",
-              "importance": "mandatory"
+              "type": "table",
+              "importance": "mandatory",
+              "columns": [
+                { "id": "categorie", "label": "Categorie", "hint": "bijv. NAW-gegevens, BSN" },
+                { "id": "persoonsgegevens", "label": "Persoonsgegevens", "hint": "specifieke gegevens binnen deze categorie" },
+                { "id": "bron", "label": "Bron", "hint": "waar komen de gegevens vandaan" }
+              ]
             },
             {
               "id": "d2.3",
@@ -132,8 +137,12 @@
             {
               "id": "d3.2",
               "text": "Geef per gegevensverwerking aan welke categorieën persoonsgegevens worden verwerkt.",
-              "type": "text",
-              "importance": "mandatory"
+              "type": "table",
+              "importance": "mandatory",
+              "columns": [
+                { "id": "verwerking", "label": "Gegevensverwerking", "hint": "bijv. verzamelen, opslaan, verstrekken" },
+                { "id": "categorieen", "label": "Categorieën persoonsgegevens" }
+              ]
             }
           ]
         },
@@ -198,14 +207,23 @@
               "id": "d6.1",
               "text": "Noem alle betrokken partijen en geef per partij de AVG-rol aan (verwerkingsverantwoordelijke, gezamenlijke verwerkingsverantwoordelijke, verwerker, sub-verwerker, verstrekker, ontvanger, betrokkene of derde).",
               "guidance": "Verwerkingsverantwoordelijke: bepaalt het doel en de middelen van de verwerking. Verwerker: verwerkt gegevens in opdracht van de verwerkingsverantwoordelijke.",
-              "type": "text",
-              "importance": "mandatory"
+              "type": "table",
+              "importance": "mandatory",
+              "columns": [
+                { "id": "partij", "label": "Partij" },
+                { "id": "avg_rol", "label": "AVG-rol", "hint": "verwerkingsverantwoordelijke, verwerker, sub-verwerker, verstrekker, ontvanger, betrokkene of derde" }
+              ]
             },
             {
               "id": "d6.2",
               "text": "Beschrijf welke functionarissen of afdelingen binnen de betrokken organisaties toegang krijgen tot welke categorieën persoonsgegevens.",
-              "type": "text",
-              "importance": "optional"
+              "type": "table",
+              "importance": "optional",
+              "columns": [
+                { "id": "functionaris", "label": "Functionaris of afdeling" },
+                { "id": "organisatie", "label": "Organisatie" },
+                { "id": "toegang", "label": "Toegang tot", "hint": "categorieën persoonsgegevens" }
+              ]
             },
             {
               "id": "d6.3",
@@ -301,8 +319,13 @@
               "id": "d10.1",
               "text": "Wat zijn de bewaartermijnen voor de persoonsgegevens per categorie of per gegevensverwerking?",
               "guidance": "Bewaartermijnen mogen niet langer zijn dan strikt noodzakelijk ten opzichte van de verwerkingsdoeleinden. Motiveer de gekozen termijn.",
-              "type": "text",
-              "importance": "mandatory"
+              "type": "table",
+              "importance": "mandatory",
+              "columns": [
+                { "id": "categorie", "label": "Categorie of gegevensverwerking" },
+                { "id": "bewaartermijn", "label": "Bewaartermijn", "hint": "bijv. 7 jaar" },
+                { "id": "motivering", "label": "Motivering" }
+              ]
             },
             {
               "id": "d10.2",

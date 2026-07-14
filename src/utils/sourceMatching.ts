@@ -1,4 +1,5 @@
 import type { AnswerSource } from '../models/Assessment'
+import { parseTableAnswer, tableAnswerToPlainText } from './tableAnswer'
 
 // Matching is text-based and intentionally forgiving: it must survive Tiptap
 // HTML answers, diacritics, case and whitespace differences between the LLM
@@ -29,9 +30,11 @@ export function stripHtml(html: string): string {
 }
 
 /** Flatten any answer shape (checkbox arrays, radio "option\n---\nfollowup",
- *  Tiptap HTML) into plain text for matching. */
+ *  table JSON, Tiptap HTML) into plain text for matching. */
 export function answerPlainText(value: string | string[]): string {
   if (Array.isArray(value)) return value.join('; ')
+  const table = parseTableAnswer(value)
+  if (table) return tableAnswerToPlainText(table)
   const joined = value.split('\n---\n').join(' ')
   return /<[a-z][\s\S]*>/i.test(joined) ? stripHtml(joined) : joined
 }

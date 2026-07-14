@@ -65,8 +65,12 @@
               "id": "ppm_a.eindresultaten",
               "text": "Gewenste eindresultaten (Milestones)",
               "guidance": "Geef een overzicht van de belangrijkste producten (milestones) die moeten worden opgeleverd, inclusief implementatie en acceptatie door de beheerorganisatie.",
-              "type": "text",
-              "importance": "mandatory"
+              "type": "table",
+              "importance": "mandatory",
+              "columns": [
+                { "id": "milestone", "label": "Milestone / product" },
+                { "id": "datum", "label": "Beoogde opleverdatum" }
+              ]
             }
           ]
         },
@@ -93,8 +97,13 @@
               "id": "ppm_a.toleranties",
               "text": "Projecttoleranties (oranje/rood voor product, tijd en geld)",
               "guidance": "Definieer de tolerantiegrenzen voor product, planning en budget. Wanneer wordt afwijkend gerapporteerd aan de stuurgroep?",
-              "type": "text",
-              "importance": "optional"
+              "type": "table",
+              "importance": "optional",
+              "columns": [
+                { "id": "aspect", "label": "Aspect", "hint": "product, tijd of geld" },
+                { "id": "oranje", "label": "Oranje (grens)" },
+                { "id": "rood", "label": "Rood (grens)" }
+              ]
             },
             {
               "id": "ppm_a.afhankelijkheden",

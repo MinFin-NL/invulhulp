@@ -15,7 +15,8 @@ import {
   BorderStyle,
 } from 'docx'
 import { saveAs } from 'file-saver'
-import type { Answers, RiskLevelValue, FormConfig } from '../models/Assessment'
+import type { Answers, Question, RiskLevelValue, FormConfig } from '../models/Assessment'
+import { parseTableAnswer } from '../utils/tableAnswer'
 
 function stripHtml(html: string): string {
   return html
@@ -35,6 +36,66 @@ function formatAnswer(value: string | string[] | undefined): string {
   if (!value) return '(niet ingevuld)'
   if (Array.isArray(value)) return value.map(stripHtml).join(', ') || '(niet ingevuld)'
   return stripHtml(value) || '(niet ingevuld)'
+}
+
+/** Real docx table (shaded header + rows) for a table question, or null when
+ *  the answer is empty/not a table. */
+function tableAnswerChildren(
+  question: Question,
+  value: string | string[] | undefined,
+): (Paragraph | Table)[] | null {
+  if (question.type !== 'table' || typeof value !== 'string') return null
+  const table = parseTableAnswer(value)
+  if (!table || table.rows.length === 0) return null
+  const columns = question.columns ?? []
+
+  const headerRow = new TableRow({
+    children: columns.map(
+      (c) =>
+        new TableCell({
+          shading: { type: ShadingType.CLEAR, color: 'auto', fill: 'F0F4F8' },
+          children: [
+            new Paragraph({
+              children: [new TextRun({ text: c.label, bold: true, size: 20 })],
+            }),
+          ],
+        }),
+    ),
+  })
+  const dataRows = table.rows.map(
+    (row) =>
+      new TableRow({
+        children: columns.map(
+          (_, i) =>
+            new TableCell({
+              children: [
+                new Paragraph({ children: [new TextRun({ text: row[i] ?? '', size: 20 })] }),
+              ],
+            }),
+        ),
+      }),
+  )
+
+  const children: (Paragraph | Table)[] = [
+    new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      rows: [headerRow, ...dataRows],
+    }),
+  ]
+  if (table.notes.trim()) {
+    children.push(
+      new Paragraph({
+        children: [
+          new TextRun({ text: `${question.notesLabel ?? 'Toelichting'}: `, bold: true, size: 20 }),
+          new TextRun({ text: table.notes.trim(), size: 20 }),
+        ],
+        spacing: { before: 80, after: 160 },
+      }),
+    )
+  } else {
+    children.push(new Paragraph({ children: [], spacing: { after: 160 } }))
+  }
+  return children
 }
 
 function riskColor(level: RiskLevelValue): string {
@@ -160,17 +221,19 @@ export async function exportToWord(
             children: [new TextRun({ text: questionLabel, bold: true, size: 22, color: '333333' })],
             spacing: { before: 120, after: 40 },
           }),
-          new Paragraph({
-            children: [
-              new TextRun({
-                text: hasAnswer ? formatAnswer(answer) : '(niet ingevuld)',
-                size: 22,
-                color: hasAnswer ? '000000' : '999999',
-                italics: !hasAnswer,
-              }),
-            ],
-            spacing: { after: 160 },
-          }),
+          ...((hasAnswer && tableAnswerChildren(question, answer)) || [
+            new Paragraph({
+              children: [
+                new TextRun({
+                  text: hasAnswer ? formatAnswer(answer) : '(niet ingevuld)',
+                  size: 22,
+                  color: hasAnswer ? '000000' : '999999',
+                  italics: !hasAnswer,
+                }),
+              ],
+              spacing: { after: 160 },
+            }),
+          ]),
         )
       }
     }

@@ -123,6 +123,7 @@ import { exportToPdf } from '../services/pdfExport'
 import { exportToWord } from '../services/wordExport'
 import { exportToJson, importFromJson } from '../services/dataExport'
 import type { FormConfig, Question } from '../models/Assessment'
+import { parseTableAnswer, tableAnswerToPlainText } from '../utils/tableAnswer'
 
 const props = defineProps<{
   formConfig: FormConfig
@@ -204,6 +205,8 @@ function formattedAnswer(id: string): string {
   const a = store.getAnswer(id)
   if (!a) return '(niet ingevuld)'
   if (Array.isArray(a)) return a.length > 0 ? a.join(', ') : '(niet ingevuld)'
+  const table = parseTableAnswer(a)
+  if (table) return tableAnswerToPlainText(table) || '(niet ingevuld)'
   const clean = stripHtml(a).replace('\n---\n', ' — ')
   return clean.trim() || '(niet ingevuld)'
 }

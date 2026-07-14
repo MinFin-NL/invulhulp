@@ -1,5 +1,6 @@
-import type { AnswerSource, AnswerSourceMeta, Question } from '../models/Assessment'
+import type { AnswerSource, AnswerSourceMeta, Question, TableColumn } from '../models/Assessment'
 import { answerPlainText, filterSupportingSources, topRetrievedSources } from '../utils/sourceMatching'
+import { parsePipeSuggestion, serializeTableAnswer } from '../utils/tableAnswer'
 
 export interface ImproveResponse {
   suggestion: string
@@ -29,6 +30,7 @@ export interface ExtractRequest {
   questionType?: string
   fieldFormat?: string
   formContext?: string
+  columns?: TableColumn[]
 }
 
 function postJson(url: string, body: unknown): Promise<Response> {
@@ -233,6 +235,7 @@ export interface RagExtractRequest {
   questionType?: string
   fieldFormat?: string
   formContext?: string
+  columns?: TableColumn[]
   docIds?: string[]
   topK?: number
 }
@@ -254,6 +257,7 @@ export async function extractRagStream(
         question_type: req.questionType ?? 'text',
         field_format: req.fieldFormat ?? '',
         form_context: req.formContext ?? '',
+        columns: req.columns ?? [],
         doc_ids: req.docIds ?? [],
         top_k: req.topK ?? 6,
       },
@@ -281,6 +285,7 @@ export async function extractFromDocumentsStream(
       question_type: req.questionType ?? 'text',
       field_format: req.fieldFormat ?? '',
       form_context: req.formContext ?? '',
+      columns: req.columns ?? [],
     },
     onChunk,
     onDone,
@@ -331,6 +336,15 @@ function mapSuggestionToAnswer(question: Question, suggestion: string): string |
     return question.type === 'checkbox' ? [matched] : matched
   }
 
+  if (question.type === 'table') {
+    // The backend already validated + grounded the pipe rows; parse into the
+    // stored JSON shape.
+    const parsed = parsePipeSuggestion(text, question.columns?.length ?? 0)
+    if (!parsed) return null
+    const serialized = serializeTableAnswer(parsed)
+    return serialized || null
+  }
+
   if (question.type === 'text') {
     // Short factual fields: strip labels and enforce the expected shape so a
     // confidently-wrong value (e.g. a name in an email field) is dropped.
@@ -378,7 +392,10 @@ export function buildAnswerSourceMeta(
 ): AnswerSourceMeta | null {
   if (!sources || sources.length === 0) return null
   const supporting = filterSupportingSources(answerPlainText(value), sources)
-  const isChoice = questionType === 'radio' || questionType === 'checkbox'
+  // Table answers were grounded per cell on the server; the client sentence-
+  // overlap heuristic would false-alarm on short cell fragments, so tables get
+  // the same exemption as choice questions.
+  const isChoice = questionType === 'radio' || questionType === 'checkbox' || questionType === 'table'
   if (isChoice) {
     return {
       sources: supporting.length > 0 ? supporting : topRetrievedSources(sources),
@@ -407,6 +424,7 @@ export async function bulkExtractFromDocument(params: BulkExtractParams): Promis
         questionType: question.type,
         fieldFormat: question.format,
         formContext,
+        columns: question.columns,
         docIds,
       },
       () => {},

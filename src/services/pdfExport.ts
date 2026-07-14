@@ -1,5 +1,6 @@
 import type { TDocumentDefinitions, Content } from 'pdfmake/interfaces'
-import type { Answers, RiskLevelValue, FormConfig } from '../models/Assessment'
+import type { Answers, Question, RiskLevelValue, FormConfig } from '../models/Assessment'
+import { parseTableAnswer } from '../utils/tableAnswer'
 
 function stripHtml(html: string): string {
   return html
@@ -19,6 +20,37 @@ function formatAnswer(value: string | string[] | undefined): string {
   if (!value) return '(niet ingevuld)'
   if (Array.isArray(value)) return value.map(stripHtml).join(', ') || '(niet ingevuld)'
   return stripHtml(value) || '(niet ingevuld)'
+}
+
+/** Real pdfmake table (header + rows) for a table question, or null when the
+ *  answer is empty/not a table. */
+function tableAnswerContent(question: Question, value: string | string[] | undefined): Content[] | null {
+  if (question.type !== 'table' || typeof value !== 'string') return null
+  const table = parseTableAnswer(value)
+  if (!table || table.rows.length === 0) return null
+  const columns = question.columns ?? []
+  const header = columns.map((c) => ({ text: c.label, bold: true, fillColor: '#f0f4f8' }))
+  const rows = table.rows.map((row) => columns.map((_, i) => ({ text: row[i] ?? '' })))
+  const content: Content[] = [
+    {
+      table: {
+        headerRows: 1,
+        widths: columns.map(() => '*'),
+        body: [header, ...rows],
+      },
+      layout: 'lightHorizontalLines',
+      style: 'answerText',
+      margin: [0, 0, 0, table.notes ? 4 : 8] as [number, number, number, number],
+    },
+  ]
+  if (table.notes.trim()) {
+    content.push({
+      text: `${question.notesLabel ?? 'Toelichting'}: ${table.notes.trim()}`,
+      style: 'answerText',
+      margin: [0, 0, 0, 8] as [number, number, number, number],
+    })
+  }
+  return content
 }
 
 export function exportToPdf(
@@ -145,11 +177,13 @@ export function exportToPdf(
                   style: 'questionText',
                   margin: [0, 0, 0, 2] as [number, number, number, number],
                 },
-                {
-                  text: hasAnswer ? formatAnswer(answer) : '(niet ingevuld)',
-                  style: hasAnswer ? 'answerText' : 'emptyAnswer',
-                  margin: [0, 0, 0, 8] as [number, number, number, number],
-                },
+                ...((hasAnswer && tableAnswerContent(question, answer)) || [
+                  {
+                    text: hasAnswer ? formatAnswer(answer) : '(niet ingevuld)',
+                    style: hasAnswer ? 'answerText' : 'emptyAnswer',
+                    margin: [0, 0, 0, 8] as [number, number, number, number],
+                  },
+                ]),
               ],
             },
           ],

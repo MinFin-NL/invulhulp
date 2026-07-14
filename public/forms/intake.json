@@ -209,8 +209,13 @@
             {
               "id": "intake_d.risicos",
               "text": "Zijn er risico's of andere factoren die belangrijk zijn voor het succesvol afronden van dit initiatief?",
-              "type": "text",
-              "importance": "optional"
+              "type": "table",
+              "importance": "optional",
+              "columns": [
+                { "id": "risico", "label": "Risico of factor" },
+                { "id": "impact", "label": "Impact" },
+                { "id": "beheersmaatregel", "label": "Beheersmaatregel" }
+              ]
             }
           ]
         }

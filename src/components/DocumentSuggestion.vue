@@ -44,6 +44,27 @@
             </template>
           </div>
 
+          <!-- Table suggestion: read-only preview of the validated rows -->
+          <div v-else-if="isTableType && tableSuggestion" class="doc-table-preview">
+            <table class="rvo-table doc-table-preview__table">
+              <thead class="rvo-table-head">
+                <tr class="rvo-table-row">
+                  <th v-for="col in questionColumns" :key="col.id" class="rvo-table-header" scope="col">
+                    {{ col.label }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="rvo-table-body">
+                <tr v-for="(row, i) in tableSuggestion.rows" :key="i" class="rvo-table-row">
+                  <td v-for="(cell, j) in row" :key="j" class="rvo-table-cell">{{ cell }}</td>
+                </tr>
+              </tbody>
+            </table>
+            <p v-if="tableSuggestion.notes" class="doc-table-preview__notes">
+              <strong>Toelichting:</strong> {{ tableSuggestion.notes }}
+            </p>
+          </div>
+
           <div v-else-if="noChanges" class="doc-diff doc-diff__empty">
             Geen wijzigingen — het huidige antwoord dekt de documentinhoud al.
           </div>
@@ -114,8 +135,9 @@ import type { Change } from 'diff'
 import { storeToRefs } from 'pinia'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { extractRagStream } from '../services/llmService'
-import type { AnswerSource, AnswerSourceMeta } from '../models/Assessment'
+import type { AnswerSource, AnswerSourceMeta, TableColumn } from '../models/Assessment'
 import { answerPlainText, filterSupportingSources, topRetrievedSources } from '../utils/sourceMatching'
+import { parsePipeSuggestion, serializeTableAnswer } from '../utils/tableAnswer'
 import SourcePanel from './SourcePanel.vue'
 import DocumentViewerModal from './DocumentViewerModal.vue'
 
@@ -124,6 +146,7 @@ const props = defineProps<{
   questionType: string
   currentValue: string
   questionOptions?: string[]
+  questionColumns?: TableColumn[]
 }>()
 
 const emit = defineEmits<{
@@ -139,7 +162,13 @@ const readyDocIds = computed(() =>
 
 const isTextType = computed(() => props.questionType === 'text')
 const isChoiceType = computed(() => props.questionType === 'radio' || props.questionType === 'checkbox')
-const canSuggest = computed(() => isTextType.value || (isChoiceType.value && (props.questionOptions?.length ?? 0) > 0))
+const isTableType = computed(() => props.questionType === 'table')
+const canSuggest = computed(
+  () =>
+    isTextType.value ||
+    (isChoiceType.value && (props.questionOptions?.length ?? 0) > 0) ||
+    (isTableType.value && (props.questionColumns?.length ?? 0) > 0),
+)
 
 const matchedOption = computed((): string | null => {
   if (!isChoiceType.value || suggestion.value === null) return null
@@ -178,8 +207,16 @@ const displaySources = computed((): AnswerSource[] => {
   return isChoiceType.value ? topRetrievedSources(sources.value) : []
 })
 
+// Parsed preview of a validated table suggestion (pipe rows from the server).
+const tableSuggestion = computed(() => {
+  if (!isTableType.value || suggestion.value === null || isInsufficient.value) return null
+  return parsePipeSuggestion(suggestion.value, props.questionColumns?.length ?? 0)
+})
+
 const suggestionGrounded = computed(() => {
-  if (suggestionWarningDismissed.value || isChoiceType.value) return true
+  // Table cells are grounded server-side; the client heuristic false-alarms
+  // on short cell fragments.
+  if (suggestionWarningDismissed.value || isChoiceType.value || isTableType.value) return true
   if (suggestion.value === null || sources.value.length === 0) return true
   return supportingSources.value.length > 0
 })
@@ -227,6 +264,7 @@ async function requestExtraction() {
       targetQuestion: props.targetQuestionText,
       options: props.questionOptions,
       questionType: props.questionType,
+      columns: props.questionColumns,
       docIds: readyDocIds.value,
     },
     (chunk) => {
@@ -249,7 +287,11 @@ async function requestExtraction() {
 
 function acceptSuggestion() {
   if (suggestion.value === null) return
-  const value = isChoiceType.value && matchedOption.value ? matchedOption.value : suggestion.value
+  let value = isChoiceType.value && matchedOption.value ? matchedOption.value : suggestion.value
+  // Tables are stored as serialized JSON, not the pipe wire format.
+  if (isTableType.value && tableSuggestion.value) {
+    value = serializeTableAnswer(tableSuggestion.value)
+  }
   const meta: AnswerSourceMeta | undefined = displaySources.value.length > 0 || !suggestionGrounded.value
     ? { sources: displaySources.value, grounded: suggestionGrounded.value, createdAt: Date.now() }
     : undefined
@@ -373,6 +415,32 @@ function rejectSuggestion() {
 
 .doc-choice {
   margin-block-end: var(--rvo-space-xs);
+}
+
+.doc-table-preview {
+  background: var(--rvo-color-wit);
+  border-radius: var(--rvo-border-radius-sm);
+  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  margin-block-end: var(--rvo-space-xs);
+  overflow-x: auto;
+}
+
+.doc-table-preview__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--rvo-font-size-sm);
+}
+
+.doc-table-preview__table .rvo-table-header,
+.doc-table-preview__table .rvo-table-cell {
+  text-align: start;
+  padding: var(--rvo-space-3xs, 4px) var(--rvo-space-2xs);
+  border-block-end: 1px solid var(--invulhulp-color-border);
+}
+
+.doc-table-preview__notes {
+  margin: var(--rvo-space-2xs) 0 0;
+  font-size: var(--rvo-font-size-sm);
 }
 
 .doc-choice__label {

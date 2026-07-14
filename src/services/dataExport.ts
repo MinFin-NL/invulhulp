@@ -1,5 +1,6 @@
-import type { Answers, RiskLevelValue, FormConfig } from '../models/Assessment'
+import type { Answers, Question, RiskLevelValue, FormConfig } from '../models/Assessment'
 import type { FormId } from '../stores/assessmentStore'
+import { parseTableAnswer } from '../utils/tableAnswer'
 
 export interface ExportData {
   version: '1'
@@ -91,9 +92,24 @@ function stripHtml(html: string): string {
     .trim()
 }
 
-function formatAnswerMd(value: string | string[] | undefined): string {
+function formatAnswerMd(value: string | string[] | undefined, question?: Question): string {
   if (!value) return '*(niet ingevuld)*'
   if (Array.isArray(value)) return value.length > 0 ? value.map(stripHtml).join(', ') : '*(niet ingevuld)*'
+  if (question?.type === 'table') {
+    const table = parseTableAnswer(value)
+    if (table && table.rows.length > 0) {
+      const columns = question.columns ?? []
+      const esc = (s: string) => s.replace(/\|/g, '\\|')
+      const md = [
+        `| ${columns.map((c) => esc(c.label)).join(' | ')} |`,
+        `| ${columns.map(() => '---').join(' | ')} |`,
+        ...table.rows.map((row) => `| ${columns.map((_, i) => esc(row[i] ?? '')).join(' | ')} |`),
+      ]
+      if (table.notes.trim()) md.push('', `*${question.notesLabel ?? 'Toelichting'}:* ${table.notes.trim()}`)
+      return md.join('\n')
+    }
+    return '*(niet ingevuld)*'
+  }
   const clean = stripHtml(value).replace(/\n---\n/g, '\n\n---\n\n')
   return clean || '*(niet ingevuld)*'
 }
@@ -131,7 +147,7 @@ export function exportToMarkdown(
       for (const question of subsection.questions) {
         lines.push(`**${question.id}** — ${question.text}`)
         lines.push('')
-        lines.push(formatAnswerMd(answers[question.id]))
+        lines.push(formatAnswerMd(answers[question.id], question))
         lines.push('')
       }
     }

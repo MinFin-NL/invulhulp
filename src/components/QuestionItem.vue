@@ -88,6 +88,19 @@
       </div>
     </fieldset>
 
+    <!-- Table question: fixed columns from the form JSON, user edits rows -->
+    <fieldset v-else-if="question.type === 'table'" class="rvo-form-fieldset invulhulp-question__fieldset">
+      <legend class="rvo-form-fieldset__legend">
+        <span class="invulhulp-question__label-text">{{ question.text }}</span>
+        <span v-if="question.importance === 'mandatory'" class="invulhulp-question__required" aria-hidden="true">*</span>
+        <span v-else class="invulhulp-question__optional">(aanvullend)</span>
+      </legend>
+      <p v-if="question.guidance" class="rvo-text rvo-text--sm invulhulp-question__guidance">
+        {{ question.guidance }}
+      </p>
+      <TableQuestion :question="question" v-model="tableModel" />
+    </fieldset>
+
     <!-- AI Mode looked at this question but couldn't find an answer -->
     <p v-if="showAiUnanswered" class="invulhulp-question__ai-empty" role="note">
       <span class="invulhulp-question__ai-empty-icon" aria-hidden="true">
@@ -126,6 +139,7 @@
       :target-question-text="question.text"
       :question-type="question.type"
       :question-options="question.options"
+      :question-columns="question.columns"
       :current-value="currentValueAsString"
       @apply-suggestion="onApplySuggestion"
     />
@@ -136,6 +150,7 @@
 import { computed, ref } from 'vue'
 import type { AnswerSource, AnswerSourceMeta, Question } from '../models/Assessment'
 import TiptapEditor from './TiptapEditor.vue'
+import TableQuestion from './TableQuestion.vue'
 import CrossFormSuggestion from './CrossFormSuggestion.vue'
 import DocumentSuggestion from './DocumentSuggestion.vue'
 import SourcePanel from './SourcePanel.vue'
@@ -171,11 +186,14 @@ function clearUnanswered() {
   if (formId) clearAiUnanswered(formId, props.question.id)
 }
 
-const matchingMappings = computed(() =>
-  mappings.value.filter(
+// Table questions can't be filled by the synthesize flow (it produces free
+// text, not grid rows), so cross-form suggestions are suppressed for them.
+const matchingMappings = computed(() => {
+  if (props.question.type === 'table') return []
+  return mappings.value.filter(
     (m) => m.targetFormId === store.activeFormId && m.targetQuestionId === props.question.id,
-  ),
-)
+  )
+})
 
 const sourceMeta = computed(() => store.answerSourcesFor(props.question.id))
 const persistedAnswerText = computed(() => answerPlainText(props.modelValue))
@@ -186,6 +204,18 @@ function showSourceDocument(source: AnswerSource) {
 }
 
 const textModel = computed({
+  get() {
+    return typeof props.modelValue === 'string' ? props.modelValue : ''
+  },
+  set(val: string) {
+    emit('update:modelValue', val)
+    store.dismissSourceWarning(props.question.id)
+    clearUnanswered()
+  },
+})
+
+// Same contract as textModel: table answers are one serialized JSON string.
+const tableModel = computed({
   get() {
     return typeof props.modelValue === 'string' ? props.modelValue : ''
   },

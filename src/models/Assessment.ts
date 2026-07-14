@@ -1,8 +1,16 @@
-export type QuestionType = 'text' | 'radio' | 'checkbox'
+export type QuestionType = 'text' | 'radio' | 'checkbox' | 'table'
 export type QuestionImportance = 'mandatory' | 'optional'
 // Hint for AI extraction: tells the model (and client validation) what shape a
 // short text field should have. Untagged text fields are treated as 'longtext'.
 export type QuestionFormat = 'email' | 'phone' | 'date' | 'shorttext' | 'longtext'
+
+// Column definition for a 'table' question. `hint` feeds both the column
+// header tooltip and the AI extraction prompt.
+export interface TableColumn {
+  id: string
+  label: string
+  hint?: string
+}
 
 export interface Question {
   id: string
@@ -13,6 +21,12 @@ export interface Question {
   options?: string[]
   followUp?: string
   format?: QuestionFormat
+  // Table questions only: fixed column schema plus grid bounds and the label
+  // of the free-text notes field rendered under the grid.
+  columns?: TableColumn[]
+  notesLabel?: string
+  minRows?: number
+  maxRows?: number
 }
 
 export interface Subsection {

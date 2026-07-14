@@ -243,8 +243,13 @@
               "id": "aa_e.risicos",
               "text": "Risico's en aandachtspunten",
               "guidance": "Welke risico's of aandachtspunten zijn nu te onderkennen bij uitvoering van het project? Hoe ernstig is het als het risico optreedt? Welke maatregelen zijn voorzien?",
-              "type": "text",
-              "importance": "mandatory"
+              "type": "table",
+              "importance": "mandatory",
+              "columns": [
+                { "id": "risico", "label": "Risico of aandachtspunt" },
+                { "id": "ernst", "label": "Ernst bij optreden" },
+                { "id": "maatregelen", "label": "Voorziene maatregelen" }
+              ]
             },
             {
               "id": "aa_e.impact_gebruikersorg",
