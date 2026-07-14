@@ -4,7 +4,8 @@ Gebruikersbeheer via de Keycloak Admin REST API.
 Beheerders (realm-rol 'beheerder') kunnen vanuit de app gebruikers aanmaken,
 (de)activeren, verwijderen en wachtwoorden resetten. De backend gebruikt
 daarvoor een aparte confidential client met een service account
-(realm-management rollen: manage-users, view-users) en de
+(realm-management rollen: manage-users, view-users, view-realm — die laatste
+is nodig om realm-rollen en hun leden te lezen) en de
 client-credentials grant. Nieuwe gebruikers krijgen een tijdelijk wachtwoord
 en moeten dat bij de eerste login wijzigen — daarna loggen ze in via de
 normale OIDC-flow in auth.py; er verandert niets aan het loginpad.
@@ -95,7 +96,7 @@ async def _kc(client: httpx.AsyncClient, method: str, path: str, **kwargs) -> ht
     if res.status_code == 403:
         raise HTTPException(
             status_code=502,
-            detail="Service account mist realm-management rollen (manage-users/view-users)",
+            detail="Service account mist realm-management rollen (manage-users/view-users/view-realm)",
         )
     return res
 
