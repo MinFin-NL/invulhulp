@@ -155,7 +155,7 @@
               "options": ["Ja", "Nee"]
             },
             {
-              "id": "qs_c.ketenpartners",
+              "id": "qs_c.ketenpartners", "allowAttachments": true,
               "text": "Beschrijf de ketenpartners en afnemers van het proces",
               "guidance": "Welke externe partijen zijn betrokken bij of afhankelijk van dit proces of systeem?",
               "type": "text",
@@ -177,7 +177,7 @@
               "options": ["Ja", "Nee", "Deels"]
             },
             {
-              "id": "qs_c.systemen_beschrijving",
+              "id": "qs_c.systemen_beschrijving", "allowAttachments": true,
               "text": "Beschrijf de gebruikte systemen en applicaties",
               "guidance": "Welke systemen of applicaties worden ingezet voor dit proces?",
               "type": "text",

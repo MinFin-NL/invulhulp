@@ -101,6 +101,10 @@
       <TableQuestion :question="question" v-model="tableModel" />
     </fieldset>
 
+    <!-- Image attachments (opt-in per question via the form JSON); embedded
+         in PDF/Word exports -->
+    <QuestionAttachments v-if="question.allowAttachments" :question-id="question.id" />
+
     <!-- AI Mode looked at this question but couldn't find an answer -->
     <p v-if="showAiUnanswered" class="invulhulp-question__ai-empty" role="note">
       <span class="invulhulp-question__ai-empty-icon" aria-hidden="true">
@@ -151,6 +155,7 @@ import { computed, ref } from 'vue'
 import type { AnswerSource, AnswerSourceMeta, Question } from '../models/Assessment'
 import TiptapEditor from './TiptapEditor.vue'
 import TableQuestion from './TableQuestion.vue'
+import QuestionAttachments from './QuestionAttachments.vue'
 import CrossFormSuggestion from './CrossFormSuggestion.vue'
 import DocumentSuggestion from './DocumentSuggestion.vue'
 import SourcePanel from './SourcePanel.vue'

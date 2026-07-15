@@ -128,7 +128,7 @@
           "description": "Geef alle gegevensverwerkingen weer en geef aan welke categorieën persoonsgegevens per verwerking worden verwerkt.",
           "questions": [
             {
-              "id": "d3.1",
+              "id": "d3.1", "allowAttachments": true,
               "text": "Beschrijf alle gegevensverwerkingen die plaatsvinden (bijv. verzamelen, opslaan, raadplegen, verstrekken, verwijderen).",
               "guidance": "Benoem elke afzonderlijke verwerking en omschrijf wat er met de persoonsgegevens gebeurt. Desgewenst kunt u een stroomschema bijvoegen.",
               "type": "text",
@@ -152,7 +152,7 @@
           "description": "Beschrijf de technische middelen en methoden die worden gebruikt bij de verwerking van persoonsgegevens.",
           "questions": [
             {
-              "id": "d4.1",
+              "id": "d4.1", "allowAttachments": true,
               "text": "Beschrijf op welke wijze en met welke technische middelen de persoonsgegevens worden verwerkt.",
               "type": "text",
               "importance": "mandatory"

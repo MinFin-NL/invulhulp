@@ -1,4 +1,4 @@
-import type { Answers, Question, RiskLevelValue, FormConfig } from '../models/Assessment'
+import type { Answers, Question, QuestionAttachment, RiskLevelValue, FormConfig } from '../models/Assessment'
 import type { FormId } from '../stores/assessmentStore'
 import { parseTableAnswer } from '../utils/tableAnswer'
 
@@ -11,6 +11,9 @@ export interface ExportData {
   riskLevel: RiskLevelValue
   goDecision: boolean | null
   completedSections: string[]
+  // Metadata only — the image bytes stay on the backend. Importing on another
+  // account (or after deletion) shows a placeholder for missing images.
+  attachments?: Record<string, QuestionAttachment[]>
 }
 
 function triggerDownload(content: string, filename: string, mimeType: string): void {
@@ -36,6 +39,7 @@ export function exportToJson(
   goDecision: boolean | null,
   completedSections: string[],
   systemName: string,
+  attachments: Record<string, QuestionAttachment[]> = {},
 ): void {
   const data: ExportData = {
     version: '1',
@@ -46,6 +50,7 @@ export function exportToJson(
     riskLevel,
     goDecision,
     completedSections,
+    attachments,
   }
   const label = formId.toUpperCase()
   const filename = `${label}-${timestamp()}.json`
@@ -120,6 +125,7 @@ export function exportToMarkdown(
   riskLevel: RiskLevelValue,
   goDecision: boolean | null,
   systemName: string,
+  attachments: Record<string, QuestionAttachment[]> = {},
 ): void {
   const hasConditionalPartB = formConfig.features.conditionalPartB
   const today = new Date().toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -149,6 +155,11 @@ export function exportToMarkdown(
         lines.push('')
         lines.push(formatAnswerMd(answers[question.id], question))
         lines.push('')
+        // A .md download can't carry the bytes — reference the attachment.
+        for (const att of attachments[question.id] ?? []) {
+          lines.push(`*Bijlage: ${att.filename}${att.caption.trim() ? ` — ${att.caption.trim()}` : ''}* (afbeelding-id: ${att.id})`)
+          lines.push('')
+        }
       }
     }
   }

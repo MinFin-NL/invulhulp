@@ -1,6 +1,7 @@
 import type { TDocumentDefinitions, Content } from 'pdfmake/interfaces'
-import type { Answers, Question, RiskLevelValue, FormConfig } from '../models/Assessment'
+import type { Answers, Question, QuestionAttachment, RiskLevelValue, FormConfig } from '../models/Assessment'
 import { parseTableAnswer } from '../utils/tableAnswer'
+import { fetchImageDataUrl } from './llmService'
 
 function stripHtml(html: string): string {
   return html
@@ -53,13 +54,52 @@ function tableAnswerContent(question: Question, value: string | string[] | undef
   return content
 }
 
-export function exportToPdf(
+/** Image + caption content for a question's attachments. Bytes are looked up
+ *  in `dataUrls`; attachments whose fetch failed degrade to a placeholder. */
+function attachmentContent(
+  attachments: QuestionAttachment[],
+  dataUrls: Map<string, string>,
+): Content[] {
+  const content: Content[] = []
+  for (const att of attachments) {
+    const dataUrl = dataUrls.get(att.id)
+    if (!dataUrl) {
+      content.push({
+        text: `(afbeelding niet beschikbaar: ${att.filename})`,
+        style: 'emptyAnswer',
+        margin: [0, 2, 0, 8] as [number, number, number, number],
+      })
+      continue
+    }
+    content.push({
+      unbreakable: true,
+      stack: [
+        { image: dataUrl, fit: [430, 280] as [number, number], margin: [0, 4, 0, 2] as [number, number, number, number] },
+        ...(att.caption.trim()
+          ? [{ text: att.caption.trim(), style: 'meta', margin: [0, 0, 0, 8] as [number, number, number, number] }]
+          : []),
+      ],
+    })
+  }
+  return content
+}
+
+export async function exportToPdf(
   answers: Answers,
   formConfig: FormConfig,
   riskLevel: RiskLevelValue,
   goDecision: boolean | null,
   systemName?: string,
-): void {
+  attachments: Record<string, QuestionAttachment[]> = {},
+): Promise<void> {
+  // Pre-fetch all attachment bytes as data URLs (pdfmake embeds base64).
+  const allAttachments = Object.values(attachments).flat()
+  const dataUrls = new Map<string, string>()
+  await Promise.allSettled(
+    allAttachments.map(async (att) => {
+      dataUrls.set(att.id, await fetchImageDataUrl(att.id))
+    }),
+  )
   const hasConditionalPartB = formConfig.features.conditionalPartB
   const riskInfo = riskLevel ? (formConfig.riskLevelInfo?.[riskLevel] ?? null) : null
   const today = new Date().toLocaleDateString('nl-NL', {
@@ -184,6 +224,7 @@ export function exportToPdf(
                     margin: [0, 0, 0, 8] as [number, number, number, number],
                   },
                 ]),
+                ...attachmentContent(attachments[question.id] ?? [], dataUrls),
               ],
             },
           ],
@@ -221,13 +262,13 @@ export function exportToPdf(
   }
 
   // Dynamic import to avoid SSR issues
-  import('pdfmake/build/pdfmake').then((pdfMakeModule) => {
-    import('pdfmake/build/vfs_fonts').then((vfsFontsModule) => {
-      const pdfMake = pdfMakeModule.default
-      const vfs = (vfsFontsModule as { default?: { pdfMake?: { vfs: Record<string, string> } } })
-        .default?.pdfMake?.vfs
-      if (vfs) pdfMake.vfs = vfs
-      pdfMake.createPdf(docDefinition).download(formConfig.meta.filename)
-    })
-  })
+  const [pdfMakeModule, vfsFontsModule] = await Promise.all([
+    import('pdfmake/build/pdfmake'),
+    import('pdfmake/build/vfs_fonts'),
+  ])
+  const pdfMake = pdfMakeModule.default
+  const vfs = (vfsFontsModule as { default?: { pdfMake?: { vfs: Record<string, string> } } })
+    .default?.pdfMake?.vfs
+  if (vfs) pdfMake.vfs = vfs
+  pdfMake.createPdf(docDefinition).download(formConfig.meta.filename)
 }

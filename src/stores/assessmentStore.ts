@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
-import type { Answers, AnswerSourceMeta, RiskLevelValue } from '../models/Assessment'
-import { indexDocument, deleteDocument, listDocuments } from '../services/llmService'
+import type { Answers, AnswerSourceMeta, QuestionAttachment, RiskLevelValue } from '../models/Assessment'
+import { indexDocument, deleteDocument, deleteImage, listDocuments } from '../services/llmService'
 
 export type FormId = string
 export type DossierId = string
@@ -10,6 +10,9 @@ export interface FormState {
   // Per-question source citations for AI-extracted answers (optional: absent
   // in dossiers persisted before this feature existed).
   answerSources?: Record<string, AnswerSourceMeta>
+  // Per-question image attachments (metadata only — bytes live on the backend).
+  // Optional: absent in dossiers persisted before this feature existed.
+  attachments?: Record<string, QuestionAttachment[]>
   currentView: string
   completedSections: string[]
   riskLevel: RiskLevelValue
@@ -56,6 +59,7 @@ function initialFormState(): FormState {
   return {
     answers: {},
     answerSources: {},
+    attachments: {},
     currentView: 'home',
     completedSections: [],
     riskLevel: null,
@@ -130,6 +134,9 @@ export const useAssessmentStore = defineStore('assessment', {
     },
     answerSourcesFor(): (questionId: string) => AnswerSourceMeta | undefined {
       return (questionId: string) => this.activeForm.answerSources?.[questionId]
+    },
+    attachmentsFor(): (questionId: string) => QuestionAttachment[] {
+      return (questionId: string) => this.activeForm.attachments?.[questionId] ?? []
     },
     isSectionCompleted(): (sectionId: string) => boolean {
       return (sectionId: string) => this.activeForm.completedSections.includes(sectionId)
@@ -220,6 +227,12 @@ export const useAssessmentStore = defineStore('assessment', {
       // Best-effort cleanup of indexed documents on the backend
       for (const doc of dossier.documents) {
         deleteDocument(doc.id).catch(() => {})
+      }
+      // Best-effort cleanup of image attachments across all the dossier's forms
+      for (const form of Object.values(dossier.forms)) {
+        for (const list of Object.values(form.attachments ?? {})) {
+          for (const att of list) deleteImage(att.id).catch(() => {})
+        }
       }
       delete this.dossiers[id]
       this.dossierOrder = this.dossierOrder.filter((x) => x !== id)
@@ -349,6 +362,29 @@ export const useAssessmentStore = defineStore('assessment', {
     dismissSourceWarning(questionId: string) {
       const meta = this.currentFormMutable()?.answerSources?.[questionId]
       if (meta) meta.grounded = true
+    },
+
+    addAttachment(questionId: string, att: QuestionAttachment) {
+      const f = this.currentFormMutable()
+      if (!f) return
+      if (!f.attachments) f.attachments = {}
+      if (!f.attachments[questionId]) f.attachments[questionId] = []
+      f.attachments[questionId].push(att)
+    },
+
+    removeAttachment(questionId: string, imageId: string) {
+      const list = this.currentFormMutable()?.attachments?.[questionId]
+      if (!list) return
+      const idx = list.findIndex((a) => a.id === imageId)
+      if (idx === -1) return
+      list.splice(idx, 1)
+      // best-effort server cleanup; UI removal already happened
+      deleteImage(imageId).catch(() => {})
+    },
+
+    updateAttachmentCaption(questionId: string, imageId: string, caption: string) {
+      const att = this.currentFormMutable()?.attachments?.[questionId]?.find((a) => a.id === imageId)
+      if (att) att.caption = caption
     },
 
     async removeDocument(id: string) {

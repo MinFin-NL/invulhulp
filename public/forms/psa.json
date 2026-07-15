@@ -141,7 +141,7 @@
               "importance": "mandatory"
             },
             {
-              "id": "psa_c.processen",
+              "id": "psa_c.processen", "allowAttachments": true,
               "text": "Processen",
               "guidance": "Welke bedrijfsprocessen worden geraakt door de verandering?",
               "type": "text",
@@ -176,7 +176,7 @@
           "description": "Beschrijf de informatieobjecten en gegevens die relevant zijn voor het project.",
           "questions": [
             {
-              "id": "psa_d.gegevensmodel",
+              "id": "psa_d.gegevensmodel", "allowAttachments": true,
               "text": "Gegevensmodel",
               "guidance": "Beschrijf de relevante informatieobjecten en gegevens. Welke (persoons)gegevens worden verwerkt?",
               "type": "text",
@@ -196,7 +196,7 @@
           "description": "Beschrijf de applicatiecontext en functionaliteit die wordt gerealiseerd.",
           "questions": [
             {
-              "id": "psa_d.functioneel",
+              "id": "psa_d.functioneel", "allowAttachments": true,
               "text": "Functionele beschrijving",
               "guidance": "Beschrijf de relevante applicatiecontext, welke functionaliteit wordt gerealiseerd en welke data wordt uitgewisseld.",
               "type": "text",
@@ -237,7 +237,7 @@
           "description": "Beschrijf de technologielaag die de applicaties ondersteunt.",
           "questions": [
             {
-              "id": "psa_d.technologie",
+              "id": "psa_d.technologie", "allowAttachments": true,
               "text": "Technologielaag",
               "guidance": "Beschrijf de technologielaag voor dit project, inclusief infrastructuur, netwerk en platforms.",
               "type": "text",

@@ -1,5 +1,6 @@
 import {
   Document,
+  ImageRun,
   Packer,
   Paragraph,
   TextRun,
@@ -15,8 +16,9 @@ import {
   BorderStyle,
 } from 'docx'
 import { saveAs } from 'file-saver'
-import type { Answers, Question, RiskLevelValue, FormConfig } from '../models/Assessment'
+import type { Answers, Question, QuestionAttachment, RiskLevelValue, FormConfig } from '../models/Assessment'
 import { parseTableAnswer } from '../utils/tableAnswer'
+import { fetchImageArrayBuffer } from './llmService'
 
 function stripHtml(html: string): string {
   return html
@@ -98,6 +100,74 @@ function tableAnswerChildren(
   return children
 }
 
+// Fit within the printable page width (A4 minus margins), in px.
+const IMAGE_MAX_WIDTH = 560
+
+async function imageDimensions(att: QuestionAttachment, data: ArrayBuffer): Promise<{ width: number; height: number }> {
+  let { width, height } = att
+  if (!width || !height) {
+    // Metadata predates dimension capture — decode the bytes instead.
+    try {
+      const bmp = await createImageBitmap(new Blob([data], { type: att.mimeType }))
+      width = bmp.width
+      height = bmp.height
+      bmp.close()
+    } catch {
+      width = IMAGE_MAX_WIDTH
+      height = Math.round(IMAGE_MAX_WIDTH * 0.6)
+    }
+  }
+  const scale = Math.min(1, IMAGE_MAX_WIDTH / width)
+  return { width: Math.round(width * scale), height: Math.round(height * scale) }
+}
+
+/** Paragraphs for a question's attachments: the image (scaled to fit the
+ *  page) plus its caption. Unfetchable images degrade to a placeholder. */
+async function attachmentParagraphs(attachments: QuestionAttachment[]): Promise<Paragraph[]> {
+  const paragraphs: Paragraph[] = []
+  for (const att of attachments) {
+    try {
+      const data = await fetchImageArrayBuffer(att.id)
+      const { width, height } = await imageDimensions(att, data)
+      paragraphs.push(
+        new Paragraph({
+          children: [
+            new ImageRun({
+              type: att.mimeType === 'image/png' ? 'png' : 'jpg',
+              data,
+              transformation: { width, height },
+            }),
+          ],
+          spacing: { before: 80, after: att.caption.trim() ? 40 : 160 },
+        }),
+      )
+      if (att.caption.trim()) {
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: att.caption.trim(), size: 18, color: '666666', italics: true })],
+            spacing: { after: 160 },
+          }),
+        )
+      }
+    } catch {
+      paragraphs.push(
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: `(afbeelding niet beschikbaar: ${att.filename})`,
+              size: 20,
+              color: '999999',
+              italics: true,
+            }),
+          ],
+          spacing: { after: 160 },
+        }),
+      )
+    }
+  }
+  return paragraphs
+}
+
 function riskColor(level: RiskLevelValue): string {
   switch (level) {
     case 'onaanvaardbaar': return 'C0392B'
@@ -113,6 +183,7 @@ export async function exportToWord(
   riskLevel: RiskLevelValue,
   goDecision: boolean | null,
   systemName?: string,
+  attachments: Record<string, QuestionAttachment[]> = {},
 ): Promise<void> {
   const hasConditionalPartB = formConfig.features.conditionalPartB
   const riskInfo = riskLevel ? (formConfig.riskLevelInfo?.[riskLevel] ?? null) : null
@@ -234,6 +305,7 @@ export async function exportToWord(
               spacing: { after: 160 },
             }),
           ]),
+          ...(await attachmentParagraphs(attachments[question.id] ?? [])),
         )
       }
     }

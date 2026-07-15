@@ -240,7 +240,7 @@
               "options": ["Ja", "Nee"]
             },
             {
-              "id": "ps_d.algoritme_beschrijving",
+              "id": "ps_d.algoritme_beschrijving", "allowAttachments": true,
               "text": "Beschrijf het algoritme en de rol ervan in de verwerking",
               "guidance": "Speelt het algoritme een belangrijke rol? Essentieel is als de uitkomsten noodzakelijk zijn voor het goed werken van het proces.",
               "type": "text",

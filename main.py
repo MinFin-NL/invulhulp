@@ -22,9 +22,9 @@ from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -37,6 +37,7 @@ if "--dev" in sys.argv:
 import admin_users
 import auth
 import docstore
+import imagestore
 import llm
 import rag
 
@@ -980,7 +981,74 @@ async def remove_session(session_id: str, request: Request) -> dict:
     await rag.delete_session(session_id)
     user_sub = auth.current_user(request).get("sub") or "anonymous"
     await asyncio.to_thread(docstore.delete_session, user_sub, session_id)
+    await asyncio.to_thread(imagestore.delete_session_images, user_sub, session_id)
     return {"deleted": session_id}
+
+
+# ---------------------------------------------------------------------------
+# Image attachments (per-question uploads; bytes live server-side, the
+# frontend keeps only metadata in localStorage)
+# ---------------------------------------------------------------------------
+
+IMAGE_MAX_BYTES = 5 * 1024 * 1024
+# pdfmake can only embed PNG/JPEG, so uploads are restricted to those.
+_IMAGE_MAGIC = {"image/png": b"\x89PNG", "image/jpeg": b"\xff\xd8\xff"}
+
+
+@app.post("/api/images")
+async def upload_image(
+    request: Request,
+    file: UploadFile = File(...),
+    session_id: str = Form(...),
+) -> dict:
+    mime = (file.content_type or "").lower()
+    if mime not in _IMAGE_MAGIC:
+        raise HTTPException(status_code=400, detail="Alleen PNG- of JPEG-afbeeldingen zijn toegestaan.")
+    data = await file.read(IMAGE_MAX_BYTES + 1)
+    if len(data) > IMAGE_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="Afbeelding is te groot (maximaal 5 MB).")
+    # Don't trust the declared content-type — check the file signature.
+    if not data.startswith(_IMAGE_MAGIC[mime]):
+        raise HTTPException(status_code=400, detail="Bestand is geen geldige PNG- of JPEG-afbeelding.")
+    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    meta = await asyncio.to_thread(
+        imagestore.save_image,
+        user_sub=user_sub,
+        session_id=session_id,
+        filename=file.filename or "afbeelding",
+        mime=mime,
+        data=data,
+    )
+    return {
+        "image_id": meta["image_id"],
+        "filename": meta["filename"],
+        "mime": meta["mime"],
+        "size": meta["size"],
+    }
+
+
+@app.get("/api/images/{image_id}")
+async def get_image(image_id: str, request: Request) -> Response:
+    # Lookup is scoped to the requesting user's directory, so ownership is
+    # enforced by the path itself.
+    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    result = await asyncio.to_thread(imagestore.load_image, user_sub, image_id)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Afbeelding niet gevonden.")
+    data, meta = result
+    return Response(
+        content=data,
+        media_type=meta["mime"],
+        # Ids are unique per upload, so the bytes never change.
+        headers={"Cache-Control": "private, max-age=31536000, immutable"},
+    )
+
+
+@app.delete("/api/images/{image_id}")
+async def remove_image(image_id: str, request: Request) -> dict:
+    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    await asyncio.to_thread(imagestore.delete_image, user_sub, image_id)
+    return {"deleted": image_id}
 
 
 def _rag_user_message(

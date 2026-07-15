@@ -148,7 +148,7 @@
               "importance": "mandatory"
             },
             {
-              "id": "ppm_b.fasering",
+              "id": "ppm_b.fasering", "allowAttachments": true,
               "text": "Doorlooptijd en fasering (indicatief)",
               "guidance": "Geef een indicatieve planning met de belangrijkste fasen en mijlpalen.",
               "type": "text",
@@ -223,7 +223,7 @@
           "description": "Beschrijf de projectmanagementstructuur en de betrokken stakeholders.",
           "questions": [
             {
-              "id": "ppm_d.projectmanagement",
+              "id": "ppm_d.projectmanagement", "allowAttachments": true,
               "text": "Projectmanagementteamstructuur",
               "guidance": "Beschrijf de projectorganisatie: stuurgroep, projectmanager, projectteam en hun rollen.",
               "type": "text",

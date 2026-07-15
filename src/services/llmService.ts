@@ -221,6 +221,53 @@ export async function deleteDocument(docId: string): Promise<void> {
   await fetch(`/api/documents/${encodeURIComponent(docId)}`, { method: 'DELETE' })
 }
 
+export interface UploadedImage {
+  imageId: string
+  filename: string
+  mime: string
+  size: number
+}
+
+/** Upload a question-attachment image; the backend stores the bytes and
+ *  returns the id the frontend keeps in its metadata. */
+export async function uploadImage(file: File, sessionId: string): Promise<UploadedImage> {
+  const body = new FormData()
+  body.append('file', file)
+  body.append('session_id', sessionId)
+  // No Content-Type header — the browser sets the multipart boundary itself.
+  const res = await fetch('/api/images', { method: 'POST', body })
+  if (!res.ok) throw new Error(await readErrorDetail(res))
+  const data = (await res.json()) as { image_id: string; filename: string; mime: string; size: number }
+  return { imageId: data.image_id, filename: data.filename, mime: data.mime, size: data.size }
+}
+
+/** Same-origin URL for an attachment image; session-cookie auth applies. */
+export function imageUrl(imageId: string): string {
+  return `/api/images/${encodeURIComponent(imageId)}`
+}
+
+export async function fetchImageArrayBuffer(imageId: string): Promise<ArrayBuffer> {
+  const res = await fetch(imageUrl(imageId))
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.arrayBuffer()
+}
+
+export async function fetchImageDataUrl(imageId: string): Promise<string> {
+  const res = await fetch(imageUrl(imageId))
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  const blob = await res.blob()
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result as string)
+    reader.onerror = () => reject(new Error('Afbeelding kon niet worden gelezen'))
+    reader.readAsDataURL(blob)
+  })
+}
+
+export async function deleteImage(imageId: string): Promise<void> {
+  await fetch(imageUrl(imageId), { method: 'DELETE' })
+}
+
 export async function verifyDocuments(sessionId: string, docIds: string[]): Promise<{ found: string[]; missing: string[] }> {
   const res = await postJson('/api/documents/verify', { session_id: sessionId, doc_ids: docIds })
   if (!res.ok) return { found: docIds, missing: [] } // fail open — don't block AI mode on verify errors

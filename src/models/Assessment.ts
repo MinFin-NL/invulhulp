@@ -21,6 +21,10 @@ export interface Question {
   options?: string[]
   followUp?: string
   format?: QuestionFormat
+  // Opt-in: show the image-attachment control under this question. Reserved
+  // for questions where a picture genuinely helps (architectuur, datamodel,
+  // processchema) so the other questions stay uncluttered.
+  allowAttachments?: boolean
   // Table questions only: fixed column schema plus grid bounds and the label
   // of the free-text notes field rendered under the grid.
   columns?: TableColumn[]
@@ -63,6 +67,22 @@ export interface AnswerSourceMeta {
   // field shows a hallucination warning until the user reviews/edits it.
   grounded: boolean
   createdAt: number
+}
+
+// An image attached to a question. Only this metadata is persisted client-side
+// (localStorage); the bytes live on the backend under the `id`.
+export interface QuestionAttachment {
+  id: string // server image_id
+  filename: string
+  caption: string
+  mimeType: string
+  // Natural pixel dimensions, measured client-side at upload; used to size
+  // the image in Word exports.
+  width?: number
+  height?: number
+  uploadedAt: number
+  // v2: set when the image was extracted from an uploaded source document.
+  sourceDocId?: string
 }
 
 export type RiskLevelValue = 'onaanvaardbaar' | 'hoog' | 'beperkt' | 'minimaal' | null

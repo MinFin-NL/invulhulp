@@ -218,6 +218,7 @@ function exportPdf() {
     store.riskLevel,
     store.goDecision,
     systemName.value || undefined,
+    store.activeForm.attachments ?? {},
   )
 }
 
@@ -228,6 +229,7 @@ function exportWord() {
     store.riskLevel,
     store.goDecision,
     systemName.value || undefined,
+    store.activeForm.attachments ?? {},
   )
 }
 
@@ -239,6 +241,7 @@ function doExportJson() {
     store.goDecision,
     store.completedSections,
     systemName.value,
+    store.activeForm.attachments ?? {},
   )
 }
 
@@ -259,6 +262,7 @@ async function handleImport(event: Event) {
     formState.riskLevel = data.riskLevel
     formState.goDecision = data.goDecision
     formState.completedSections = data.completedSections
+    formState.attachments = data.attachments ?? {}
     systemName.value = data.systemName || ''
     importSuccess.value = true
     input.value = ''

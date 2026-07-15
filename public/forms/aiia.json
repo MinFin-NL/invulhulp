@@ -156,7 +156,7 @@
           "description": "Beschrijf de technische oplossing en de overwegingen daarbij.",
           "questions": [
             {
-              "id": "1.2.1",
+              "id": "1.2.1", "allowAttachments": true,
               "text": "Geef een beschrijving van het AI-systeem (techniek, data, type algoritme).",
               "guidance": "Beschrijf welk type AI-systeem wordt gebruikt (machine learning, regelgebaseerd, generatief AI, etc.), welke data als input dient en welk type output het systeem produceert.",
               "type": "text",
@@ -497,7 +497,7 @@
           "description": "Beschrijf de technische opzet en infrastructuur van het systeem.",
           "questions": [
             {
-              "id": "4.4.1",
+              "id": "4.4.1", "allowAttachments": true,
               "text": "Hoe is het systeem technisch geïmplementeerd?",
               "type": "text",
               "importance": "mandatory"
@@ -511,7 +511,7 @@
               "followUp": "Beschrijf de aanpassingen of afwijkingen."
             },
             {
-              "id": "4.4.3",
+              "id": "4.4.3", "allowAttachments": true,
               "text": "Wat is de systeemarchitectuur?",
               "type": "text",
               "importance": "mandatory"
@@ -538,7 +538,7 @@
               "importance": "mandatory"
             },
             {
-              "id": "4.4.7",
+              "id": "4.4.7", "allowAttachments": true,
               "text": "Hoe kan het systeem samenwerken met andere hard- en software?",
               "type": "text",
               "importance": "optional"
@@ -668,7 +668,7 @@
               "followUp": "Beschrijf de modelaannames en hoe de data hieraan voldoet."
             },
             {
-              "id": "5.1.7",
+              "id": "5.1.7", "allowAttachments": true,
               "text": "Hoe wordt inputdata verzameld en gecombineerd?",
               "type": "text",
               "importance": "mandatory"
