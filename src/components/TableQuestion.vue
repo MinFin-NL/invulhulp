@@ -35,9 +35,10 @@
                 type="button"
                 class="rvo-button rvo-button--tertiary rvo-button--sm invulhulp-table-question__remove-btn"
                 :aria-label="`Rij ${rowIndex + 1} verwijderen`"
+                title="Rij verwijderen"
                 @click="removeRow(rowIndex)"
               >
-                Verwijderen
+                ✕
               </button>
             </td>
           </tr>
@@ -173,7 +174,13 @@ function removeRow(rowIndex: number) {
 
 .invulhulp-table-question__table {
   width: 100%;
-  border-collapse: collapse;
+  /* Fixed layout: columns share the card width and shrink to fit, so the
+     table never overflows and the delete button is always in view. */
+  table-layout: fixed;
+  /* `collapse` breaks position:sticky on cells in Chrome; `separate` with
+     zero spacing renders identically because borders are per-cell. */
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .invulhulp-table-question__table .rvo-table-header {
@@ -192,17 +199,31 @@ function removeRow(rowIndex: number) {
 
 .invulhulp-table-question__cell-input {
   width: 100%;
-  min-width: 8rem;
+  min-width: 0;
   font-size: var(--rvo-font-size-sm);
   padding: var(--rvo-space-3xs, 4px) var(--rvo-space-2xs);
   border: 1px solid var(--invulhulp-color-border);
   border-radius: var(--rvo-border-radius-sm, 4px);
 }
 
+/* Pinned to the right edge of the scroll container so the delete action
+   stays visible even when the table itself scrolls horizontally. */
 .invulhulp-table-question__actions-header,
 .invulhulp-table-question__actions-cell {
-  width: 1%;
+  width: 2.75rem;
   white-space: nowrap;
+  position: sticky;
+  inset-inline-end: 0;
+  background: var(--invulhulp-color-background, #fff);
+}
+
+.invulhulp-table-question__actions-header {
+  background: var(--invulhulp-color-surface, #f0f4f8);
+}
+
+.invulhulp-table-question__remove-btn {
+  padding: var(--rvo-space-3xs, 4px) var(--rvo-space-2xs);
+  line-height: 1;
 }
 
 .invulhulp-table-question__remove-btn,
