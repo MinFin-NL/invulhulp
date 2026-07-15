@@ -34,7 +34,6 @@
               <button
                 type="button"
                 class="rvo-button rvo-button--tertiary rvo-button--sm invulhulp-table-question__remove-btn"
-                :disabled="table.rows.length <= minRows"
                 :aria-label="`Rij ${rowIndex + 1} verwijderen`"
                 @click="removeRow(rowIndex)"
               >
@@ -159,8 +158,10 @@ function addRow() {
 }
 
 function removeRow(rowIndex: number) {
-  if (table.rows.length <= minRows.value) return
   table.rows.splice(rowIndex, 1)
+  // Deleting is always allowed; the grid just refills to the minimum with
+  // blank rows so there is always something to type in.
+  while (table.rows.length < Math.max(minRows.value, 1)) table.rows.push(blankRow())
   emitValue()
 }
 </script>
