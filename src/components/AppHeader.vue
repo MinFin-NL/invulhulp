@@ -30,7 +30,7 @@
             class="invulhulp-header__ghost-btn"
             :aria-pressed="auth.userManagementOpen"
           >
-            {{ auth.userManagementOpen ? 'Terug naar formulieren' : 'Gebruikersbeheer' }}
+            {{ auth.userManagementOpen ? 'Terug naar dossiers' : 'Gebruikersbeheer' }}
           </button>
           <span v-if="auth.isAdmin" class="invulhulp-header__divider" aria-hidden="true" />
           <span v-if="auth.user" class="invulhulp-header__user">
@@ -46,32 +46,27 @@
         </div>
       </div>
 
-      <!-- Grouped form tabs with track labels and sequence arrows -->
-      <nav class="invulhulp-header__tab-bar" aria-label="Formulieren">
-        <div v-for="(group, gIdx) in trackGroups" :key="group.track" class="invulhulp-header__tab-group">
-          <div v-if="gIdx > 0" class="invulhulp-header__tab-divider" aria-hidden="true" />
-          <div class="invulhulp-header__tab-group-inner">
-            <h2 class="invulhulp-header__track-label">{{ group.label }}</h2>
-            <ul class="rvo-tabs invulhulp-header__tabs">
-              <template v-for="(form, idx) in group.forms" :key="form.id">
-                <li v-if="idx > 0" class="invulhulp-header__tab-arrow" aria-hidden="true">
-                  {{ group.track === 'assessment' ? '↔' : '→' }}
-                </li>
-                <li class="rvo-tabs__item">
-                  <button
-                    type="button"
-                    class="rvo-tabs__item-link"
-                    :class="{ 'rvo-tabs__item-link--active': store.activeFormId === form.id }"
-                    :aria-current="store.activeFormId === form.id ? 'page' : undefined"
-                    @click="switchTo(form.id)"
-                  >
-                    {{ form.title }}
-                  </button>
-                </li>
-              </template>
-            </ul>
-          </div>
-        </div>
+      <!-- Breadcrumb: dossier › formulier -->
+      <nav v-if="showBreadcrumb" class="invulhulp-header__breadcrumb" aria-label="Kruimelpad">
+        <button
+          v-if="store.activeFormId !== null"
+          type="button"
+          class="invulhulp-header__crumb invulhulp-header__crumb--link"
+          @click="store.goToPortal()"
+        >
+          <span class="invulhulp-header__crumb-icon" aria-hidden="true" />
+          {{ store.activeDossier.name }}
+        </button>
+        <span v-else class="invulhulp-header__crumb invulhulp-header__crumb--current" aria-current="page">
+          <span class="invulhulp-header__crumb-icon" aria-hidden="true" />
+          {{ store.activeDossier.name }}
+        </span>
+        <template v-if="activeFormTitle">
+          <span class="invulhulp-header__crumb-sep" aria-hidden="true">›</span>
+          <span class="invulhulp-header__crumb invulhulp-header__crumb--current" aria-current="page">
+            {{ activeFormTitle }}
+          </span>
+        </template>
       </nav>
     </div>
   </header>
@@ -90,7 +85,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import emblemUrl from '@nl-rvo/assets/images/emblem.svg'
-import type { FormId } from '../stores/assessmentStore'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAuthStore } from '../stores/authStore'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
@@ -105,26 +99,13 @@ onMounted(async () => {
   availableForms.value = await loadAvailableForms()
 })
 
-const TRACK_META: Record<string, { label: string; order: number }> = {
-  project: { label: 'Projectspoor', order: 1 },
-  privacy: { label: 'Privacyspoor', order: 2 },
-  assessment: { label: 'Assessments', order: 3 },
-}
+const showBreadcrumb = computed(
+  () => store.screen === 'dossier' && !auth.userManagementOpen && store.activeDossier.name !== '',
+)
 
-const trackGroups = computed(() => {
-  const byTrack: Record<string, FormIndexEntry[]> = {}
-  for (const form of availableForms.value) {
-    const t = form.track ?? 'assessment'
-    if (!byTrack[t]) byTrack[t] = []
-    byTrack[t].push(form)
-  }
-  return Object.entries(byTrack)
-    .sort(([a], [b]) => (TRACK_META[a]?.order ?? 99) - (TRACK_META[b]?.order ?? 99))
-    .map(([track, forms]) => ({
-      track,
-      label: TRACK_META[track]?.label ?? track,
-      forms: [...forms].sort((a, b) => (a.order ?? 0) - (b.order ?? 0)),
-    }))
+const activeFormTitle = computed(() => {
+  if (store.activeFormId === null) return null
+  return availableForms.value.find((f) => f.id === store.activeFormId)?.title ?? null
 })
 
 const resetTitle = computed(() => {
@@ -132,14 +113,9 @@ const resetTitle = computed(() => {
   return `"${label}" opnieuw beginnen?`
 })
 
-function switchTo(id: FormId) {
-  auth.userManagementOpen = false
-  store.setActiveForm(id)
-}
-
 function goHome() {
   auth.userManagementOpen = false
-  store.goToPortal()
+  store.goToDossierList()
 }
 
 function openResetDialog() {
@@ -242,113 +218,65 @@ function openResetDialog() {
   --rvo-logo-font-weight: bold;
 }
 
-.invulhulp-header__tab-bar {
+.invulhulp-header__breadcrumb {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   flex-wrap: wrap;
-  gap: var(--rvo-space-md) var(--rvo-space-lg);
-  border-block-start: 1px solid rgb(255 255 255 / 0.15);
-  padding-block: var(--rvo-space-sm) var(--rvo-space-md);
-}
-
-.invulhulp-header__tab-group {
-  display: flex;
-  align-items: stretch;
-}
-
-.invulhulp-header__tab-divider {
-  inline-size: 1px;
-  background: rgb(255 255 255 / 0.2);
-  margin-block: var(--rvo-space-xs) 0;
-  margin-inline-end: var(--rvo-space-sm);
-  flex-shrink: 0;
-}
-
-.invulhulp-header__tab-group-inner {
-  display: flex;
-  flex-direction: column;
   gap: var(--rvo-space-2xs);
-  min-inline-size: 0;
+  border-block-start: 1px solid rgb(255 255 255 / 0.15);
+  padding-block: var(--rvo-space-xs) var(--rvo-space-sm);
 }
 
-.invulhulp-header__track-label {
-  font-size: var(--rvo-font-size-2xs);
-  font-weight: var(--rvo-font-weight-semibold);
-  color: rgb(255 255 255 / 0.6);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin: 0;
-  padding-inline-start: var(--rvo-space-2xs);
-}
-
-.invulhulp-header__tabs {
-  list-style: none;
-  margin: 0;
-  padding: var(--rvo-space-3xs);
+.invulhulp-header__crumb {
   display: inline-flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: var(--rvo-space-3xs);
-  background: rgb(255 255 255 / 0.08);
-  border: 1px solid rgb(255 255 255 / 0.12);
-  border-radius: 999px;
-}
-
-.invulhulp-header__tab-arrow {
-  color: rgb(255 255 255 / 0.4);
-  font-size: var(--rvo-font-size-sm);
-  padding-inline: var(--rvo-space-3xs);
-  user-select: none;
-  flex-shrink: 0;
-  list-style: none;
-  display: inline-flex;
-  align-items: center;
-}
-.invulhulp-header__tab-arrow::before {
-  display: none;
-}
-
-/* Pill chips on the dark header */
-.invulhulp-header__tabs :deep(.rvo-tabs__item) {
-  list-style: none;
-  display: inline-flex;
-}
-.invulhulp-header__tabs :deep(.rvo-tabs__item)::before {
-  display: none;
-}
-
-/* Pill chip buttons — all colour rules use !important to beat both the
-   browser UA stylesheet (ButtonText) and the @media ≥600px rvo-tabs rules */
-.invulhulp-header__tabs :deep(.rvo-tabs__item-link) {
-  display: inline-flex;
-  align-items: center;
-  border: 0 !important;
-  background: transparent !important;
-  color: rgb(255 255 255 / 0.82) !important;
-  cursor: pointer;
-  font: inherit;
+  gap: var(--rvo-space-xs);
   font-size: var(--rvo-font-size-sm);
   font-weight: var(--rvo-font-weight-semibold);
   white-space: nowrap;
-  padding: var(--rvo-space-2xs) var(--rvo-space-md);
-  border-radius: 999px;
-  margin-block-end: 0 !important;
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
+  padding: var(--rvo-space-3xs) var(--rvo-space-xs);
+  border-radius: var(--rvo-radius-md, 4px);
 }
 
-.invulhulp-header__tabs :deep(.rvo-tabs__item-link:hover) {
-  background: rgb(255 255 255 / 0.12) !important;
-  color: var(--rvo-color-wit) !important;
+.invulhulp-header__crumb--current {
+  color: var(--rvo-color-wit);
 }
 
-.invulhulp-header__tabs :deep(.rvo-tabs__item-link:focus-visible) {
+.invulhulp-header__crumb--link {
+  border: 0;
+  background: transparent;
+  color: rgb(255 255 255 / 0.75);
+  font: inherit;
+  font-size: var(--rvo-font-size-sm);
+  font-weight: var(--rvo-font-weight-semibold);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.invulhulp-header__crumb--link:hover {
+  background: rgb(255 255 255 / 0.12);
+  color: var(--rvo-color-wit);
+}
+
+.invulhulp-header__crumb--link:focus-visible {
   outline: 2px solid var(--rvo-color-wit);
   outline-offset: 2px;
 }
 
-.invulhulp-header__tabs :deep(.rvo-tabs__item-link--active) {
-  background: var(--rvo-color-wit) !important;
-  color: var(--rvo-color-lintblauw) !important;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 0.18);
+/* Static mask URL so Vite resolves the NLDS icon in the production build —
+   a runtime url(...) binding renders as a white square. */
+.invulhulp-header__crumb-icon {
+  display: inline-block;
+  inline-size: 1.125rem;
+  block-size: 1.125rem;
+  flex-shrink: 0;
+  background-color: currentColor;
+  -webkit-mask: url('@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg') center / contain no-repeat;
+  mask: url('@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg') center / contain no-repeat;
+}
+
+.invulhulp-header__crumb-sep {
+  color: rgb(255 255 255 / 0.4);
+  user-select: none;
 }
 </style>

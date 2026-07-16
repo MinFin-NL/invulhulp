@@ -2,50 +2,24 @@
   <div class="portal-page">
     <div class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm">
 
-      <!-- Hero -->
-      <section class="rvo-hero rvo-hero--lichtblauw portal-hero">
-        <div class="rvo-hero__content">
-          <h1 class="rvo-heading rvo-heading--2xl rvo-hero__title">FinDocs</h1>
-          <p class="rvo-text rvo-text--lg rvo-hero__subtitle">
-            Digitale instrumenten voor IV-projecten, privacy en AI-impact assessments — Ministerie van Financiën
-          </p>
-        </div>
-      </section>
-
-      <!-- Dossier selector -->
-      <section class="portal-card" aria-labelledby="dossier-title">
-        <div class="portal-card__header">
-          <h2 id="dossier-title" class="rvo-heading rvo-heading--lg portal-card__title">Dossier</h2>
-          <p class="rvo-text portal-card__desc">
-            Een dossier groepeert brondocumenten en formulierantwoorden. Wissel tussen dossiers om met een andere verzameling te werken.
-          </p>
-        </div>
-        <div class="portal-card__controls">
-          <div class="dossier-tabs" role="tablist" aria-label="Dossiers">
-            <button
-              v-for="d in store.dossierList"
-              :key="d.id"
-              type="button"
-              role="tab"
-              :aria-selected="d.id === store.activeDossierId"
-              class="dossier-tab"
-              :class="{ 'dossier-tab--active': d.id === store.activeDossierId }"
-              @click="store.switchDossier(d.id)"
-            >
-              <span class="dossier-tab__name">{{ d.name }}</span>
-              <span class="dossier-tab__meta">{{ d.documents.length }} doc</span>
-            </button>
+      <!-- Dossier page header -->
+      <section class="dossier-header" aria-labelledby="dossier-title">
+        <button
+          type="button"
+          class="rvo-link dossier-header__back"
+          @click="store.goToDossierList()"
+        >
+          ‹ Alle dossiers
+        </button>
+        <div class="dossier-header__row">
+          <div class="dossier-header__title-group">
+            <span class="dossier-header__icon" aria-hidden="true" />
+            <h1 id="dossier-title" class="rvo-heading rvo-heading--2xl dossier-header__name">
+              {{ store.activeDossier.name }}
+            </h1>
           </div>
           <div class="dossier-actions">
             <button
-              type="button"
-              class="rvo-button rvo-button--tertiary rvo-button--size-sm"
-              @click="openCreateDialog"
-            >
-              + Nieuw dossier
-            </button>
-            <button
-              v-if="store.activeDossierId"
               type="button"
               class="rvo-button rvo-button--tertiary rvo-button--size-sm"
               @click="openRenameDialog"
@@ -53,7 +27,6 @@
               Hernoemen
             </button>
             <button
-              v-if="store.dossierList.length > 1"
               type="button"
               class="rvo-button rvo-button--warning-subtle rvo-button--size-sm"
               @click="openDeleteDialog"
@@ -62,6 +35,9 @@
             </button>
           </div>
         </div>
+        <p class="rvo-text dossier-header__desc">
+          Dit dossier groepeert de brondocumenten en formulierantwoorden voor één project of systeem.
+        </p>
       </section>
 
       <!-- Brondocumenten upload -->
@@ -204,11 +180,21 @@
                 <p class="rvo-text rvo-text--sm form-card__desc">{{ form.shortDescription }}</p>
               </div>
               <div class="form-card__actions">
+                <span
+                  v-if="statusFor(form.id)"
+                  class="rvo-tag rvo-tag--pill form-card__status"
+                  :class="{
+                    'rvo-tag--info': statusFor(form.id)!.status === 'bezig',
+                    'rvo-tag--success': statusFor(form.id)!.status === 'afgerond',
+                  }"
+                >
+                  {{ statusLabel(statusFor(form.id)!) }}
+                </span>
                 <button
                   class="rvo-button rvo-button--primary rvo-button--size-sm form-card__btn"
                   @click="$emit('open', form.id)"
                 >
-                  Openen
+                  {{ statusFor(form.id)?.status === 'bezig' ? 'Verder' : 'Openen' }}
                 </button>
                 <AiModeToggle
                   :form-id="form.id"
@@ -243,15 +229,6 @@
       @cancel="onAiModeErrorDismissed"
     />
     <ConfirmDialog
-      ref="createDialog"
-      title="Nieuw dossier"
-      message="Geef het dossier een naam."
-      kind="prompt"
-      input-label="Naam"
-      confirm-label="Aanmaken"
-      @confirm="onCreateConfirmed"
-    />
-    <ConfirmDialog
       ref="renameDialog"
       title="Dossier hernoemen"
       kind="prompt"
@@ -278,6 +255,8 @@ import infoIcon from '@nl-rvo/assets/icons/functioneel/info.svg'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAiMode } from '../composables/useAiMode'
+import { useFormProgress } from '../composables/useFormProgress'
+import type { FormProgress } from '../utils/formProgress'
 import DocumentOntology from './DocumentOntology.vue'
 import EntityGraph from './EntityGraph.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
@@ -297,8 +276,8 @@ const showGraph = ref(false)
 const hasAnyOntology = computed(() => store.documents.some(d => !!d.ontology))
 
 const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModeError, aiModePhase, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone, dismissAiModeError, hasSmoothingUndo, undoSmoothing } = useAiMode()
+const { progressFor } = useFormProgress()
 
-const createDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const renameDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const deleteDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const aiModeErrorDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
@@ -331,8 +310,16 @@ function onAiModeErrorDismissed() {
   }
 }
 
-function openCreateDialog() {
-  createDialog.value?.open()
+function statusFor(formId: string): FormProgress | null {
+  if (!store.activeDossierId) return null
+  const dossier = store.dossiers[store.activeDossierId]
+  return dossier ? progressFor(dossier, formId) : null
+}
+
+function statusLabel(p: FormProgress): string {
+  if (p.status === 'afgerond') return 'Afgerond'
+  if (p.status === 'bezig') return `Bezig (${p.completed}/${p.total})`
+  return 'Niet gestart'
 }
 
 function openRenameDialog() {
@@ -347,11 +334,6 @@ function openDeleteDialog() {
   deleteDialog.value?.open()
 }
 
-function onCreateConfirmed(name: string) {
-  const trimmed = name.trim() || `Dossier ${store.dossierList.length + 1}`
-  store.createDossier(trimmed)
-}
-
 function onRenameConfirmed(name: string) {
   if (!store.activeDossierId) return
   const trimmed = name.trim()
@@ -362,6 +344,8 @@ function onRenameConfirmed(name: string) {
 function onDeleteConfirmed() {
   if (!store.activeDossierId) return
   store.deleteDossier(store.activeDossierId)
+  // Never land unannounced in whichever dossier became active next
+  store.goToDossierList()
 }
 
 async function extractPptxText(file: File): Promise<string> {
@@ -556,8 +540,60 @@ const trackGroups = computed(() => {
   min-height: 100%;
 }
 
-.portal-hero {
-  margin-block-end: var(--rvo-space-3xl);
+.dossier-header {
+  margin-block-end: var(--rvo-space-2xl);
+}
+
+.dossier-header__back {
+  display: inline-block;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--rvo-font-size-sm);
+  color: var(--rvo-color-lintblauw);
+  text-decoration: underline;
+  margin-block-end: var(--rvo-space-sm);
+}
+
+.dossier-header__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--rvo-space-md);
+  flex-wrap: wrap;
+}
+
+.dossier-header__title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--rvo-space-sm);
+  min-inline-size: 0;
+}
+
+/* Static mask URL so Vite resolves the NLDS icon in the production build —
+   a runtime url(...) binding renders as a white square. */
+.dossier-header__icon {
+  display: inline-block;
+  inline-size: 2rem;
+  block-size: 2rem;
+  flex-shrink: 0;
+  background-color: var(--rvo-color-lintblauw);
+  -webkit-mask: url('@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg') center / contain no-repeat;
+  mask: url('@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg') center / contain no-repeat;
+}
+
+.dossier-header__name {
+  color: var(--rvo-color-lintblauw);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.dossier-header__desc {
+  color: var(--invulhulp-color-text-subtle);
+  font-size: var(--rvo-font-size-sm);
+  margin: var(--rvo-space-2xs) 0 0;
 }
 
 .portal-card {
@@ -602,61 +638,6 @@ const trackGroups = computed(() => {
   justify-content: space-between;
   gap: var(--rvo-space-md);
   flex-wrap: wrap;
-}
-
-.dossier-tabs {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: var(--rvo-space-3xs);
-  padding: var(--rvo-space-3xs);
-  background: var(--rvo-color-grijs-100);
-  border: 1px solid var(--invulhulp-color-border);
-  border-radius: 999px;
-}
-
-.dossier-tab {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--rvo-space-xs);
-  background: transparent;
-  border: 0;
-  border-radius: 999px;
-  padding: var(--rvo-space-2xs) var(--rvo-space-md);
-  cursor: pointer;
-  color: var(--rvo-color-grijs-800);
-  font: inherit;
-  font-size: var(--rvo-font-size-sm);
-  transition: background 0.15s, color 0.15s, box-shadow 0.15s;
-  white-space: nowrap;
-}
-
-.dossier-tab:hover:not(.dossier-tab--active) {
-  background: var(--rvo-color-wit);
-  color: var(--rvo-color-lintblauw);
-}
-
-.dossier-tab:focus-visible {
-  outline: 2px solid var(--rvo-color-lintblauw);
-  outline-offset: 1px;
-}
-
-.dossier-tab--active {
-  background: var(--rvo-color-lintblauw);
-  color: var(--rvo-color-wit);
-  box-shadow: 0 1px 2px rgb(21 66 115 / 0.25);
-}
-
-.dossier-tab__name {
-  font-weight: var(--rvo-font-weight-semibold);
-}
-
-.dossier-tab__meta {
-  font-size: var(--rvo-font-size-2xs);
-  opacity: 0.75;
-}
-
-.dossier-tab--active .dossier-tab__meta {
-  opacity: 0.85;
 }
 
 .dossier-actions {
@@ -914,6 +895,10 @@ const trackGroups = computed(() => {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--rvo-space-xs);
+}
+
+.form-card__status {
+  font-size: var(--rvo-font-size-2xs);
 }
 
 .form-card__btn {

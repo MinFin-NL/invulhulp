@@ -22,7 +22,8 @@ const aiModeCancelled: Record<string, boolean> = {}
 // one section per LLM call. Drives the "Antwoorden gladstrijken…" banner text.
 const aiModePhase = ref<Record<string, { current: number; total: number } | null>>({})
 // Pre-smoothing originals per form, session-only — powers the one-click undo.
-const aiModePreSmooth = ref<Record<string, Record<string, string>>>({})
+// The dossier id pins the undo to the dossier the run happened in.
+const aiModePreSmooth = ref<Record<string, { dossierId: string; originals: Record<string, string> }>>({})
 
 // Answers with markup beyond plain paragraphs (lists, bold, …) are usually
 // user-authored; smoothing works on plaintext and would flatten them.
@@ -39,6 +40,11 @@ export function useAiMode() {
 
   async function startAiMode(formId: string) {
     if (aiModeActive.value.has(formId) || readyDocIds.value.length === 0) return
+
+    // Capture the dossier the run started in: the user can switch dossiers
+    // mid-run and answers must not leak into the newly active one.
+    const dossierId = store.activeDossierId
+    if (!dossierId) return
 
     let formConfig
     try {
@@ -71,8 +77,8 @@ export function useAiMode() {
       docIds: readyDocIds.value,
       questions,
       formContext: formConfig.aiContext,
-      onAnswer: (qId, value) => store.setAnswerForForm(formId, qId, value),
-      onSources: (qId, meta) => store.setAnswerSourcesForForm(formId, qId, meta),
+      onAnswer: (qId, value) => store.setAnswerForForm(formId, qId, value, dossierId),
+      onSources: (qId, meta) => store.setAnswerSourcesForForm(formId, qId, meta, dossierId),
       onEmpty: (qId) => {
         const set = new Set(aiModeUnanswered.value[formId] ?? [])
         set.add(qId)
@@ -85,7 +91,7 @@ export function useAiMode() {
     })
 
     if (!aiModeCancelled[formId]) {
-      await smoothForm(formId, formConfig)
+      await smoothForm(formId, formConfig, dossierId)
     }
 
     aiModeActive.value = new Set([...aiModeActive.value].filter((id) => id !== formId))
@@ -104,8 +110,8 @@ export function useAiMode() {
   /** Final AI Modus phase: rewrite the form's longtext answers section by
    *  section to remove duplication across answers. Applies rewrites directly
    *  to the store; originals are snapshotted for a one-click undo. */
-  async function smoothForm(formId: string, formConfig: FormConfig) {
-    const answers = store.forms[formId]?.answers ?? {}
+  async function smoothForm(formId: string, formConfig: FormConfig, dossierId: string) {
+    const answers = store.dossiers[dossierId]?.forms[formId]?.answers ?? {}
     const originals: Record<string, string> = {}
     const sections: SmoothSection[] = []
 
@@ -127,13 +133,13 @@ export function useAiMode() {
     // A single answer has nothing to be deduplicated against.
     if (Object.keys(originals).length < 2) return
 
-    aiModePreSmooth.value = { ...aiModePreSmooth.value, [formId]: originals }
+    aiModePreSmooth.value = { ...aiModePreSmooth.value, [formId]: { dossierId, originals } }
     aiModePhase.value = { ...aiModePhase.value, [formId]: { current: 0, total: sections.length } }
     let rewritten = 0
     try {
       rewritten = await smoothFormAnswers({
         sections,
-        onRewrite: (qId, html) => store.setAnswerForForm(formId, qId, html),
+        onRewrite: (qId, html) => store.setAnswerForForm(formId, qId, html, dossierId),
         onSectionProgress: (current, total) => {
           aiModePhase.value = { ...aiModePhase.value, [formId]: { current, total } }
         },
@@ -153,10 +159,10 @@ export function useAiMode() {
 
   /** Restore the pre-smoothing answers of the last AI Modus run. */
   function undoSmoothing(formId: string) {
-    const originals = aiModePreSmooth.value[formId]
-    if (!originals) return
-    for (const [qId, value] of Object.entries(originals)) {
-      store.setAnswerForForm(formId, qId, value)
+    const snapshot = aiModePreSmooth.value[formId]
+    if (!snapshot) return
+    for (const [qId, value] of Object.entries(snapshot.originals)) {
+      store.setAnswerForForm(formId, qId, value, snapshot.dossierId)
     }
     clearSmoothingUndo(formId)
   }

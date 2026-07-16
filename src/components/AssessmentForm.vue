@@ -40,9 +40,14 @@
       <UserManagement />
     </main>
 
-    <!-- Portal landing page (no form selected) -->
+    <!-- Dossier overview (home) -->
+    <main v-else-if="store.screen === 'dossierList'" class="assessment-shell__portal">
+      <DossierList />
+    </main>
+
+    <!-- Dossier detail page (no form selected) -->
     <main v-else-if="store.activeFormId === null" class="assessment-shell__portal">
-      <PortalPage @open="store.setActiveForm" />
+      <DossierDetail @open="store.setActiveForm" />
     </main>
 
     <div v-else-if="isLoading" class="assessment-shell__loading">
@@ -133,13 +138,15 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import { loadForm } from '../services/formLoader'
+import { computeNavOrder } from '../utils/formProgress'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAuthStore } from '../stores/authStore'
 import { useAiMode } from '../composables/useAiMode'
 import type { FormConfig, NavStepSubsections, NavStepSpecialView, Section } from '../models/Assessment'
 import AppHeader from './AppHeader.vue'
 import AppFooter from './AppFooter.vue'
-import PortalPage from './PortalPage.vue'
+import DossierList from './DossierList.vue'
+import DossierDetail from './DossierDetail.vue'
 import FormIntro from './FormIntro.vue'
 import SectionNav from './SectionNav.vue'
 import SectionView from './SectionView.vue'
@@ -190,28 +197,7 @@ watch(() => store.activeFormId, loadActiveForm)
 // Build ordered navigation list from form config
 const navOrder = computed((): string[] => {
   if (!formConfig.value) return []
-  const order: string[] = []
-
-  for (const step of formConfig.value.navigation) {
-    if (step.type === 'subsections') {
-      const s = step as NavStepSubsections
-      if (s.condition) {
-        const val = store[s.condition.storeKey as keyof typeof store]
-        if (val !== s.condition.value) continue
-      }
-      const section = formConfig.value.sections.find((sec) => sec.id === s.sectionId)
-      if (section) {
-        for (const sub of section.subsections) {
-          if (s.exclude?.includes(sub.id)) continue
-          order.push(sub.id)
-        }
-      }
-    } else {
-      order.push((step as NavStepSpecialView).viewId)
-    }
-  }
-
-  return order
+  return computeNavOrder(formConfig.value, store.activeForm)
 })
 
 // Set of subsection IDs excluded from direct section rendering

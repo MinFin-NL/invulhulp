@@ -49,11 +49,18 @@ export interface Dossier {
   id: DossierId
   name: string
   createdAt: number
+  // Absent in dossiers persisted before this field existed — display falls
+  // back to createdAt.
+  updatedAt?: number
   sessionId: string
   activeFormId: FormId | null
   forms: Record<FormId, FormState>
   documents: SourceDocument[]
 }
+
+/** Top-level screen: the dossier overview or a single dossier (whose own
+ *  activeFormId decides between the detail page and an open form). */
+export type Screen = 'dossierList' | 'dossier'
 
 function initialFormState(): FormState {
   return {
@@ -90,6 +97,7 @@ interface StoreState {
   dossiers: Record<DossierId, Dossier>
   dossierOrder: DossierId[]
   activeDossierId: DossierId | null
+  screen: Screen
   // Legacy fields — preserved for one-shot migration from older persisted state
   forms?: Record<FormId, FormState>
   activeFormId?: FormId | null
@@ -102,6 +110,9 @@ export const useAssessmentStore = defineStore('assessment', {
     dossiers: {},
     dossierOrder: [],
     activeDossierId: null,
+    // Default doubles as migration: state persisted before this field existed
+    // lands on the dossier overview.
+    screen: 'dossierList',
   }),
 
   getters: {
@@ -175,20 +186,36 @@ export const useAssessmentStore = defineStore('assessment', {
       }
     },
 
+    /** Stamp a dossier as edited; drives "Laatst bewerkt" on the overview.
+     *  Only content mutations call this — navigating is not an edit. */
+    touch(id?: DossierId | null) {
+      const d = (id ?? this.activeDossierId) ? this.dossiers[(id ?? this.activeDossierId)!] : null
+      if (d) d.updatedAt = Date.now()
+    },
+
     createDossier(name?: string): DossierId {
       const trimmed = (name ?? '').trim() || `Dossier ${this.dossierOrder.length + 1}`
       const d = newDossier(trimmed)
       this.dossiers[d.id] = d
       this.dossierOrder.push(d.id)
       this.activeDossierId = d.id
+      this.screen = 'dossier'
       return d.id
     },
 
-    switchDossier(id: DossierId) {
-      if (this.dossiers[id]) {
-        this.activeDossierId = id
-        this.syncDocumentsFromServer()
-      }
+    goToDossierList() {
+      this.screen = 'dossierList'
+    },
+
+    /** Open a dossier's detail page from the overview. Always lands on the
+     *  detail page, never on a stale open form. */
+    openDossier(id: DossierId) {
+      const dossier = this.dossiers[id]
+      if (!dossier) return
+      this.activeDossierId = id
+      dossier.activeFormId = null
+      this.screen = 'dossier'
+      this.syncDocumentsFromServer()
     },
 
     /** Merge documents the backend has persisted for the active dossier into
@@ -218,7 +245,10 @@ export const useAssessmentStore = defineStore('assessment', {
 
     renameDossier(id: DossierId, name: string) {
       const trimmed = name.trim()
-      if (this.dossiers[id] && trimmed) this.dossiers[id].name = trimmed
+      if (this.dossiers[id] && trimmed) {
+        this.dossiers[id].name = trimmed
+        this.touch(id)
+      }
     },
 
     deleteDossier(id: DossierId) {
@@ -247,11 +277,15 @@ export const useAssessmentStore = defineStore('assessment', {
       const dossier = this.dossiers[this.activeDossierId!]
       if (!dossier.forms[id]) dossier.forms[id] = initialFormState()
       dossier.activeFormId = id
+      this.screen = 'dossier'
     },
 
     setAnswer(questionId: string, value: string | string[]) {
       const f = this.currentFormMutable()
-      if (f) f.answers[questionId] = value
+      if (f) {
+        f.answers[questionId] = value
+        this.touch()
+      }
     },
 
     setCurrentView(view: string) {
@@ -261,18 +295,25 @@ export const useAssessmentStore = defineStore('assessment', {
 
     setRiskLevel(level: RiskLevelValue) {
       const f = this.currentFormMutable()
-      if (f) f.riskLevel = level
+      if (f) {
+        f.riskLevel = level
+        this.touch()
+      }
     },
 
     setGoDecision(decision: boolean) {
       const f = this.currentFormMutable()
-      if (f) f.goDecision = decision
+      if (f) {
+        f.goDecision = decision
+        this.touch()
+      }
     },
 
     markSectionCompleted(sectionId: string) {
       const f = this.currentFormMutable()
       if (f && !f.completedSections.includes(sectionId)) {
         f.completedSections.push(sectionId)
+        this.touch()
       }
     },
 
@@ -282,14 +323,19 @@ export const useAssessmentStore = defineStore('assessment', {
       return dossier.forms[dossier.activeFormId] ?? null
     },
 
+    /** Back to the active dossier's detail page (closes the open form). */
     goToPortal() {
       const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
       if (dossier) dossier.activeFormId = null
+      this.screen = 'dossier'
     },
 
     resetActive() {
       const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
-      if (dossier?.activeFormId) dossier.forms[dossier.activeFormId] = initialFormState()
+      if (dossier?.activeFormId) {
+        dossier.forms[dossier.activeFormId] = initialFormState()
+        this.touch()
+      }
     },
 
     reset() {
@@ -298,6 +344,7 @@ export const useAssessmentStore = defineStore('assessment', {
       for (const id of Object.keys(dossier.forms)) {
         dossier.forms[id] = initialFormState()
       }
+      this.touch()
     },
 
     async addDocument(name: string, content: string): Promise<SourceDocument> {
@@ -311,6 +358,7 @@ export const useAssessmentStore = defineStore('assessment', {
         indexing: true,
       }
       dossier.documents.push(doc)
+      this.touch(dossier.id)
 
       try {
         const res = await indexDocument({
@@ -336,15 +384,20 @@ export const useAssessmentStore = defineStore('assessment', {
       return doc
     },
 
-    setAnswerForForm(formId: string, questionId: string, value: string | string[]) {
-      const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
+    // The optional dossierId lets long-running writers (AI Modus) keep writing
+    // to the dossier they started in, even if the user switched dossiers.
+    setAnswerForForm(formId: string, questionId: string, value: string | string[], dossierId?: DossierId) {
+      const id = dossierId ?? this.activeDossierId
+      const dossier = id ? this.dossiers[id] : null
       if (!dossier) return
       if (!dossier.forms[formId]) dossier.forms[formId] = initialFormState()
       dossier.forms[formId].answers[questionId] = value
+      this.touch(dossier.id)
     },
 
-    setAnswerSourcesForForm(formId: string, questionId: string, meta: AnswerSourceMeta) {
-      const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
+    setAnswerSourcesForForm(formId: string, questionId: string, meta: AnswerSourceMeta, dossierId?: DossierId) {
+      const id = dossierId ?? this.activeDossierId
+      const dossier = id ? this.dossiers[id] : null
       if (!dossier) return
       if (!dossier.forms[formId]) dossier.forms[formId] = initialFormState()
       const form = dossier.forms[formId]
@@ -370,6 +423,7 @@ export const useAssessmentStore = defineStore('assessment', {
       if (!f.attachments) f.attachments = {}
       if (!f.attachments[questionId]) f.attachments[questionId] = []
       f.attachments[questionId].push(att)
+      this.touch()
     },
 
     removeAttachment(questionId: string, imageId: string) {
@@ -378,19 +432,24 @@ export const useAssessmentStore = defineStore('assessment', {
       const idx = list.findIndex((a) => a.id === imageId)
       if (idx === -1) return
       list.splice(idx, 1)
+      this.touch()
       // best-effort server cleanup; UI removal already happened
       deleteImage(imageId).catch(() => {})
     },
 
     updateAttachmentCaption(questionId: string, imageId: string, caption: string) {
       const att = this.currentFormMutable()?.attachments?.[questionId]?.find((a) => a.id === imageId)
-      if (att) att.caption = caption
+      if (att) {
+        att.caption = caption
+        this.touch()
+      }
     },
 
     async removeDocument(id: string) {
       const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
       if (!dossier) return
       dossier.documents = dossier.documents.filter((d) => d.id !== id)
+      this.touch(dossier.id)
       try {
         await deleteDocument(id)
       } catch {
