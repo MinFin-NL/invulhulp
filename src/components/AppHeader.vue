@@ -18,7 +18,7 @@
         </button>
         <div class="invulhulp-header__actions">
           <button
-            v-if="store.activeFormId !== null && store.currentView !== 'home'"
+            v-if="showResetButton"
             @click="openResetDialog"
             class="rvo-button rvo-button--secondary rvo-button--size-sm"
           >
@@ -98,6 +98,17 @@ const resetDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 onMounted(async () => {
   availableForms.value = await loadAvailableForms()
 })
+
+// Reset applies to a single form, so only offer it while a form is actually
+// open — not on the dossier list or dossier detail page, where activeFormId
+// can still hold a stale value from the last visited form.
+const showResetButton = computed(
+  () =>
+    store.screen === 'dossier' &&
+    !auth.userManagementOpen &&
+    store.activeFormId !== null &&
+    store.currentView !== 'home',
+)
 
 const showBreadcrumb = computed(
   () => store.screen === 'dossier' && !auth.userManagementOpen && store.activeDossier.name !== '',
