@@ -97,6 +97,7 @@ import type { CrossFormMapping } from '../models/Assessment'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { getCachedForm } from '../services/formLoader'
 import { synthesizeStream } from '../services/llmService'
+import { answerPlainText } from '../utils/sourceMatching'
 
 const props = defineProps<{
   mapping: CrossFormMapping
@@ -129,9 +130,11 @@ const sourceContext = computed(() => {
   return sourceQuestionIds
     .map((id) => {
       const raw = store.forms[sourceFormId]?.answers[id]
+      // Source answers may be Tiptap HTML; flatten to plain text before they
+      // land in the synthesize prompt or the "gebruik direct" value.
       const answer =
         typeof raw === 'string'
-          ? raw.replace('\n---\n', ': ')
+          ? answerPlainText(raw.replace('\n---\n', ': '))
           : Array.isArray(raw)
             ? raw.join(', ')
             : ''
@@ -167,11 +170,11 @@ const streamingText = computed((): string => {
 
 const diffParts = computed((): Change[] => {
   if (suggestion.value === null) return []
-  return diffWords(props.currentValue, suggestion.value)
+  return diffWords(answerPlainText(props.currentValue), suggestion.value)
 })
 
 const noChanges = computed(
-  () => suggestion.value !== null && suggestion.value === props.currentValue,
+  () => suggestion.value !== null && suggestion.value === answerPlainText(props.currentValue),
 )
 
 async function requestSynthesis() {

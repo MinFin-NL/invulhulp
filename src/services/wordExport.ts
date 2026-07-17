@@ -18,6 +18,7 @@ import {
 import { saveAs } from 'file-saver'
 import type { Answers, Question, QuestionAttachment, RiskLevelValue, FormConfig } from '../models/Assessment'
 import { parseTableAnswer } from '../utils/tableAnswer'
+import { htmlToParagraphs } from '../utils/htmlRuns'
 import { fetchImageArrayBuffer } from './llmService'
 
 function stripHtml(html: string): string {
@@ -38,6 +39,30 @@ function formatAnswer(value: string | string[] | undefined): string {
   if (!value) return '(niet ingevuld)'
   if (Array.isArray(value)) return value.map(stripHtml).join(', ') || '(niet ingevuld)'
   return stripHtml(value) || '(niet ingevuld)'
+}
+
+/** Styled paragraphs (bold/italic runs) for a string answer, or null when the
+ *  value flattens to nothing so the caller falls back to "(niet ingevuld)". */
+function styledAnswerParagraphs(value: string): Paragraph[] | null {
+  const paragraphs = htmlToParagraphs(value)
+  if (paragraphs.length === 0) return null
+  return paragraphs.map(
+    (p, i) =>
+      new Paragraph({
+        children: p.runs.map(
+          (r) =>
+            new TextRun({
+              text: r.text,
+              size: 22,
+              color: '000000',
+              bold: r.bold,
+              italics: r.italics,
+              break: r.breakBefore ? 1 : undefined,
+            }),
+        ),
+        spacing: { after: i === paragraphs.length - 1 ? 160 : 60 },
+      }),
+  )
 }
 
 /** Real docx table (shaded header + rows) for a table question, or null when
@@ -293,19 +318,20 @@ export async function exportToWord(
             children: [new TextRun({ text: questionLabel, bold: true, size: 22, color: '333333' })],
             spacing: { before: 120, after: 40 },
           }),
-          ...((hasAnswer && tableAnswerChildren(question, answer)) || [
-            new Paragraph({
-              children: [
-                new TextRun({
-                  text: hasAnswer ? formatAnswer(answer) : '(niet ingevuld)',
-                  size: 22,
-                  color: hasAnswer ? '000000' : '999999',
-                  italics: !hasAnswer,
-                }),
-              ],
-              spacing: { after: 160 },
-            }),
-          ]),
+          ...((hasAnswer && tableAnswerChildren(question, answer)) ||
+            (hasAnswer && typeof answer === 'string' && styledAnswerParagraphs(answer)) || [
+              new Paragraph({
+                children: [
+                  new TextRun({
+                    text: hasAnswer ? formatAnswer(answer) : '(niet ingevuld)',
+                    size: 22,
+                    color: hasAnswer ? '000000' : '999999',
+                    italics: !hasAnswer,
+                  }),
+                ],
+                spacing: { after: 160 },
+              }),
+            ]),
           ...(await attachmentParagraphs(attachments[question.id] ?? [], sessionId)),
         )
       }

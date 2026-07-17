@@ -265,6 +265,23 @@ IMPROVE_CASES = [
         ],
     ),
     dict(
+        id="improve-keeps-markdown",
+        question_context="Omschrijving van het IV-verzoek",
+        text=(
+            "het systeem gaat **persoonsgegevens** verwerken van burgers, dat "
+            "is *bijzonder gevoelig* dus daar moeten we best wel goed op letten "
+            "en de bewaartermijn is 5 jaar ofzo"
+        ),
+        checks=[
+            # vet- en cursief-opmaak blijven behouden ("5" niet gecheckt:
+            # modellen schrijven getallen soms uit, net als bij improve-clumsy)
+            check_contains_all("**persoonsgegevens**", "*bijzonder"),
+            # spreektaal moet weg — vangt ook een verbatim echo van de invoer
+            check_not_contains("ofzo", "best wel"),
+            check_not_contains("AVG-artikel", "DPIA verplicht"),  # geen nieuwe claims
+        ],
+    ),
+    dict(
         id="improve-keeps-facts",
         question_context="Doelgroep en omvang toekomstige gebruikers",
         text=(

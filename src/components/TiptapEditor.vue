@@ -95,6 +95,32 @@
 
     <!-- Toolbar row: improve button + error -->
     <div class="tiptap-toolbar">
+      <template v-if="!store.readOnly">
+        <button
+          type="button"
+          class="rvo-button rvo-button--tertiary rvo-button--size-sm tiptap-mark-btn"
+          :class="{ 'tiptap-mark-btn--active': editor?.isActive('bold') }"
+          :aria-pressed="editor?.isActive('bold') ?? false"
+          aria-label="Vetgedrukt (Ctrl+B)"
+          title="Vetgedrukt (Ctrl+B)"
+          @mousedown.prevent
+          @click="editor?.chain().focus().toggleBold().run()"
+        >
+          <strong>B</strong>
+        </button>
+        <button
+          type="button"
+          class="rvo-button rvo-button--tertiary rvo-button--size-sm tiptap-mark-btn"
+          :class="{ 'tiptap-mark-btn--active': editor?.isActive('italic') }"
+          :aria-pressed="editor?.isActive('italic') ?? false"
+          aria-label="Cursief (Ctrl+I)"
+          title="Cursief (Ctrl+I)"
+          @mousedown.prevent
+          @click="editor?.chain().focus().toggleItalic().run()"
+        >
+          <em>I</em>
+        </button>
+      </template>
       <button
         v-if="!store.readOnly && suggestion === null && !streamingText && pendingClarification === null"
         type="button"
@@ -118,6 +144,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import { diffWords } from 'diff'
 import type { Change } from 'diff'
 import { improveTextStream } from '../services/llmService'
+import { htmlToMarkdown, markdownToHtml } from '../utils/htmlRuns'
 import { useAssessmentStore } from '../stores/assessmentStore'
 
 // Mermaid is heavy (~1.5 MB of chunks); load it lazily, only when the model
@@ -154,7 +181,9 @@ const editor = useEditor({
   // Viewers of a shared dossier can read but not type.
   editable: !store.readOnly,
   onUpdate({ editor: e }) {
-    emit('update:modelValue', e.getText())
+    // Store HTML so bold/italic survive; an empty doc is stored as '' (never
+    // '<p></p>') so empty-answer checks and form progress keep working.
+    emit('update:modelValue', e.getText().trim() ? e.getHTML() : '')
   },
 })
 
@@ -167,10 +196,14 @@ watch(
   () => props.modelValue,
   (newVal) => {
     if (!editor.value) return
-    const current = editor.value.getText()
-    if (current !== newVal) {
-      editor.value.commands.setContent(newVal)
-    }
+    // The store may hold HTML (new answers) or legacy plain text; accept the
+    // incoming value when it matches either representation, otherwise it is a
+    // real external change (AI Modus, cross-form, import) to load.
+    const incoming = newVal ?? ''
+    if (incoming === '' && editor.value.getText().trim() === '') return
+    if (incoming === editor.value.getHTML()) return
+    if (incoming === editor.value.getText()) return
+    editor.value.commands.setContent(incoming)
   },
 )
 
@@ -196,19 +229,24 @@ const streamingText = computed((): string => {
   return (beforeClose ? beforeClose[1] : content).trim()
 })
 
+// Diffs compare markdown against markdown, so bold/italic markers line up
+// with what the improve endpoint sends back.
 const diffParts = computed((): Change[] => {
   if (suggestion.value === null) return []
-  const original = editor.value?.getText() ?? ''
+  const original = editor.value ? htmlToMarkdown(editor.value.getHTML()) : ''
   return diffWords(original, suggestion.value)
 })
 
 const noChanges = computed(() =>
-  suggestion.value !== null && suggestion.value === (editor.value?.getText() ?? ''),
+  suggestion.value !== null &&
+  suggestion.value === (editor.value ? htmlToMarkdown(editor.value.getHTML()) : ''),
 )
 
 async function runImprove(clarification?: { question: string; answer: string }) {
   if (!editor.value) return
-  const text = editor.value.getText().trim()
+  // Markdown keeps the user's bold/italic through the LLM round-trip; for
+  // unformatted text this is identical to plain text.
+  const text = htmlToMarkdown(editor.value.getHTML()).trim()
   if (!text) return
 
   error.value = ''
@@ -280,8 +318,8 @@ async function renderDiagram(code: string) {
 
 function acceptSuggestion() {
   if (!editor.value || suggestion.value === null) return
-  editor.value.commands.setContent(suggestion.value)
-  emit('update:modelValue', suggestion.value)
+  editor.value.commands.setContent(markdownToHtml(suggestion.value))
+  emit('update:modelValue', editor.value.getText().trim() ? editor.value.getHTML() : '')
   suggestion.value = null
   rationale.value = ''
   diagramSvg.value = ''
@@ -377,6 +415,16 @@ function rejectSuggestion() {
 
 .tiptap-toolbar__error {
   color: var(--rvo-color-rood);
+}
+
+.tiptap-mark-btn {
+  min-inline-size: 2rem;
+  justify-content: center;
+}
+
+.tiptap-mark-btn--active {
+  background: var(--rvo-color-hemelblauw-150, #d9ebf7);
+  border-radius: var(--rvo-border-radius-sm);
 }
 
 .tiptap-clarification__question {

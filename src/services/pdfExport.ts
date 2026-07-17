@@ -1,6 +1,7 @@
 import type { TDocumentDefinitions, Content } from 'pdfmake/interfaces'
 import type { Answers, Question, QuestionAttachment, RiskLevelValue, FormConfig } from '../models/Assessment'
 import { parseTableAnswer } from '../utils/tableAnswer'
+import { htmlToParagraphs } from '../utils/htmlRuns'
 import { fetchImageDataUrl } from './llmService'
 
 function stripHtml(html: string): string {
@@ -21,6 +22,22 @@ function formatAnswer(value: string | string[] | undefined): string {
   if (!value) return '(niet ingevuld)'
   if (Array.isArray(value)) return value.map(stripHtml).join(', ') || '(niet ingevuld)'
   return stripHtml(value) || '(niet ingevuld)'
+}
+
+/** Styled paragraphs (bold/italic runs) for a string answer, or null when the
+ *  value flattens to nothing so the caller falls back to "(niet ingevuld)". */
+function styledAnswerContent(value: string): Content[] | null {
+  const paragraphs = htmlToParagraphs(value)
+  if (paragraphs.length === 0) return null
+  return paragraphs.map((p, i) => ({
+    text: p.runs.map((r) => ({
+      text: (r.breakBefore ? '\n' : '') + r.text,
+      bold: r.bold || undefined,
+      italics: r.italics || undefined,
+    })),
+    style: 'answerText',
+    margin: [0, 0, 0, i === paragraphs.length - 1 ? 8 : 4] as [number, number, number, number],
+  }))
 }
 
 /** Real pdfmake table (header + rows) for a table question, or null when the
@@ -218,13 +235,14 @@ export async function exportToPdf(
                   style: 'questionText',
                   margin: [0, 0, 0, 2] as [number, number, number, number],
                 },
-                ...((hasAnswer && tableAnswerContent(question, answer)) || [
-                  {
-                    text: hasAnswer ? formatAnswer(answer) : '(niet ingevuld)',
-                    style: hasAnswer ? 'answerText' : 'emptyAnswer',
-                    margin: [0, 0, 0, 8] as [number, number, number, number],
-                  },
-                ]),
+                ...((hasAnswer && tableAnswerContent(question, answer)) ||
+                  (hasAnswer && typeof answer === 'string' && styledAnswerContent(answer)) || [
+                    {
+                      text: hasAnswer ? formatAnswer(answer) : '(niet ingevuld)',
+                      style: hasAnswer ? 'answerText' : 'emptyAnswer',
+                      margin: [0, 0, 0, 8] as [number, number, number, number],
+                    },
+                  ]),
                 ...attachmentContent(attachments[question.id] ?? [], dataUrls),
               ],
             },

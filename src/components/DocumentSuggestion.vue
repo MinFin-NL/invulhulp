@@ -240,11 +240,11 @@ const isInsufficient = computed(
 
 const diffParts = computed((): Change[] => {
   if (suggestion.value === null || isInsufficient.value) return []
-  return diffWords(props.currentValue, suggestion.value)
+  return diffWords(answerPlainText(props.currentValue), suggestion.value)
 })
 
 const noChanges = computed(
-  () => suggestion.value !== null && suggestion.value === props.currentValue,
+  () => suggestion.value !== null && suggestion.value === answerPlainText(props.currentValue),
 )
 
 async function requestExtraction() {
