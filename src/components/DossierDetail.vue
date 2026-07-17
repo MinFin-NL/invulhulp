@@ -54,6 +54,9 @@
             Gedeeld door {{ store.activeDossier.ownerName ?? 'een collega' }} — u heeft leesrechten.
           </div>
         </div>
+        <div v-if="shareError" class="rvo-alert rvo-alert--error rvo-alert--padding-sm" role="alert">
+          <div class="rvo-alert__container">{{ shareError }}</div>
+        </div>
       </section>
 
       <!-- Brondocumenten upload -->
@@ -306,6 +309,7 @@ const { progressFor } = useFormProgress()
 const renameDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const deleteDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const shareDialog = ref<InstanceType<typeof ShareDialog> | null>(null)
+const shareError = ref('')
 const aiModeErrorDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const aiModeErrorFormId = ref<string | null>(null)
 
@@ -364,6 +368,7 @@ async function openShareDialog() {
   const id = store.activeDossierId
   const dossier = id ? store.dossiers[id] : null
   if (!id || !dossier) return
+  shareError.value = ''
   let grants
   try {
     grants = (await fetchDossier(id)).grants
@@ -381,8 +386,12 @@ async function openShareDialog() {
       })
       dossier.myRole = saved.myRole
       grants = saved.grants
-    } catch {
-      return // offline — sharing needs the server
+    } catch (e) {
+      // Sharing needs the server; tell the user why it won't open.
+      shareError.value = e instanceof TypeError
+        ? 'Delen lukt niet: geen verbinding met de server.'
+        : `Delen lukt niet: ${e instanceof Error ? e.message : String(e)}`
+      return
     }
   }
   shareDialog.value?.open(grants)
