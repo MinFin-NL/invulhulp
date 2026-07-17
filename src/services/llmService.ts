@@ -217,8 +217,11 @@ export async function listDocuments(sessionId: string): Promise<ServerDocument[]
   return data.documents
 }
 
-export async function deleteDocument(docId: string): Promise<void> {
-  await fetch(`/api/documents/${encodeURIComponent(docId)}`, { method: 'DELETE' })
+export async function deleteDocument(docId: string, sessionId: string): Promise<void> {
+  await fetch(
+    `/api/documents/${encodeURIComponent(docId)}?session_id=${encodeURIComponent(sessionId)}`,
+    { method: 'DELETE' },
+  )
 }
 
 export interface UploadedImage {
@@ -241,19 +244,21 @@ export async function uploadImage(file: File, sessionId: string): Promise<Upload
   return { imageId: data.image_id, filename: data.filename, mime: data.mime, size: data.size }
 }
 
-/** Same-origin URL for an attachment image; session-cookie auth applies. */
-export function imageUrl(imageId: string): string {
-  return `/api/images/${encodeURIComponent(imageId)}`
+/** Same-origin URL for an attachment image; session-cookie auth applies.
+ *  session_id is a query param (these URLs land in <img src>) so the backend
+ *  can resolve the dossier's storage owner for shared dossiers. */
+export function imageUrl(imageId: string, sessionId: string): string {
+  return `/api/images/${encodeURIComponent(imageId)}?session_id=${encodeURIComponent(sessionId)}`
 }
 
-export async function fetchImageArrayBuffer(imageId: string): Promise<ArrayBuffer> {
-  const res = await fetch(imageUrl(imageId))
+export async function fetchImageArrayBuffer(imageId: string, sessionId: string): Promise<ArrayBuffer> {
+  const res = await fetch(imageUrl(imageId, sessionId))
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.arrayBuffer()
 }
 
-export async function fetchImageDataUrl(imageId: string): Promise<string> {
-  const res = await fetch(imageUrl(imageId))
+export async function fetchImageDataUrl(imageId: string, sessionId: string): Promise<string> {
+  const res = await fetch(imageUrl(imageId, sessionId))
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   const blob = await res.blob()
   return new Promise((resolve, reject) => {
@@ -264,8 +269,8 @@ export async function fetchImageDataUrl(imageId: string): Promise<string> {
   })
 }
 
-export async function deleteImage(imageId: string): Promise<void> {
-  await fetch(imageUrl(imageId), { method: 'DELETE' })
+export async function deleteImage(imageId: string, sessionId: string): Promise<void> {
+  await fetch(imageUrl(imageId, sessionId), { method: 'DELETE' })
 }
 
 export async function verifyDocuments(sessionId: string, docIds: string[]): Promise<{ found: string[]; missing: string[] }> {

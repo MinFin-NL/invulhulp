@@ -37,9 +37,11 @@ if "--dev" in sys.argv:
 import admin_users
 import auth
 import docstore
+import dossiers
 import imagestore
 import llm
 import rag
+import users
 
 load_dotenv()
 
@@ -101,6 +103,8 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(admin_users.router)
+app.include_router(dossiers.router)
+app.include_router(users.router)
 
 SYSTEM_PROMPT = (
     "Je bent een assistent die helpt bij het invullen van AI Impact Assessments "
@@ -912,6 +916,9 @@ async def extract_from_documents_stream(req: ExtractRequest) -> StreamingRespons
 async def index_document(req: IndexDocumentRequest, request: Request) -> IndexDocumentResponse:
     if not req.content.strip():
         raise HTTPException(status_code=400, detail="Document is leeg.")
+    # Resolve the storage owner up front: editors' uploads must land in the
+    # dossier owner's directory or they'd be invisible to everyone else.
+    user_sub = await dossiers.resolve_session_access(request, req.session_id, "editor")
     try:
         index_task = rag.index_document(
             session_id=req.session_id,
@@ -924,9 +931,8 @@ async def index_document(req: IndexDocumentRequest, request: Request) -> IndexDo
         index_result, ontology = await asyncio.gather(index_task, ontology_task)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Indexering mislukt: [{type(e).__name__}] {e}") from e
-    # Persist the source text per user so a fresh browser (or wiped
+    # Persist the source text per storage owner so a fresh browser (or wiped
     # localStorage) can restore the dossier's documents from the server.
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
     try:
         await asyncio.to_thread(
             docstore.save_document,
@@ -950,16 +956,16 @@ async def index_document(req: IndexDocumentRequest, request: Request) -> IndexDo
 
 @app.get("/api/documents")
 async def list_documents(session_id: str, request: Request) -> dict:
-    """The logged-in user's stored documents for one dossier (session)."""
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    """The stored documents for one dossier (session) the caller may view."""
+    user_sub = await dossiers.resolve_session_access(request, session_id, "viewer")
     docs = await asyncio.to_thread(docstore.list_documents, user_sub, session_id)
     return {"documents": docs}
 
 
 @app.delete("/api/documents/{doc_id}")
-async def remove_document(doc_id: str, request: Request) -> dict:
+async def remove_document(doc_id: str, session_id: str, request: Request) -> dict:
+    user_sub = await dossiers.resolve_session_access(request, session_id, "editor")
     await rag.delete_document(doc_id)
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
     await asyncio.to_thread(docstore.delete_document, user_sub, doc_id)
     return {"deleted": doc_id}
 
@@ -970,16 +976,17 @@ class VerifyDocumentsRequest(BaseModel):
 
 
 @app.post("/api/documents/verify")
-async def verify_documents(req: VerifyDocumentsRequest) -> dict:
+async def verify_documents(req: VerifyDocumentsRequest, request: Request) -> dict:
     """Return which doc_ids are actually present in the vector store."""
+    await dossiers.resolve_session_access(request, req.session_id, "viewer")
     found = await rag.get_indexed_doc_ids(req.session_id, req.doc_ids)
     return {"found": found, "missing": [d for d in req.doc_ids if d not in found]}
 
 
 @app.delete("/api/sessions/{session_id}")
 async def remove_session(session_id: str, request: Request) -> dict:
+    user_sub = await dossiers.resolve_session_access(request, session_id, "owner")
     await rag.delete_session(session_id)
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
     await asyncio.to_thread(docstore.delete_session, user_sub, session_id)
     await asyncio.to_thread(imagestore.delete_session_images, user_sub, session_id)
     return {"deleted": session_id}
@@ -1010,7 +1017,7 @@ async def upload_image(
     # Don't trust the declared content-type — check the file signature.
     if not data.startswith(_IMAGE_MAGIC[mime]):
         raise HTTPException(status_code=400, detail="Bestand is geen geldige PNG- of JPEG-afbeelding.")
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    user_sub = await dossiers.resolve_session_access(request, session_id, "editor")
     meta = await asyncio.to_thread(
         imagestore.save_image,
         user_sub=user_sub,
@@ -1028,10 +1035,11 @@ async def upload_image(
 
 
 @app.get("/api/images/{image_id}")
-async def get_image(image_id: str, request: Request) -> Response:
-    # Lookup is scoped to the requesting user's directory, so ownership is
-    # enforced by the path itself.
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
+async def get_image(image_id: str, session_id: str, request: Request) -> Response:
+    # session_id is a query param because these URLs land in <img src>.
+    # Lookup is scoped to the resolved storage owner's directory, so a viewer
+    # of the dossier reads from the owner's files.
+    user_sub = await dossiers.resolve_session_access(request, session_id, "viewer")
     result = await asyncio.to_thread(imagestore.load_image, user_sub, image_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Afbeelding niet gevonden.")
@@ -1045,8 +1053,8 @@ async def get_image(image_id: str, request: Request) -> Response:
 
 
 @app.delete("/api/images/{image_id}")
-async def remove_image(image_id: str, request: Request) -> dict:
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
+async def remove_image(image_id: str, session_id: str, request: Request) -> dict:
+    user_sub = await dossiers.resolve_session_access(request, session_id, "editor")
     await asyncio.to_thread(imagestore.delete_image, user_sub, image_id)
     return {"deleted": image_id}
 
@@ -1084,9 +1092,11 @@ def _rag_user_message(
 
 
 @app.post("/api/extract/rag/stream")
-async def extract_rag_stream(req: RagExtractRequest) -> StreamingResponse:
+async def extract_rag_stream(req: RagExtractRequest, request: Request) -> StreamingResponse:
     if not req.target_question.strip():
         raise HTTPException(status_code=400, detail="Doelvraag mag niet leeg zijn.")
+    # Role check before the stream starts so a denied caller gets a clean 403.
+    await dossiers.resolve_session_access(request, req.session_id, "editor")
     try:
         chunks = await rag.retrieve(
             session_id=req.session_id,

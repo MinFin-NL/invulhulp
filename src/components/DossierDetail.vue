@@ -20,6 +20,16 @@
           </div>
           <div class="dossier-actions">
             <button
+              v-if="store.isOwner"
+              type="button"
+              class="rvo-button rvo-button--tertiary rvo-button--size-sm dossier-actions__share"
+              @click="openShareDialog"
+            >
+              <span class="dossier-actions__share-icon" aria-hidden="true" />
+              Delen
+            </button>
+            <button
+              v-if="store.canEdit"
               type="button"
               class="rvo-button rvo-button--tertiary rvo-button--size-sm"
               @click="openRenameDialog"
@@ -27,6 +37,7 @@
               Hernoemen
             </button>
             <button
+              v-if="store.isOwner"
               type="button"
               class="rvo-button rvo-button--warning-subtle rvo-button--size-sm"
               @click="openDeleteDialog"
@@ -38,6 +49,11 @@
         <p class="rvo-text dossier-header__desc">
           Dit dossier groepeert de brondocumenten en formulierantwoorden voor één project of systeem.
         </p>
+        <div v-if="store.readOnly" class="rvo-alert rvo-alert--info rvo-alert--padding-sm">
+          <div class="rvo-alert__container">
+            Gedeeld door {{ store.activeDossier.ownerName ?? 'een collega' }} — u heeft leesrechten.
+          </div>
+        </div>
       </section>
 
       <!-- Brondocumenten upload -->
@@ -65,7 +81,7 @@
           </p>
         </div>
 
-        <div class="docs-controls">
+        <div v-if="store.canEdit" class="docs-controls">
           <label
             class="rvo-button rvo-button--primary docs-upload-btn"
             :class="{ 'docs-upload-btn--busy': isUploading }"
@@ -145,6 +161,7 @@
                 </div>
               </div>
               <button
+                v-if="store.canEdit"
                 type="button"
                 class="rvo-link docs-item__remove"
                 @click="store.removeDocument(doc.id)"
@@ -197,6 +214,7 @@
                   {{ statusFor(form.id)?.status === 'bezig' ? 'Verder' : 'Openen' }}
                 </button>
                 <AiModeToggle
+                  v-if="store.canEdit"
                   :form-id="form.id"
                   :has-documents="readyDocIds.length > 0"
                   :is-active="aiModeActive.has(form.id)"
@@ -245,6 +263,11 @@
       variant="warning"
       @confirm="onDeleteConfirmed"
     />
+    <ShareDialog
+      v-if="store.activeDossierId"
+      ref="shareDialog"
+      :dossier-id="store.activeDossierId"
+    />
   </div>
 </template>
 
@@ -260,7 +283,9 @@ import type { FormProgress } from '../utils/formProgress'
 import DocumentOntology from './DocumentOntology.vue'
 import EntityGraph from './EntityGraph.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
+import ShareDialog from './ShareDialog.vue'
 import AiModeToggle from './AiModeToggle.vue'
+import { fetchDossier, saveDossier } from '../services/dossierService'
 
 defineEmits<{ open: [id: string] }>()
 
@@ -280,6 +305,7 @@ const { progressFor } = useFormProgress()
 
 const renameDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const deleteDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
+const shareDialog = ref<InstanceType<typeof ShareDialog> | null>(null)
 const aiModeErrorDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const aiModeErrorFormId = ref<string | null>(null)
 
@@ -332,6 +358,34 @@ function openRenameDialog() {
 function openDeleteDialog() {
   if (!store.activeDossierId) return
   deleteDialog.value?.open()
+}
+
+async function openShareDialog() {
+  const id = store.activeDossierId
+  const dossier = id ? store.dossiers[id] : null
+  if (!id || !dossier) return
+  let grants
+  try {
+    grants = (await fetchDossier(id)).grants
+  } catch {
+    // Not on the server yet (never synced) — push it now so it can be shared.
+    try {
+      const saved = await saveDossier({
+        id,
+        name: dossier.name,
+        createdAt: dossier.createdAt,
+        updatedAt: dossier.updatedAt,
+        sessionId: dossier.sessionId,
+        activeFormId: dossier.activeFormId,
+        forms: dossier.forms,
+      })
+      dossier.myRole = saved.myRole
+      grants = saved.grants
+    } catch {
+      return // offline — sharing needs the server
+    }
+  }
+  shareDialog.value?.open(grants)
 }
 
 function onRenameConfirmed(name: string) {
@@ -644,6 +698,24 @@ const trackGroups = computed(() => {
   display: flex;
   gap: var(--rvo-space-xs);
   align-items: center;
+}
+
+.dossier-actions__share {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--rvo-space-3xs);
+}
+
+/* Static mask URL so Vite resolves the NLDS icon in the production build —
+   a runtime url(...) binding renders as a white square. */
+.dossier-actions__share-icon {
+  display: inline-block;
+  inline-size: 1rem;
+  block-size: 1rem;
+  flex-shrink: 0;
+  background-color: currentColor;
+  -webkit-mask: url('@nl-rvo/assets/icons/functioneel/delen.svg') center / contain no-repeat;
+  mask: url('@nl-rvo/assets/icons/functioneel/delen.svg') center / contain no-repeat;
 }
 
 .docs-title-row {

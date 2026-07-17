@@ -123,11 +123,11 @@ async function imageDimensions(att: QuestionAttachment, data: ArrayBuffer): Prom
 
 /** Paragraphs for a question's attachments: the image (scaled to fit the
  *  page) plus its caption. Unfetchable images degrade to a placeholder. */
-async function attachmentParagraphs(attachments: QuestionAttachment[]): Promise<Paragraph[]> {
+async function attachmentParagraphs(attachments: QuestionAttachment[], sessionId: string): Promise<Paragraph[]> {
   const paragraphs: Paragraph[] = []
   for (const att of attachments) {
     try {
-      const data = await fetchImageArrayBuffer(att.id)
+      const data = await fetchImageArrayBuffer(att.id, sessionId)
       const { width, height } = await imageDimensions(att, data)
       paragraphs.push(
         new Paragraph({
@@ -184,6 +184,7 @@ export async function exportToWord(
   goDecision: boolean | null,
   systemName?: string,
   attachments: Record<string, QuestionAttachment[]> = {},
+  sessionId = '',
 ): Promise<void> {
   const hasConditionalPartB = formConfig.features.conditionalPartB
   const riskInfo = riskLevel ? (formConfig.riskLevelInfo?.[riskLevel] ?? null) : null
@@ -305,7 +306,7 @@ export async function exportToWord(
               spacing: { after: 160 },
             }),
           ]),
-          ...(await attachmentParagraphs(attachments[question.id] ?? [])),
+          ...(await attachmentParagraphs(attachments[question.id] ?? [], sessionId)),
         )
       }
     }

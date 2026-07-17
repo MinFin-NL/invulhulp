@@ -91,13 +91,14 @@ export async function exportToPdf(
   goDecision: boolean | null,
   systemName?: string,
   attachments: Record<string, QuestionAttachment[]> = {},
+  sessionId = '',
 ): Promise<void> {
   // Pre-fetch all attachment bytes as data URLs (pdfmake embeds base64).
   const allAttachments = Object.values(attachments).flat()
   const dataUrls = new Map<string, string>()
   await Promise.allSettled(
     allAttachments.map(async (att) => {
-      dataUrls.set(att.id, await fetchImageDataUrl(att.id))
+      dataUrls.set(att.id, await fetchImageDataUrl(att.id, sessionId))
     }),
   )
   const hasConditionalPartB = formConfig.features.conditionalPartB

@@ -31,11 +31,12 @@ services:
       OIDC_POST_LOGIN_REDIRECT: http://localhost:8080/
       OIDC_POST_LOGOUT_REDIRECT: http://localhost:8080/
       SESSION_SECRET: ${SESSION_SECRET:-dev-session-secret-change-me-please}
-      # Persistent data (LanceDB chunks + per-user document/image stores) —
+      # Persistent data (LanceDB chunks + document/image/dossier stores) —
       # mirrors the /data Azure Files mount in production.
       LANCEDB_PATH: /data/lancedb
       DOCS_PATH: /data/docs
       IMAGES_PATH: /data/images
+      DOSSIERS_PATH: /data/dossiers
     volumes:
       - backend_data:/data
     depends_on:

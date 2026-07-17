@@ -42,6 +42,7 @@
             :name="question.id"
             :value="option"
             :checked="radioValue === option"
+            :disabled="store.readOnly"
             :aria-required="question.importance === 'mandatory' ? 'true' : undefined"
             @change="onRadioSelect(option)"
           />
@@ -81,6 +82,7 @@
             :name="question.id"
             :value="option"
             :checked="checkboxValues.includes(option)"
+            :disabled="store.readOnly"
             @change="onCheckboxToggle(option)"
           />
           <span class="rvo-checkbox__label">{{ option }}</span>
@@ -128,7 +130,7 @@
 
     <!-- One suggestion panel per source form that has a mapping for this question -->
     <CrossFormSuggestion
-      v-for="mapping in matchingMappings"
+      v-for="mapping in store.readOnly ? [] : matchingMappings"
       :key="`${mapping.sourceFormId}-${mapping.targetQuestionId}`"
       :mapping="mapping"
       :target-question-text="question.text"
@@ -139,7 +141,7 @@
 
     <!-- Document extraction panel (only when user has uploaded documents) -->
     <DocumentSuggestion
-      v-if="store.documents.length > 0"
+      v-if="store.canEdit && store.documents.length > 0"
       :target-question-text="question.text"
       :question-type="question.type"
       :question-options="question.options"

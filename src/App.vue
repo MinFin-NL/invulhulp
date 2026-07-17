@@ -79,6 +79,9 @@ onMounted(async () => {
   await auth.fetchMe()
   if (auth.status === 'authenticated') {
     const store = useAssessmentStore()
+    // Server first: shared dossiers and other-device edits come in before
+    // ensureDossier() would auto-create a spurious empty dossier.
+    await store.loadFromServer()
     store.ensureDossier()
     store.syncDocumentsFromServer()
   }

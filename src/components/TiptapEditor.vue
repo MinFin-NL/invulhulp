@@ -96,7 +96,7 @@
     <!-- Toolbar row: improve button + error -->
     <div class="tiptap-toolbar">
       <button
-        v-if="suggestion === null && !streamingText && pendingClarification === null"
+        v-if="!store.readOnly && suggestion === null && !streamingText && pendingClarification === null"
         type="button"
         :disabled="isLoading || !hasContent"
         class="rvo-button rvo-button--tertiary rvo-button--size-sm"
@@ -118,6 +118,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import { diffWords } from 'diff'
 import type { Change } from 'diff'
 import { improveTextStream } from '../services/llmService'
+import { useAssessmentStore } from '../stores/assessmentStore'
 
 // Mermaid is heavy (~1.5 MB of chunks); load it lazily, only when the model
 // actually returns a diagram.
@@ -140,6 +141,8 @@ const emit = defineEmits<{
   'update:modelValue': [value: string]
 }>()
 
+const store = useAssessmentStore()
+
 const editor = useEditor({
   extensions: [
     StarterKit,
@@ -148,10 +151,17 @@ const editor = useEditor({
     }),
   ],
   content: props.modelValue,
+  // Viewers of a shared dossier can read but not type.
+  editable: !store.readOnly,
   onUpdate({ editor: e }) {
     emit('update:modelValue', e.getText())
   },
 })
+
+watch(
+  () => store.readOnly,
+  (ro) => editor.value?.setEditable(!ro),
+)
 
 watch(
   () => props.modelValue,

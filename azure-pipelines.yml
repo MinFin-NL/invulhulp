@@ -26,10 +26,11 @@ variables:
     value: ca-invulhulp-frontend-inno-d
   - name: KEYCLOAK_APP
     value: ca-keycloak-inno-d
-  # Persistent storage for the backend. Per-user document store lives on an
-  # Azure Files share mounted at /data. LanceDB chunks live in a Blob
-  # container (az:// URI) — NOT on the Files share: Lance commits manifests
-  # with rename-if-not-exists, which the SMB mount rejects (errno 95).
+  # Persistent storage for the backend. The document, image, and dossier
+  # stores (DOCS_PATH/IMAGES_PATH/DOSSIERS_PATH) live on an Azure Files share
+  # mounted at /data. LanceDB chunks live in a Blob container (az:// URI) —
+  # NOT on the Files share: Lance commits manifests with
+  # rename-if-not-exists, which the SMB mount rejects (errno 95).
   - name: STORAGE_ACCOUNT
     value: stinvulhulpinnod
   - name: FILE_SHARE
@@ -229,6 +230,7 @@ stages:
                       "AZURE_STORAGE_ACCOUNT_KEY=secretref:storage-key" \
                       "DOCS_PATH=/data/docs" \
                       "IMAGES_PATH=/data/images" \
+                      "DOSSIERS_PATH=/data/dossiers" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
                       "AZURE_OPENAI_DEPLOYMENT=gpt-5.3-chat" \
                       "AZURE_OPENAI_API_VERSION=2025-04-01-preview" \
@@ -265,6 +267,7 @@ stages:
                       "AZURE_STORAGE_ACCOUNT_KEY=secretref:storage-key" \
                       "DOCS_PATH=/data/docs" \
                       "IMAGES_PATH=/data/images" \
+                      "DOSSIERS_PATH=/data/dossiers" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
                       "AZURE_OPENAI_DEPLOYMENT=gpt-5.3-chat" \
                       "AZURE_OPENAI_API_VERSION=2025-04-01-preview" \

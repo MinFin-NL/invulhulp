@@ -40,6 +40,10 @@
               <span class="dossier-card__icon" aria-hidden="true" />
               <span class="dossier-card__body">
                 <span class="rvo-heading rvo-heading--md dossier-card__name">{{ d.name }}</span>
+                <span v-if="d.sharedWithMe" class="rvo-tag rvo-tag--info rvo-tag--pill dossier-card__shared">
+                  Gedeeld door {{ d.ownerName ?? 'een collega' }}
+                  <template v-if="d.myRole"> · {{ roleLabels[d.myRole] }}</template>
+                </span>
                 <span class="rvo-text rvo-text--sm dossier-card__meta">
                   {{ d.documents.length }} {{ d.documents.length === 1 ? 'document' : 'documenten' }}
                   · {{ summaryFor(d).done }}/{{ summaryFor(d).total }} formulieren afgerond
@@ -77,6 +81,8 @@ import ConfirmDialog from './ConfirmDialog.vue'
 const store = useAssessmentStore()
 const { dossierSummary } = useFormProgress()
 const createDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
+
+const roleLabels = { viewer: 'Lezen', editor: 'Bewerken', owner: 'Eigenaar' } as const
 
 onMounted(() => {
   store.ensureDossier()
@@ -198,6 +204,11 @@ function onCreateConfirmed(name: string) {
 
 .dossier-card__meta {
   color: var(--rvo-color-grijs-800);
+}
+
+.dossier-card__shared {
+  align-self: flex-start;
+  font-size: var(--rvo-font-size-xs);
 }
 
 .dossier-card__date {

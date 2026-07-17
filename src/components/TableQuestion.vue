@@ -27,11 +27,13 @@
                 :value="row[colIndex] ?? ''"
                 :aria-label="`${col.label}, rij ${rowIndex + 1}`"
                 :placeholder="col.hint"
+                :disabled="store.readOnly"
                 @input="onCellInput(rowIndex, colIndex, $event)"
               />
             </td>
             <td class="rvo-table-cell invulhulp-table-question__actions-cell">
               <button
+                v-if="!store.readOnly"
                 type="button"
                 class="rvo-button rvo-button--tertiary rvo-button--sm invulhulp-table-question__remove-btn"
                 :aria-label="`Rij ${rowIndex + 1} verwijderen`"
@@ -47,6 +49,7 @@
     </div>
 
     <button
+      v-if="!store.readOnly"
       type="button"
       class="rvo-button rvo-button--tertiary rvo-button--sm invulhulp-table-question__add-btn"
       :disabled="table.rows.length >= maxRows"
@@ -64,6 +67,7 @@
         class="rvo-textarea invulhulp-table-question__notes-input"
         rows="3"
         :value="table.notes"
+        :disabled="store.readOnly"
         @input="onNotesInput($event)"
       ></textarea>
     </div>
@@ -74,11 +78,14 @@
 import { computed, reactive, watch } from 'vue'
 import type { Question, TableColumn } from '../models/Assessment'
 import { parseTableAnswer, serializeTableAnswer, type TableAnswer } from '../utils/tableAnswer'
+import { useAssessmentStore } from '../stores/assessmentStore'
 
 const props = defineProps<{
   question: Question
   modelValue: string
 }>()
+
+const store = useAssessmentStore()
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]

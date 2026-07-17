@@ -6,7 +6,7 @@
           <img
             v-if="!broken.has(att.id)"
             class="question-attachments__thumb"
-            :src="imageUrl(att.id)"
+            :src="imageUrl(att.id, store.sessionId)"
             :alt="att.caption || att.filename"
             loading="lazy"
             @error="broken.add(att.id)"
@@ -15,6 +15,7 @@
             (afbeelding niet beschikbaar)
           </span>
           <button
+            v-if="store.canEdit"
             type="button"
             class="question-attachments__delete"
             :aria-label="`Verwijder afbeelding ${att.filename}`"
@@ -32,13 +33,14 @@
             class="utrecht-textbox utrecht-textbox--sm question-attachments__caption"
             placeholder="Bijschrift (optioneel)"
             :value="att.caption"
+            :disabled="store.readOnly"
             @input="store.updateAttachmentCaption(questionId, att.id, ($event.target as HTMLInputElement).value)"
           />
         </figcaption>
       </figure>
     </div>
 
-    <div class="question-attachments__actions">
+    <div v-if="store.canEdit" class="question-attachments__actions">
       <input
         ref="fileInput"
         type="file"
@@ -138,6 +140,7 @@ function onFilesSelected(event: Event) {
 
 // Scoped to this component's root so it doesn't fight Tiptap's paste handling.
 function onPaste(event: ClipboardEvent) {
+  if (store.readOnly) return
   const files = Array.from(event.clipboardData?.files ?? []).filter((f) => ACCEPTED.has(f.type))
   if (files.length === 0) return
   event.preventDefault()

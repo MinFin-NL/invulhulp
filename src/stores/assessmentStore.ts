@@ -1,6 +1,13 @@
 import { defineStore } from 'pinia'
 import type { Answers, AnswerSourceMeta, QuestionAttachment, RiskLevelValue } from '../models/Assessment'
 import { indexDocument, deleteDocument, deleteImage, listDocuments } from '../services/llmService'
+import {
+  deleteDossierOnServer,
+  fetchDossiers,
+  saveDossier,
+  type DossierRole,
+  type ServerDossier,
+} from '../services/dossierService'
 
 export type FormId = string
 export type DossierId = string
@@ -56,6 +63,11 @@ export interface Dossier {
   activeFormId: FormId | null
   forms: Record<FormId, FormState>
   documents: SourceDocument[]
+  // Sharing metadata from the server. Absent on dossiers that never synced
+  // (old persisted state, offline) — those are treated as fully owned.
+  myRole?: DossierRole
+  ownerName?: string
+  sharedWithMe?: boolean
 }
 
 /** Top-level screen: the dossier overview or a single dossier (whose own
@@ -92,6 +104,16 @@ function newDossier(name: string): Dossier {
     documents: [],
   }
 }
+
+// Debounce timers for the server push, keyed by dossier id. Module scope on
+// purpose: timers must never end up in the persisted state.
+const pushTimers = new Map<DossierId, ReturnType<typeof setTimeout>>()
+const PUSH_DEBOUNCE_MS = 1500
+
+// While the server dossier list is loading, ensureDossier() must not
+// auto-create anything: a user whose only dossiers are shared ones would get
+// a spurious empty "Dossier 1" that then syncs to the server.
+let serverLoadPending = false
 
 interface StoreState {
   dossiers: Record<DossierId, Dossier>
@@ -152,10 +174,25 @@ export const useAssessmentStore = defineStore('assessment', {
     isSectionCompleted(): (sectionId: string) => boolean {
       return (sectionId: string) => this.activeForm.completedSections.includes(sectionId)
     },
+
+    // Sharing roles: a dossier without myRole never synced to the server and
+    // is fully the user's own — treat as owner.
+    canEdit(): boolean {
+      const role = this.activeDossier.myRole
+      return role === undefined || role !== 'viewer'
+    },
+    isOwner(): boolean {
+      const role = this.activeDossier.myRole
+      return role === undefined || role === 'owner'
+    },
+    readOnly(): boolean {
+      return !this.canEdit
+    },
   },
 
   actions: {
     ensureDossier() {
+      if (serverLoadPending) return
       // One-shot migration from pre-dossier persisted state
       const legacy = this.$state as StoreState
       if (
@@ -187,10 +224,118 @@ export const useAssessmentStore = defineStore('assessment', {
     },
 
     /** Stamp a dossier as edited; drives "Laatst bewerkt" on the overview.
-     *  Only content mutations call this — navigating is not an edit. */
+     *  Only content mutations call this — navigating is not an edit. This is
+     *  the single funnel for content changes, so it also schedules the
+     *  debounced push to the server. */
     touch(id?: DossierId | null) {
       const d = (id ?? this.activeDossierId) ? this.dossiers[(id ?? this.activeDossierId)!] : null
-      if (d) d.updatedAt = Date.now()
+      if (d) {
+        d.updatedAt = Date.now()
+        this.schedulePush(d.id)
+      }
+    },
+
+    /** Debounced best-effort push of one dossier to the server. Viewers never
+     *  push (the server would reject with 403 anyway). */
+    schedulePush(id: DossierId) {
+      const dossier = this.dossiers[id]
+      if (!dossier || dossier.myRole === 'viewer') return
+      const existing = pushTimers.get(id)
+      if (existing) clearTimeout(existing)
+      pushTimers.set(
+        id,
+        setTimeout(() => {
+          pushTimers.delete(id)
+          const d = this.dossiers[id]
+          if (!d) return
+          saveDossier({
+            id: d.id,
+            name: d.name,
+            createdAt: d.createdAt,
+            updatedAt: d.updatedAt,
+            sessionId: d.sessionId,
+            activeFormId: d.activeFormId,
+            forms: d.forms,
+          }).catch(() => {
+            // offline or denied — localStorage keeps the state, next edit retries
+          })
+        }, PUSH_DEBOUNCE_MS),
+      )
+    },
+
+    /** Load the user's dossiers (own + shared) from the server and merge them
+     *  into local state. Call once after login, before ensureDossier(). */
+    async loadFromServer() {
+      serverLoadPending = true
+      let serverDossiers: ServerDossier[]
+      try {
+        serverDossiers = await fetchDossiers()
+      } catch {
+        return // offline or older backend — keep localStorage state
+      } finally {
+        serverLoadPending = false
+      }
+      const serverById = new Map(serverDossiers.map((d) => [d.id, d]))
+
+      // Drop local dossiers that synced before but are now denied/gone: the
+      // localStorage cache is per-browser, not per-user, so this is either a
+      // revoked share or another account's cache. Never re-push those.
+      for (const id of [...this.dossierOrder]) {
+        const local = this.dossiers[id]
+        if (local?.myRole !== undefined && !serverById.has(id)) {
+          delete this.dossiers[id]
+          this.dossierOrder = this.dossierOrder.filter((x) => x !== id)
+        }
+      }
+
+      for (const server of serverDossiers) {
+        const local = this.dossiers[server.id]
+        if (!local) {
+          // New to this browser (shared with me, or made on another device)
+          this.dossiers[server.id] = {
+            id: server.id,
+            name: server.name,
+            createdAt: server.createdAt,
+            updatedAt: server.updatedAt,
+            sessionId: server.sessionId,
+            activeFormId: null,
+            forms: server.forms ?? {},
+            documents: [],
+            myRole: server.myRole,
+            ownerName: server.ownerName ?? undefined,
+            sharedWithMe: server.sharedWithMe,
+          }
+          this.dossierOrder.push(server.id)
+          continue
+        }
+        // Known locally: server wins unless the local copy is strictly newer
+        // (offline edits) — then keep local content and push it back.
+        if ((server.updatedAt ?? 0) >= (local.updatedAt ?? 0)) {
+          local.name = server.name
+          local.forms = server.forms ?? {}
+          local.updatedAt = server.updatedAt
+        } else {
+          this.schedulePush(local.id)
+        }
+        local.sessionId = server.sessionId
+        local.myRole = server.myRole
+        local.ownerName = server.ownerName ?? undefined
+        local.sharedWithMe = server.sharedWithMe
+      }
+
+      // Migration: local dossiers the server has never seen (pre-sharing
+      // localStorage state). Skip pristine empty ones to avoid junk records.
+      for (const id of this.dossierOrder) {
+        const local = this.dossiers[id]
+        if (!local || local.myRole !== undefined || serverById.has(id)) continue
+        const pristine = Object.keys(local.forms).length === 0 && local.documents.length === 0
+        if (pristine) continue
+        this.schedulePush(id)
+      }
+
+      if (this.activeDossierId && !this.dossiers[this.activeDossierId]) {
+        this.activeDossierId = this.dossierOrder[0] ?? null
+      }
     },
 
     createDossier(name?: string): DossierId {
@@ -200,6 +345,7 @@ export const useAssessmentStore = defineStore('assessment', {
       this.dossierOrder.push(d.id)
       this.activeDossierId = d.id
       this.screen = 'dossier'
+      this.schedulePush(d.id)
       return d.id
     },
 
@@ -254,16 +400,14 @@ export const useAssessmentStore = defineStore('assessment', {
     deleteDossier(id: DossierId) {
       const dossier = this.dossiers[id]
       if (!dossier) return
-      // Best-effort cleanup of indexed documents on the backend
-      for (const doc of dossier.documents) {
-        deleteDocument(doc.id).catch(() => {})
+      const timer = pushTimers.get(id)
+      if (timer) {
+        clearTimeout(timer)
+        pushTimers.delete(id)
       }
-      // Best-effort cleanup of image attachments across all the dossier's forms
-      for (const form of Object.values(dossier.forms)) {
-        for (const list of Object.values(form.attachments ?? {})) {
-          for (const att of list) deleteImage(att.id).catch(() => {})
-        }
-      }
+      // Best-effort server-side cleanup: the dossier record cascade also
+      // removes the documents, images and vector chunks.
+      deleteDossierOnServer(id).catch(() => {})
       delete this.dossiers[id]
       this.dossierOrder = this.dossierOrder.filter((x) => x !== id)
       if (this.activeDossierId === id) {
@@ -434,7 +578,7 @@ export const useAssessmentStore = defineStore('assessment', {
       list.splice(idx, 1)
       this.touch()
       // best-effort server cleanup; UI removal already happened
-      deleteImage(imageId).catch(() => {})
+      deleteImage(imageId, this.activeDossier.sessionId).catch(() => {})
     },
 
     updateAttachmentCaption(questionId: string, imageId: string, caption: string) {
@@ -451,7 +595,7 @@ export const useAssessmentStore = defineStore('assessment', {
       dossier.documents = dossier.documents.filter((d) => d.id !== id)
       this.touch(dossier.id)
       try {
-        await deleteDocument(id)
+        await deleteDocument(id, dossier.sessionId)
       } catch {
         // best-effort; UI removal already happened
       }

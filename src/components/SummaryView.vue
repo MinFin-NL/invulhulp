@@ -219,6 +219,7 @@ function exportPdf() {
     store.goDecision,
     systemName.value || undefined,
     store.activeForm.attachments ?? {},
+    store.sessionId,
   )
 }
 
@@ -230,6 +231,7 @@ function exportWord() {
     store.goDecision,
     systemName.value || undefined,
     store.activeForm.attachments ?? {},
+    store.sessionId,
   )
 }
 
