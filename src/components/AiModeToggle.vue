@@ -14,7 +14,7 @@
       <span class="ai-mode-empty__actions">
         <button
           type="button"
-          class="rvo-button rvo-button--secondary rvo-button--size-sm"
+          class="rvo-button rvo-button--primary rvo-button--size-sm"
           @click="$emit('activate', formId)"
         >
           Probeer opnieuw
@@ -323,7 +323,8 @@ defineEmits<{
 
 .ai-mode-empty {
   display: flex;
-  align-items: flex-start;
+  flex-wrap: wrap;
+  align-items: center;
   gap: var(--rvo-space-xs);
   padding: var(--rvo-space-xs) var(--rvo-space-sm);
   background: #fdf6ec;
@@ -339,14 +340,13 @@ defineEmits<{
   align-items: center;
   color: #b8860b;
   flex-shrink: 0;
-  margin-block-start: 1px;
 }
 
 .ai-mode-empty__body {
   display: flex;
   flex-direction: column;
   gap: 1px;
-  flex-grow: 1;
+  flex: 1 1 10rem;
   min-width: 0;
 }
 
@@ -361,10 +361,10 @@ defineEmits<{
 }
 
 .ai-mode-empty__actions {
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--rvo-space-2xs);
-  flex-shrink: 0;
 }
 
 /* ── Keyframes ───────────────────────────────────────────────────────────── */

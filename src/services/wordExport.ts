@@ -6,11 +6,13 @@ import {
   TextRun,
   HeadingLevel,
   AlignmentType,
+  Header,
   Footer,
   PageNumber,
   Table,
   TableRow,
   TableCell,
+  TableLayoutType,
   WidthType,
   ShadingType,
   BorderStyle,
@@ -20,6 +22,34 @@ import type { Answers, Question, QuestionAttachment, RiskLevelValue, FormConfig 
 import { parseTableAnswer } from '../utils/tableAnswer'
 import { htmlToParagraphs } from '../utils/htmlRuns'
 import { fetchImageArrayBuffer } from './llmService'
+
+// NL Design System (RVO) palette, mirrored from @nl-rvo/design-tokens so the
+// exported document reads as the same visual system as the app itself.
+const RVO = {
+  lintblauw: '154273',
+  donkerblauw: '01689B',
+  donkerblauwTint: 'D9E9F0',
+  groen: '39870C',
+  rood: 'D51B1E',
+  grijs900: '0F172A',
+  grijs700: '334155',
+  grijs500: '64748B',
+  grijs200: 'E2E8F0',
+  grijs050: 'F8FAFC',
+  wit: 'FFFFFF',
+}
+
+const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: RVO.wit }
+const NO_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER }
+
+// Left indent (twips) that aligns question labels and answers into one column,
+// leaving room for the colored accent border on the left.
+const BODY_INDENT = 220
+
+// Usable text width on A4 at the default 1440-twip margins (11906 − 2×1440).
+// Full-bleed banner tables must set this explicitly, otherwise Word's autofit
+// collapses a single-cell table to its minimum content width.
+const CONTENT_WIDTH = 9026
 
 function stripHtml(html: string): string {
   return html
@@ -49,24 +79,25 @@ function styledAnswerParagraphs(value: string): Paragraph[] | null {
   return paragraphs.map(
     (p, i) =>
       new Paragraph({
+        indent: { left: BODY_INDENT },
+        spacing: { after: i === paragraphs.length - 1 ? 200 : 60, line: 288 },
         children: p.runs.map(
           (r) =>
             new TextRun({
               text: r.text,
               size: 22,
-              color: '000000',
+              color: RVO.grijs900,
               bold: r.bold,
               italics: r.italics,
               break: r.breakBefore ? 1 : undefined,
             }),
         ),
-        spacing: { after: i === paragraphs.length - 1 ? 160 : 60 },
       }),
   )
 }
 
-/** Real docx table (shaded header + rows) for a table question, or null when
- *  the answer is empty/not a table. */
+/** Real docx table (shaded header + bordered rows) for a table question, or
+ *  null when the answer is empty/not a table. */
 function tableAnswerChildren(
   question: Question,
   value: string | string[] | undefined,
@@ -76,27 +107,35 @@ function tableAnswerChildren(
   if (!table || table.rows.length === 0) return null
   const columns = question.columns ?? []
 
+  const cellBorder = { style: BorderStyle.SINGLE, size: 4, color: RVO.grijs200 }
+  const cellBorders = { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder }
+
   const headerRow = new TableRow({
+    tableHeader: true,
     children: columns.map(
       (c) =>
         new TableCell({
-          shading: { type: ShadingType.CLEAR, color: 'auto', fill: 'F0F4F8' },
+          shading: { type: ShadingType.CLEAR, color: 'auto', fill: RVO.lintblauw },
+          borders: cellBorders,
+          margins: { top: 60, bottom: 60, left: 120, right: 120 },
           children: [
-            new Paragraph({
-              children: [new TextRun({ text: c.label, bold: true, size: 20 })],
-            }),
+            new Paragraph({ children: [new TextRun({ text: c.label, bold: true, size: 20, color: RVO.wit })] }),
           ],
         }),
     ),
   })
   const dataRows = table.rows.map(
-    (row) =>
+    (row, ri) =>
       new TableRow({
         children: columns.map(
           (_, i) =>
             new TableCell({
+              shading:
+                ri % 2 === 1 ? { type: ShadingType.CLEAR, color: 'auto', fill: RVO.grijs050 } : undefined,
+              borders: cellBorders,
+              margins: { top: 60, bottom: 60, left: 120, right: 120 },
               children: [
-                new Paragraph({ children: [new TextRun({ text: row[i] ?? '', size: 20 })] }),
+                new Paragraph({ children: [new TextRun({ text: row[i] ?? '', size: 20, color: RVO.grijs900 })] }),
               ],
             }),
         ),
@@ -106,27 +145,29 @@ function tableAnswerChildren(
   const children: (Paragraph | Table)[] = [
     new Table({
       width: { size: 100, type: WidthType.PERCENTAGE },
+      indent: { size: BODY_INDENT, type: WidthType.DXA },
       rows: [headerRow, ...dataRows],
     }),
   ]
   if (table.notes.trim()) {
     children.push(
       new Paragraph({
+        indent: { left: BODY_INDENT },
+        spacing: { before: 100, after: 200 },
         children: [
-          new TextRun({ text: `${question.notesLabel ?? 'Toelichting'}: `, bold: true, size: 20 }),
-          new TextRun({ text: table.notes.trim(), size: 20 }),
+          new TextRun({ text: `${question.notesLabel ?? 'Toelichting'}: `, bold: true, size: 20, color: RVO.grijs700 }),
+          new TextRun({ text: table.notes.trim(), size: 20, color: RVO.grijs900 }),
         ],
-        spacing: { before: 80, after: 160 },
       }),
     )
   } else {
-    children.push(new Paragraph({ children: [], spacing: { after: 160 } }))
+    children.push(new Paragraph({ children: [], spacing: { after: 200 } }))
   }
   return children
 }
 
 // Fit within the printable page width (A4 minus margins), in px.
-const IMAGE_MAX_WIDTH = 560
+const IMAGE_MAX_WIDTH = 520
 
 async function imageDimensions(att: QuestionAttachment, data: ArrayBuffer): Promise<{ width: number; height: number }> {
   let { width, height } = att
@@ -156,6 +197,8 @@ async function attachmentParagraphs(attachments: QuestionAttachment[], sessionId
       const { width, height } = await imageDimensions(att, data)
       paragraphs.push(
         new Paragraph({
+          indent: { left: BODY_INDENT },
+          spacing: { before: 80, after: att.caption.trim() ? 40 : 200 },
           children: [
             new ImageRun({
               type: att.mimeType === 'image/png' ? 'png' : 'jpg',
@@ -163,29 +206,30 @@ async function attachmentParagraphs(attachments: QuestionAttachment[], sessionId
               transformation: { width, height },
             }),
           ],
-          spacing: { before: 80, after: att.caption.trim() ? 40 : 160 },
         }),
       )
       if (att.caption.trim()) {
         paragraphs.push(
           new Paragraph({
-            children: [new TextRun({ text: att.caption.trim(), size: 18, color: '666666', italics: true })],
-            spacing: { after: 160 },
+            indent: { left: BODY_INDENT },
+            spacing: { after: 200 },
+            children: [new TextRun({ text: att.caption.trim(), size: 18, color: RVO.grijs500, italics: true })],
           }),
         )
       }
     } catch {
       paragraphs.push(
         new Paragraph({
+          indent: { left: BODY_INDENT },
+          spacing: { after: 200 },
           children: [
             new TextRun({
               text: `(afbeelding niet beschikbaar: ${att.filename})`,
               size: 20,
-              color: '999999',
+              color: RVO.grijs500,
               italics: true,
             }),
           ],
-          spacing: { after: 160 },
         }),
       )
     }
@@ -221,56 +265,80 @@ export async function exportToWord(
 
   const children: (Paragraph | Table)[] = []
 
-  // Cover
+  // Cover: a full-width lintblauw band (single-cell table) carrying the title,
+  // mirroring the app's header bar.
   children.push(
-    new Paragraph({
-      children: [new TextRun({ text: formConfig.meta.docTitle, bold: true, size: 44, color: '154273' })],
-      spacing: { after: 200 },
+    new Table({
+      width: { size: CONTENT_WIDTH, type: WidthType.DXA },
+      columnWidths: [CONTENT_WIDTH],
+      layout: TableLayoutType.FIXED,
+      borders: NO_BORDERS,
+      rows: [
+        new TableRow({
+          children: [
+            new TableCell({
+              width: { size: CONTENT_WIDTH, type: WidthType.DXA },
+              shading: { type: ShadingType.CLEAR, color: 'auto', fill: RVO.lintblauw },
+              borders: NO_BORDERS,
+              margins: { top: 560, bottom: 560, left: 400, right: 400 },
+              children: [
+                new Paragraph({
+                  spacing: { after: 160 },
+                  children: [new TextRun({ text: 'Ministerie van Financiën', size: 20, color: 'C7D6E6' })],
+                }),
+                new Paragraph({
+                  children: [new TextRun({ text: formConfig.meta.docTitle, bold: true, size: 44, color: RVO.wit })],
+                }),
+              ],
+            }),
+          ],
+        }),
+      ],
     }),
+    // Metadata lines (separate paragraphs — a newline inside a run does not
+    // break in Word).
     new Paragraph({
-      children: [new TextRun({ text: 'Ministerie van Financiën', size: 28, color: '154273' })],
-      spacing: { after: 100 },
-    }),
-    new Paragraph({
-      children: [new TextRun({ text: `Versie ${formConfig.version} | ${today}`, size: 20, color: '666666' })],
-      spacing: { after: 100 },
+      spacing: { before: 320, after: 40 },
+      children: [
+        new TextRun({ text: 'Versie ', size: 20, color: RVO.grijs500 }),
+        new TextRun({ text: formConfig.version, size: 20, color: RVO.grijs700, bold: true }),
+        new TextRun({ text: '   ·   ', size: 20, color: RVO.grijs500 }),
+        new TextRun({ text: today, size: 20, color: RVO.grijs700 }),
+      ],
     }),
   )
-
   if (systemName) {
     children.push(
       new Paragraph({
+        spacing: { after: 40 },
         children: [
-          new TextRun({
-            text: `${hasConditionalPartB ? 'Systeem' : 'Project'}: ${systemName}`,
-            size: 20,
-            color: '666666',
-          }),
+          new TextRun({ text: `${hasConditionalPartB ? 'Systeem' : 'Project'}: `, size: 20, color: RVO.grijs500 }),
+          new TextRun({ text: systemName, size: 20, color: RVO.grijs700, bold: true }),
         ],
-        spacing: { after: 400 },
       }),
     )
   }
 
   if (hasConditionalPartB && riskInfo) {
     children.push(
+      new Paragraph({ children: [], spacing: { after: 160 } }),
       new Table({
-        width: { size: 100, type: WidthType.PERCENTAGE },
+        width: { size: CONTENT_WIDTH, type: WidthType.DXA },
+        columnWidths: [CONTENT_WIDTH],
+        layout: TableLayoutType.FIXED,
+        borders: NO_BORDERS,
         rows: [
           new TableRow({
             children: [
               new TableCell({
+                width: { size: CONTENT_WIDTH, type: WidthType.DXA },
                 shading: { type: ShadingType.CLEAR, color: 'auto', fill: riskColor(riskLevel) },
-                borders: {
-                  top: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-                  bottom: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-                  left: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-                  right: { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' },
-                },
+                borders: NO_BORDERS,
+                margins: { top: 140, bottom: 140, left: 240, right: 240 },
                 children: [
                   new Paragraph({
                     children: [
-                      new TextRun({ text: `Risiconiveau: ${riskInfo.label}`, bold: true, color: 'FFFFFF', size: 24 }),
+                      new TextRun({ text: `Risiconiveau: ${riskInfo.label}`, bold: true, color: RVO.wit, size: 24 }),
                     ],
                   }),
                 ],
@@ -280,8 +348,10 @@ export async function exportToWord(
         ],
       }),
     )
-    children.push(new Paragraph({ children: [new TextRun({ text: '' })], spacing: { after: 400 } }))
   }
+
+  // Page break after the cover so the content starts on a fresh page.
+  children.push(new Paragraph({ children: [], pageBreakBefore: true }))
 
   // Sections
   const sectionsToInclude = formConfig.sections.filter((s) => {
@@ -289,51 +359,74 @@ export async function exportToWord(
     return true
   })
 
-  for (const section of sectionsToInclude) {
+  for (const [sectionIndex, section] of sectionsToInclude.entries()) {
     children.push(
       new Paragraph({
         text: section.title,
         heading: HeadingLevel.HEADING_1,
-        spacing: { before: 320, after: 160 },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: RVO.donkerblauwTint, space: 6 } },
+        spacing: { before: sectionIndex === 0 ? 0 : 400, after: 220 },
       }),
     )
 
     for (const subsection of section.subsections) {
       children.push(
         new Paragraph({
-          text: subsection.title,
-          heading: HeadingLevel.HEADING_2,
-          spacing: { before: 240, after: 120 },
+          shading: { type: ShadingType.CLEAR, color: 'auto', fill: RVO.grijs050 },
+          border: { left: { style: BorderStyle.SINGLE, size: 18, color: RVO.donkerblauw, space: 10 } },
+          spacing: { before: 260, after: subsection.description ? 60 : 160 },
+          children: [new TextRun({ text: subsection.title, bold: true, size: 24, color: RVO.lintblauw })],
         }),
       )
+      if (subsection.description) {
+        children.push(
+          new Paragraph({
+            spacing: { after: 160 },
+            children: [new TextRun({ text: subsection.description, italics: true, size: 20, color: RVO.grijs500 })],
+          }),
+        )
+      }
 
       for (const question of subsection.questions) {
         const answer = answers[question.id]
         const hasAnswer = answer && (Array.isArray(answer) ? answer.length > 0 : answer.trim() !== '')
-        const questionLabel =
-          question.importance === 'mandatory' ? `${question.text} *` : question.text
+        const accent = question.importance === 'mandatory' ? RVO.donkerblauw : RVO.groen
 
+        // Question label — bold, with a colored left accent bar and the
+        // mandatory asterisk in red.
+        const labelRuns = [new TextRun({ text: question.text, bold: true, size: 22, color: RVO.grijs900 })]
+        if (question.importance === 'mandatory') {
+          labelRuns.push(new TextRun({ text: '  *', bold: true, size: 22, color: RVO.rood }))
+        }
         children.push(
           new Paragraph({
-            children: [new TextRun({ text: questionLabel, bold: true, size: 22, color: '333333' })],
-            spacing: { before: 120, after: 40 },
+            keepNext: true,
+            indent: { left: BODY_INDENT },
+            border: { left: { style: BorderStyle.SINGLE, size: 18, color: accent, space: 12 } },
+            spacing: { before: 200, after: 80 },
+            children: labelRuns,
           }),
-          ...((hasAnswer && tableAnswerChildren(question, answer)) ||
-            (hasAnswer && typeof answer === 'string' && styledAnswerParagraphs(answer)) || [
-              new Paragraph({
-                children: [
-                  new TextRun({
-                    text: hasAnswer ? formatAnswer(answer) : '(niet ingevuld)',
-                    size: 22,
-                    color: hasAnswer ? '000000' : '999999',
-                    italics: !hasAnswer,
-                  }),
-                ],
-                spacing: { after: 160 },
-              }),
-            ]),
-          ...(await attachmentParagraphs(attachments[question.id] ?? [], sessionId)),
         )
+
+        // Answer body.
+        const answerChildren =
+          (hasAnswer && tableAnswerChildren(question, answer)) ||
+          (hasAnswer && typeof answer === 'string' && styledAnswerParagraphs(answer)) || [
+            new Paragraph({
+              indent: { left: BODY_INDENT },
+              spacing: { after: 200 },
+              children: [
+                new TextRun({
+                  text: hasAnswer ? formatAnswer(answer) : '(niet ingevuld)',
+                  size: 22,
+                  color: hasAnswer ? RVO.grijs900 : RVO.grijs500,
+                  italics: !hasAnswer,
+                }),
+              ],
+            }),
+          ]
+        children.push(...answerChildren)
+        children.push(...(await attachmentParagraphs(attachments[question.id] ?? [], sessionId)))
       }
     }
   }
@@ -342,6 +435,11 @@ export async function exportToWord(
     creator: 'Ministerie van Financiën',
     title: formConfig.meta.docTitle,
     styles: {
+      default: {
+        document: {
+          run: { font: 'Arial', size: 22, color: RVO.grijs900 },
+        },
+      },
       paragraphStyles: [
         {
           id: 'Heading1',
@@ -349,31 +447,35 @@ export async function exportToWord(
           basedOn: 'Normal',
           next: 'Normal',
           quickFormat: true,
-          run: { bold: true, size: 28, color: '154273' },
-        },
-        {
-          id: 'Heading2',
-          name: 'Heading 2',
-          basedOn: 'Normal',
-          next: 'Normal',
-          quickFormat: true,
-          run: { bold: true, size: 24, color: '333333' },
+          run: { bold: true, size: 30, color: RVO.lintblauw, font: 'Arial' },
         },
       ],
     },
     sections: [
       {
-        properties: {},
+        properties: { titlePage: true },
+        headers: {
+          default: new Header({
+            children: [
+              new Paragraph({
+                border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: RVO.grijs200, space: 4 } },
+                children: [new TextRun({ text: formConfig.meta.docTitle, size: 16, color: RVO.grijs500 })],
+              }),
+            ],
+          }),
+          first: new Header({ children: [new Paragraph({ children: [] })] }),
+        },
         footers: {
           default: new Footer({
             children: [
               new Paragraph({
+                border: { top: { style: BorderStyle.SINGLE, size: 4, color: RVO.grijs200, space: 4 } },
                 alignment: AlignmentType.CENTER,
                 children: [
-                  new TextRun({ text: `${formConfig.meta.footerLabel} | Pagina `, size: 16, color: '999999' }),
-                  new TextRun({ children: [PageNumber.CURRENT], size: 16, color: '999999' }),
-                  new TextRun({ text: ' van ', size: 16, color: '999999' }),
-                  new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 16, color: '999999' }),
+                  new TextRun({ text: `${formConfig.meta.footerLabel} | Pagina `, size: 16, color: RVO.grijs500 }),
+                  new TextRun({ children: [PageNumber.CURRENT], size: 16, color: RVO.grijs500 }),
+                  new TextRun({ text: ' van ', size: 16, color: RVO.grijs500 }),
+                  new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 16, color: RVO.grijs500 }),
                 ],
               }),
             ],
