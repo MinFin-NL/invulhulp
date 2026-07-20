@@ -9,8 +9,11 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev
 
-# Copy application
-COPY main.py auth.py admin_users.py llm.py rag.py docstore.py ./
+# Copy application. Glob all backend modules rather than hand-listing them:
+# a hand-maintained list silently drops newly added modules (e.g. the dossier
+# sharing feature: dossiers/dossierstore/imagestore/users), which crash-loops
+# the container on `import` at startup. .dockerignore keeps out .venv/.git/etc.
+COPY *.py ./
 
 EXPOSE 8000
 
