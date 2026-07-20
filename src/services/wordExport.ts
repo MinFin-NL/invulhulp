@@ -16,6 +16,7 @@ import {
   WidthType,
   ShadingType,
   BorderStyle,
+  HeightRule,
 } from 'docx'
 import { saveAs } from 'file-saver'
 import type { Answers, Question, QuestionAttachment, RiskLevelValue, FormConfig } from '../models/Assessment'
@@ -23,12 +24,40 @@ import { parseTableAnswer } from '../utils/tableAnswer'
 import { htmlToParagraphs } from '../utils/htmlRuns'
 import { fetchImageArrayBuffer } from './llmService'
 
+// Rijkshuisstijl / NL Design System styling for the modern report export.
+//
+// Font: the Rijksoverheid corporate typeface is "Rijksoverheid Sans", which is
+// licensed and cannot be embedded in a distributable .docx. The Rijkshuisstijl
+// prescribes **Verdana** as the substitute font for office documents (Word,
+// PowerPoint), which is what the RVO design tokens also fall back to
+// (`Verdana, Calibri, Arial`). Verdana is available on every OS, so the file
+// renders identically for every recipient.
+const FONT = 'Verdana'
+
+// Type scale in half-points (Verdana runs visually larger than Arial, so the
+// body sits at 10pt rather than 11pt).
+const SIZE = {
+  coverTitle: 40,
+  coverKicker: 18,
+  meta: 18,
+  sectionTitle: 26,
+  sectionKicker: 15,
+  subsection: 22,
+  description: 18,
+  label: 20,
+  body: 20,
+  cell: 18,
+  caption: 16,
+  chrome: 15,
+}
+
 // NL Design System (RVO) palette, mirrored from @nl-rvo/design-tokens so the
 // exported document reads as the same visual system as the app itself.
 const RVO = {
   lintblauw: '154273',
   donkerblauw: '01689B',
   donkerblauwTint: 'D9E9F0',
+  hemelblauw: '007BC7',
   groen: '39870C',
   rood: 'D51B1E',
   grijs900: '0F172A',
@@ -42,9 +71,12 @@ const RVO = {
 const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: RVO.wit }
 const NO_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER }
 
+const CHECKED = '☒'
+const UNCHECKED = '☐'
+
 // Left indent (twips) that aligns question labels and answers into one column,
 // leaving room for the colored accent border on the left.
-const BODY_INDENT = 220
+const BODY_INDENT = 240
 
 // Usable text width on A4 at the default 1440-twip margins (11906 − 2×1440).
 // Full-bleed banner tables must set this explicitly, otherwise Word's autofit
@@ -80,12 +112,12 @@ function styledAnswerParagraphs(value: string): Paragraph[] | null {
     (p, i) =>
       new Paragraph({
         indent: { left: BODY_INDENT },
-        spacing: { after: i === paragraphs.length - 1 ? 200 : 60, line: 288 },
+        spacing: { after: i === paragraphs.length - 1 ? 220 : 60, line: 276 },
         children: p.runs.map(
           (r) =>
             new TextRun({
               text: r.text,
-              size: 22,
+              size: SIZE.body,
               color: RVO.grijs900,
               bold: r.bold,
               italics: r.italics,
@@ -94,6 +126,53 @@ function styledAnswerParagraphs(value: string): Paragraph[] | null {
         ),
       }),
   )
+}
+
+/** Radio/checkbox questions render every option as a ☒/☐ line — the reader
+ *  sees the full choice set with the selection marked, like the official
+ *  template. Returns null for non-choice questions. Unanswered choice
+ *  questions still render (all boxes empty). */
+function choiceAnswerParagraphs(
+  question: Question,
+  value: string | string[] | undefined,
+): Paragraph[] | null {
+  if ((question.type !== 'radio' && question.type !== 'checkbox') || !question.options?.length) return null
+
+  const selected = new Set<string>()
+  let followUp = ''
+  if (Array.isArray(value)) {
+    for (const v of value) selected.add(stripHtml(v).trim().toLowerCase())
+  } else if (typeof value === 'string' && value.trim()) {
+    const [picked, follow] = value.split('\n---\n')
+    selected.add(stripHtml(picked).trim().toLowerCase())
+    if (follow) followUp = stripHtml(follow).trim()
+  }
+
+  const options = question.options
+  const paragraphs = options.map(
+    (opt, i) =>
+      new Paragraph({
+        indent: { left: BODY_INDENT },
+        spacing: { after: i === options.length - 1 && !followUp ? 220 : 40 },
+        children: [
+          new TextRun({
+            text: `${selected.has(opt.trim().toLowerCase()) ? CHECKED : UNCHECKED}  ${opt}`,
+            size: SIZE.body,
+            color: RVO.grijs900,
+          }),
+        ],
+      }),
+  )
+  if (followUp) {
+    paragraphs.push(
+      new Paragraph({
+        indent: { left: BODY_INDENT },
+        spacing: { before: 40, after: 220 },
+        children: [new TextRun({ text: followUp, size: SIZE.body, color: RVO.grijs900 })],
+      }),
+    )
+  }
+  return paragraphs
 }
 
 /** Real docx table (shaded header + bordered rows) for a table question, or
@@ -119,7 +198,7 @@ function tableAnswerChildren(
           borders: cellBorders,
           margins: { top: 60, bottom: 60, left: 120, right: 120 },
           children: [
-            new Paragraph({ children: [new TextRun({ text: c.label, bold: true, size: 20, color: RVO.wit })] }),
+            new Paragraph({ children: [new TextRun({ text: c.label, bold: true, size: SIZE.cell, color: RVO.wit })] }),
           ],
         }),
     ),
@@ -135,7 +214,7 @@ function tableAnswerChildren(
               borders: cellBorders,
               margins: { top: 60, bottom: 60, left: 120, right: 120 },
               children: [
-                new Paragraph({ children: [new TextRun({ text: row[i] ?? '', size: 20, color: RVO.grijs900 })] }),
+                new Paragraph({ children: [new TextRun({ text: row[i] ?? '', size: SIZE.cell, color: RVO.grijs900 })] }),
               ],
             }),
         ),
@@ -153,15 +232,15 @@ function tableAnswerChildren(
     children.push(
       new Paragraph({
         indent: { left: BODY_INDENT },
-        spacing: { before: 100, after: 200 },
+        spacing: { before: 100, after: 220 },
         children: [
-          new TextRun({ text: `${question.notesLabel ?? 'Toelichting'}: `, bold: true, size: 20, color: RVO.grijs700 }),
-          new TextRun({ text: table.notes.trim(), size: 20, color: RVO.grijs900 }),
+          new TextRun({ text: `${question.notesLabel ?? 'Toelichting'}: `, bold: true, size: SIZE.cell, color: RVO.grijs700 }),
+          new TextRun({ text: table.notes.trim(), size: SIZE.cell, color: RVO.grijs900 }),
         ],
       }),
     )
   } else {
-    children.push(new Paragraph({ children: [], spacing: { after: 200 } }))
+    children.push(new Paragraph({ children: [], spacing: { after: 220 } }))
   }
   return children
 }
@@ -198,7 +277,7 @@ async function attachmentParagraphs(attachments: QuestionAttachment[], sessionId
       paragraphs.push(
         new Paragraph({
           indent: { left: BODY_INDENT },
-          spacing: { before: 80, after: att.caption.trim() ? 40 : 200 },
+          spacing: { before: 80, after: att.caption.trim() ? 40 : 220 },
           children: [
             new ImageRun({
               type: att.mimeType === 'image/png' ? 'png' : 'jpg',
@@ -212,8 +291,8 @@ async function attachmentParagraphs(attachments: QuestionAttachment[], sessionId
         paragraphs.push(
           new Paragraph({
             indent: { left: BODY_INDENT },
-            spacing: { after: 200 },
-            children: [new TextRun({ text: att.caption.trim(), size: 18, color: RVO.grijs500, italics: true })],
+            spacing: { after: 220 },
+            children: [new TextRun({ text: att.caption.trim(), size: SIZE.caption, color: RVO.grijs500, italics: true })],
           }),
         )
       }
@@ -221,11 +300,11 @@ async function attachmentParagraphs(attachments: QuestionAttachment[], sessionId
       paragraphs.push(
         new Paragraph({
           indent: { left: BODY_INDENT },
-          spacing: { after: 200 },
+          spacing: { after: 220 },
           children: [
             new TextRun({
               text: `(afbeelding niet beschikbaar: ${att.filename})`,
-              size: 20,
+              size: SIZE.body,
               color: RVO.grijs500,
               italics: true,
             }),
@@ -244,6 +323,14 @@ function riskColor(level: RiskLevelValue): string {
     case 'beperkt': return '2980B9'
     default: return '27AE60'
   }
+}
+
+/** Split "Deel 1: Gegevens…" into a small kicker ("DEEL 1") and the title, so
+ *  section headers get a two-line, styled treatment. */
+function splitSectionTitle(title: string): { kicker: string | null; title: string } {
+  const m = title.match(/^\s*(Deel\s+\d+|Onderdeel\s+\d+|Fase\s+\d+)\s*[:.\-–]\s*(.+)$/i)
+  if (m) return { kicker: m[1].toUpperCase(), title: m[2].trim() }
+  return { kicker: null, title }
 }
 
 export async function exportToWord(
@@ -265,8 +352,8 @@ export async function exportToWord(
 
   const children: (Paragraph | Table)[] = []
 
-  // Cover: a full-width lintblauw band (single-cell table) carrying the title,
-  // mirroring the app's header bar.
+  // Cover: a full-width lintblauw band with a bright hemelblauw accent stripe
+  // beneath it (the app's header identity), carrying the ministry name + title.
   children.push(
     new Table({
       width: { size: CONTENT_WIDTH, type: WidthType.DXA },
@@ -280,30 +367,42 @@ export async function exportToWord(
               width: { size: CONTENT_WIDTH, type: WidthType.DXA },
               shading: { type: ShadingType.CLEAR, color: 'auto', fill: RVO.lintblauw },
               borders: NO_BORDERS,
-              margins: { top: 560, bottom: 560, left: 400, right: 400 },
+              margins: { top: 640, bottom: 640, left: 460, right: 460 },
               children: [
                 new Paragraph({
-                  spacing: { after: 160 },
-                  children: [new TextRun({ text: 'Ministerie van Financiën', size: 20, color: 'C7D6E6' })],
+                  spacing: { after: 200 },
+                  children: [new TextRun({ text: 'MINISTERIE VAN FINANCIËN', size: SIZE.coverKicker, color: '9DBAD6', bold: true })],
                 }),
                 new Paragraph({
-                  children: [new TextRun({ text: formConfig.meta.docTitle, bold: true, size: 44, color: RVO.wit })],
+                  children: [new TextRun({ text: formConfig.meta.docTitle, bold: true, size: SIZE.coverTitle, color: RVO.wit })],
                 }),
               ],
             }),
           ],
         }),
+        // Thin accent stripe flush under the band.
+        new TableRow({
+          height: { value: 90, rule: HeightRule.EXACT },
+          children: [
+            new TableCell({
+              width: { size: CONTENT_WIDTH, type: WidthType.DXA },
+              shading: { type: ShadingType.CLEAR, color: 'auto', fill: RVO.hemelblauw },
+              borders: NO_BORDERS,
+              margins: { top: 0, bottom: 0, left: 0, right: 0 },
+              children: [new Paragraph({ spacing: { after: 0, line: 90 }, children: [new TextRun({ text: '', size: 2 })] })],
+            }),
+          ],
+        }),
       ],
     }),
-    // Metadata lines (separate paragraphs — a newline inside a run does not
-    // break in Word).
+    // Metadata block.
     new Paragraph({
-      spacing: { before: 320, after: 40 },
+      spacing: { before: 360, after: 40 },
       children: [
-        new TextRun({ text: 'Versie ', size: 20, color: RVO.grijs500 }),
-        new TextRun({ text: formConfig.version, size: 20, color: RVO.grijs700, bold: true }),
-        new TextRun({ text: '   ·   ', size: 20, color: RVO.grijs500 }),
-        new TextRun({ text: today, size: 20, color: RVO.grijs700 }),
+        new TextRun({ text: 'Versie ', size: SIZE.meta, color: RVO.grijs500 }),
+        new TextRun({ text: formConfig.version, size: SIZE.meta, color: RVO.grijs700, bold: true }),
+        new TextRun({ text: '      ·      ', size: SIZE.meta, color: RVO.grijs200 }),
+        new TextRun({ text: today, size: SIZE.meta, color: RVO.grijs700 }),
       ],
     }),
   )
@@ -312,16 +411,24 @@ export async function exportToWord(
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: `${hasConditionalPartB ? 'Systeem' : 'Project'}: `, size: 20, color: RVO.grijs500 }),
-          new TextRun({ text: systemName, size: 20, color: RVO.grijs700, bold: true }),
+          new TextRun({ text: `${hasConditionalPartB ? 'Systeem' : 'Project'}: `, size: SIZE.meta, color: RVO.grijs500 }),
+          new TextRun({ text: systemName, size: SIZE.meta, color: RVO.grijs700, bold: true }),
         ],
       }),
     )
   }
+  // Rule closing the cover metadata.
+  children.push(
+    new Paragraph({
+      spacing: { before: 200, after: 0 },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: RVO.grijs200, space: 1 } },
+      children: [new TextRun({ text: '', size: 2 })],
+    }),
+  )
 
   if (hasConditionalPartB && riskInfo) {
     children.push(
-      new Paragraph({ children: [], spacing: { after: 160 } }),
+      new Paragraph({ children: [], spacing: { after: 200 } }),
       new Table({
         width: { size: CONTENT_WIDTH, type: WidthType.DXA },
         columnWidths: [CONTENT_WIDTH],
@@ -360,12 +467,22 @@ export async function exportToWord(
   })
 
   for (const [sectionIndex, section] of sectionsToInclude.entries()) {
+    const { kicker, title } = splitSectionTitle(section.title)
+    if (kicker) {
+      children.push(
+        new Paragraph({
+          keepNext: true,
+          spacing: { before: sectionIndex === 0 ? 0 : 440, after: 20 },
+          children: [new TextRun({ text: kicker, bold: true, size: SIZE.sectionKicker, color: RVO.hemelblauw })],
+        }),
+      )
+    }
     children.push(
       new Paragraph({
-        text: section.title,
         heading: HeadingLevel.HEADING_1,
         border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: RVO.donkerblauwTint, space: 6 } },
-        spacing: { before: sectionIndex === 0 ? 0 : 400, after: 220 },
+        spacing: { before: kicker ? 0 : sectionIndex === 0 ? 0 : 440, after: 240 },
+        children: [new TextRun({ text: title, bold: true, size: SIZE.sectionTitle, color: RVO.lintblauw })],
       }),
     )
 
@@ -374,15 +491,15 @@ export async function exportToWord(
         new Paragraph({
           shading: { type: ShadingType.CLEAR, color: 'auto', fill: RVO.grijs050 },
           border: { left: { style: BorderStyle.SINGLE, size: 18, color: RVO.donkerblauw, space: 10 } },
-          spacing: { before: 260, after: subsection.description ? 60 : 160 },
-          children: [new TextRun({ text: subsection.title, bold: true, size: 24, color: RVO.lintblauw })],
+          spacing: { before: 280, after: subsection.description ? 60 : 180 },
+          children: [new TextRun({ text: subsection.title, bold: true, size: SIZE.subsection, color: RVO.lintblauw })],
         }),
       )
       if (subsection.description) {
         children.push(
           new Paragraph({
-            spacing: { after: 160 },
-            children: [new TextRun({ text: subsection.description, italics: true, size: 20, color: RVO.grijs500 })],
+            spacing: { after: 180 },
+            children: [new TextRun({ text: subsection.description, italics: true, size: SIZE.description, color: RVO.grijs500 })],
           }),
         )
       }
@@ -392,33 +509,35 @@ export async function exportToWord(
         const hasAnswer = answer && (Array.isArray(answer) ? answer.length > 0 : answer.trim() !== '')
         const accent = question.importance === 'mandatory' ? RVO.donkerblauw : RVO.groen
 
-        // Question label — bold, with a colored left accent bar and the
-        // mandatory asterisk in red.
-        const labelRuns = [new TextRun({ text: question.text, bold: true, size: 22, color: RVO.grijs900 })]
+        // Question label — regular weight in lintblauw (distinguished from the
+        // black answer by color + the colored accent bar, not by boldness), with
+        // the mandatory asterisk in red.
+        const labelRuns = [new TextRun({ text: question.text, size: SIZE.label, color: RVO.lintblauw })]
         if (question.importance === 'mandatory') {
-          labelRuns.push(new TextRun({ text: '  *', bold: true, size: 22, color: RVO.rood }))
+          labelRuns.push(new TextRun({ text: '  *', size: SIZE.label, color: RVO.rood }))
         }
         children.push(
           new Paragraph({
             keepNext: true,
             indent: { left: BODY_INDENT },
-            border: { left: { style: BorderStyle.SINGLE, size: 18, color: accent, space: 12 } },
-            spacing: { before: 200, after: 80 },
+            border: { left: { style: BorderStyle.SINGLE, size: 18, color: accent, space: 14 } },
+            spacing: { before: 220, after: 80 },
             children: labelRuns,
           }),
         )
 
         // Answer body.
         const answerChildren =
+          choiceAnswerParagraphs(question, answer) ||
           (hasAnswer && tableAnswerChildren(question, answer)) ||
           (hasAnswer && typeof answer === 'string' && styledAnswerParagraphs(answer)) || [
             new Paragraph({
               indent: { left: BODY_INDENT },
-              spacing: { after: 200 },
+              spacing: { after: 220 },
               children: [
                 new TextRun({
-                  text: hasAnswer ? formatAnswer(answer) : '(niet ingevuld)',
-                  size: 22,
+                  text: hasAnswer ? formatAnswer(answer) : 'Niet ingevuld',
+                  size: SIZE.body,
                   color: hasAnswer ? RVO.grijs900 : RVO.grijs500,
                   italics: !hasAnswer,
                 }),
@@ -437,7 +556,7 @@ export async function exportToWord(
     styles: {
       default: {
         document: {
-          run: { font: 'Arial', size: 22, color: RVO.grijs900 },
+          run: { font: FONT, size: SIZE.body, color: RVO.grijs900 },
         },
       },
       paragraphStyles: [
@@ -447,7 +566,7 @@ export async function exportToWord(
           basedOn: 'Normal',
           next: 'Normal',
           quickFormat: true,
-          run: { bold: true, size: 30, color: RVO.lintblauw, font: 'Arial' },
+          run: { bold: true, size: SIZE.sectionTitle, color: RVO.lintblauw, font: FONT },
         },
       ],
     },
@@ -459,7 +578,7 @@ export async function exportToWord(
             children: [
               new Paragraph({
                 border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: RVO.grijs200, space: 4 } },
-                children: [new TextRun({ text: formConfig.meta.docTitle, size: 16, color: RVO.grijs500 })],
+                children: [new TextRun({ text: formConfig.meta.docTitle, size: SIZE.chrome, color: RVO.grijs500 })],
               }),
             ],
           }),
@@ -472,10 +591,10 @@ export async function exportToWord(
                 border: { top: { style: BorderStyle.SINGLE, size: 4, color: RVO.grijs200, space: 4 } },
                 alignment: AlignmentType.CENTER,
                 children: [
-                  new TextRun({ text: `${formConfig.meta.footerLabel} | Pagina `, size: 16, color: RVO.grijs500 }),
-                  new TextRun({ children: [PageNumber.CURRENT], size: 16, color: RVO.grijs500 }),
-                  new TextRun({ text: ' van ', size: 16, color: RVO.grijs500 }),
-                  new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 16, color: RVO.grijs500 }),
+                  new TextRun({ text: `${formConfig.meta.footerLabel} | Pagina `, size: SIZE.chrome, color: RVO.grijs500 }),
+                  new TextRun({ children: [PageNumber.CURRENT], size: SIZE.chrome, color: RVO.grijs500 }),
+                  new TextRun({ text: ' van ', size: SIZE.chrome, color: RVO.grijs500 }),
+                  new TextRun({ children: [PageNumber.TOTAL_PAGES], size: SIZE.chrome, color: RVO.grijs500 }),
                 ],
               }),
             ],
