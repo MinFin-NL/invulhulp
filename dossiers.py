@@ -32,6 +32,7 @@ import docstore
 import dossierstore
 import imagestore
 import rag
+import users
 from dossierstore import ROLE_ORDER
 
 router = APIRouter(prefix="/api/dossiers", tags=["dossiers"])
@@ -57,6 +58,38 @@ async def resolve_session_access(request: Request, session_id: str, minimum: str
         return user_sub
     _require_role(record, user_sub, minimum)
     return record.get("ownerSub") or user_sub
+
+
+async def _enrich_grants(records: list[dict[str, Any]]) -> None:
+    """Backfill grants whose name/email are missing (owner grants captured from
+    thin OIDC claims, pre-enrichment records) from the Keycloak Admin API and
+    persist the healed records. No-op once every grant carries an identity, so
+    the Keycloak round-trips only happen until a dossier self-heals."""
+    missing = {
+        g.get("sub")
+        for record in records
+        for g in record.get("grants", [])
+        if g.get("sub") and not (g.get("name") and g.get("email"))
+    }
+    if not missing:
+        return
+    resolved = await users.resolve_users(missing)
+    if not resolved:
+        return
+    for record in records:
+        changed = False
+        for g in record.get("grants", []):
+            info = resolved.get(g.get("sub"))
+            if not info:
+                continue
+            if not g.get("name") and info.get("name"):
+                g["name"] = info["name"]
+                changed = True
+            if not g.get("email") and info.get("email"):
+                g["email"] = info["email"]
+                changed = True
+        if changed:
+            await asyncio.to_thread(dossierstore.save_dossier, record)
 
 
 def _view(record: dict[str, Any], user_sub: str) -> dict[str, Any]:
@@ -91,6 +124,7 @@ class GrantBody(BaseModel):
 async def list_dossiers(request: Request) -> dict:
     user_sub = auth.current_user(request).get("sub") or "anonymous"
     records = await asyncio.to_thread(dossierstore.list_dossiers_for, user_sub)
+    await _enrich_grants(records)
     return {"dossiers": [_view(r, user_sub) for r in records]}
 
 
@@ -101,6 +135,7 @@ async def get_dossier(dossier_id: str, request: Request) -> dict:
     if record is None:
         raise HTTPException(status_code=404, detail="Dossier niet gevonden")
     _require_role(record, user_sub, "viewer")
+    await _enrich_grants([record])
     return _view(record, user_sub)
 
 
@@ -190,6 +225,7 @@ async def set_grant(dossier_id: str, sub: str, body: GrantBody, request: Request
     else:
         grants.append({"sub": sub, "email": body.email, "name": body.name, "role": body.role})
     await asyncio.to_thread(dossierstore.save_dossier, record)
+    await _enrich_grants([record])
     return {"grants": record["grants"]}
 
 
@@ -213,4 +249,5 @@ async def remove_grant(dossier_id: str, sub: str, request: Request) -> dict:
         raise HTTPException(status_code=400, detail="Een dossier moet minimaal één eigenaar hebben")
     record["grants"] = [g for g in grants if g.get("sub") != sub]
     await asyncio.to_thread(dossierstore.save_dossier, record)
+    await _enrich_grants([record])
     return {"grants": record["grants"]}
