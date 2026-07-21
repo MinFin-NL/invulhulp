@@ -16,6 +16,25 @@
       <hr class="rvo-hr invulhulp-modal__divider" />
 
       <div class="invulhulp-modal__body">
+        <!-- TEMPORARY DEBUG BLOCK — remove after share-modal fix.
+             Renders the component's raw state with plain inline styles so it
+             does not depend on the .share-dialog__* CSS. Lets us see, without
+             browser devtools, whether the grant/user objects actually carry
+             name/email in the frontend or whether the styled list is hiding them. -->
+        <div style="border: 2px solid red; padding: 8px; background: #fff; color: #000; font: 12px/1.4 monospace; white-space: pre-wrap; word-break: break-all;">
+          <strong>DEBUG — mySub = [{{ mySub }}]</strong>
+          <div>grants ({{ grants.length }}):</div>
+          <div v-for="g in grants" :key="'dbg-' + g.sub" style="color: #0a0;">
+            name=[{{ g.name }}] email=[{{ g.email }}] sub=[{{ g.sub }}] role=[{{ g.role }}]
+          </div>
+          <div>results ({{ results.length }}):</div>
+          <div v-for="u in results" :key="'dbgu-' + u.id" style="color: #00a;">
+            name=[{{ u.name }}] email=[{{ u.email }}] id=[{{ u.id }}]
+          </div>
+          <div>raw grants JSON: {{ JSON.stringify(grants) }}</div>
+        </div>
+        <!-- /TEMPORARY DEBUG BLOCK -->
+
         <!-- Search -->
         <div class="rvo-form-field">
           <label class="rvo-form-field__label" :for="searchId">Zoek op naam of e-mailadres</label>
