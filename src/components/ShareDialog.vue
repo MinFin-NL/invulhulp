@@ -32,6 +32,8 @@
             name=[{{ u.name }}] email=[{{ u.email }}] id=[{{ u.id }}]
           </div>
           <div>raw grants JSON: {{ JSON.stringify(grants) }}</div>
+          <div style="margin-top: 6px; color: #a00;">MEASURE:
+{{ debugMeasure }}</div>
         </div>
         <!-- /TEMPORARY DEBUG BLOCK -->
 
@@ -159,6 +161,7 @@ const searched = ref(false)
 const pendingRoles = ref<Record<string, DossierRole>>({})
 const grants = ref<Grant[]>([])
 const error = ref('')
+const debugMeasure = ref('') // TEMPORARY — remove after share-modal fix
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -170,7 +173,29 @@ async function open(currentGrants: Grant[]) {
   error.value = ''
   dialogEl.value?.showModal()
   await nextTick()
+  measureFirstName() // TEMPORARY
   searchEl.value?.focus()
+}
+
+// TEMPORARY — measure the real styled name element to find why it renders blank.
+function measureFirstName() {
+  const el = dialogEl.value?.querySelector(
+    '.share-dialog__results .share-dialog__name',
+  ) as HTMLElement | null
+  if (!el) {
+    debugMeasure.value = 'no .share-dialog__name element found in DOM'
+    return
+  }
+  const cs = getComputedStyle(el)
+  const who = el.closest('.share-dialog__who') as HTMLElement | null
+  const row = el.closest('.share-dialog__row') as HTMLElement | null
+  debugMeasure.value = [
+    `name: w=${el.offsetWidth} h=${el.offsetHeight} color=${cs.color} bg=${cs.backgroundColor}`,
+    `      display=${cs.display} visibility=${cs.visibility} opacity=${cs.opacity} overflow=${cs.overflow}`,
+    `      whiteSpace=${cs.whiteSpace} text="${(el.textContent || '').trim()}"`,
+    `who:  w=${who?.offsetWidth} h=${who?.offsetHeight}`,
+    `row:  w=${row?.offsetWidth} h=${row?.offsetHeight}`,
+  ].join('\n')
 }
 
 function close() {
