@@ -36,7 +36,6 @@ if "--dev" in sys.argv:
 
 import admin_users
 import auth
-import debug_share  # TEMPORARY: share-modal diagnostics, remove after debugging
 import docstore
 import dossiers
 import imagestore
@@ -106,7 +105,6 @@ app.include_router(auth.router)
 app.include_router(admin_users.router)
 app.include_router(dossiers.router)
 app.include_router(users.router)
-app.include_router(debug_share.router)  # TEMPORARY: remove after share-modal fix
 
 SYSTEM_PROMPT = (
     "Je bent een assistent die helpt bij het invullen van AI Impact Assessments "

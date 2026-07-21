@@ -16,27 +16,6 @@
       <hr class="rvo-hr invulhulp-modal__divider" />
 
       <div class="invulhulp-modal__body">
-        <!-- TEMPORARY DEBUG BLOCK — remove after share-modal fix.
-             Renders the component's raw state with plain inline styles so it
-             does not depend on the .share-dialog__* CSS. Lets us see, without
-             browser devtools, whether the grant/user objects actually carry
-             name/email in the frontend or whether the styled list is hiding them. -->
-        <div style="border: 2px solid red; padding: 8px; background: #fff; color: #000; font: 12px/1.4 monospace; white-space: pre-wrap; word-break: break-all;">
-          <strong>DEBUG — mySub = [{{ mySub }}]</strong>
-          <div>grants ({{ grants.length }}):</div>
-          <div v-for="g in grants" :key="'dbg-' + g.sub" style="color: #0a0;">
-            name=[{{ g.name }}] email=[{{ g.email }}] sub=[{{ g.sub }}] role=[{{ g.role }}]
-          </div>
-          <div>results ({{ results.length }}):</div>
-          <div v-for="u in results" :key="'dbgu-' + u.id" style="color: #00a;">
-            name=[{{ u.name }}] email=[{{ u.email }}] id=[{{ u.id }}]
-          </div>
-          <div>raw grants JSON: {{ JSON.stringify(grants) }}</div>
-          <div style="margin-top: 6px; color: #a00;">MEASURE:
-{{ debugMeasure }}</div>
-        </div>
-        <!-- /TEMPORARY DEBUG BLOCK -->
-
         <!-- Search -->
         <div class="rvo-form-field">
           <label class="rvo-form-field__label" :for="searchId">Zoek op naam of e-mailadres</label>
@@ -161,7 +140,6 @@ const searched = ref(false)
 const pendingRoles = ref<Record<string, DossierRole>>({})
 const grants = ref<Grant[]>([])
 const error = ref('')
-const debugMeasure = ref('') // TEMPORARY — remove after share-modal fix
 
 let searchTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -173,29 +151,7 @@ async function open(currentGrants: Grant[]) {
   error.value = ''
   dialogEl.value?.showModal()
   await nextTick()
-  measureFirstName() // TEMPORARY
   searchEl.value?.focus()
-}
-
-// TEMPORARY — measure the real styled name element to find why it renders blank.
-function measureFirstName() {
-  const el = dialogEl.value?.querySelector(
-    '.share-dialog__results .share-dialog__name',
-  ) as HTMLElement | null
-  if (!el) {
-    debugMeasure.value = 'no .share-dialog__name element found in DOM'
-    return
-  }
-  const cs = getComputedStyle(el)
-  const who = el.closest('.share-dialog__who') as HTMLElement | null
-  const row = el.closest('.share-dialog__row') as HTMLElement | null
-  debugMeasure.value = [
-    `name: w=${el.offsetWidth} h=${el.offsetHeight} color=${cs.color} bg=${cs.backgroundColor}`,
-    `      display=${cs.display} visibility=${cs.visibility} opacity=${cs.opacity} overflow=${cs.overflow}`,
-    `      whiteSpace=${cs.whiteSpace} text="${(el.textContent || '').trim()}"`,
-    `who:  w=${who?.offsetWidth} h=${who?.offsetHeight}`,
-    `row:  w=${row?.offsetWidth} h=${row?.offsetHeight}`,
-  ].join('\n')
 }
 
 function close() {
@@ -396,6 +352,11 @@ defineExpose({ open })
 }
 
 .share-dialog__role {
+  /* .utrecht-select forces inline-size: 100%; left unchecked it eats the whole
+     flex row and collapses .share-dialog__who (flex-basis 0) to zero width,
+     hiding the name/e-mail behind overflow: hidden. Size it to its content. */
+  flex: 0 0 auto;
+  inline-size: auto;
   min-inline-size: 8rem;
 }
 
