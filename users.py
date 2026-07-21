@@ -31,7 +31,18 @@ async def search_users(q: str, request: Request) -> list[dict]:
     q = q.strip()
     if len(q) < 2:
         return []
-    me_sub = auth.current_user(request).get("sub")
+    me = auth.current_user(request)
+    me_sub = me.get("sub")
+    # Match self on email too: a Keycloak reseed gives the caller a fresh sub,
+    # so a stale session sub would no longer equal the live id and the user
+    # would see themselves in the results. Email survives reseeds.
+    me_email = (me.get("email") or "").strip().lower()
+
+    def _is_me(u: dict) -> bool:
+        return u["id"] == me_sub or (
+            bool(me_email) and (u.get("email") or "").strip().lower() == me_email
+        )
+
     if auth.DEV_AUTH_BYPASS:
         needle = q.lower()
         return [
@@ -51,5 +62,5 @@ async def search_users(q: str, request: Request) -> list[dict]:
             "email": u.get("email"),
         }
         for u in res.json()
-        if not (u.get("username") or "").startswith("service-account-") and u["id"] != me_sub
+        if not (u.get("username") or "").startswith("service-account-") and not _is_me(u)
     ]

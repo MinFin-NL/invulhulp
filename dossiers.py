@@ -37,8 +37,10 @@ from dossierstore import ROLE_ORDER
 router = APIRouter(prefix="/api/dossiers", tags=["dossiers"])
 
 
-def _require_role(record: dict[str, Any], user_sub: str, minimum: str) -> str:
-    role = dossierstore.role_of(record, user_sub)
+def _require_role(
+    record: dict[str, Any], user_sub: str, minimum: str, user_email: str | None = None
+) -> str:
+    role = dossierstore.role_of(record, user_sub, user_email)
     if role is None:
         raise HTTPException(status_code=403, detail="Geen toegang tot dit dossier")
     if ROLE_ORDER[role] < ROLE_ORDER[minimum]:
@@ -49,25 +51,32 @@ def _require_role(record: dict[str, Any], user_sub: str, minimum: str) -> str:
 async def resolve_session_access(request: Request, session_id: str, minimum: str) -> str:
     """Check the caller's role on the dossier owning `session_id` and return
     the storage sub (whose docstore/imagestore dir holds the files)."""
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    user = auth.current_user(request)
+    user_sub = user.get("sub") or "anonymous"
     record = await asyncio.to_thread(dossierstore.find_by_session, session_id)
     if record is None:
         # No server dossier yet (unmigrated local dossier, --dev): the caller
         # owns their own files, exactly as before sharing existed.
         return user_sub
-    _require_role(record, user_sub, minimum)
+    await asyncio.to_thread(dossierstore.reconcile_identity, record, user_sub, user.get("email"))
+    _require_role(record, user_sub, minimum, user.get("email"))
+    # ownerSub is the storage key and is intentionally not healed (files live
+    # under the original sub on the durable share); return it as-is.
     return record.get("ownerSub") or user_sub
 
 
-def _view(record: dict[str, Any], user_sub: str) -> dict[str, Any]:
+def _view(record: dict[str, Any], user_sub: str, user_email: str | None = None) -> dict[str, Any]:
     """A dossier record as the frontend sees it, with computed fields."""
-    role = dossierstore.role_of(record, user_sub)
+    role = dossierstore.role_of(record, user_sub, user_email)
     owner = next((g for g in record.get("grants", []) if g.get("role") == "owner"), None)
     return {
         **record,
         "myRole": role,
         "ownerName": (owner or {}).get("name") or (owner or {}).get("email"),
-        "sharedWithMe": record.get("ownerSub") != user_sub,
+        # Derive from the caller's own role, not an ownerSub identity compare:
+        # subs drift across Keycloak reseeds, so an owner whose stored sub went
+        # stale must still see their dossier as their own, not "shared with me".
+        "sharedWithMe": role != "owner",
     }
 
 
@@ -89,19 +98,32 @@ class GrantBody(BaseModel):
 
 @router.get("")
 async def list_dossiers(request: Request) -> dict:
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
-    records = await asyncio.to_thread(dossierstore.list_dossiers_for, user_sub)
-    return {"dossiers": [_view(r, user_sub) for r in records]}
+    user = auth.current_user(request)
+    user_sub = user.get("sub") or "anonymous"
+    user_email = user.get("email")
+
+    def _load_and_heal() -> list[dict[str, Any]]:
+        records = dossierstore.list_dossiers_for(user_sub, user_email)
+        for record in records:
+            # Heal a stale grant sub (post-reseed) to the caller's live sub so
+            # the repair persists; no-op when nothing is stale.
+            dossierstore.reconcile_identity(record, user_sub, user_email)
+        return records
+
+    records = await asyncio.to_thread(_load_and_heal)
+    return {"dossiers": [_view(r, user_sub, user_email) for r in records]}
 
 
 @router.get("/{dossier_id}")
 async def get_dossier(dossier_id: str, request: Request) -> dict:
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    user = auth.current_user(request)
+    user_sub = user.get("sub") or "anonymous"
     record = await asyncio.to_thread(dossierstore.load_dossier, dossier_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Dossier niet gevonden")
-    _require_role(record, user_sub, "viewer")
-    return _view(record, user_sub)
+    await asyncio.to_thread(dossierstore.reconcile_identity, record, user_sub, user.get("email"))
+    _require_role(record, user_sub, "viewer", user.get("email"))
+    return _view(record, user_sub, user.get("email"))
 
 
 @router.put("/{dossier_id}")
@@ -109,6 +131,10 @@ async def put_dossier(dossier_id: str, body: DossierPayload, request: Request) -
     user = auth.current_user(request)
     user_sub = user.get("sub") or "anonymous"
     existing = await asyncio.to_thread(dossierstore.load_dossier, dossier_id)
+    if existing is not None:
+        await asyncio.to_thread(
+            dossierstore.reconcile_identity, existing, user_sub, user.get("email")
+        )
     if existing is None:
         # Create-if-absent: this is also the migration path for dossiers that
         # so far lived only in the caller's localStorage.
@@ -125,7 +151,7 @@ async def put_dossier(dossier_id: str, body: DossierPayload, request: Request) -
             ],
         }
     else:
-        _require_role(existing, user_sub, "editor")
+        _require_role(existing, user_sub, "editor", user.get("email"))
         # ownerSub and grants are never client-writable through this endpoint.
         record = {
             "id": existing["id"],
@@ -141,16 +167,18 @@ async def put_dossier(dossier_id: str, body: DossierPayload, request: Request) -
         forms=body.forms,
     )
     await asyncio.to_thread(dossierstore.save_dossier, record)
-    return _view(record, user_sub)
+    return _view(record, user_sub, user.get("email"))
 
 
 @router.delete("/{dossier_id}")
 async def delete_dossier(dossier_id: str, request: Request) -> dict:
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    user = auth.current_user(request)
+    user_sub = user.get("sub") or "anonymous"
     record = await asyncio.to_thread(dossierstore.load_dossier, dossier_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Dossier niet gevonden")
-    _require_role(record, user_sub, "owner")
+    await asyncio.to_thread(dossierstore.reconcile_identity, record, user_sub, user.get("email"))
+    _require_role(record, user_sub, "owner", user.get("email"))
     # Cascade like main.py's DELETE /api/sessions/{id}, keyed on the storage
     # owner so shared documents/images are cleaned up too.
     storage_sub = record.get("ownerSub") or user_sub
@@ -171,11 +199,13 @@ def _owner_count(record: dict[str, Any]) -> int:
 async def set_grant(dossier_id: str, sub: str, body: GrantBody, request: Request) -> dict:
     if body.role not in ROLE_ORDER:
         raise HTTPException(status_code=422, detail="Ongeldige rol")
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    user = auth.current_user(request)
+    user_sub = user.get("sub") or "anonymous"
     record = await asyncio.to_thread(dossierstore.load_dossier, dossier_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Dossier niet gevonden")
-    _require_role(record, user_sub, "owner")
+    await asyncio.to_thread(dossierstore.reconcile_identity, record, user_sub, user.get("email"))
+    _require_role(record, user_sub, "owner", user.get("email"))
 
     grants = record.setdefault("grants", [])
     existing = next((g for g in grants if g.get("sub") == sub), None)
@@ -195,15 +225,17 @@ async def set_grant(dossier_id: str, sub: str, body: GrantBody, request: Request
 
 @router.delete("/{dossier_id}/grants/{sub}")
 async def remove_grant(dossier_id: str, sub: str, request: Request) -> dict:
-    user_sub = auth.current_user(request).get("sub") or "anonymous"
+    user = auth.current_user(request)
+    user_sub = user.get("sub") or "anonymous"
     record = await asyncio.to_thread(dossierstore.load_dossier, dossier_id)
     if record is None:
         raise HTTPException(status_code=404, detail="Dossier niet gevonden")
+    await asyncio.to_thread(dossierstore.reconcile_identity, record, user_sub, user.get("email"))
     # Owners manage grants; any user may remove their own grant ("leave").
     if sub != user_sub:
-        _require_role(record, user_sub, "owner")
+        _require_role(record, user_sub, "owner", user.get("email"))
     else:
-        _require_role(record, user_sub, "viewer")
+        _require_role(record, user_sub, "viewer", user.get("email"))
 
     grants = record.get("grants", [])
     target = next((g for g in grants if g.get("sub") == sub), None)

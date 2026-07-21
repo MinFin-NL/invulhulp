@@ -123,8 +123,24 @@ async def _set_temp_password(client: httpx.AsyncClient, user_id: str, password: 
         raise HTTPException(status_code=502, detail="Wachtwoord instellen mislukt")
 
 
-def _guard_not_self(request: Request, user_id: str, actie: str) -> None:
-    if auth.current_user(request).get("sub") == user_id:
+async def _guard_not_self(
+    client: httpx.AsyncClient, request: Request, user_id: str, actie: str
+) -> None:
+    """Verhinder dat een beheerder een actie op zichzelf uitvoert.
+
+    Vergelijk op sub én e-mail: na een Keycloak-herseed is de sessie-sub niet
+    meer gelijk aan het live gebruikers-id, en vergelijken op alleen sub zou de
+    beheerder toestaan zijn eigen (live) account te verwijderen. E-mail
+    overleeft een herseed en sluit dat gat.
+    """
+    me = auth.current_user(request)
+    if me.get("sub") == user_id:
+        raise HTTPException(status_code=400, detail=f"Je kunt jezelf niet {actie}")
+    my_email = (me.get("email") or "").strip().lower()
+    if not my_email:
+        return
+    res = await _kc(client, "GET", f"/users/{user_id}")
+    if res.status_code == 200 and (res.json().get("email") or "").strip().lower() == my_email:
         raise HTTPException(status_code=400, detail=f"Je kunt jezelf niet {actie}")
 
 
@@ -148,7 +164,18 @@ async def list_users(request: Request) -> list[dict]:
             raise HTTPException(status_code=502, detail="Gebruikers ophalen mislukt")
         admins_res = await _kc(client, "GET", f"/roles/{ADMIN_ROLE}/users", params={"max": 500})
         admin_ids = {u["id"] for u in admins_res.json()} if admins_res.status_code == 200 else set()
-    me_sub = auth.current_user(request).get("sub")
+    me = auth.current_user(request)
+    me_sub = me.get("sub")
+    # Match self op e-mail én sub: na een Keycloak-herseed krijgt de beheerder
+    # een nieuwe sub, dus een verouderde sessie-sub is niet meer gelijk aan het
+    # live id. E-mail overleeft een herseed en houdt 'isSelf' correct.
+    me_email = (me.get("email") or "").strip().lower()
+
+    def _is_self(u: dict) -> bool:
+        return u["id"] == me_sub or (
+            bool(me_email) and (u.get("email") or "").strip().lower() == me_email
+        )
+
     return [
         {
             "id": u["id"],
@@ -158,7 +185,7 @@ async def list_users(request: Request) -> list[dict]:
             "email": u.get("email"),
             "enabled": u.get("enabled", False),
             "isAdmin": u["id"] in admin_ids,
-            "isSelf": u["id"] == me_sub,
+            "isSelf": _is_self(u),
             "createdTimestamp": u.get("createdTimestamp"),
         }
         for u in res.json()
@@ -212,13 +239,13 @@ async def update_user(user_id: str, body: UserUpdate, request: Request) -> dict:
     async with httpx.AsyncClient(timeout=15) as client:
         if body.enabled is not None:
             if not body.enabled:
-                _guard_not_self(request, user_id, "deactiveren")
+                await _guard_not_self(client, request, user_id, "deactiveren")
             res = await _kc(client, "PUT", f"/users/{user_id}", json={"enabled": body.enabled})
             if res.status_code not in (200, 204):
                 raise HTTPException(status_code=502, detail="Gebruiker bijwerken mislukt")
         if body.isAdmin is not None:
             if not body.isAdmin:
-                _guard_not_self(request, user_id, "de beheerdersrol afnemen")
+                await _guard_not_self(client, request, user_id, "de beheerdersrol afnemen")
             role = await _realm_role(client, ADMIN_ROLE)
             method = "POST" if body.isAdmin else "DELETE"
             res = await _kc(client, method, f"/users/{user_id}/role-mappings/realm", json=[role])
@@ -237,8 +264,8 @@ async def reset_password(user_id: str) -> dict:
 
 @router.delete("/{user_id}", status_code=204)
 async def delete_user(user_id: str, request: Request) -> None:
-    _guard_not_self(request, user_id, "verwijderen")
     async with httpx.AsyncClient(timeout=15) as client:
+        await _guard_not_self(client, request, user_id, "verwijderen")
         res = await _kc(client, "DELETE", f"/users/{user_id}")
         if res.status_code not in (200, 204):
             raise HTTPException(status_code=502, detail="Gebruiker verwijderen mislukt")

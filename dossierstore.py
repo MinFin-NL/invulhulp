@@ -80,13 +80,13 @@ def _iter_records():
             continue  # skip corrupt/partial files rather than break the list
 
 
-def list_dossiers_for(user_sub: str) -> list[dict[str, Any]]:
+def list_dossiers_for(user_sub: str, user_email: str | None = None) -> list[dict[str, Any]]:
     """All dossiers the user has a grant on.
 
     Full directory scan — fine at PoC scale. TODO: keep a sub→dossier index
     when the number of dossiers grows.
     """
-    return [r for r in _iter_records() if role_of(r, user_sub)]
+    return [r for r in _iter_records() if role_of(r, user_sub, user_email)]
 
 
 def find_by_session(session_id: str) -> dict[str, Any] | None:
@@ -100,8 +100,85 @@ def find_by_session(session_id: str) -> dict[str, Any] | None:
     return None
 
 
-def role_of(record: dict[str, Any], user_sub: str) -> str | None:
-    for grant in record.get("grants", []):
+def _norm_email(email: str | None) -> str:
+    return (email or "").strip().lower()
+
+
+def grant_for(
+    record: dict[str, Any], user_sub: str | None, user_email: str | None = None
+) -> dict[str, Any] | None:
+    """The caller's access grant on this dossier.
+
+    The grant's primary key is the Keycloak `sub`, but subs are not eternal: a
+    Keycloak realm reseed hands the same person a fresh UUID (see auth.py), so a
+    grant written under an old sub would otherwise orphan its owner. Email
+    survives reseeds, so when no sub matches we fall back to matching on email.
+    Use reconcile_identity() to heal the stored sub to the caller's live one.
+    """
+    grants = record.get("grants", [])
+    for grant in grants:
         if grant.get("sub") == user_sub:
-            return grant.get("role")
+            return grant
+    email = _norm_email(user_email)
+    if email:
+        for grant in grants:
+            if _norm_email(grant.get("email")) == email:
+                return grant
     return None
+
+
+def role_of(
+    record: dict[str, Any], user_sub: str | None, user_email: str | None = None
+) -> str | None:
+    grant = grant_for(record, user_sub, user_email)
+    return grant.get("role") if grant else None
+
+
+def _dedupe_grants(grants: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Collapse grants that share a sub (can happen after a heal merges an old
+    orphaned grant into one the user already had), keeping the strongest role
+    and the richest name/email. Order is preserved."""
+    by_sub: dict[Any, dict[str, Any]] = {}
+    order: list[Any] = []
+    for grant in grants:
+        sub = grant.get("sub")
+        if sub not in by_sub:
+            by_sub[sub] = dict(grant)
+            order.append(sub)
+            continue
+        kept = by_sub[sub]
+        if ROLE_ORDER.get(grant.get("role"), 0) > ROLE_ORDER.get(kept.get("role"), 0):
+            kept["role"] = grant.get("role")
+        kept["email"] = kept.get("email") or grant.get("email")
+        kept["name"] = kept.get("name") or grant.get("name")
+    return [by_sub[sub] for sub in order]
+
+
+def reconcile_identity(
+    record: dict[str, Any], user_sub: str | None, user_email: str | None
+) -> bool:
+    """Re-anchor the caller's access grant on their current (live) sub.
+
+    A Keycloak realm reseed hands the same person a new sub, which would orphan
+    them from dossiers whose grants store the old one. Email survives reseeds,
+    so when a grant matches the caller by email but carries a different sub we
+    heal that grant's sub in place and persist. Returns True if anything changed.
+
+    `ownerSub` is deliberately left untouched: it is the on-disk storage
+    directory key (see the module docstring and docstore._user_dir), and the
+    dossier's uploaded documents/images physically live under the original sub
+    on the durable share. Repointing it would strand those files. Only the ACL
+    (grants) is healed; storage stays where it is.
+    """
+    email = _norm_email(user_email)
+    if not email or not user_sub:
+        return False
+    changed = False
+    for grant in record.get("grants", []):
+        if grant.get("sub") != user_sub and _norm_email(grant.get("email")) == email:
+            grant["sub"] = user_sub
+            changed = True
+    if changed:
+        record["grants"] = _dedupe_grants(record.get("grants", []))
+        save_dossier(record)
+    return changed
