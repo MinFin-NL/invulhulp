@@ -55,14 +55,11 @@
 
       <!-- Export buttons -->
       <div class="rvo-layout-row rvo-layout-gap--md summary-view__exports">
-        <button @click="exportPdf" class="rvo-button rvo-button--primary">
-          Download PDF rapport
-        </button>
-        <button @click="exportWord" class="rvo-button rvo-button--secondary">
+        <button @click="exportWord" class="rvo-button rvo-button--primary">
           Download Word rapport
         </button>
-        <button @click="doExportJson" class="rvo-button rvo-button--secondary">
-          Download JSON (hervatten)
+        <button v-if="showLegacyExport" @click="exportLegacy" class="rvo-button rvo-button--secondary">
+          Download origineel format (Word)
         </button>
       </div>
 
@@ -119,9 +116,9 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
-import { exportToPdf } from '../services/pdfExport'
 import { exportToWord } from '../services/wordExport'
-import { exportToJson, importFromJson } from '../services/dataExport'
+import { exportToLegacyDocx } from '../services/legacyDocxExport'
+import { importFromJson } from '../services/dataExport'
 import type { FormConfig, Question } from '../models/Assessment'
 import { parseTableAnswer, tableAnswerToPlainText } from '../utils/tableAnswer'
 
@@ -211,16 +208,12 @@ function formattedAnswer(id: string): string {
   return clean.trim() || '(niet ingevuld)'
 }
 
-function exportPdf() {
-  exportToPdf(
-    store.answers,
-    props.formConfig,
-    store.riskLevel,
-    store.goDecision,
-    systemName.value || undefined,
-    store.activeForm.attachments ?? {},
-    store.sessionId,
-  )
+// The legacy exporter reproduces the official "Intakeformulier 2.0" template
+// layout exactly; it only applies to the intake form.
+const showLegacyExport = computed(() => props.formConfig.id === 'intake')
+
+function exportLegacy() {
+  exportToLegacyDocx(store.answers, props.formConfig, systemName.value || undefined)
 }
 
 function exportWord() {
@@ -232,18 +225,6 @@ function exportWord() {
     systemName.value || undefined,
     store.activeForm.attachments ?? {},
     store.sessionId,
-  )
-}
-
-function doExportJson() {
-  exportToJson(
-    store.answers,
-    props.formConfig.id,
-    store.riskLevel,
-    store.goDecision,
-    store.completedSections,
-    systemName.value,
-    store.activeForm.attachments ?? {},
   )
 }
 

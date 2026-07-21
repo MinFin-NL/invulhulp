@@ -11,8 +11,10 @@ gebruikersadministratie niet uitlekt naar niet-beheerders.
 
 from __future__ import annotations
 
+from typing import Iterable
+
 import httpx
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, HTTPException, Request
 
 import auth
 from admin_users import _kc
@@ -57,10 +59,50 @@ async def search_users(q: str, request: Request) -> list[dict]:
     return [
         {
             "id": u["id"],
-            "name": f"{u.get('firstName') or ''} {u.get('lastName') or ''}".strip()
-            or u.get("username"),
+            "name": _display_name(u),
             "email": u.get("email"),
         }
         for u in res.json()
         if not (u.get("username") or "").startswith("service-account-") and not _is_me(u)
     ]
+
+
+def _display_name(u: dict) -> str | None:
+    return f"{u.get('firstName') or ''} {u.get('lastName') or ''}".strip() or u.get("username")
+
+
+async def resolve_users(subs: Iterable[str]) -> dict[str, dict]:
+    """Look up display name + e-mail for the given Keycloak user ids.
+
+    Used to fill in dossier grants whose name/email weren't captured at share
+    time — notably the owner grant, which is built from OIDC claims that may
+    lack the profile/email scopes. The Keycloak Admin API is the authoritative
+    source (firstName/lastName/email), independent of what the login token
+    happened to carry. Unknown or unreachable users are omitted so the caller
+    can fall back to the raw sub instead of failing the whole request.
+    """
+    ids = list(dict.fromkeys(s for s in subs if s))
+    if not ids:
+        return {}
+    if auth.DEV_AUTH_BYPASS:
+        dev = auth.DEV_USER
+        known = {u["id"]: u for u in _DEV_USERS}
+        known[dev["sub"]] = {"id": dev["sub"], "name": dev.get("name"), "email": dev.get("email")}
+        return {
+            i: {"name": known[i].get("name"), "email": known[i].get("email")}
+            for i in ids
+            if i in known
+        }
+    out: dict[str, dict] = {}
+    async with httpx.AsyncClient(timeout=15) as client:
+        for sub in ids:
+            try:
+                res = await _kc(client, "GET", f"/users/{sub}")
+            except HTTPException:
+                # Keycloak unreachable or lacking view-users: degrade quietly.
+                continue
+            if res.status_code != 200:
+                continue
+            u = res.json()
+            out[sub] = {"name": _display_name(u), "email": u.get("email")}
+    return out
