@@ -29,7 +29,7 @@
   "navigation": [
     { "type": "subsections", "sectionId": "deel_a", "exclude": ["3"] },
     { "type": "specialView", "viewId": "risk", "label": "Naar risicoclassificatie", "navGroupHeader": "Bijlage 1", "navLabel": "Risicoclassificatie" },
-    { "type": "specialView", "viewId": "decision", "label": "Naar afweging &amp; beslissing", "navLabel": "3. Afweging &amp; beslissing", "completionSectionId": "3", "conditionalNext": { "storeKey": "goDecision", "ifTrue": "deel_b", "ifFalse": "summary" } },
+    { "type": "specialView", "viewId": "decision", "label": "Naar afweging & beslissing", "navLabel": "3. Afweging & beslissing", "completionSectionId": "3", "conditionalNext": { "storeKey": "goDecision", "ifTrue": "deel_b", "ifFalse": "summary" } },
     { "type": "subsections", "sectionId": "deel_b", "condition": { "storeKey": "goDecision", "value": true } },
     { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
   ],
