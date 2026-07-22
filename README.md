@@ -112,7 +112,7 @@ Een typische workflow zou zijn: gebruik eerst een **beslishulp** om vast te stel
 
 ## Getting started
 
-The quickest way to run everything locally is `python main.py --dev`, which bypasses the Keycloak login. Combine it with `VITE_AUTH_BYPASS=true` (already set in `.env.development`) on the frontend.
+The quickest way to run everything locally is `python backend/main.py --dev` (run from the repo root), which bypasses the Keycloak login. Combine it with `VITE_AUTH_BYPASS=true` (already set in `.env.development`) on the frontend.
 
 ### 1. Pull the LLM model
 
@@ -171,13 +171,13 @@ See `.env.example` and `.env.azure.example` for the full set and inline notes.
 For local development with the login bypassed:
 
 ```bash
-uv run python main.py --dev
+uv run python backend/main.py --dev
 ```
 
 Or run uvicorn directly (requires a reachable Keycloak):
 
 ```bash
-uv run uvicorn main:app --reload
+uv run uvicorn main:app --app-dir backend --reload
 ```
 
 The API will be available at `http://localhost:8000`.

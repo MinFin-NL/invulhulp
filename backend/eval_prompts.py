@@ -6,9 +6,9 @@ from main.py / rag.py against the configured LLM backend (default: Ollama
 mistral) and scores the outputs with deterministic checks.
 
 Usage:
-    OLLAMA_MODEL=mistral python3 eval_prompts.py            # all suites
-    OLLAMA_MODEL=mistral python3 eval_prompts.py extract    # one suite
-    python3 eval_prompts.py --runs 3                        # repeat each case
+    OLLAMA_MODEL=mistral python3 backend/eval_prompts.py            # all suites
+    OLLAMA_MODEL=mistral python3 backend/eval_prompts.py extract    # one suite
+    python3 backend/eval_prompts.py --runs 3                        # repeat each case
 
 Each case reports two verdicts:
     raw   — what the model produced (after XML parse, before the safety net)

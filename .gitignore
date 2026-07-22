@@ -8,7 +8,6 @@ __pycache__/
 venv/
 env/
 *.egg-info/
-dist/
 build/
 .eggs/
 *.egg
@@ -17,6 +16,7 @@ build/
 .env
 .env.*
 !.env.example
+!.env.azure.example
 
 # Node
 node_modules/

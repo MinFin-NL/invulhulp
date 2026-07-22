@@ -1,9 +1,9 @@
 """
 AIIA PoC – FastAPI backend
 
-Run:
-    uvicorn main:app --reload
-    python main.py --dev      # auto-reload + bypass Keycloak login (local only)
+Run (from the repo root, so ./data paths resolve there):
+    uvicorn main:app --app-dir backend --reload
+    python backend/main.py --dev   # auto-reload + bypass Keycloak login (local only)
 
 Environment variables (can be set via .env file):
     CORS_ORIGINS      — comma-separated allowed origins (default: http://localhost:5173)
