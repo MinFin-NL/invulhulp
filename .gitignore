@@ -67,8 +67,8 @@ assets/docs_project_management/
 # Vector store
 data/lancedb/
 data/docs/
+data/
 
 # Claude stuff
 .scratch-test
-
-data/
+claude.md

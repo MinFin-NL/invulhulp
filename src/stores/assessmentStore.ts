@@ -8,6 +8,9 @@ import {
   type DossierRole,
   type ServerDossier,
 } from '../services/dossierService'
+import { DossierDoc, SEED_ORIGIN } from '../collab/dossierDoc'
+import { connectDossier, disconnectAll, getProvider } from '../collab/dossierTransport'
+import type { DossierPayload } from '../collab/ydocCodec'
 
 export type FormId = string
 export type DossierId = string
@@ -110,6 +113,28 @@ function newDossier(name: string): Dossier {
 const pushTimers = new Map<DossierId, ReturnType<typeof setTimeout>>()
 const PUSH_DEBOUNCE_MS = 1500
 
+// One live CRDT doc per dossier — the source of truth for a dossier's shared
+// CONTENT (answers, sources, attachments, risk/go/sections) while it's in
+// memory. Content mutators write through the doc; its onChange mirrors the
+// merged content back into Pinia. Per-user navigation (activeFormId,
+// currentView) and server-owned fields (documents, sharing) stay in Pinia and
+// are never touched by the mirror. Module scope so docs never get persisted.
+// Phase 2 attaches WebSocket transport to these same docs.
+const dossierDocs = new Map<DossierId, DossierDoc>()
+
+/** The collab-synced envelope for one dossier (drops documents/sharing). */
+function payloadOf(d: Dossier): DossierPayload {
+  return {
+    id: d.id,
+    name: d.name,
+    createdAt: d.createdAt,
+    updatedAt: d.updatedAt,
+    sessionId: d.sessionId,
+    activeFormId: d.activeFormId,
+    forms: d.forms,
+  }
+}
+
 // While the server dossier list is loading, ensureDossier() must not
 // auto-create anything: a user whose only dossiers are shared ones would get
 // a spurious empty "Dossier 1" that then syncs to the server.
@@ -191,6 +216,15 @@ export const useAssessmentStore = defineStore('assessment', {
   },
 
   actions: {
+    /** Mark that a server load is imminent, so ensureDossier() won't auto-create
+     *  a spurious empty dossier before shared/other-device dossiers arrive.
+     *  Call synchronously (App setup) before any child mounts — child onMounted
+     *  (DossierList/DossierDetail) runs before the parent's, and dev-auth renders
+     *  the list immediately. loadFromServer clears the flag in its finally. */
+    beginServerLoad() {
+      serverLoadPending = true
+    },
+
     ensureDossier() {
       if (serverLoadPending) return
       // One-shot migration from pre-dossier persisted state
@@ -276,6 +310,12 @@ export const useAssessmentStore = defineStore('assessment', {
         serverLoadPending = false
       }
       const serverById = new Map(serverDossiers.map((d) => [d.id, d]))
+
+      // Server load rewrites Pinia forms below; drop live docs + their
+      // transport so they re-seed from the merged result and reconnect on the
+      // next edit.
+      disconnectAll()
+      dossierDocs.clear()
 
       // Drop local dossiers that synced before but are now denied/gone: the
       // localStorage cache is per-browser, not per-user, so this is either a
@@ -416,20 +456,39 @@ export const useAssessmentStore = defineStore('assessment', {
       if (!this.activeDossierId) this.ensureDossier()
     },
 
+    /** Apply several answer mutations to one dossier as a single atomic doc
+     *  transaction — collaborators see them land together and it's one undo step
+     *  (e.g. an AI Modus smoothing undo restoring many answers at once). The
+     *  mirror + server push fire once for the whole batch. */
+    batchAnswers(dossierId: DossierId, fn: () => void) {
+      const doc = this._docFor(dossierId)
+      if (doc) doc.transact(fn)
+      else fn()
+    },
+
+    /** The shared top-level Y.XmlFragment for a rich-text answer in the active
+     *  form — what a collaborative Tiptap editor binds to. Null off a dossier. */
+    textFragmentFor(questionId: string) {
+      const id = this.activeDossierId
+      const formId = this.activeDossier.activeFormId
+      if (!id || !formId) return null
+      return this._docFor(id)?.textFragment(formId, questionId) ?? null
+    },
+
     setActiveForm(id: FormId) {
       this.ensureDossier()
       const dossier = this.dossiers[this.activeDossierId!]
       if (!dossier.forms[id]) dossier.forms[id] = initialFormState()
       dossier.activeFormId = id
       this.screen = 'dossier'
+      // Open the live doc now (connect + seed) so edits sync even before this
+      // user types — otherwise a reader would never receive collaborators' edits.
+      this._docFor(dossier.id)
     },
 
     setAnswer(questionId: string, value: string | string[]) {
-      const f = this.currentFormMutable()
-      if (f) {
-        f.answers[questionId] = value
-        this.touch()
-      }
+      const formId = this.activeDossier.activeFormId
+      if (formId) this.setAnswerForForm(formId, questionId, value)
     },
 
     setCurrentView(view: string) {
@@ -438,33 +497,91 @@ export const useAssessmentStore = defineStore('assessment', {
     },
 
     setRiskLevel(level: RiskLevelValue) {
-      const f = this.currentFormMutable()
-      if (f) {
-        f.riskLevel = level
-        this.touch()
-      }
+      const id = this.activeDossierId
+      const formId = this.activeDossier.activeFormId
+      if (id && formId) this._docFor(id)?.setRiskLevel(formId, level)
     },
 
     setGoDecision(decision: boolean) {
-      const f = this.currentFormMutable()
-      if (f) {
-        f.goDecision = decision
-        this.touch()
-      }
+      const id = this.activeDossierId
+      const formId = this.activeDossier.activeFormId
+      if (id && formId) this._docFor(id)?.setGoDecision(formId, decision)
     },
 
     markSectionCompleted(sectionId: string) {
-      const f = this.currentFormMutable()
-      if (f && !f.completedSections.includes(sectionId)) {
-        f.completedSections.push(sectionId)
-        this.touch()
-      }
+      const id = this.activeDossierId
+      const formId = this.activeDossier.activeFormId
+      if (id && formId) this._docFor(id)?.markSectionCompleted(formId, sectionId)
     },
 
     currentFormMutable(): FormState | null {
       const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
       if (!dossier || !dossier.activeFormId) return null
       return dossier.forms[dossier.activeFormId] ?? null
+    },
+
+    /** The live CRDT doc for a dossier, created (and seeded from current Pinia
+     *  state) on first use. Content mutators route through it; its onChange
+     *  merges shared content back into Pinia and schedules persistence. */
+    _docFor(dossierId: DossierId): DossierDoc | null {
+      const dossier = this.dossiers[dossierId]
+      if (!dossier) return null
+      const existing = dossierDocs.get(dossierId)
+      if (existing) return existing
+
+      // Empty doc: it's seeded either from the room (a peer already opened it)
+      // or, if the room is empty, from our own JSON — the seed-once pattern that
+      // avoids two peers independently building (and duplicating) the tree.
+      const doc = new DossierDoc()
+      // onChange fires for the seed, local edits, and synced remote merges.
+      doc.onChange((payload, origin) => {
+        const d = this.dossiers[payload.id]
+        if (!d) return
+        // Merge ONLY shared content into Pinia, per form. currentView is
+        // per-user view state and is deliberately preserved; name/activeFormId
+        // and documents/sharing are owned elsewhere and left untouched.
+        for (const [fid, incoming] of Object.entries(payload.forms)) {
+          const target = d.forms[fid]
+          if (!target) {
+            d.forms[fid] = incoming
+            continue
+          }
+          target.answers = incoming.answers
+          target.answerSources = incoming.answerSources
+          target.attachments = incoming.attachments
+          target.riskLevel = incoming.riskLevel
+          target.goDecision = incoming.goDecision
+          target.completedSections = incoming.completedSections
+        }
+        // Seeding (opening) is not an edit — don't bump updatedAt or persist.
+        if (origin === SEED_ORIGIN) return
+        // A peer's edit arrives with the provider as its origin. Everything else
+        // is a local edit — whether via setAnswer (LOCAL_ORIGIN) or the bound
+        // editor typing directly into the fragment (y-prosemirror's own origin).
+        // Persist local edits; reflect a peer's edit but let the originator
+        // persist it (two clients PUTting the same dossier at once races the file store).
+        if (origin === getProvider(payload.id)) {
+          d.updatedAt = payload.updatedAt ?? Date.now()
+        } else {
+          d.updatedAt = Date.now()
+          this.schedulePush(d.id)
+        }
+      })
+      dossierDocs.set(dossierId, doc)
+      // Viewers don't sync-edit (server rejects them); they read the REST
+      // snapshot, so seed locally now. Editors connect and seed-if-empty on sync.
+      if (dossier.myRole === 'viewer') {
+        doc.seedFrom(payloadOf(dossier))
+      } else {
+        connectDossier(doc.doc, dossierId, () => {
+          doc.seedFrom(payloadOf(dossier))
+          // Push once after seeding: any edits made before the (deferred) seed
+          // completed were captured in Pinia by the seed's mirror run but under
+          // SEED_ORIGIN, which doesn't push. This persists fast typing on open.
+          this.schedulePush(dossierId)
+        })
+      }
+      return doc
     },
 
     /** Back to the active dossier's detail page (closes the open form). */
@@ -475,20 +592,17 @@ export const useAssessmentStore = defineStore('assessment', {
     },
 
     resetActive() {
-      const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
-      if (dossier?.activeFormId) {
-        dossier.forms[dossier.activeFormId] = initialFormState()
-        this.touch()
-      }
+      const id = this.activeDossierId
+      const dossier = id ? this.dossiers[id] : null
+      if (dossier?.activeFormId) this._docFor(id!)?.resetForm(dossier.activeFormId)
     },
 
     reset() {
-      const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
+      const id = this.activeDossierId
+      const dossier = id ? this.dossiers[id] : null
       if (!dossier) return
-      for (const id of Object.keys(dossier.forms)) {
-        dossier.forms[id] = initialFormState()
-      }
-      this.touch()
+      const doc = this._docFor(id!)
+      for (const fid of Object.keys(dossier.forms)) doc?.resetForm(fid)
     },
 
     async addDocument(name: string, content: string): Promise<SourceDocument> {
@@ -530,23 +644,19 @@ export const useAssessmentStore = defineStore('assessment', {
 
     // The optional dossierId lets long-running writers (AI Modus) keep writing
     // to the dossier they started in, even if the user switched dossiers.
+    // The optional dossierId lets long-running writers (AI Modus) keep writing
+    // to the dossier they started in, even if the user switched dossiers.
     setAnswerForForm(formId: string, questionId: string, value: string | string[], dossierId?: DossierId) {
       const id = dossierId ?? this.activeDossierId
-      const dossier = id ? this.dossiers[id] : null
-      if (!dossier) return
-      if (!dossier.forms[formId]) dossier.forms[formId] = initialFormState()
-      dossier.forms[formId].answers[questionId] = value
-      this.touch(dossier.id)
+      if (!id || !this.dossiers[id]) return
+      // Through the doc: ensureForm creates the form, the mirror lands it in Pinia.
+      this._docFor(id)?.setAnswer(formId, questionId, value)
     },
 
     setAnswerSourcesForForm(formId: string, questionId: string, meta: AnswerSourceMeta, dossierId?: DossierId) {
       const id = dossierId ?? this.activeDossierId
-      const dossier = id ? this.dossiers[id] : null
-      if (!dossier) return
-      if (!dossier.forms[formId]) dossier.forms[formId] = initialFormState()
-      const form = dossier.forms[formId]
-      if (!form.answerSources) form.answerSources = {}
-      form.answerSources[questionId] = meta
+      if (!id || !this.dossiers[id]) return
+      this._docFor(id)?.setAnswerSources(formId, questionId, meta)
     },
 
     setAnswerSources(questionId: string, meta: AnswerSourceMeta) {
@@ -557,36 +667,40 @@ export const useAssessmentStore = defineStore('assessment', {
     // The user touched the answer: the hallucination warning is no longer
     // relevant, but the citations remain useful.
     dismissSourceWarning(questionId: string) {
-      const meta = this.currentFormMutable()?.answerSources?.[questionId]
-      if (meta) meta.grounded = true
+      const id = this.activeDossierId
+      const formId = this.activeDossier.activeFormId
+      if (id && formId) this._docFor(id)?.markGrounded(formId, questionId)
     },
 
     addAttachment(questionId: string, att: QuestionAttachment) {
-      const f = this.currentFormMutable()
-      if (!f) return
-      if (!f.attachments) f.attachments = {}
-      if (!f.attachments[questionId]) f.attachments[questionId] = []
-      f.attachments[questionId].push(att)
-      this.touch()
+      const id = this.activeDossierId
+      const formId = this.activeDossier.activeFormId
+      if (!id || !formId) return
+      const current = this.currentFormMutable()?.attachments?.[questionId] ?? []
+      this._docFor(id)?.setAttachments(formId, questionId, [...current, att])
     },
 
     removeAttachment(questionId: string, imageId: string) {
-      const list = this.currentFormMutable()?.attachments?.[questionId]
-      if (!list) return
-      const idx = list.findIndex((a) => a.id === imageId)
-      if (idx === -1) return
-      list.splice(idx, 1)
-      this.touch()
+      const id = this.activeDossierId
+      const formId = this.activeDossier.activeFormId
+      if (!id || !formId) return
+      const current = this.currentFormMutable()?.attachments?.[questionId]
+      if (!current) return
+      const next = current.filter((a) => a.id !== imageId)
+      if (next.length === current.length) return
+      this._docFor(id)?.setAttachments(formId, questionId, next)
       // best-effort server cleanup; UI removal already happened
       deleteImage(imageId, this.activeDossier.sessionId).catch(() => {})
     },
 
     updateAttachmentCaption(questionId: string, imageId: string, caption: string) {
-      const att = this.currentFormMutable()?.attachments?.[questionId]?.find((a) => a.id === imageId)
-      if (att) {
-        att.caption = caption
-        this.touch()
-      }
+      const id = this.activeDossierId
+      const formId = this.activeDossier.activeFormId
+      if (!id || !formId) return
+      const current = this.currentFormMutable()?.attachments?.[questionId]
+      if (!current) return
+      const next = current.map((a) => (a.id === imageId ? { ...a, caption } : a))
+      this._docFor(id)?.setAttachments(formId, questionId, next)
     },
 
     async removeDocument(id: string) {

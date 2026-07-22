@@ -21,6 +21,7 @@ from urllib.parse import urlencode
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
+from starlette.requests import HTTPConnection
 
 OIDC_DISCOVERY_URL = os.environ.get(
     "OIDC_DISCOVERY_URL",
@@ -130,17 +131,22 @@ def current_user(request: Request) -> dict:
     return request.session.get("user") or {}
 
 
-def require_user(request: Request) -> None:
+def require_user(conn: HTTPConnection) -> None:
     """Global dependency: let /api/auth/* through, gate everything else.
 
     Attached to the FastAPI app so every existing endpoint is protected
-    without touching each route.
+    without touching each route. Typed as HTTPConnection (the shared base of
+    Request and WebSocket) so it resolves for WebSocket routes too — those
+    authenticate inside the endpoint (raising HTTPException before a ws accept
+    would 500), so we let them through here.
     """
     if DEV_AUTH_BYPASS:
         return
-    if request.url.path.startswith("/api/auth"):
+    if conn.scope["type"] == "websocket":
         return
-    if not request.session.get("user"):
+    if conn.url.path.startswith("/api/auth"):
+        return
+    if not conn.session.get("user"):
         raise HTTPException(status_code=401, detail="Niet ingelogd")
 
 

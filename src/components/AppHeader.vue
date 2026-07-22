@@ -67,6 +67,7 @@
             {{ activeFormTitle }}
           </span>
         </template>
+        <PresenceBar :dossier-id="store.activeDossierId" class="invulhulp-header__presence" />
       </nav>
     </div>
   </header>
@@ -89,6 +90,7 @@ import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAuthStore } from '../stores/authStore'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
 import ConfirmDialog from './ConfirmDialog.vue'
+import PresenceBar from './PresenceBar.vue'
 
 const store = useAssessmentStore()
 const auth = useAuthStore()
@@ -139,6 +141,20 @@ function openResetDialog() {
   background-color: var(--rvo-color-lintblauw);
   color: var(--rvo-color-wit);
   padding: 0;
+}
+
+/* Push the "who's here" avatars to the trailing edge of the breadcrumb row. */
+.invulhulp-header__presence {
+  margin-inline-start: auto;
+}
+
+/* The bar renders on the dark header — lighten its label + avatar rings. */
+.invulhulp-header__presence :deep(.presence-label) {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.invulhulp-header__presence :deep(.presence-avatar) {
+  border-color: var(--rvo-color-lintblauw);
 }
 
 .invulhulp-header__topbar {

@@ -13,7 +13,11 @@
         </p>
         <TiptapEditor
           :id="question.id"
+          :key="`${question.id}:${collabProvider ? 'live' : 'local'}`"
           v-model="textModel"
+          :fragment="collabFragment"
+          :provider="collabProvider"
+          :user="collabUser"
           :question-context="question.text"
           :aria-required="question.importance === 'mandatory' ? 'true' : undefined"
         />
@@ -166,6 +170,7 @@ import { useCrossFormMappings } from '../composables/useCrossFormMappings'
 import { useAiMode } from '../composables/useAiMode'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { answerPlainText } from '../utils/sourceMatching'
+import { useCollab } from '../collab/useCollab'
 
 const props = defineProps<{
   question: Question
@@ -178,6 +183,10 @@ const emit = defineEmits<{
 
 const store = useAssessmentStore()
 const mappings = useCrossFormMappings()
+
+// Collaborative binding for the main rich-text answer (text questions only).
+const collabQuestionId = computed(() => (props.question.type === 'text' ? props.question.id : ''))
+const { fragment: collabFragment, provider: collabProvider, user: collabUser } = useCollab(collabQuestionId)
 const { isAiUnanswered, clearAiUnanswered } = useAiMode()
 
 // True while AI Mode flagged this question as unanswerable and the user hasn't
