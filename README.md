@@ -13,6 +13,7 @@ A web application that helps Dutch government employees fill in AI-related compl
 - **User management** — Beheerders (admins) can create, edit, reset passwords for, and delete users straight from the app via the Keycloak Admin API.
 - **Dossier management** — Group source documents and form answers into named dossiers; switch between dossiers to work on separate projects simultaneously. Dossiers are stored server-side (with a debounced localStorage cache), so work survives across devices and sessions.
 - **Dossier sharing** — Share a dossier with colleagues and assign a role: **viewer** (read-only), **editor** (fill in answers), or **owner**. Access to every session, document, and image endpoint is gated by the caller's grant.
+- **Real-time collaboration** — Multiple users can edit the same dossier simultaneously. Answers sync live over a WebSocket using Yjs/CRDT (Tiptap Collaboration on the frontend, pycrdt on the backend), with collaborative carets in the editor and a presence bar showing who else is working in the dossier. Live editing requires the editor or owner role; conflicts merge automatically.
 - **Source document upload** — Upload background documents (`.txt`, `.md`, `.docx`, `.xlsx`, `.pptx`, `.pdf`) so the AI can extract relevant answers per question.
 - **Retrieval-augmented answers (RAG)** — Uploaded documents are chunked and indexed in a LanceDB vector store; question answering retrieves the most relevant chunks and grounds suggestions in them, with citations back to the source.
 - **Document ontology & entity graph** — Extracted entities and their relationships are visualised as an interactive graph, giving an overview of what a dossier's documents contain.
@@ -94,6 +95,7 @@ Een typische workflow zou zijn: gebruik eerst een **beslishulp** om vast te stel
 | Frontend | Vue 3 + TypeScript + Vite |
 | Rich text editor | Tiptap (with Mermaid diagrams) |
 | State management | Pinia (with persistence) + server-side dossiers |
+| Real-time collaboration | Yjs (y-websocket + Tiptap Collaboration) ↔ pycrdt / pycrdt-websocket |
 | Design system | NL RVO Component Library |
 | Word export | docx |
 | Graph visualisation | vis-network |
@@ -163,6 +165,7 @@ Available variables:
 | `SESSION_HTTPS_ONLY` | `false` | Set to `true` in production |
 | `LANCEDB_PATH` | `./data/lancedb` | LanceDB vector-store path |
 | `DOCS_PATH` / `IMAGES_PATH` / `DOSSIERS_PATH` | `./data/...` | Persistent stores for documents, images, and dossiers |
+| `COLLAB_PATH` | `./data/collab` | Durable Yjs/CRDT state for real-time collaboration (one binary file per dossier) |
 
 See `.env.example` and `.env.azure.example` for the full set and inline notes.
 
@@ -230,6 +233,7 @@ All endpoints live under `/api` and require an authenticated session (except the
 |---|---|---|
 | `/api/dossiers` · `/api/dossiers/{id}` | `GET` · `PUT` · `DELETE` | Manage dossiers |
 | `/api/dossiers/{id}/grants/{sub}` | `PUT` · `DELETE` | Share/unshare a dossier with a user (assign a role) |
+| `/api/collab/{dossier_id}` | `WS` | Real-time collaboration WebSocket (Yjs sync + presence; editor/owner only) |
 | `/api/users/search` | `GET` | Search users to share with |
 | `/api/admin/users` | `GET` · `POST` · `PUT` · `DELETE` | User management (beheerder only) |
 | `/api/admin/users/{id}/reset-password` | `POST` | Reset a user's password |
@@ -242,11 +246,19 @@ All endpoints live under `/api` and require an authenticated session (except the
 | AI Impact Assessment (IenW, v2.0) | [rijksoverheid.nl](https://www.rijksoverheid.nl/documenten/rapporten/2022/11/30/ai-impact-assessment-ministerie-van-infrastructuur-en-waterstaat) |
 | Model DPIA Rijksdienst (v3.0) | [kcbr.nl](https://www.kcbr.nl/sites/default/files/2023-09/Model%20DPIA%20Rijksdienst%20v3.0.pdf) |
 
-## Mogelijke toekomstige functionaliteit
+## Real-time collaboration internals
 
-### Samenwerken via Tiptap
+Meerdere gebruikers kunnen tegelijk aan hetzelfde dossier werken. Wijzigingen worden direct zichtbaar, conflicten worden automatisch opgelost via Yjs/CRDT en er is geen handmatig samenvoegen nodig — met name waardevol voor grote assessments waarbij juridische, privacy- en technische experts elk hun eigen secties invullen.
 
-De rich-text editor (Tiptap) biedt een solide basis voor real-time samenwerking. Met de Tiptap Collaboration-extensie (gebaseerd op Yjs/CRDT) kunnen meerdere gebruikers tegelijk aan hetzelfde formulier werken: wijzigingen worden direct zichtbaar, conflicten worden automatisch opgelost en er is geen handmatig samenvoegen nodig. Dit is met name waardevol voor grote assessments waarbij juridische, privacy- en technische experts elk hun eigen secties invullen. Dossiers kunnen nu al gedeeld worden met rollen (viewer/editor/owner); gelijktijdige live-bewerking is de logische volgende stap.
+How it works:
+
+- **One Yjs document per dossier**, synced over `/api/collab/{dossier_id}` (y-websocket protocol). The backend (`backend/collab.py`, built on pycrdt) is transport + merge only — it does not understand the dossier structure.
+- **Auth over the same session cookie** as the REST API; live editing is gated to the **editor/owner** roles (viewers get the read-only REST snapshot).
+- **The first client seeds the room** from the stored dossier JSON (`src/collab/ydocCodec.ts`); durable persistence stays with the JSON dossier store, while the server also debounce-flushes the raw CRDT state to `COLLAB_PATH` so a restart preserves in-flight edits.
+- **Tiptap Collaboration + Collaboration Caret** bind each rich-text answer to a shared fragment, and `src/collab/usePresence.ts` drives the presence bar via Yjs awareness.
+- In production, nginx must forward WebSocket `Upgrade` headers for `/api/collab` (see `nginx.conf`); the Vite dev proxy handles this automatically.
+
+See `docs/realtime-collab-plan.md` for the full design and phase plan.
 
 ## License
 
