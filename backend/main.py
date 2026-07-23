@@ -36,6 +36,7 @@ if "--dev" in sys.argv:
 
 import admin_users
 import auth
+import collab
 import docstore
 import dossiers
 import imagestore
@@ -71,7 +72,11 @@ async def _warmup() -> None:
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     # Run warmup in the background so startup isn't blocked.
     task = asyncio.create_task(_warmup())
-    yield
+    # Start the collaboration WebSocket server (y-protocol sync per dossier).
+    async with collab.ws_server:
+        yield
+        # Persist any in-flight collab state before the loop tears down.
+        await collab.flush_all()
     task.cancel()
 
 
@@ -105,6 +110,7 @@ app.include_router(auth.router)
 app.include_router(admin_users.router)
 app.include_router(dossiers.router)
 app.include_router(users.router)
+app.include_router(collab.router)
 
 SYSTEM_PROMPT = (
     "Je bent een assistent die helpt bij het invullen van AI Impact Assessments "

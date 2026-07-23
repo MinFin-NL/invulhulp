@@ -37,6 +37,7 @@ services:
       DOCS_PATH: /data/docs
       IMAGES_PATH: /data/images
       DOSSIERS_PATH: /data/dossiers
+      COLLAB_PATH: /data/collab
     volumes:
       - backend_data:/data
     depends_on:

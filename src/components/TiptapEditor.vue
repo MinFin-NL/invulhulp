@@ -137,10 +137,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import { EditorContent, useEditor } from '@tiptap/vue-3'
+import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue'
+import { Editor, EditorContent } from '@tiptap/vue-3'
+import type { AnyExtension } from '@tiptap/core'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
+import { Collaboration } from '@tiptap/extension-collaboration'
+import { CollaborationCaret } from '@tiptap/extension-collaboration-caret'
+import type * as Y from 'yjs'
 import { diffWords } from 'diff'
 import type { Change } from 'diff'
 import { improveTextStream } from '../services/llmService'
@@ -162,6 +166,13 @@ const props = defineProps<{
   modelValue: string
   placeholder?: string
   questionContext?: string
+  // When set, the editor binds directly to this shared Yjs fragment
+  // (character-level collaboration) instead of round-tripping modelValue. The
+  // store's mirror keeps Pinia/persistence current from the fragment.
+  fragment?: Y.XmlFragment | null
+  // y-websocket provider — enables remote cursors (CollaborationCaret).
+  provider?: unknown | null
+  user?: { name: string; color: string } | null
 }>()
 
 const emit = defineEmits<{
@@ -170,22 +181,65 @@ const emit = defineEmits<{
 
 const store = useAssessmentStore()
 
-const editor = useEditor({
-  extensions: [
-    StarterKit,
-    Placeholder.configure({
-      placeholder: props.placeholder ?? 'Vul uw antwoord in…',
-    }),
-  ],
-  content: props.modelValue,
-  // Viewers of a shared dossier can read but not type.
-  editable: !store.readOnly,
-  onUpdate({ editor: e }) {
-    // Store HTML so bold/italic survive; an empty doc is stored as '' (never
-    // '<p></p>') so empty-answer checks and form progress keep working.
-    emit('update:modelValue', e.getText().trim() ? e.getHTML() : '')
+// Collaborative when bound to a fragment; otherwise the classic v-model editor.
+const collaborative = !!props.fragment
+
+function buildExtensions(): AnyExtension[] {
+  const placeholder = Placeholder.configure({
+    placeholder: props.placeholder ?? 'Vul uw antwoord in…',
+  })
+  if (props.fragment) {
+    // Collaboration provides its own undo history, so disable StarterKit's.
+    const ext: AnyExtension[] = [
+      StarterKit.configure({ undoRedo: false }),
+      placeholder,
+      Collaboration.configure({ fragment: props.fragment }),
+    ]
+    if (props.provider) {
+      ext.push(
+        CollaborationCaret.configure({
+          provider: props.provider as never,
+          user: props.user ?? undefined,
+        }),
+      )
+    }
+    return ext
+  }
+  return [StarterKit, placeholder]
+}
+
+const editor = shallowRef<Editor | undefined>()
+
+function createEditor() {
+  editor.value?.destroy()
+  editor.value = new Editor({
+    extensions: buildExtensions(),
+    // Collaboration loads content from the fragment; don't also set it here.
+    content: collaborative ? undefined : props.modelValue,
+    // Viewers of a shared dossier can read but not type.
+    editable: !store.readOnly,
+    onUpdate({ editor: e }) {
+      // Fragment-bound: the fragment is the source of truth and the store mirror
+      // updates Pinia — don't emit (that would double-write via setAnswer).
+      if (collaborative) return
+      // Store HTML so bold/italic survive; an empty doc is stored as '' (never
+      // '<p></p>') so empty-answer checks and form progress keep working.
+      emit('update:modelValue', e.getText().trim() ? e.getHTML() : '')
+    },
+  })
+}
+createEditor()
+
+// The y-websocket provider exists only after its module lazy-loads and the
+// socket is created — i.e. after this editor mounted. Extensions can't be added
+// to a live Tiptap editor, so rebuild it when the provider (dis)appears;
+// content is safe because it lives in the shared fragment, not the editor.
+watch(
+  () => props.provider,
+  () => {
+    if (collaborative) createEditor()
   },
-})
+)
 
 watch(
   () => store.readOnly,
@@ -195,6 +249,8 @@ watch(
 watch(
   () => props.modelValue,
   (newVal) => {
+    // Fragment-bound editors take content from the fragment, not modelValue.
+    if (collaborative) return
     if (!editor.value) return
     // The store may hold HTML (new answers) or legacy plain text; accept the
     // incoming value when it matches either representation, otherwise it is a
@@ -318,8 +374,12 @@ async function renderDiagram(code: string) {
 
 function acceptSuggestion() {
   if (!editor.value || suggestion.value === null) return
+  // setContent writes the bound fragment when collaborative (synced to peers);
+  // only the classic path needs to emit back to the store.
   editor.value.commands.setContent(markdownToHtml(suggestion.value))
-  emit('update:modelValue', editor.value.getText().trim() ? editor.value.getHTML() : '')
+  if (!collaborative) {
+    emit('update:modelValue', editor.value.getText().trim() ? editor.value.getHTML() : '')
+  }
   suggestion.value = null
   rationale.value = ''
   diagramSvg.value = ''
@@ -334,6 +394,33 @@ function rejectSuggestion() {
 </script>
 
 <style scoped>
+/* Remote collaborators' cursors (CollaborationCaret). The per-user colour is
+   set inline on the caret by the extension; these rules give it shape + a name
+   label. :deep because the widgets render inside the ProseMirror content. */
+.tiptap-wrapper :deep(.collaboration-carets__caret) {
+  border-left: 1px solid;
+  border-right: 1px solid;
+  margin-left: -1px;
+  margin-right: -1px;
+  pointer-events: none;
+  position: relative;
+  word-break: normal;
+}
+
+.tiptap-wrapper :deep(.collaboration-carets__label) {
+  border-radius: 3px 3px 3px 0;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: var(--rvo-font-weight-bold, 700);
+  left: -1px;
+  line-height: normal;
+  padding: 0.05rem 0.3rem;
+  position: absolute;
+  top: -1.3em;
+  user-select: none;
+  white-space: nowrap;
+}
+
 .tiptap-suggestion {
   border-radius: 0;
   border-block-start: 0;

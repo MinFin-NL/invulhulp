@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import json
 import os
+import uuid
 from typing import Any
 
 from dotenv import load_dotenv
@@ -45,10 +46,21 @@ def save_dossier(record: dict[str, Any]) -> None:
     # The sanitized id is canonical, so filename and record id always match.
     record["id"] = _safe(record["id"])
     path = _path(record["id"])
-    tmp = f"{path}.tmp"
-    with open(tmp, "w", encoding="utf-8") as f:
-        json.dump(record, f, ensure_ascii=False)
-    os.replace(tmp, path)  # atomic also on the SMB mount
+    # Per-write unique temp name: two clients pushing the same shared dossier
+    # concurrently (collaboration) must not race on one .tmp path — otherwise one
+    # rename wins and the other raises FileNotFoundError on the vanished temp.
+    tmp = f"{path}.{os.getpid()}.{uuid.uuid4().hex}.tmp"
+    try:
+        with open(tmp, "w", encoding="utf-8") as f:
+            json.dump(record, f, ensure_ascii=False)
+        os.replace(tmp, path)  # atomic also on the SMB mount
+    except BaseException:
+        # Don't leak the temp file if writing/renaming failed.
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
+        raise
 
 
 def load_dossier(dossier_id: str) -> dict[str, Any] | None:

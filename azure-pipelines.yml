@@ -231,6 +231,7 @@ stages:
                       "DOCS_PATH=/data/docs" \
                       "IMAGES_PATH=/data/images" \
                       "DOSSIERS_PATH=/data/dossiers" \
+                      "COLLAB_PATH=/data/collab" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
                       "AZURE_OPENAI_DEPLOYMENT=gpt-5.3-chat" \
                       "AZURE_OPENAI_API_VERSION=2025-04-01-preview" \
@@ -268,6 +269,7 @@ stages:
                       "DOCS_PATH=/data/docs" \
                       "IMAGES_PATH=/data/images" \
                       "DOSSIERS_PATH=/data/dossiers" \
+                      "COLLAB_PATH=/data/collab" \
                       "AZURE_OPENAI_ENDPOINT=secretref:openai-endpoint" \
                       "AZURE_OPENAI_DEPLOYMENT=gpt-5.3-chat" \
                       "AZURE_OPENAI_API_VERSION=2025-04-01-preview" \

@@ -157,13 +157,17 @@ export function useAiMode() {
     return !!aiModePreSmooth.value[formId]
   }
 
-  /** Restore the pre-smoothing answers of the last AI Modus run. */
+  /** Restore the pre-smoothing answers of the last AI Modus run. Atomic: all
+   *  answers are restored in one transaction, so a collaborator sees the undo as
+   *  a single coherent change (and it's one server push). */
   function undoSmoothing(formId: string) {
     const snapshot = aiModePreSmooth.value[formId]
     if (!snapshot) return
-    for (const [qId, value] of Object.entries(snapshot.originals)) {
-      store.setAnswerForForm(formId, qId, value, snapshot.dossierId)
-    }
+    store.batchAnswers(snapshot.dossierId, () => {
+      for (const [qId, value] of Object.entries(snapshot.originals)) {
+        store.setAnswerForForm(formId, qId, value, snapshot.dossierId)
+      }
+    })
     clearSmoothingUndo(formId)
   }
 

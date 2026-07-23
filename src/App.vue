@@ -1,6 +1,9 @@
 <template>
   <div class="utrecht-document rvo-theme">
-    <div v-if="auth.status === 'loading'" class="invulhulp-auth-gate">
+    <!-- Also gate while booting: the form must not mount until loadFromServer
+         finished, or its disconnectAll() tears down the collab sockets the
+         freshly mounted editors just opened (1-second connect/close churn). -->
+    <div v-if="auth.status === 'loading' || (auth.status === 'authenticated' && booting)" class="invulhulp-auth-gate">
       <p>Bezig met laden…</p>
     </div>
 
@@ -46,16 +49,24 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import AssessmentForm from './components/AssessmentForm.vue'
 import { useAssessmentStore } from './stores/assessmentStore'
 import { useAuthStore } from './stores/authStore'
+import { setLocalUser } from './collab/dossierTransport'
 import emblemUrl from '@nl-rvo/assets/images/emblem.svg'
 import brondocIcon from '@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg'
 import aiIcon from '@nl-rvo/assets/icons/computer-en-internet/digitalisering.svg'
 import samenhangIcon from '@nl-rvo/assets/icons/op-kantoor/documenten-met-elkaar-verbonden.svg'
 
 const auth = useAuthStore()
+const booting = ref(true)
+
+// Synchronously (before any child mounts) block ensureDossier's auto-create
+// until loadFromServer runs — otherwise a child's onMounted creates a spurious
+// empty dossier before shared/other-device dossiers arrive. Cleared in
+// loadFromServer's finally.
+useAssessmentStore().beginServerLoad()
 
 const features = [
   {
@@ -78,6 +89,9 @@ const features = [
 onMounted(async () => {
   await auth.fetchMe()
   if (auth.status === 'authenticated') {
+    if (auth.user) {
+      setLocalUser({ sub: auth.user.sub, name: auth.user.name ?? auth.user.email ?? 'Gebruiker' })
+    }
     const store = useAssessmentStore()
     // Server first: shared dossiers and other-device edits come in before
     // ensureDossier() would auto-create a spurious empty dossier.
@@ -85,6 +99,7 @@ onMounted(async () => {
     store.ensureDossier()
     store.syncDocumentsFromServer()
   }
+  booting.value = false
 })
 </script>
 
