@@ -5,7 +5,7 @@ description = "findocs – AI-assisted Government Compliance Forms"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi>=0.141.1",
-    "uvicorn[standard]>=0.52.1",
+    "uvicorn[standard]>=0.52.3",
     "ollama>=0.6.2",
     "openai>=1.0.0",
     "python-dotenv>=1.0.0",

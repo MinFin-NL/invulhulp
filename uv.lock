@@ -291,7 +291,7 @@ requires-dist = [
     { name = "pycrdt-websocket", specifier = ">=0.16.4" },
     { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "python-multipart", specifier = ">=0.0.9" },
-    { name = "uvicorn", extras = ["standard"], specifier = ">=0.52.1" },
+    { name = "uvicorn", extras = ["standard"], specifier = ">=0.52.3" },
 ]
 
 [[package]]
