@@ -8,23 +8,21 @@
       </div>
 
       <!-- Risk level (forms with riskClassification feature) -->
-      <div
-        v-if="props.formConfig.features.riskClassification && store.riskLevel"
-        class="rvo-alert rvo-alert--padding-md"
-        :class="`rvo-alert--${alertType}`"
-      >
-        <!-- One element inside the container: rvo-alert lays its children out in a row. -->
-        <div class="rvo-alert__container">
+            <nldd-banner
+              v-if="props.formConfig.features.riskClassification && store.riskLevel"
+              :variant="alertVariant"
+            >
           <div>
             <strong>Risicoclassificatie: {{ riskInfo?.label }}</strong><br />
             {{ riskInfo?.description }}
           </div>
-        </div>
-      </div>
+      </nldd-banner>
 
       <!-- Unanswered mandatory -->
-      <div v-if="unansweredMandatory.length > 0" class="rvo-alert rvo-alert--warning rvo-alert--padding-md">
-        <div class="rvo-alert__container">
+      <nldd-banner
+        variant="warning"
+        v-if="unansweredMandatory.length > 0"
+      >
           <div class="summary-view__unanswered-content">
             <strong>Verplichte vragen niet ingevuld ({{ unansweredMandatory.length }})</strong>
             <p class="rvo-text rvo-text--sm summary-view__unanswered-intro">De volgende verplichte vragen zijn nog niet beantwoord:</p>
@@ -39,8 +37,7 @@
               </ul>
             </div>
           </div>
-        </div>
-      </div>
+      </nldd-banner>
 
       <!-- Name input -->
       <div class="rvo-form-field">
@@ -227,11 +224,11 @@ const riskInfo = computed(() =>
   store.riskLevel ? (props.formConfig.riskLevelInfo?.[store.riskLevel] ?? null) : null,
 )
 
-const alertType = computed(() => {
+const alertVariant = computed(() => {
   switch (store.riskLevel) {
-    case 'onaanvaardbaar': return 'error'
+    case 'onaanvaardbaar': return 'critical'
     case 'hoog': return 'warning'
-    case 'beperkt': return 'info'
+    case 'beperkt': return 'accent'
     default: return 'success'
   }
 })

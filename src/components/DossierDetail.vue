@@ -50,14 +50,19 @@
         <p class="rvo-text dossier-header__desc">
           Dit dossier groepeert de brondocumenten en formulierantwoorden voor één project of systeem.
         </p>
-        <div v-if="store.readOnly" class="rvo-alert rvo-alert--info rvo-alert--padding-sm">
-          <div class="rvo-alert__container">
-            Gedeeld door {{ store.activeDossier.ownerName ?? 'een collega' }} — u heeft leesrechten.
-          </div>
-        </div>
-        <div v-if="shareError" class="rvo-alert rvo-alert--error rvo-alert--padding-sm" role="alert">
-          <div class="rvo-alert__container">{{ shareError }}</div>
-        </div>
+        <nldd-banner
+          variant="accent"
+          size="sm"
+          v-if="store.readOnly"
+          :text="`Gedeeld door ${store.activeDossier.ownerName ?? 'een collega'} — u heeft leesrechten.`"
+        />
+        <nldd-banner
+          variant="critical"
+          size="sm"
+          v-if="shareError"
+          role="alert"
+          :text="shareError"
+        />
       </section>
 
       <!-- Eerste bezoek aan een leeg dossier: één scherm, één handeling. De
@@ -107,12 +112,18 @@
              staat is dit scherm weg, dus de succesmelding hoort in de gewone
              documentenkaart. -->
         <div class="docs-alerts" role="status" aria-live="polite">
-          <div v-if="isUploading" class="rvo-alert rvo-alert--info rvo-alert--padding-sm">
-            <div class="rvo-alert__container">{{ uploadingLabel }}</div>
-          </div>
-          <div v-if="uploadError" class="rvo-alert rvo-alert--error rvo-alert--padding-sm">
-            <div class="rvo-alert__container">{{ uploadError }}</div>
-          </div>
+          <nldd-banner
+            variant="accent"
+            size="sm"
+            v-if="isUploading"
+            :text="uploadingLabel"
+          />
+          <nldd-banner
+            variant="critical"
+            size="sm"
+            v-if="uploadError"
+            :text="uploadError"
+          />
         </div>
 
         <button
@@ -147,11 +158,13 @@
 
       <!-- Alles wat van toepassing is, is af. Dat is een mijlpaal: benoem hem,
            in plaats van de band stilletjes te laten verdwijnen. -->
-      <div v-else-if="allFormsDone" class="rvo-alert rvo-alert--success rvo-alert--padding-sm next-step__done">
-        <div class="rvo-alert__container">
-          Alle formulieren die voor dit dossier gelden zijn afgerond.
-        </div>
-      </div>
+      <nldd-banner
+        variant="success"
+        size="sm"
+        class="next-step__done"
+        v-else-if="allFormsDone"
+        text="Alle formulieren die voor dit dossier gelden zijn afgerond."
+      />
 
       <!-- Phase rail: the whole lifecycle in one row, as a table of contents
            for the timeline below. Each circle fills from the bottom with the
@@ -256,18 +269,25 @@
 
         <!-- Live status alerts -->
         <div class="docs-alerts" role="status" aria-live="polite">
-          <div v-if="isUploading" class="rvo-alert rvo-alert--info rvo-alert--padding-sm">
-            <div class="rvo-alert__container">{{ uploadingLabel }}</div>
-          </div>
-          <div v-if="successMessage" class="rvo-alert rvo-alert--success rvo-alert--padding-sm">
-            <!-- One element inside the container: rvo-alert lays its children out in a row. -->
-            <div class="rvo-alert__container">
+          <nldd-banner
+            variant="accent"
+            size="sm"
+            v-if="isUploading"
+            :text="uploadingLabel"
+          />
+                    <nldd-banner
+                      variant="success"
+                      size="sm"
+                      v-if="successMessage"
+                    >
               <div><strong>Toegevoegd:</strong> {{ successMessage }}</div>
-            </div>
-          </div>
-          <div v-if="uploadError" class="rvo-alert rvo-alert--error rvo-alert--padding-sm">
-            <div class="rvo-alert__container">{{ uploadError }}</div>
-          </div>
+          </nldd-banner>
+          <nldd-banner
+            variant="critical"
+            size="sm"
+            v-if="uploadError"
+            :text="uploadError"
+          />
         </div>
 
         <EntityGraph

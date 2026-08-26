@@ -23,25 +23,21 @@
         </h1>
       </header>
 
-      <div
+      <nldd-banner
+        variant="warning"
+        size="sm"
         v-if="saveStatus === 'error'"
-        class="rvo-alert rvo-alert--warning rvo-alert--padding-sm"
         role="alert"
-      >
-        <div class="rvo-alert__container">
-          Opslaan op de server lukt even niet. Je antwoorden staan wel op dit apparaat bewaard —
-          bij de volgende wijziging probeert de app het opnieuw.
-        </div>
-      </div>
+        text="Opslaan op de server lukt even niet. Je antwoorden staan wel op dit apparaat bewaard — bij de volgende wijziging probeert de app het opnieuw."
+      />
 
       <!-- Sections another party fills in: say so, and say that AI Modus keeps
            its hands off, so nobody wonders where an answer came from. -->
-      <div v-if="section.aiFill === false" class="rvo-alert rvo-alert--info rvo-alert--padding-md">
-        <div class="rvo-alert__container">
-          Dit onderdeel wordt door een andere partij ingevuld. AI Modus vult hier niets in — antwoorden komen
-          alleen van de beoordelaar zelf.
-        </div>
-      </div>
+      <nldd-banner
+        variant="accent"
+        v-if="section.aiFill === false"
+        text="Dit onderdeel wordt door een andere partij ingevuld. AI Modus vult hier niets in — antwoorden komen alleen van de beoordelaar zelf."
+      />
 
       <!-- Subsections -->
       <div v-for="subsection in section.subsections" :key="subsection.id" class="rvo-layout-column rvo-layout-gap--lg">

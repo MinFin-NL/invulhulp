@@ -15,27 +15,25 @@
     </div>
 
     <!-- AI extraction panel -->
-    <div
-      v-if="streamingText || suggestion !== null"
-      class="rvo-alert rvo-alert--success rvo-alert--padding-sm doc-suggestion__panel"
-      :aria-busy="isLoading"
-    >
-      <div class="rvo-alert__container">
+        <nldd-banner
+          variant="success"
+          size="sm"
+          class="doc-suggestion__panel"
+          v-if="streamingText || suggestion !== null"
+          :aria-busy="isLoading"
+        >
         <div class="doc-suggestion__panel-header">
           <span class="doc-suggestion__panel-label">✦ Extractie uit brondocumenten</span>
           <span v-if="rationale" class="doc-suggestion__rationale">{{ rationale }}</span>
         </div>
-
         <!-- Live streaming view -->
         <div v-if="isLoading" class="doc-diff doc-diff--streaming" aria-live="polite">
           <span v-if="streamingText">{{ streamingText }}<span class="doc-diff__cursor" aria-hidden="true">▋</span></span>
           <span v-else class="doc-diff__empty">Verbinding maken…</span>
         </div>
-
         <!-- Final view -->
         <template v-else-if="suggestion !== null">
           <div v-if="isInsufficient" class="doc-diff doc-diff__empty">{{ suggestion }}</div>
-
           <div v-else-if="isChoiceType" class="doc-choice">
             <div v-if="!matchedOption" class="doc-diff doc-diff__empty">
               De AI stelde "{{ suggestion }}" voor, maar dit komt niet overeen met een van de beschikbare opties.
@@ -51,7 +49,6 @@
               </div>
             </template>
           </div>
-
           <!-- Table suggestion: read-only preview of the validated rows -->
           <div v-else-if="isTableType && tableSuggestion" class="doc-table-preview">
             <table class="rvo-table doc-table-preview__table">
@@ -72,7 +69,6 @@
               <strong>Toelichting:</strong> {{ tableSuggestion.notes }}
             </p>
           </div>
-
           <div v-else-if="noChanges" class="doc-diff doc-diff__empty">
             Geen wijzigingen — het huidige antwoord dekt de documentinhoud al.
           </div>
@@ -83,7 +79,6 @@
               :class="part.added ? 'doc-diff__add' : part.removed ? 'doc-diff__del' : ''"
             >{{ part.value }}</span>
           </div>
-
           <!-- Source passages, so the user can verify before accepting -->
           <SourcePanel
             v-if="!isInsufficient && (displaySources.length > 0 || !suggestionGrounded)"
@@ -94,7 +89,6 @@
             @show-document="showDocument"
             @dismiss-warning="suggestionWarningDismissed = true"
           />
-
           <div class="doc-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
             <nldd-button
               variant="primary"
@@ -111,8 +105,7 @@
             />
           </div>
         </template>
-      </div>
-    </div>
+    </nldd-banner>
 
     <!-- Action button (hidden while streaming or when suggestion is shown) -->
     <div v-if="canSuggest && suggestion === null && !streamingText" class="doc-suggestion__actions">

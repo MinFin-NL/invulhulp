@@ -67,12 +67,13 @@
       <main class="assessment-shell__main">
 
         <!-- Answers taken over verbatim from an earlier form on opening -->
-        <div
-          v-if="prefill"
-          class="rvo-alert rvo-alert--info rvo-alert--padding-sm assessment-shell__prefill"
-          role="status"
-        >
-          <div class="rvo-alert__container">
+                <nldd-banner
+                  variant="accent"
+                  size="sm"
+                  class="assessment-shell__prefill"
+                  v-if="prefill"
+                  role="status"
+                >
             <span>{{ prefillMessage }}</span>
             <nldd-button
               variant="neutral-transparent"
@@ -81,8 +82,7 @@
               aria-label="Melding over overgenomen antwoorden sluiten"
               @click="prefill = null"
             />
-          </div>
-        </div>
+        </nldd-banner>
 
         <!-- Home -->
         <FormIntro
@@ -97,14 +97,14 @@
           class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm assessment-shell__forbidden"
         >
           <div class="rvo-layout-column rvo-layout-gap--xl">
-            <div class="rvo-alert rvo-alert--error rvo-alert--padding-md">
-              <div class="rvo-alert__container">
+                        <nldd-banner
+                          variant="critical"
+                        >
                 <strong>Dit AI-systeem is verboden</strong><br />
                 Op basis van de risicoclassificatie valt dit systeem in de categorie
                 <em>onaanvaardbaar risico</em> onder de EU AI-verordening (Art. 5).
                 Het systeem mag niet worden ingezet.
-              </div>
-            </div>
+            </nldd-banner>
             <div class="rvo-layout-row rvo-layout-gap--md">
               <nldd-button
                 variant="secondary"

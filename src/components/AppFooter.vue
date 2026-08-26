@@ -3,8 +3,11 @@
     <div
       class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm invulhulp-footer__inner"
     >
-      <div class="rvo-alert rvo-alert--warning rvo-alert--padding-sm invulhulp-footer__alert">
-        <div class="rvo-alert__container">
+            <nldd-banner
+              variant="warning"
+              size="sm"
+              class="invulhulp-footer__alert"
+            >
           <p class="rvo-text rvo-text--sm invulhulp-footer__text">
             Dit is een bètaversie van dit hulpmiddel. Vragen of feedback?
             <a
@@ -12,8 +15,7 @@
               href="mailto:innovatiemanagamentfinancien@minfin.nl"
             >innovatiemanagamentfinancien@minfin.nl</a>
           </p>
-        </div>
-      </div>
+      </nldd-banner>
     </div>
   </footer>
 </template>

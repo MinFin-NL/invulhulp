@@ -8,15 +8,15 @@
       </div>
 
       <!-- Risk level reminder -->
-      <div v-if="store.riskLevel" class="rvo-alert rvo-alert--padding-md" :class="`rvo-alert--${alertType}`">
-        <!-- One element inside the container: rvo-alert lays its children out in a row. -->
-        <div class="rvo-alert__container">
+            <nldd-banner
+              v-if="store.riskLevel"
+              :variant="alertVariant"
+            >
           <div>
             <strong>Risicoclassificatie: {{ riskInfo?.label }}</strong><br />
             {{ riskInfo?.description }}
           </div>
-        </div>
-      </div>
+      </nldd-banner>
 
       <!-- Questions -->
       <div class="rvo-layout-column rvo-layout-gap--lg">
@@ -72,11 +72,11 @@ const goAnswer = computed(() => {
   return typeof raw === 'string' ? raw.split('\n---\n')[0] : ''
 })
 
-const alertType = computed(() => {
+const alertVariant = computed(() => {
   switch (store.riskLevel) {
-    case 'onaanvaardbaar': return 'error'
+    case 'onaanvaardbaar': return 'critical'
     case 'hoog': return 'warning'
-    case 'beperkt': return 'info'
+    case 'beperkt': return 'accent'
     default: return 'success'
   }
 })

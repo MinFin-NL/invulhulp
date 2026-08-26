@@ -86,9 +86,12 @@
           Minimaal één eigenaar vereist.
         </p>
 
-        <div v-if="error" class="rvo-alert rvo-alert--error rvo-alert--padding-sm">
-          <div class="rvo-alert__container">{{ error }}</div>
-        </div>
+        <nldd-banner
+          variant="critical"
+          size="sm"
+          v-if="error"
+          :text="error"
+        />
       </div>
 
       <div class="invulhulp-modal__actions">

@@ -9,17 +9,26 @@
         </p>
       </div>
 
-      <div v-if="error" class="rvo-alert rvo-alert--error rvo-alert--padding-md" role="alert">
-        <div class="rvo-alert__container">{{ error }}</div>
-      </div>
+      <nldd-banner
+        variant="critical"
+        v-if="error"
+        role="alert"
+        :text="error"
+      />
 
-      <div v-if="notice" class="rvo-alert rvo-alert--success rvo-alert--padding-md" role="status">
-        <div class="rvo-alert__container">{{ notice }}</div>
-      </div>
+      <nldd-banner
+        variant="success"
+        v-if="notice"
+        role="status"
+        :text="notice"
+      />
 
       <!-- Eénmalig getoond tijdelijk wachtwoord -->
-      <div v-if="tempPassword" class="rvo-alert rvo-alert--warning rvo-alert--padding-md">
-        <div class="rvo-alert__container user-mgmt__temp-pw">
+            <nldd-banner
+              variant="warning"
+              class="user-mgmt__temp-pw"
+              v-if="tempPassword"
+            >
           <div>
             <strong>Tijdelijk wachtwoord voor {{ tempPassword.who }}:</strong>
             <code class="user-mgmt__pw-code">{{ tempPassword.value }}</code><br />
@@ -40,8 +49,7 @@
               @click="tempPassword = null"
             />
           </div>
-        </div>
-      </div>
+      </nldd-banner>
 
       <!-- Nieuwe gebruiker -->
       <section class="user-mgmt__panel">

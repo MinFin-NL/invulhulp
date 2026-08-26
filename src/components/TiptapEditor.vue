@@ -10,17 +10,17 @@
 
     <!-- Suggestion panel: visible while streaming, when a suggestion is ready
          or when the AI asks a clarification question -->
-    <div
-      v-if="streamingText || suggestion !== null || pendingClarification !== null"
-      class="rvo-alert rvo-alert--info rvo-alert--padding-sm tiptap-suggestion"
-      :aria-busy="isLoading"
-    >
-      <div class="rvo-alert__container">
+        <nldd-banner
+          variant="accent"
+          size="sm"
+          class="tiptap-suggestion"
+          v-if="streamingText || suggestion !== null || pendingClarification !== null"
+          :aria-busy="isLoading"
+        >
         <div class="tiptap-suggestion__header">
           <span class="tiptap-suggestion__label">{{ pendingClarification !== null ? 'AI-vraag' : 'AI-suggestie' }}</span>
           <span v-if="rationale" class="tiptap-suggestion__rationale">{{ rationale }}</span>
         </div>
-
         <!-- Clarification: the AI needs extra input before it can improve -->
         <template v-if="pendingClarification !== null">
           <p class="tiptap-clarification__question">{{ pendingClarification }}</p>
@@ -48,13 +48,11 @@
             />
           </div>
         </template>
-
         <!-- Live streaming view -->
         <div v-else-if="isLoading" class="tiptap-diff tiptap-diff--streaming" aria-live="polite">
           <span v-if="streamingText">{{ streamingText }}<span class="tiptap-diff__cursor" aria-hidden="true">▋</span></span>
           <span v-else class="tiptap-diff__empty">Verbinding maken…</span>
         </div>
-
         <!-- Final diff view -->
         <template v-else-if="suggestion !== null">
           <div v-if="noChanges" class="tiptap-diff tiptap-diff__empty">
@@ -67,7 +65,6 @@
               :class="part.added ? 'tiptap-diff__add' : part.removed ? 'tiptap-diff__del' : ''"
             >{{ part.value }}</span>
           </div>
-
           <!-- Optional mermaid diagram accompanying the suggestion -->
           <div
             v-if="diagramSvg"
@@ -76,7 +73,6 @@
             aria-label="Diagram bij de suggestie"
             v-html="diagramSvg"
           ></div>
-
           <div class="tiptap-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
             <nldd-button
               variant="primary"
@@ -92,8 +88,7 @@
             />
           </div>
         </template>
-      </div>
-    </div>
+    </nldd-banner>
 
     <!-- Toolbar row: improve button + error -->
     <div class="tiptap-toolbar">

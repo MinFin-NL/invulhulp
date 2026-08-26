@@ -43,9 +43,12 @@
 
         <p v-if="loading" class="rvo-text beslishulp__status">Beslishulp laden…</p>
 
-        <div v-else-if="loadError" class="rvo-alert rvo-alert--error rvo-alert--padding-md" role="alert">
-          <div class="rvo-alert__container">{{ loadError }}</div>
-        </div>
+        <nldd-banner
+          variant="critical"
+          v-else-if="loadError"
+          role="alert"
+          :text="loadError"
+        />
 
         <!-- ---------------- Question ---------------- -->
         <template v-else-if="position?.kind === 'question'">
@@ -104,12 +107,13 @@
 
         <!-- ---------------- Conclusion ---------------- -->
         <template v-else-if="position?.kind === 'conclusion'">
-          <div class="rvo-alert rvo-alert--padding-md beslishulp__verdict" :class="`rvo-alert--${alertModifier}`">
-            <div class="rvo-alert__container">
+                    <nldd-banner
+                      class="beslishulp__verdict"
+                      :variant="alertVariant"
+                    >
               <strong>{{ verdictLine }}</strong>
               <span v-if="savedNotice" class="beslishulp__saved">{{ savedNotice }}</span>
-            </div>
-          </div>
+          </nldd-banner>
 
           <p class="rvo-text beslishulp__conclusion">{{ position.conclusion.conclusion }}</p>
 
@@ -160,17 +164,18 @@
         <!-- ---------------- Dead end ----------------
              Upstream writes no fallback redirect, so a combination of answers can
              in principle match no route. Say so plainly instead of freezing. -->
-        <div v-else-if="position?.kind === 'deadEnd'" class="rvo-alert rvo-alert--warning rvo-alert--padding-md" role="alert">
-          <!-- One element inside the container: rvo-alert lays its children out in a row. -->
-          <div class="rvo-alert__container">
+                <nldd-banner
+                  variant="warning"
+                  v-else-if="position?.kind === 'deadEnd'"
+                  role="alert"
+                >
             <div>
               <strong>Geen vervolgvraag gevonden.</strong><br />
               Deze combinatie van antwoorden leidt in de beslisboom niet naar een vervolgvraag of conclusie.
               Ga een stap terug en kies een ander antwoord, of raadpleeg
               <a class="rvo-link" href="mailto:ai-verordening@minbzk.nl">ai-verordening@minbzk.nl</a>.
             </div>
-          </div>
-        </div>
+        </nldd-banner>
       </div>
 
       <footer class="beslishulp__footer">
@@ -272,13 +277,13 @@ const verdictLine = computed(() =>
   ),
 )
 
-const alertModifier = computed(() => {
+const alertVariant = computed(() => {
   const conclusionId = position.value?.kind === 'conclusion' ? position.value.conclusion.conclusionId : null
-  if (isOutOfScope(state.value?.labels ?? new Set(), conclusionId)) return 'info'
+  if (isOutOfScope(state.value?.labels ?? new Set(), conclusionId)) return 'accent'
   switch (riskLevelFor(state.value?.labels ?? new Set())) {
-    case 'onaanvaardbaar': return 'error'
+    case 'onaanvaardbaar': return 'critical'
     case 'hoog': return 'warning'
-    case 'beperkt': return 'info'
+    case 'beperkt': return 'accent'
     default: return 'success'
   }
 })

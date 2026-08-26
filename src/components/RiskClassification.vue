@@ -14,12 +14,10 @@
 
       <!-- Not run yet: the beslishulp is the way in. -->
       <div v-if="!run" class="rvo-layout-column rvo-layout-gap--lg">
-        <div class="rvo-alert rvo-alert--info rvo-alert--padding-md">
-          <div class="rvo-alert__container">
-            De beslishulp is voor dit dossier nog niet doorlopen. Doorloop de vragen om de risicogroep vast te stellen;
-            u kunt daarna terugkeren naar dit assessment.
-          </div>
-        </div>
+        <nldd-banner
+          variant="accent"
+          text="De beslishulp is voor dit dossier nog niet doorlopen. Doorloop de vragen om de risicogroep vast te stellen; u kunt daarna terugkeren naar dit assessment."
+        />
         <nldd-button
           class="risk-classification__start"
           variant="primary"
@@ -31,17 +29,13 @@
 
       <!-- Run available: show it, then let the user adopt it for this assessment. -->
       <div v-else class="rvo-layout-column rvo-layout-gap--lg">
-        <div class="rvo-alert rvo-alert--padding-md" :class="`rvo-alert--${alertModifier}`">
-          <!-- One element inside the container: rvo-alert lays its children out
-               in a row, so a bare <strong> + <br> would sit beside the text. -->
-          <div class="rvo-alert__container">
+                <nldd-banner :variant="alertVariant">
             <div>
               <strong>{{ verdict }}</strong><br />
               <template v-if="levelInfo">{{ levelInfo.description }}</template>
               <template v-else>{{ conclusionText }}</template>
             </div>
-          </div>
-        </div>
+        </nldd-banner>
 
         <section v-if="conclusionText && levelInfo" class="risk-classification__conclusion">
           <h2 class="rvo-heading rvo-heading--md risk-classification__subtitle">Conclusie van de beslishulp</h2>
@@ -113,9 +107,14 @@ const conclusionText = computed(() => {
   return tree.value.conclusions.find((c) => c.conclusionId === id)?.conclusion ?? ''
 })
 
-const alertModifier = computed(() => {
-  const c = levelInfo.value?.color
-  return c === 'error' || c === 'warning' || c === 'success' ? c : 'info'
+// levelInfo carries RVO-era colour names; map them onto NLDD banner variants.
+const alertVariant = computed(() => {
+  switch (levelInfo.value?.color) {
+    case 'error': return 'critical'
+    case 'warning': return 'warning'
+    case 'success': return 'success'
+    default: return 'accent'
+  }
 })
 
 const completedOn = computed(() =>

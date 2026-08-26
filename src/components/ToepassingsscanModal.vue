@@ -106,19 +106,16 @@
             </li>
           </ul>
 
-          <div
-            v-if="!hasBeslishulp && kenmerken.algoritme_of_ai !== false"
-            class="rvo-alert rvo-alert--info rvo-alert--padding-md scan__alert"
-          >
-            <!-- One element inside the container: rvo-alert lays its children out
-                 in a row, so a bare <strong> would sit beside the text. -->
-            <div class="rvo-alert__container">
+                    <nldd-banner
+                      variant="accent"
+                      class="scan__alert"
+                      v-if="!hasBeslishulp && kenmerken.algoritme_of_ai !== false"
+                    >
               <div>
                 Of de AI-verordening geldt, bepaalt de <strong>Beslishulp AI-verordening</strong> —
                 op de dossierpagina bij de EU AI Act-kaart.
               </div>
-            </div>
-          </div>
+          </nldd-banner>
 
           <p class="rvo-text rvo-text--sm rvo-text--subtle scan__note">
             Advies, geen juridisch oordeel: leg een "niet van toepassing" voor aan de FG, privacy

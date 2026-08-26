@@ -20,23 +20,22 @@
     </div>
 
     <!-- AI synthesis suggestion panel -->
-    <div
-      v-if="streamingText || suggestion !== null"
-      class="rvo-alert rvo-alert--success rvo-alert--padding-sm cross-suggestion__panel"
-      :aria-busy="isLoading"
-    >
-      <div class="rvo-alert__container">
+        <nldd-banner
+          variant="success"
+          size="sm"
+          class="cross-suggestion__panel"
+          v-if="streamingText || suggestion !== null"
+          :aria-busy="isLoading"
+        >
         <div class="cross-suggestion__panel-header">
           <span class="cross-suggestion__panel-label">✦ Synthese vanuit {{ sourceLabel }}</span>
           <span v-if="rationale" class="cross-suggestion__rationale">{{ rationale }}</span>
         </div>
-
         <!-- Live streaming view -->
         <div v-if="isLoading" class="cross-diff cross-diff--streaming" aria-live="polite">
           <span v-if="streamingText">{{ streamingText }}<span class="cross-diff__cursor" aria-hidden="true">▋</span></span>
           <span v-else class="cross-diff__empty">Verbinding maken…</span>
         </div>
-
         <!-- Final diff view -->
         <template v-else-if="suggestion !== null">
           <div v-if="noChanges" class="cross-diff cross-diff__empty">
@@ -49,7 +48,6 @@
               :class="part.added ? 'cross-diff__add' : part.removed ? 'cross-diff__del' : ''"
             >{{ part.value }}</span>
           </div>
-
           <div class="cross-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
             <nldd-button
               variant="primary"
@@ -65,8 +63,7 @@
             />
           </div>
         </template>
-      </div>
-    </div>
+    </nldd-banner>
 
     <!-- Action buttons (hidden while streaming). "Gebruik direct" works for
          every question type that has a copyable value; AI synthesis is only

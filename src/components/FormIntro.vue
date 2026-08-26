@@ -9,12 +9,11 @@
         </p>
       </header>
 
-      <div class="rvo-alert rvo-alert--info rvo-alert--padding-md">
-        <!-- One element inside the container: rvo-alert lays its children out in a row. -->
-        <div class="rvo-alert__container">
+            <nldd-banner
+              variant="accent"
+            >
           <div><strong>Let op:</strong> {{ content.notice }}</div>
-        </div>
-      </div>
+      </nldd-banner>
 
       <section class="rvo-layout-column rvo-layout-gap--md">
         <h2 class="rvo-heading rvo-heading--xl form-intro__section-title">Over dit instrument</h2>

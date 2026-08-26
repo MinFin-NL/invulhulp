@@ -27,8 +27,11 @@
         <!-- Danger zone: onomkeerbare actie. De gevolgen staan er voluit,
              daarna typt de gebruiker de naam over — een bevestigingsknop alleen
              is te makkelijk per ongeluk te raken. -->
-        <div v-if="confirmPhrase" class="rvo-alert rvo-alert--error rvo-alert--padding-md invulhulp-modal__danger">
-          <div class="rvo-alert__container invulhulp-modal__danger-body">
+                <nldd-banner
+                  variant="critical"
+                  class="invulhulp-modal__danger invulhulp-modal__danger-body"
+                  v-if="confirmPhrase"
+                >
             <strong class="invulhulp-modal__danger-title">Let op: dit kan niet ongedaan worden gemaakt</strong>
             <slot name="danger" />
             <div class="rvo-form-field invulhulp-modal__danger-field">
@@ -50,8 +53,7 @@
                   : 'De knop wordt actief zodra de naam exact overeenkomt.' }}
               </span>
             </div>
-          </div>
-        </div>
+        </nldd-banner>
 
         <div v-if="kind === 'prompt'" class="rvo-form-field">
           <label class="rvo-form-field__label" :for="inputId">{{ inputLabel || 'Naam' }}</label>
