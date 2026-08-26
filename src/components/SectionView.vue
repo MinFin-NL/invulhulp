@@ -1,6 +1,6 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm section-view">
-    <div class="rvo-layout-column rvo-layout-gap--xl">
+  <div class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad section-view">
+    <div class="invulhulp-column invulhulp-gap--xl">
 
       <!-- Section header -->
       <header>
@@ -40,7 +40,7 @@
       />
 
       <!-- Subsections -->
-      <div v-for="subsection in section.subsections" :key="subsection.id" class="rvo-layout-column rvo-layout-gap--lg">
+      <div v-for="subsection in section.subsections" :key="subsection.id" class="invulhulp-column invulhulp-gap--lg">
         <div>
           <nldd-title size="2"><h2 class="section-view__subsection-title">
             {{ subsection.title }}
@@ -60,7 +60,7 @@
       </div>
 
       <!-- Navigation -->
-      <div class="rvo-layout-row rvo-layout-gap--md section-view__nav">
+      <div class="invulhulp-row invulhulp-gap--md section-view__nav">
         <nldd-button
           variant="secondary"
           text="← Vorige"

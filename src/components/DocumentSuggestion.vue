@@ -52,20 +52,18 @@
           </div>
           <!-- Table suggestion: read-only preview of the validated rows -->
           <div v-else-if="isTableType && tableSuggestion" class="doc-table-preview">
-            <table class="rvo-table doc-table-preview__table">
-              <thead class="rvo-table-head">
-                <tr class="rvo-table-row">
-                  <th v-for="col in questionColumns" :key="col.id" class="rvo-table-header" scope="col">
-                    {{ col.label }}
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="rvo-table-body">
-                <tr v-for="(row, i) in tableSuggestion.rows" :key="i" class="rvo-table-row">
-                  <td v-for="(cell, j) in row" :key="j" class="rvo-table-cell">{{ cell }}</td>
-                </tr>
-              </tbody>
-            </table>
+            <nldd-table
+              class="doc-table-preview__table"
+              :columns="gridColumns(questionColumns?.length ?? 0)"
+              accessible-label="Voorgestelde rijen uit de brondocumenten"
+            >
+              <nldd-table-row slot="header">
+                <nldd-text-cell v-for="col in questionColumns" :key="col.id" size="sm" :text="col.label" />
+              </nldd-table-row>
+              <nldd-table-row v-for="(row, i) in tableSuggestion.rows" :key="i">
+                <nldd-text-cell v-for="(cell, j) in row" :key="j" size="sm" :text="cell" />
+              </nldd-table-row>
+            </nldd-table>
             <p v-if="tableSuggestion.notes" class="doc-table-preview__notes">
               <strong>Toelichting:</strong> {{ tableSuggestion.notes }}
             </p>
@@ -90,7 +88,7 @@
             @show-document="showDocument"
             @dismiss-warning="suggestionWarningDismissed = true"
           />
-          <div class="doc-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
+          <div class="doc-suggestion__actions invulhulp-row invulhulp-gap--xs">
             <nldd-button
               variant="primary"
               size="sm"
@@ -151,6 +149,12 @@ const props = defineProps<{
   questionOptions?: string[]
   questionColumns?: TableColumn[]
 }>()
+
+/** nldd-table lays its columns out with a CSS grid track list; the preview has
+ *  no fixed widths, so every column gets an equal share. */
+function gridColumns(count: number): string {
+  return `repeat(${Math.max(count, 1)}, minmax(0, 1fr))`
+}
 
 const emit = defineEmits<{
   'apply-suggestion': [value: string, meta?: AnswerSourceMeta]
@@ -451,13 +455,6 @@ function rejectSuggestion() {
   width: 100%;
   border-collapse: collapse;
   font-size: var(--primitives-font-size-90);
-}
-
-.doc-table-preview__table .rvo-table-header,
-.doc-table-preview__table .rvo-table-cell {
-  text-align: start;
-  padding: var(--primitives-space-2, 4px) var(--primitives-space-4);
-  border-block-end: 1px solid var(--invulhulp-color-border);
 }
 
 .doc-table-preview__notes {

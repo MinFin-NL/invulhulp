@@ -1,6 +1,6 @@
 <template>
   <div class="portal-page">
-    <div class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm">
+    <div class="invulhulp-measure invulhulp-measure--lg invulhulp-measure--pad">
 
       <!-- Dossier page header -->
       <section class="dossier-header" aria-labelledby="dossier-title">

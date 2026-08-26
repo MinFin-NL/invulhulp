@@ -5,7 +5,7 @@
     <!-- AI Mode banner: prominent, sticky indicator while AI fills this form -->
     <Transition name="ai-banner">
       <div v-if="isAiActive" ref="bannerEl" class="ai-banner" role="status" aria-live="polite">
-        <div class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm ai-banner__inner">
+        <div class="invulhulp-measure invulhulp-measure--lg invulhulp-measure--pad ai-banner__inner">
           <span class="ai-banner__spinner" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 2 22.5 22" width="22" height="22" aria-hidden="true">
               <path d="m 10.55,20.49 0.6,1.81 0.6,-1.81 c 1.04,-3.11 3.48,-5.55 6.59,-6.59 l 1.81,-0.6 -1.81,-0.6 C 15.23,11.66 12.79,9.22 11.75,6.11 L 11.15,4.3 10.55,6.11 C 9.51,9.22 7.07,11.66 3.96,12.7 l -1.81,0.6 1.81,0.6 c 3.11,1.04 5.55,3.48 6.59,6.59" fill="#fff"/>
@@ -96,9 +96,9 @@
         <!-- AIIA-only: Forbidden onaanvaardbaar risk stop screen -->
         <div
           v-else-if="formConfig.features.riskClassification && store.riskLevel === 'onaanvaardbaar' && store.currentView !== 'risk'"
-          class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm assessment-shell__forbidden"
+          class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad assessment-shell__forbidden"
         >
-          <div class="rvo-layout-column rvo-layout-gap--xl">
+          <div class="invulhulp-column invulhulp-gap--xl">
                         <nldd-banner
                           variant="critical"
                         >
@@ -107,7 +107,7 @@
                 <em>onaanvaardbaar risico</em> onder de EU AI-verordening (Art. 5).
                 Het systeem mag niet worden ingezet.
             </nldd-banner>
-            <div class="rvo-layout-row rvo-layout-gap--md">
+            <div class="invulhulp-row invulhulp-gap--md">
               <nldd-button
                 variant="secondary"
                 text="Risicoclassificatie herzien"

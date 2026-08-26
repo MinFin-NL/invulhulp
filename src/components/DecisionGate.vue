@@ -1,6 +1,6 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm decision-gate">
-    <div class="rvo-layout-column rvo-layout-gap--xl">
+  <div class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad decision-gate">
+    <div class="invulhulp-column invulhulp-gap--xl">
 
       <div>
         <nldd-text color="inherit" size="sm" class="decision-gate__kicker">Sectie 3 – Afweging</nldd-text>
@@ -19,7 +19,7 @@
       </nldd-banner>
 
       <!-- Questions -->
-      <div class="rvo-layout-column rvo-layout-gap--lg">
+      <div class="invulhulp-column invulhulp-gap--lg">
         <QuestionItem
           v-for="question in decisionQuestions"
           :key="question.id"
@@ -30,7 +30,7 @@
       </div>
 
       <!-- Navigation -->
-      <div class="rvo-layout-row rvo-layout-gap--md decision-gate__nav">
+      <div class="invulhulp-row invulhulp-gap--md decision-gate__nav">
         <nldd-button
           variant="secondary"
           text="← Vorige"

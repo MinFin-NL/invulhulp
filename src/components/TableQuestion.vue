@@ -15,26 +15,25 @@
 
     <div v-show="gridOpen" class="invulhulp-table-question__viewport">
       <div class="invulhulp-table-question__scroll" ref="scrollEl" @scroll="updateScrollState">
-      <table class="rvo-table invulhulp-table-question__table">
-        <thead class="rvo-table-head">
-          <tr class="rvo-table-row">
-            <th
-              v-for="col in columns"
-              :key="col.id"
-              class="rvo-table-header"
-              :title="col.hint"
-              scope="col"
-            >
-              {{ col.label }}
-            </th>
-            <th class="rvo-table-header invulhulp-table-question__actions-header" scope="col">
-              <span class="rvo-visually-hidden">Acties</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody class="rvo-table-body">
-          <tr v-for="(row, rowIndex) in table.rows" :key="rowIndex" class="rvo-table-row">
-            <td v-for="(col, colIndex) in columns" :key="col.id" class="rvo-table-cell">
+      <nldd-table
+        class="invulhulp-table-question__table"
+        :columns="gridColumns"
+        :accessible-label="question.text"
+      >
+        <nldd-table-row slot="header">
+          <nldd-text-cell
+            v-for="col in columns"
+            :key="col.id"
+            size="sm"
+            :text="col.label"
+            :title="col.hint"
+          />
+          <nldd-cell class="invulhulp-table-question__actions-header">
+            <span class="invulhulp-visually-hidden">Acties</span>
+          </nldd-cell>
+        </nldd-table-row>
+          <nldd-table-row v-for="(row, rowIndex) in table.rows" :key="rowIndex">
+            <nldd-cell v-for="(col, colIndex) in columns" :key="col.id">
               <!-- Dropdown cell (upstream select/radio column) -->
               <!-- nldd-dropdown wraps a native <select>: the options stay
                    ordinary markup and the component supplies the chrome. -->
@@ -86,8 +85,8 @@
                 :disabled="store.readOnly"
                 @input="onCellValue(rowIndex, colIndex, $event)"
               />
-            </td>
-            <td class="rvo-table-cell invulhulp-table-question__actions-cell">
+            </nldd-cell>
+            <nldd-cell class="invulhulp-table-question__actions-cell">
               <nldd-button
                 variant="neutral-transparent"
                 class="invulhulp-table-question__remove-btn"
@@ -97,10 +96,9 @@
                 title="Rij verwijderen"
                 @click="removeRow(rowIndex)"
               />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+            </nldd-cell>
+          </nldd-table-row>
+      </nldd-table>
       </div>
       <!-- Clickable scroll buttons — the explicit affordance. -->
       <button
@@ -184,6 +182,13 @@ const emit = defineEmits<{
 
 const columns = computed<TableColumn[]>(() => props.question.columns ?? [])
 const minRows = computed(() => Math.max(props.question.minRows ?? 1, 0))
+// nldd-table declares its columns once as a grid track list: the data columns
+// share the width, the trailing actions column is just wide enough for the
+// remove button.
+const gridColumns = computed(
+  () => `repeat(${columns.value.length}, minmax(140px, 1fr)) 3rem`,
+)
+
 const maxRows = computed(() => props.question.maxRows ?? 25)
 const notesLabel = computed(() => props.question.notesLabel ?? 'Toelichting')
 

@@ -1,6 +1,6 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm summary-view">
-    <div class="rvo-layout-column rvo-layout-gap--xl">
+  <div class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad summary-view">
+    <div class="invulhulp-column invulhulp-gap--xl">
 
       <div class="summary-view__intro">
         <nldd-title size="1"><h1 class="summary-view__title">Samenvatting</h1></nldd-title>
@@ -54,7 +54,7 @@
       </div>
 
       <!-- Export buttons -->
-      <div class="rvo-layout-row rvo-layout-gap--md summary-view__exports">
+      <div class="invulhulp-row invulhulp-gap--md summary-view__exports">
         <nldd-button
           variant="primary"
           text="Download Word rapport"
@@ -73,7 +73,7 @@
         <nldd-text color="inherit" size="sm" class="summary-view__import-hint">
           Of laad een eerder opgeslagen JSON-bestand om verder te gaan waar u gebleven was:
         </nldd-text>
-        <div class="rvo-layout-row rvo-layout-gap--sm summary-view__import-row">
+        <div class="invulhulp-row invulhulp-gap--sm summary-view__import-row">
           <input ref="fileInput" type="file" accept=".json" class="invulhulp-visually-hidden" @change="handleImport" />
           <nldd-button
             variant="neutral-transparent"
@@ -86,13 +86,13 @@
       </div>
 
       <!-- Answers by section -->
-      <div v-for="section in visibleSections" :key="section.id" class="rvo-layout-column rvo-layout-gap--lg">
+      <div v-for="section in visibleSections" :key="section.id" class="invulhulp-column invulhulp-gap--lg">
         <nldd-title size="2"><h2 class="summary-view__section-title">
           {{ section.title }}
         </h2></nldd-title>
         <hr class="invulhulp-divider summary-view__section-divider" />
 
-        <div v-for="subsection in section.subsections" :key="subsection.id" class="rvo-layout-column rvo-layout-gap--md">
+        <div v-for="subsection in section.subsections" :key="subsection.id" class="invulhulp-column invulhulp-gap--md">
           <nldd-title size="3"><h3 class="summary-view__subsection-title">{{ subsection.title }}</h3></nldd-title>
 
           <article
@@ -120,20 +120,18 @@
 
                 <div v-else-if="answer.kind === 'table'" class="summary-view__answer">
                   <div v-if="answer.table.rows.length > 0" class="summary-view__table-scroll">
-                    <table class="rvo-table summary-view__table">
-                      <thead v-if="answer.columns.length > 0" class="rvo-table-head">
-                        <tr class="rvo-table-row">
-                          <th v-for="col in answer.columns" :key="col" class="rvo-table-header" scope="col">
-                            {{ col }}
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody class="rvo-table-body">
-                        <tr v-for="(row, i) in answer.table.rows" :key="i" class="rvo-table-row">
-                          <td v-for="(cell, j) in row" :key="j" class="rvo-table-cell">{{ cell }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    <nldd-table
+                      class="summary-view__table"
+                      :columns="gridColumns(answer.columns.length || answer.table.rows[0].length)"
+                      :accessible-label="question.text"
+                    >
+                      <nldd-table-row v-if="answer.columns.length > 0" slot="header">
+                        <nldd-text-cell v-for="col in answer.columns" :key="col" size="sm" :text="col" />
+                      </nldd-table-row>
+                      <nldd-table-row v-for="(row, i) in answer.table.rows" :key="i">
+                        <nldd-text-cell v-for="(cell, j) in row" :key="j" size="sm" :text="cell" />
+                      </nldd-table-row>
+                    </nldd-table>
                   </div>
                   <div v-if="answer.table.notes" class="invulhulp-text--sm summary-view__answer-html" v-html="answer.notesHtml"></div>
                 </div>
@@ -220,6 +218,12 @@ const unansweredGrouped = computed(() => {
 const riskInfo = computed(() =>
   store.riskLevel ? (props.formConfig.riskLevelInfo?.[store.riskLevel] ?? null) : null,
 )
+
+/** nldd-table lays its columns out with a CSS grid track list; these tables
+ *  have no fixed widths, so every column gets an equal share. */
+function gridColumns(count: number): string {
+  return `repeat(${Math.max(count, 1)}, minmax(0, 1fr))`
+}
 
 const alertVariant = computed(() => {
   switch (store.riskLevel) {
@@ -496,16 +500,4 @@ async function handleImport(event: Event) {
   font-size: var(--primitives-font-size-90);
 }
 
-.summary-view__table .rvo-table-header,
-.summary-view__table .rvo-table-cell {
-  text-align: start;
-  vertical-align: top;
-  padding: var(--primitives-space-2, 4px) var(--primitives-space-4);
-  border-block-end: 1px solid var(--invulhulp-color-border);
-}
-
-.summary-view__table .rvo-table-header {
-  background: var(--invulhulp-color-surface, #f0f4f8);
-  font-weight: var(--primitives-font-weight-body-bold);
-}
 </style>

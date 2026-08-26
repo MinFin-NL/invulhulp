@@ -1,7 +1,7 @@
 <template>
   <footer class="invulhulp-footer" role="contentinfo" aria-label="Bèta-melding">
     <div
-      class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm invulhulp-footer__inner"
+      class="invulhulp-measure invulhulp-measure--lg invulhulp-measure--pad invulhulp-footer__inner"
     >
             <nldd-banner
               variant="warning"

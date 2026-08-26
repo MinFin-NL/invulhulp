@@ -1,6 +1,6 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm risk-classification">
-    <div class="rvo-layout-column rvo-layout-gap--xl">
+  <div class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad risk-classification">
+    <div class="invulhulp-column invulhulp-gap--xl">
 
       <div>
         <nldd-text color="inherit" size="sm" class="risk-classification__kicker">Bijlage 1</nldd-text>
@@ -13,7 +13,7 @@
       </div>
 
       <!-- Not run yet: the beslishulp is the way in. -->
-      <div v-if="!run" class="rvo-layout-column rvo-layout-gap--lg">
+      <div v-if="!run" class="invulhulp-column invulhulp-gap--lg">
         <nldd-banner
           variant="accent"
           text="De beslishulp is voor dit dossier nog niet doorlopen. Doorloop de vragen om de risicogroep vast te stellen; u kunt daarna terugkeren naar dit assessment."
@@ -28,7 +28,7 @@
       </div>
 
       <!-- Run available: show it, then let the user adopt it for this assessment. -->
-      <div v-else class="rvo-layout-column rvo-layout-gap--lg">
+      <div v-else class="invulhulp-column invulhulp-gap--lg">
                 <nldd-banner :variant="alertVariant">
             <div>
               <strong>{{ verdict }}</strong><br />
@@ -55,7 +55,7 @@
           <template v-if="adopted"> · overgenomen in dit assessment</template>
         </nldd-text>
 
-        <div class="rvo-layout-row rvo-layout-gap--md risk-classification__result-actions">
+        <div class="invulhulp-row invulhulp-gap--md risk-classification__result-actions">
           <nldd-button
             variant="secondary"
             text="Beslishulp bekijken of herzien"

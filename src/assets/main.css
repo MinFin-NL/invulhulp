@@ -147,6 +147,44 @@ body {
 /* A button that has to read as a link (a "terug"-crumb, an inline "verwijder"
    action inside a row). nldd-link renders an <a>, so a real <button> keeps its
    own element and borrows the link tokens. */
+/* ── Layout utilities ────────────────────────────────────────────────────── */
+/* NLDD ships nldd-box / nldd-container / nldd-spacer for layout, but those are
+   custom elements: putting one around a flex child inserts a shadow boundary
+   in the middle of a layout that has to stay one flow. These are plain classes
+   on the same spacing tokens, so page structure keeps working the way it did. */
+
+.invulhulp-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.invulhulp-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.invulhulp-gap--xs { gap: var(--primitives-space-8); }
+.invulhulp-gap--sm { gap: var(--primitives-space-12); }
+.invulhulp-gap--md { gap: var(--primitives-space-16); }
+.invulhulp-gap--lg { gap: var(--primitives-space-24); }
+.invulhulp-gap--xl { gap: var(--primitives-space-32); }
+
+/* Mirrors NLDD's page-section measure, so page content lines up with anything
+   built from nldd-page-sections later. */
+.invulhulp-measure {
+  inline-size: 100%;
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+
+.invulhulp-measure--md { max-inline-size: 64rem; }
+.invulhulp-measure--lg { max-inline-size: var(--semantics-page-sections-body-max-width, 80rem); }
+
+.invulhulp-measure--pad {
+  padding-inline: var(--semantics-page-sections-md-margin-inline, var(--primitives-space-16));
+}
+
 /* nldd-text is display:block, so it cannot stand in for text set inline —
    a <span> in a sentence, a <summary>, an <li>. These match its scale so the
    two render identically: sm = --primitives-font-size-90, xs = -80. */

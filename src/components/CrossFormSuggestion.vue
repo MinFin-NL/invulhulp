@@ -48,7 +48,7 @@
               :class="part.added ? 'cross-diff__add' : part.removed ? 'cross-diff__del' : ''"
             >{{ part.value }}</span>
           </div>
-          <div class="cross-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
+          <div class="cross-suggestion__actions invulhulp-row invulhulp-gap--xs">
             <nldd-button
               variant="primary"
               size="sm"
@@ -70,7 +70,7 @@
          offered for free-text questions that need rewriting. -->
     <div
       v-if="(canCopy || canSynthesize) && suggestion === null && !streamingText"
-      class="cross-suggestion__actions rvo-layout-row rvo-layout-gap--xs"
+      class="cross-suggestion__actions invulhulp-row invulhulp-gap--xs"
     >
       <nldd-button
         variant="secondary"

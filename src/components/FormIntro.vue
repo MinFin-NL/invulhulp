@@ -1,6 +1,6 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm form-intro">
-    <div class="rvo-layout-column rvo-layout-gap--xl">
+  <div class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad form-intro">
+    <div class="invulhulp-column invulhulp-gap--xl">
 
       <header>
         <nldd-title size="1"><h1 class="form-intro__title">{{ formConfig.title }}</h1></nldd-title>
@@ -15,7 +15,7 @@
           <div><strong>Let op:</strong> {{ content.notice }}</div>
       </nldd-banner>
 
-      <section class="rvo-layout-column rvo-layout-gap--md">
+      <section class="invulhulp-column invulhulp-gap--md">
         <nldd-title size="2"><h2 class="form-intro__section-title">Over dit instrument</h2></nldd-title>
         <nldd-text>{{ content.description }}</nldd-text>
         <nldd-text v-if="content.steps.length > 0">Dit formulier omvat de volgende onderdelen:</nldd-text>
@@ -36,7 +36,7 @@
         </dl>
       </section>
 
-      <section class="rvo-layout-column rvo-layout-gap--sm">
+      <section class="invulhulp-column invulhulp-gap--sm">
         <nldd-title size="2"><h2 class="form-intro__section-title">Kleurcodering vragen</h2></nldd-title>
         <ul class="form-intro__legend">
           <li class="form-intro__legend-item">

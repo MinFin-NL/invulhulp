@@ -1,6 +1,6 @@
 <template>
   <div class="dossier-list-page">
-    <div class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm">
+    <div class="invulhulp-measure invulhulp-measure--lg invulhulp-measure--pad">
 
       <!-- Hero -->
       <section class="rvo-hero rvo-hero--lichtblauw dossier-list-hero">

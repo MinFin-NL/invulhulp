@@ -1,6 +1,6 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm user-mgmt">
-    <div class="rvo-layout-column rvo-layout-gap--lg">
+  <div class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad user-mgmt">
+    <div class="invulhulp-column invulhulp-gap--lg">
       <div>
         <h1 class="utrecht-heading-1 user-mgmt__title">Gebruikersbeheer</h1>
         <nldd-text color="inherit" class="user-mgmt__intro">
@@ -109,56 +109,51 @@
         <h2 class="utrecht-heading-2 user-mgmt__panel-title">Gebruikers ({{ users.length }})</h2>
         <nldd-text v-if="loading">Gebruikers laden…</nldd-text>
         <div v-else class="user-mgmt__table-wrap">
-          <table class="rvo-table user-mgmt__table">
-            <thead class="rvo-table-head">
-              <tr class="rvo-table-row">
-                <th class="rvo-table-header">Naam</th>
-                <th class="rvo-table-header">E-mail</th>
-                <th class="rvo-table-header">Rol</th>
-                <th v-if="scopeRoles.length" class="rvo-table-header">Formulierenset</th>
-                <th class="rvo-table-header">Status</th>
-                <th class="rvo-table-header">Acties</th>
-              </tr>
-            </thead>
-            <tbody class="rvo-table-body">
-              <tr v-for="u in users" :key="u.id" class="rvo-table-row" :class="{ 'user-mgmt__row--disabled': !u.enabled }">
-                <td class="rvo-table-cell">
+          <nldd-table
+            class="user-mgmt__table"
+            :columns="userTableColumns"
+            accessible-label="Gebruikers"
+          >
+            <nldd-table-row slot="header">
+              <nldd-text-cell size="sm" text="Naam" />
+              <nldd-text-cell size="sm" text="E-mail" />
+              <nldd-text-cell size="sm" text="Rol" />
+              <nldd-text-cell v-if="scopeRoles.length" size="sm" text="Formulierenset" />
+              <nldd-text-cell size="sm" text="Status" />
+              <nldd-text-cell size="sm" text="Acties" />
+            </nldd-table-row>
+              <nldd-table-row v-for="u in users" :key="u.id" :class="{ 'user-mgmt__row--disabled': !u.enabled }">
+                <nldd-cell>
                   {{ u.firstName }} {{ u.lastName }}
                   <span v-if="u.isSelf" class="user-mgmt__self">(jij)</span>
-                </td>
-                <td class="rvo-table-cell">{{ u.email ?? u.username }}</td>
-                <td class="rvo-table-cell">
+                </nldd-cell>
+                <nldd-text-cell size="sm" :text="u.email ?? u.username" />
+                <nldd-cell>
                   <span v-if="u.isAdmin" class="user-mgmt__badge user-mgmt__badge--admin">Beheerder</span>
                   <span v-else class="user-mgmt__badge">Gebruiker</span>
-                </td>
-                <td v-if="scopeRoles.length" class="rvo-table-cell">
-                  <div class="rvo-checkbox__group user-mgmt__roles">
-                    <label
+                </nldd-cell>
+                <nldd-cell v-if="scopeRoles.length" vertical-alignment="top">
+                  <div class="user-mgmt__roles">
+                    <nldd-checkbox-field
                       v-for="role in scopeRoles"
                       :key="role.id"
-                      class="rvo-checkbox user-mgmt__role-check"
-                    >
-                      <input
-                        class="rvo-checkbox__input"
-                        type="checkbox"
-                        :checked="u.scopeRoles.includes(role.id)"
-                        :disabled="busy"
-                        :aria-label="`${role.title} voor ${userLabel(u)}`"
-                        @change="toggleScopeRole(u, role.id)"
-                      />
-                      <span class="rvo-checkbox__label">{{ role.title }}</span>
-                    </label>
+                      class="user-mgmt__role-check"
+                      :label="role.title"
+                      :checked="u.scopeRoles.includes(role.id)"
+                      :disabled="busy"
+                      @change="toggleScopeRole(u, role.id)"
+                    />
                   </div>
                   <span v-if="u.scopeRoles.length === 0" class="user-mgmt__all-forms">
                     Ziet alle formulieren
                   </span>
-                </td>
-                <td class="rvo-table-cell">
+                </nldd-cell>
+                <nldd-cell>
                   <span :class="['user-mgmt__badge', u.enabled ? 'user-mgmt__badge--active' : 'user-mgmt__badge--off']">
                     {{ u.enabled ? 'Actief' : 'Gedeactiveerd' }}
                   </span>
-                </td>
-                <td class="rvo-table-cell user-mgmt__actions">
+                </nldd-cell>
+                <nldd-cell class="user-mgmt__actions">
                   <nldd-button
                     variant="neutral-transparent"
                     size="sm"
@@ -188,10 +183,9 @@
                     :disabled="busy || u.isSelf"
                     @click="askDelete(u)"
                   />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                </nldd-cell>
+              </nldd-table-row>
+          </nldd-table>
         </div>
       </section>
     </div>
@@ -233,7 +227,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import { loadFormRoles, type FormRole } from '../services/formLoader'
 
@@ -254,6 +248,14 @@ interface ManagedUser {
  *  formulierenlijst uit public/forms/index.json. De backend is leidend: een rol
  *  die daar niet in staat kan niet toegekend worden, ook niet als index.json
  *  hem al noemt. */
+// nldd-table needs its columns declared once as a grid track list. The
+// formulierenset column only exists when there are scope roles to show.
+const userTableColumns = computed(() =>
+  scopeRoles.value.length
+    ? 'minmax(140px, 1fr) minmax(180px, 1fr) 120px minmax(160px, 1fr) 130px minmax(220px, auto)'
+    : 'minmax(140px, 1fr) minmax(180px, 1fr) 120px 130px minmax(220px, auto)',
+)
+
 const scopeRoles = ref<FormRole[]>([])
 
 function userLabel(u: ManagedUser): string {

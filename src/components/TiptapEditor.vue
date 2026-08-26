@@ -32,7 +32,7 @@
             aria-label="Antwoord op de vraag van de AI"
             @keydown.enter.prevent="submitClarification"
           />
-          <div class="tiptap-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
+          <div class="tiptap-suggestion__actions invulhulp-row invulhulp-gap--xs">
             <nldd-button
               variant="primary"
               size="sm"
@@ -73,7 +73,7 @@
             aria-label="Diagram bij de suggestie"
             v-html="diagramSvg"
           ></div>
-          <div class="tiptap-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
+          <div class="tiptap-suggestion__actions invulhulp-row invulhulp-gap--xs">
             <nldd-button
               variant="primary"
               size="sm"
