@@ -8,7 +8,7 @@
   >
     <form method="dialog" class="invulhulp-modal__container" @submit.prevent="onConfirm">
       <header class="invulhulp-modal__header">
-        <h3 :id="titleId" class="utrecht-heading-3 invulhulp-modal__title">{{ title }}</h3>
+        <nldd-title size="3"><h3 :id="titleId" class="invulhulp-modal__title">{{ title }}</h3></nldd-title>
         <button
           type="button"
           class="invulhulp-modal__close"
@@ -19,7 +19,7 @@
         </button>
       </header>
 
-      <hr class="rvo-hr invulhulp-modal__divider" />
+      <nldd-divider class="invulhulp-modal__divider" />
 
       <div class="invulhulp-modal__body">
         <nldd-text class="invulhulp-modal__message" v-if="message">{{ message }}</nldd-text>
@@ -34,18 +34,18 @@
                 >
             <strong class="invulhulp-modal__danger-title">Let op: dit kan niet ongedaan worden gemaakt</strong>
             <slot name="danger" />
-            <div class="rvo-form-field invulhulp-modal__danger-field">
-              <label class="rvo-form-field__label" :for="phraseId">
+            <div class="invulhulp-modal__danger-field">
+              <label class="invulhulp-modal__field-label" :for="phraseId">
                 Typ <strong>{{ confirmPhrase }}</strong> om te bevestigen
               </label>
-              <input
-                :id="phraseId"
+              <nldd-text-field
+                :input-id="phraseId"
                 ref="phraseEl"
-                v-model="phraseValue"
-                type="text"
+                class="invulhulp-modal__input"
                 autocomplete="off"
-                class="utrecht-textbox utrecht-textbox--md invulhulp-modal__input"
-                :aria-describedby="phraseHintId"
+                :value="phraseValue"
+                :error-message-ids="phraseHintId"
+                @input="phraseValue = $event.detail.value"
               />
               <span :id="phraseHintId" class="invulhulp-text--sm invulhulp-modal__danger-hint">
                 {{ phraseMatches
@@ -55,15 +55,15 @@
             </div>
         </nldd-banner>
 
-        <div v-if="kind === 'prompt'" class="rvo-form-field">
-          <label class="rvo-form-field__label" :for="inputId">{{ inputLabel || 'Naam' }}</label>
-          <input
-            :id="inputId"
+        <div v-if="kind === 'prompt'" class="invulhulp-modal__field">
+          <label class="invulhulp-modal__field-label" :for="inputId">{{ inputLabel || 'Naam' }}</label>
+          <nldd-text-field
+            :input-id="inputId"
             ref="inputEl"
-            v-model="inputValue"
-            type="text"
-            class="utrecht-textbox utrecht-textbox--md invulhulp-modal__input"
+            class="invulhulp-modal__input"
+            :value="inputValue"
             :placeholder="inputPlaceholder ?? ''"
+            @input="inputValue = $event.detail.value"
           />
         </div>
       </div>
@@ -117,8 +117,15 @@ const emit = defineEmits<{
 }>()
 
 const dialogEl = ref<HTMLDialogElement | null>(null)
-const inputEl = ref<HTMLInputElement | null>(null)
-const phraseEl = ref<HTMLInputElement | null>(null)
+const inputEl = ref<HTMLElement | null>(null)
+const phraseEl = ref<HTMLElement | null>(null)
+
+/** nldd-text-field delegates focus() to its inner <input>, but exposes no
+ *  select(). Reach for the native input only for that, so opening the rename
+ *  dialog still lets the user type straight over the current name. */
+function selectAll(el: HTMLElement | null) {
+  el?.shadowRoot?.querySelector('input')?.select()
+}
 const inputValue = ref('')
 const phraseValue = ref('')
 const uid = Math.random().toString(36).slice(2, 9)
@@ -147,7 +154,7 @@ async function open(initial?: string) {
   await nextTick()
   if (props.kind === 'prompt') {
     inputEl.value?.focus()
-    inputEl.value?.select()
+    selectAll(inputEl.value)
   } else if (props.confirmPhrase) {
     phraseEl.value?.focus()
   }
@@ -260,6 +267,22 @@ defineExpose({ open })
 
 .invulhulp-modal__input {
   inline-size: 100%;
+}
+
+/* These two fields keep their own <label for> rather than an nldd-form-field
+   wrapper: the phrase label carries inline markup (the name in <strong>) and
+   the hint below is wired with error-message-ids. Same type as a
+   form-field label. */
+.invulhulp-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--primitives-space-4);
+}
+
+.invulhulp-modal__field-label {
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-medium);
+  line-height: var(--primitives-line-height-snug);
 }
 
 .invulhulp-modal__danger-body {

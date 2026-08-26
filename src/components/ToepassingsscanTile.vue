@@ -4,8 +4,8 @@
        visible explanation for every "Van toepassing" and "Niet van toepassing"
        badge further down the page.
 
-       Stock NLDS: an outlined rvo-card like the form cards, rvo-tag pills for
-       the kenmerken, rvo-button for the action. No colours of its own — see
+       Stock NLDD: a card frame like the form cards, nldd-tag for the
+       kenmerken, nldd-button for the action. No colours of its own — see
        the NL Design System rule in CLAUDE.md.
 
        Padding--xl and no left gutter: the title has to start on the same
@@ -93,8 +93,8 @@ const completedOn = computed(() =>
 </script>
 
 <style scoped>
-/* Layout only: colour, spacing, radius and type all come from RVO tokens, and
-   the card frame itself from .rvo-card--outline. */
+/* Layout only: colour, spacing, radius and type all come from NLDD tokens, and
+   the card frame itself from .invulhulp-card. */
 .scan-tile {
   display: flex;
   align-items: flex-start;
@@ -104,7 +104,7 @@ const completedOn = computed(() =>
   margin-block-end: var(--primitives-space-40);
   /* Same frame as the bands above and below it (bulk-ai, Vooraf), so the four
      dossier-level blocks read as one column instead of four stray boxes. */
-  --rvo-card-outline-border-color: var(--semantics-dividers-color);
+  border-color: var(--semantics-dividers-color);
   border-radius: var(--primitives-corner-radius-md);
 }
 

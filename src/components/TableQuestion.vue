@@ -426,29 +426,9 @@ function removeRow(rowIndex: number) {
   border-spacing: 0;
 }
 
-/* Give every data column a readable floor; wide tables then overflow-scroll. */
-.invulhulp-table-question__table .rvo-table-header,
-.invulhulp-table-question__table .rvo-table-cell {
-  min-inline-size: 8.5rem;
-}
-.invulhulp-table-question__table .invulhulp-table-question__actions-header,
-.invulhulp-table-question__table .invulhulp-table-question__actions-cell {
-  min-inline-size: 2.75rem;
-}
-
-.invulhulp-table-question__table .rvo-table-header {
-  text-align: start;
-  font-size: var(--primitives-font-size-90);
-  padding: var(--primitives-space-4) var(--primitives-space-8);
-  background: var(--invulhulp-color-surface, #f0f4f8);
-  border-block-end: 1px solid var(--invulhulp-color-border);
-}
-
-.invulhulp-table-question__table .rvo-table-cell {
-  padding: var(--primitives-space-2, 4px) var(--primitives-space-4);
-  border-block-end: 1px solid var(--invulhulp-color-border);
-  vertical-align: middle;
-}
+/* Column widths, cell padding and the row rules all come from nldd-table now:
+   the widths from its `columns` track list, the rest from inside its shadow
+   root. Only the horizontal-scroll viewport around it is still ours. */
 
 .invulhulp-table-question__cell-input {
   width: 100%;
@@ -521,12 +501,4 @@ function removeRow(rowIndex: number) {
   resize: vertical;
 }
 
-.rvo-visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
 </style>

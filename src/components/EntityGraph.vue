@@ -20,10 +20,9 @@
     <fieldset class="entity-graph__controls">
       <legend class="invulhulp-visually-hidden">Categorieën filteren</legend>
       <label v-for="cat in categories" :key="cat.key" class="entity-graph__filter">
-        <input
-          type="checkbox"
-          class="rvo-checkbox__input"
+        <nldd-checkbox-field
           :checked="visible[cat.key]"
+          :accessible-label="cat.label"
           @change="toggle(cat.key)"
         />
         <span

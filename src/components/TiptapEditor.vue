@@ -24,12 +24,11 @@
         <!-- Clarification: the AI needs extra input before it can improve -->
         <template v-if="pendingClarification !== null">
           <p class="tiptap-clarification__question">{{ pendingClarification }}</p>
-          <input
-            v-model="clarificationInput"
-            type="text"
-            class="utrecht-textbox utrecht-textbox--md"
+          <nldd-text-field
             placeholder="Uw antwoord…"
-            aria-label="Antwoord op de vraag van de AI"
+            accessible-label="Antwoord op de vraag van de AI"
+            :value="clarificationInput"
+            @input="clarificationInput = $event.detail.value"
             @keydown.enter.prevent="submitClarification"
           />
           <div class="tiptap-suggestion__actions invulhulp-row invulhulp-gap--xs">

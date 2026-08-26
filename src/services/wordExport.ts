@@ -29,8 +29,8 @@ import { fetchImageArrayBuffer } from './llmService'
 // Font: the Rijksoverheid corporate typeface is "Rijksoverheid Sans", which is
 // licensed and cannot be embedded in a distributable .docx. The Rijkshuisstijl
 // prescribes **Verdana** as the substitute font for office documents (Word,
-// PowerPoint), which is what the RVO design tokens also fall back to
-// (`Verdana, Calibri, Arial`). Verdana is available on every OS, so the file
+// PowerPoint). NLDD ships "RijksSans" as a webfont, which has the same
+// licensing problem. Verdana is available on every OS, so the file
 // renders identically for every recipient.
 const FONT = 'Verdana'
 
@@ -51,24 +51,36 @@ const SIZE = {
   chrome: 15,
 }
 
-// NL Design System (RVO) palette, mirrored from @nl-rvo/design-tokens so the
-// exported document reads as the same visual system as the app itself.
-const RVO = {
-  lintblauw: '154273',
-  donkerblauw: '01689B',
-  donkerblauwTint: 'D9E9F0',
-  hemelblauw: '007BC7',
-  groen: '39870C',
-  rood: 'D51B1E',
-  grijs900: '0F172A',
-  grijs700: '334155',
-  grijs500: '64748B',
-  grijs200: 'E2E8F0',
-  grijs050: 'F8FAFC',
-  wit: 'FFFFFF',
+// NLDD palette, mirrored from @nldd/design-system so the exported document
+// reads as the same visual system as the app itself. docx wants literal hex,
+// so these are the light-scheme tokens resolved from oklch() to sRGB; re-run
+// that conversion if the design system's colours move.
+const NLDD = {
+  /** --semantics-content-accent-color (--primitives-color-accent-750) */
+  accent: '184576',
+  /** --primitives-color-accent-600, the lighter accent for the cover band */
+  accentLight: '366396',
+  /** --semantics-categories-accent-tinted-background-color */
+  accentTint: 'E3EFFE',
+  /** --semantics-content-success-color */
+  success: '326E15',
+  /** --semantics-content-critical-color */
+  critical: 'B72C20',
+  /** --semantics-content-color (--primitives-color-neutral-800) */
+  text: '343B45',
+  /** --semantics-content-secondary-color (--primitives-color-neutral-600) */
+  textSecondary: '556273',
+  /** --primitives-color-neutral-500, quieter still: captions and meta */
+  textSubtle: '67778D',
+  /** --semantics-dividers-color (--primitives-color-neutral-75) */
+  divider: 'E2E6EC',
+  /** --semantics-surfaces-tinted-background-color */
+  surfaceTinted: 'F5F6F9',
+  /** --semantics-surfaces-base-background-color */
+  surface: 'FFFFFF',
 }
 
-const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: RVO.wit }
+const NO_BORDER = { style: BorderStyle.NONE, size: 0, color: NLDD.surface }
 const NO_BORDERS = { top: NO_BORDER, bottom: NO_BORDER, left: NO_BORDER, right: NO_BORDER }
 
 const CHECKED = '☒'
@@ -118,7 +130,7 @@ function styledAnswerParagraphs(value: string): Paragraph[] | null {
             new TextRun({
               text: r.text,
               size: SIZE.body,
-              color: RVO.grijs900,
+              color: NLDD.text,
               bold: r.bold,
               italics: r.italics,
               break: r.breakBefore ? 1 : undefined,
@@ -158,7 +170,7 @@ function choiceAnswerParagraphs(
           new TextRun({
             text: `${selected.has(opt.trim().toLowerCase()) ? CHECKED : UNCHECKED}  ${opt}`,
             size: SIZE.body,
-            color: RVO.grijs900,
+            color: NLDD.text,
           }),
         ],
       }),
@@ -168,7 +180,7 @@ function choiceAnswerParagraphs(
       new Paragraph({
         indent: { left: BODY_INDENT },
         spacing: { before: 40, after: 220 },
-        children: [new TextRun({ text: followUp, size: SIZE.body, color: RVO.grijs900 })],
+        children: [new TextRun({ text: followUp, size: SIZE.body, color: NLDD.text })],
       }),
     )
   }
@@ -191,7 +203,7 @@ function tableAnswerChildren(
   if (rows.length === 0 && !table.notes.trim()) return null
   const columns = question.columns ?? []
 
-  const cellBorder = { style: BorderStyle.SINGLE, size: 4, color: RVO.grijs200 }
+  const cellBorder = { style: BorderStyle.SINGLE, size: 4, color: NLDD.divider }
   const cellBorders = { top: cellBorder, bottom: cellBorder, left: cellBorder, right: cellBorder }
 
   const headerRow = new TableRow({
@@ -199,11 +211,11 @@ function tableAnswerChildren(
     children: columns.map(
       (c) =>
         new TableCell({
-          shading: { type: ShadingType.CLEAR, color: 'auto', fill: RVO.lintblauw },
+          shading: { type: ShadingType.CLEAR, color: 'auto', fill: NLDD.accent },
           borders: cellBorders,
           margins: { top: 60, bottom: 60, left: 120, right: 120 },
           children: [
-            new Paragraph({ children: [new TextRun({ text: c.label, bold: true, size: SIZE.cell, color: RVO.wit })] }),
+            new Paragraph({ children: [new TextRun({ text: c.label, bold: true, size: SIZE.cell, color: NLDD.surface })] }),
           ],
         }),
     ),
@@ -215,11 +227,11 @@ function tableAnswerChildren(
           (_, i) =>
             new TableCell({
               shading:
-                ri % 2 === 1 ? { type: ShadingType.CLEAR, color: 'auto', fill: RVO.grijs050 } : undefined,
+                ri % 2 === 1 ? { type: ShadingType.CLEAR, color: 'auto', fill: NLDD.surfaceTinted } : undefined,
               borders: cellBorders,
               margins: { top: 60, bottom: 60, left: 120, right: 120 },
               children: [
-                new Paragraph({ children: [new TextRun({ text: row[i] ?? '', size: SIZE.cell, color: RVO.grijs900 })] }),
+                new Paragraph({ children: [new TextRun({ text: row[i] ?? '', size: SIZE.cell, color: NLDD.text })] }),
               ],
             }),
         ),
@@ -242,8 +254,8 @@ function tableAnswerChildren(
         indent: { left: BODY_INDENT },
         spacing: { before: 100, after: 220 },
         children: [
-          new TextRun({ text: `${question.notesLabel ?? 'Toelichting'}: `, bold: true, size: SIZE.cell, color: RVO.grijs700 }),
-          new TextRun({ text: table.notes.trim(), size: SIZE.cell, color: RVO.grijs900 }),
+          new TextRun({ text: `${question.notesLabel ?? 'Toelichting'}: `, bold: true, size: SIZE.cell, color: NLDD.textSecondary }),
+          new TextRun({ text: table.notes.trim(), size: SIZE.cell, color: NLDD.text }),
         ],
       }),
     )
@@ -300,7 +312,7 @@ async function attachmentParagraphs(attachments: QuestionAttachment[], sessionId
           new Paragraph({
             indent: { left: BODY_INDENT },
             spacing: { after: 220 },
-            children: [new TextRun({ text: att.caption.trim(), size: SIZE.caption, color: RVO.grijs500, italics: true })],
+            children: [new TextRun({ text: att.caption.trim(), size: SIZE.caption, color: NLDD.textSubtle, italics: true })],
           }),
         )
       }
@@ -313,7 +325,7 @@ async function attachmentParagraphs(attachments: QuestionAttachment[], sessionId
             new TextRun({
               text: `(afbeelding niet beschikbaar: ${att.filename})`,
               size: SIZE.body,
-              color: RVO.grijs500,
+              color: NLDD.textSubtle,
               italics: true,
             }),
           ],
@@ -373,7 +385,7 @@ export async function exportToWord(
           children: [
             new TableCell({
               width: { size: CONTENT_WIDTH, type: WidthType.DXA },
-              shading: { type: ShadingType.CLEAR, color: 'auto', fill: RVO.lintblauw },
+              shading: { type: ShadingType.CLEAR, color: 'auto', fill: NLDD.accent },
               borders: NO_BORDERS,
               margins: { top: 640, bottom: 640, left: 460, right: 460 },
               children: [
@@ -382,7 +394,7 @@ export async function exportToWord(
                   children: [new TextRun({ text: 'MINISTERIE VAN FINANCIËN', size: SIZE.coverKicker, color: '9DBAD6', bold: true })],
                 }),
                 new Paragraph({
-                  children: [new TextRun({ text: formConfig.meta.docTitle, bold: true, size: SIZE.coverTitle, color: RVO.wit })],
+                  children: [new TextRun({ text: formConfig.meta.docTitle, bold: true, size: SIZE.coverTitle, color: NLDD.surface })],
                 }),
               ],
             }),
@@ -394,7 +406,7 @@ export async function exportToWord(
           children: [
             new TableCell({
               width: { size: CONTENT_WIDTH, type: WidthType.DXA },
-              shading: { type: ShadingType.CLEAR, color: 'auto', fill: RVO.hemelblauw },
+              shading: { type: ShadingType.CLEAR, color: 'auto', fill: NLDD.accentLight },
               borders: NO_BORDERS,
               margins: { top: 0, bottom: 0, left: 0, right: 0 },
               children: [new Paragraph({ spacing: { after: 0, line: 90 }, children: [new TextRun({ text: '', size: 2 })] })],
@@ -407,10 +419,10 @@ export async function exportToWord(
     new Paragraph({
       spacing: { before: 360, after: 40 },
       children: [
-        new TextRun({ text: 'Versie ', size: SIZE.meta, color: RVO.grijs500 }),
-        new TextRun({ text: formConfig.version, size: SIZE.meta, color: RVO.grijs700, bold: true }),
-        new TextRun({ text: '      ·      ', size: SIZE.meta, color: RVO.grijs200 }),
-        new TextRun({ text: today, size: SIZE.meta, color: RVO.grijs700 }),
+        new TextRun({ text: 'Versie ', size: SIZE.meta, color: NLDD.textSubtle }),
+        new TextRun({ text: formConfig.version, size: SIZE.meta, color: NLDD.textSecondary, bold: true }),
+        new TextRun({ text: '      ·      ', size: SIZE.meta, color: NLDD.divider }),
+        new TextRun({ text: today, size: SIZE.meta, color: NLDD.textSecondary }),
       ],
     }),
   )
@@ -421,13 +433,13 @@ export async function exportToWord(
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: 'Formulier: ', size: SIZE.meta, color: RVO.grijs500 }),
-          new TextRun({ text: formConfig.urn, size: SIZE.meta, color: RVO.grijs700 }),
+          new TextRun({ text: 'Formulier: ', size: SIZE.meta, color: NLDD.textSubtle }),
+          new TextRun({ text: formConfig.urn, size: SIZE.meta, color: NLDD.textSecondary }),
           ...(formConfig.registryUrn
             ? [
-                new TextRun({ text: '      ·      ', size: SIZE.meta, color: RVO.grijs200 }),
-                new TextRun({ text: 'Instrument: ', size: SIZE.meta, color: RVO.grijs500 }),
-                new TextRun({ text: formConfig.registryUrn, size: SIZE.meta, color: RVO.grijs700 }),
+                new TextRun({ text: '      ·      ', size: SIZE.meta, color: NLDD.divider }),
+                new TextRun({ text: 'Instrument: ', size: SIZE.meta, color: NLDD.textSubtle }),
+                new TextRun({ text: formConfig.registryUrn, size: SIZE.meta, color: NLDD.textSecondary }),
               ]
             : []),
         ],
@@ -439,8 +451,8 @@ export async function exportToWord(
       new Paragraph({
         spacing: { after: 40 },
         children: [
-          new TextRun({ text: `${hasConditionalPartB ? 'Systeem' : 'Project'}: `, size: SIZE.meta, color: RVO.grijs500 }),
-          new TextRun({ text: systemName, size: SIZE.meta, color: RVO.grijs700, bold: true }),
+          new TextRun({ text: `${hasConditionalPartB ? 'Systeem' : 'Project'}: `, size: SIZE.meta, color: NLDD.textSubtle }),
+          new TextRun({ text: systemName, size: SIZE.meta, color: NLDD.textSecondary, bold: true }),
         ],
       }),
     )
@@ -449,7 +461,7 @@ export async function exportToWord(
   children.push(
     new Paragraph({
       spacing: { before: 200, after: 0 },
-      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: RVO.grijs200, space: 1 } },
+      border: { bottom: { style: BorderStyle.SINGLE, size: 6, color: NLDD.divider, space: 1 } },
       children: [new TextRun({ text: '', size: 2 })],
     }),
   )
@@ -473,7 +485,7 @@ export async function exportToWord(
                 children: [
                   new Paragraph({
                     children: [
-                      new TextRun({ text: `Risiconiveau: ${riskInfo.label}`, bold: true, color: RVO.wit, size: 24 }),
+                      new TextRun({ text: `Risiconiveau: ${riskInfo.label}`, bold: true, color: NLDD.surface, size: 24 }),
                     ],
                   }),
                 ],
@@ -501,33 +513,33 @@ export async function exportToWord(
         new Paragraph({
           keepNext: true,
           spacing: { before: sectionIndex === 0 ? 0 : 440, after: 20 },
-          children: [new TextRun({ text: kicker, bold: true, size: SIZE.sectionKicker, color: RVO.hemelblauw })],
+          children: [new TextRun({ text: kicker, bold: true, size: SIZE.sectionKicker, color: NLDD.accentLight })],
         }),
       )
     }
     children.push(
       new Paragraph({
         heading: HeadingLevel.HEADING_1,
-        border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: RVO.donkerblauwTint, space: 6 } },
+        border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: NLDD.accentTint, space: 6 } },
         spacing: { before: kicker ? 0 : sectionIndex === 0 ? 0 : 440, after: 240 },
-        children: [new TextRun({ text: title, bold: true, size: SIZE.sectionTitle, color: RVO.lintblauw })],
+        children: [new TextRun({ text: title, bold: true, size: SIZE.sectionTitle, color: NLDD.accent })],
       }),
     )
 
     for (const subsection of section.subsections) {
       children.push(
         new Paragraph({
-          shading: { type: ShadingType.CLEAR, color: 'auto', fill: RVO.grijs050 },
-          border: { left: { style: BorderStyle.SINGLE, size: 18, color: RVO.donkerblauw, space: 10 } },
+          shading: { type: ShadingType.CLEAR, color: 'auto', fill: NLDD.surfaceTinted },
+          border: { left: { style: BorderStyle.SINGLE, size: 18, color: NLDD.accentLight, space: 10 } },
           spacing: { before: 280, after: subsection.description ? 60 : 180 },
-          children: [new TextRun({ text: subsection.title, bold: true, size: SIZE.subsection, color: RVO.lintblauw })],
+          children: [new TextRun({ text: subsection.title, bold: true, size: SIZE.subsection, color: NLDD.accent })],
         }),
       )
       if (subsection.description) {
         children.push(
           new Paragraph({
             spacing: { after: 180 },
-            children: [new TextRun({ text: subsection.description, italics: true, size: SIZE.description, color: RVO.grijs500 })],
+            children: [new TextRun({ text: subsection.description, italics: true, size: SIZE.description, color: NLDD.textSubtle })],
           }),
         )
       }
@@ -535,14 +547,14 @@ export async function exportToWord(
       for (const question of subsection.questions) {
         const answer = answers[question.id]
         const hasAnswer = answer && (Array.isArray(answer) ? answer.length > 0 : answer.trim() !== '')
-        const accent = question.importance === 'mandatory' ? RVO.donkerblauw : RVO.groen
+        const accent = question.importance === 'mandatory' ? NLDD.accentLight : NLDD.success
 
         // Question label — regular weight in lintblauw (distinguished from the
         // black answer by color + the colored accent bar, not by boldness), with
         // the mandatory asterisk in red.
-        const labelRuns = [new TextRun({ text: question.text, size: SIZE.label, color: RVO.lintblauw })]
+        const labelRuns = [new TextRun({ text: question.text, size: SIZE.label, color: NLDD.accent })]
         if (question.importance === 'mandatory') {
-          labelRuns.push(new TextRun({ text: '  *', size: SIZE.label, color: RVO.rood }))
+          labelRuns.push(new TextRun({ text: '  *', size: SIZE.label, color: NLDD.critical }))
         }
         children.push(
           new Paragraph({
@@ -566,7 +578,7 @@ export async function exportToWord(
                 new TextRun({
                   text: hasAnswer ? formatAnswer(answer) : 'Niet ingevuld',
                   size: SIZE.body,
-                  color: hasAnswer ? RVO.grijs900 : RVO.grijs500,
+                  color: hasAnswer ? NLDD.text : NLDD.textSubtle,
                   italics: !hasAnswer,
                 }),
               ],
@@ -584,7 +596,7 @@ export async function exportToWord(
     styles: {
       default: {
         document: {
-          run: { font: FONT, size: SIZE.body, color: RVO.grijs900 },
+          run: { font: FONT, size: SIZE.body, color: NLDD.text },
         },
       },
       paragraphStyles: [
@@ -594,7 +606,7 @@ export async function exportToWord(
           basedOn: 'Normal',
           next: 'Normal',
           quickFormat: true,
-          run: { bold: true, size: SIZE.sectionTitle, color: RVO.lintblauw, font: FONT },
+          run: { bold: true, size: SIZE.sectionTitle, color: NLDD.accent, font: FONT },
         },
       ],
     },
@@ -605,8 +617,8 @@ export async function exportToWord(
           default: new Header({
             children: [
               new Paragraph({
-                border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: RVO.grijs200, space: 4 } },
-                children: [new TextRun({ text: formConfig.meta.docTitle, size: SIZE.chrome, color: RVO.grijs500 })],
+                border: { bottom: { style: BorderStyle.SINGLE, size: 4, color: NLDD.divider, space: 4 } },
+                children: [new TextRun({ text: formConfig.meta.docTitle, size: SIZE.chrome, color: NLDD.textSubtle })],
               }),
             ],
           }),
@@ -616,13 +628,13 @@ export async function exportToWord(
           default: new Footer({
             children: [
               new Paragraph({
-                border: { top: { style: BorderStyle.SINGLE, size: 4, color: RVO.grijs200, space: 4 } },
+                border: { top: { style: BorderStyle.SINGLE, size: 4, color: NLDD.divider, space: 4 } },
                 alignment: AlignmentType.CENTER,
                 children: [
-                  new TextRun({ text: `${formConfig.meta.footerLabel} | Pagina `, size: SIZE.chrome, color: RVO.grijs500 }),
-                  new TextRun({ children: [PageNumber.CURRENT], size: SIZE.chrome, color: RVO.grijs500 }),
-                  new TextRun({ text: ' van ', size: SIZE.chrome, color: RVO.grijs500 }),
-                  new TextRun({ children: [PageNumber.TOTAL_PAGES], size: SIZE.chrome, color: RVO.grijs500 }),
+                  new TextRun({ text: `${formConfig.meta.footerLabel} | Pagina `, size: SIZE.chrome, color: NLDD.textSubtle }),
+                  new TextRun({ children: [PageNumber.CURRENT], size: SIZE.chrome, color: NLDD.textSubtle }),
+                  new TextRun({ text: ' van ', size: SIZE.chrome, color: NLDD.textSubtle }),
+                  new TextRun({ children: [PageNumber.TOTAL_PAGES], size: SIZE.chrome, color: NLDD.textSubtle }),
                 ],
               }),
             ],

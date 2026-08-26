@@ -77,11 +77,11 @@
             </li>
           </ul>
 
-          <details v-if="relevantDefinitions.length > 0" class="rvo-expandable-content rvo-expandable-content--subtle beslishulp__details">
-            <summary class="rvo-expandable-content__summary invulhulp-text--sm">
+          <details v-if="relevantDefinitions.length > 0" class="invulhulp-disclosure beslishulp__details">
+            <summary class="invulhulp-text--sm">
               Begrippen in deze vraag ({{ relevantDefinitions.length }})
             </summary>
-            <div class="rvo-expandable-content__details">
+            <div class="invulhulp-disclosure__details">
               <dl class="beslishulp__definitions">
                 <template v-for="def in relevantDefinitions" :key="def.term">
                   <dt>{{ def.term }}</dt>
@@ -91,11 +91,11 @@
             </div>
           </details>
 
-          <details v-if="position.question.sources.length > 0" class="rvo-expandable-content rvo-expandable-content--subtle beslishulp__details">
-            <summary class="rvo-expandable-content__summary invulhulp-text--sm">
+          <details v-if="position.question.sources.length > 0" class="invulhulp-disclosure beslishulp__details">
+            <summary class="invulhulp-text--sm">
               Bronnen bij deze vraag ({{ position.question.sources.length }})
             </summary>
-            <div class="rvo-expandable-content__details">
+            <div class="invulhulp-disclosure__details">
               <ul class="beslishulp__sources">
                 <li v-for="src in position.question.sources" :key="src.url">
                   <nldd-link :href="src.url" target="_blank" rel="noopener noreferrer">{{ src.source }}</nldd-link>
@@ -129,11 +129,11 @@
             </ul>
           </section>
 
-          <details class="rvo-expandable-content rvo-expandable-content--subtle beslishulp__details">
-            <summary class="rvo-expandable-content__summary invulhulp-text--sm">
+          <details class="invulhulp-disclosure beslishulp__details">
+            <summary class="invulhulp-text--sm">
               Jouw antwoorden ({{ steps.length }})
             </summary>
-            <div class="rvo-expandable-content__details">
+            <div class="invulhulp-disclosure__details">
               <ol class="beslishulp__trail">
                 <li v-for="(step, index) in steps" :key="index">
                   <span class="beslishulp__trail-q">{{ questionTextFor(step.questionId) }}</span>
@@ -146,11 +146,11 @@
             </div>
           </details>
 
-          <details v-if="position.conclusion.sources.length > 0" class="rvo-expandable-content rvo-expandable-content--subtle beslishulp__details">
-            <summary class="rvo-expandable-content__summary invulhulp-text--sm">
+          <details v-if="position.conclusion.sources.length > 0" class="invulhulp-disclosure beslishulp__details">
+            <summary class="invulhulp-text--sm">
               Bronnen bij deze conclusie ({{ position.conclusion.sources.length }})
             </summary>
-            <div class="rvo-expandable-content__details">
+            <div class="invulhulp-disclosure__details">
               <ul class="beslishulp__sources">
                 <li v-for="src in position.conclusion.sources" :key="src.url">
                   <nldd-link :href="src.url" target="_blank" rel="noopener noreferrer">{{ src.source }}</nldd-link>

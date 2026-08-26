@@ -2,7 +2,7 @@
   <div class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad user-mgmt">
     <div class="invulhulp-column invulhulp-gap--lg">
       <div>
-        <h1 class="utrecht-heading-1 user-mgmt__title">Gebruikersbeheer</h1>
+        <nldd-title size="1"><h1 class="user-mgmt__title">Gebruikersbeheer</h1></nldd-title>
         <nldd-text color="inherit" class="user-mgmt__intro">
           Gebruikers worden aangemaakt in Keycloak en loggen in via SSO. Een nieuwe gebruiker
           krijgt een tijdelijk wachtwoord en moet dat bij de eerste keer inloggen wijzigen.
@@ -53,44 +53,55 @@
 
       <!-- Nieuwe gebruiker -->
       <section class="user-mgmt__panel">
-        <h2 class="utrecht-heading-2 user-mgmt__panel-title">Nieuwe gebruiker</h2>
+        <nldd-title size="2"><h2 class="user-mgmt__panel-title">Nieuwe gebruiker</h2></nldd-title>
         <form class="user-mgmt__form" @submit.prevent="createUser">
           <div class="user-mgmt__form-fields">
-            <label class="user-mgmt__field">
-              <span class="rvo-label">Voornaam</span>
-              <input v-model.trim="form.firstName" required class="utrecht-textbox user-mgmt__input" type="text" />
-            </label>
-            <label class="user-mgmt__field">
-              <span class="rvo-label">Achternaam</span>
-              <input v-model.trim="form.lastName" required class="utrecht-textbox user-mgmt__input" type="text" />
-            </label>
-            <label class="user-mgmt__field user-mgmt__field--wide">
-              <span class="rvo-label">E-mailadres (wordt de gebruikersnaam)</span>
-              <input v-model.trim="form.email" required class="utrecht-textbox user-mgmt__input" type="email" />
-            </label>
+            <nldd-form-field label="Voornaam" class="user-mgmt__field">
+              <nldd-text-field
+                required
+                :value="form.firstName"
+                @input="form.firstName = $event.detail.value.trim()"
+              />
+            </nldd-form-field>
+            <nldd-form-field label="Achternaam" class="user-mgmt__field">
+              <nldd-text-field
+                required
+                :value="form.lastName"
+                @input="form.lastName = $event.detail.value.trim()"
+              />
+            </nldd-form-field>
+            <nldd-form-field
+              label="E-mailadres (wordt de gebruikersnaam)"
+              class="user-mgmt__field user-mgmt__field--wide"
+            >
+              <nldd-text-field
+                type="email"
+                required
+                :value="form.email"
+                @input="form.email = $event.detail.value.trim()"
+              />
+            </nldd-form-field>
           </div>
-          <label class="rvo-checkbox rvo-checkbox--not-checked user-mgmt__admin-check">
-            <input v-model="form.isAdmin" class="rvo-checkbox__input" type="checkbox" />
-            Beheerder (mag gebruikers beheren)
-          </label>
-          <fieldset v-if="scopeRoles.length" class="rvo-form-fieldset user-mgmt__roles-fieldset">
-            <legend class="rvo-form-fieldset__legend">Formulierenset</legend>
-            <p class="rvo-form-field__description">
+          <nldd-checkbox-field
+            class="user-mgmt__admin-check"
+            label="Beheerder (mag gebruikers beheren)"
+            :checked="form.isAdmin"
+            @change="form.isAdmin = $event.detail.checked"
+          />
+          <fieldset v-if="scopeRoles.length" class="user-mgmt__roles-fieldset">
+            <legend class="user-mgmt__roles-legend">Formulierenset</legend>
+            <p class="user-mgmt__roles-description">
               Zonder rol ziet de gebruiker alle formulieren. Met een rol alleen de formulieren
               die bij die rol horen.
             </p>
-            <div class="rvo-checkbox__group">
-              <label v-for="role in scopeRoles" :key="role.id" class="rvo-checkbox">
-                <input
-                  v-model="form.scopeRoles"
-                  :value="role.id"
-                  class="rvo-checkbox__input"
-                  type="checkbox"
-                />
-                <span class="rvo-checkbox__label">
-                  {{ role.title }} ({{ role.forms.length }} formulieren)
-                </span>
-              </label>
+            <div class="user-mgmt__roles-options">
+              <nldd-checkbox-field
+                v-for="role in scopeRoles"
+                :key="role.id"
+                :label="`${role.title} (${role.forms.length} formulieren)`"
+                :checked="form.scopeRoles.includes(role.id)"
+                @change="toggleFormScopeRole(role.id, $event.detail.checked)"
+              />
             </div>
           </fieldset>
           <div>
@@ -106,7 +117,7 @@
 
       <!-- Bestaande gebruikers -->
       <section class="user-mgmt__panel">
-        <h2 class="utrecht-heading-2 user-mgmt__panel-title">Gebruikers ({{ users.length }})</h2>
+        <nldd-title size="2"><h2 class="user-mgmt__panel-title">Gebruikers ({{ users.length }})</h2></nldd-title>
         <nldd-text v-if="loading">Gebruikers laden…</nldd-text>
         <div v-else class="user-mgmt__table-wrap">
           <nldd-table
@@ -203,9 +214,9 @@
   >
     <template #danger>
       <nldd-text v-if="impactLoading">Bezig met bepalen welke dossiers meegaan…</nldd-text>
-      <ul v-else class="rvo-item-list">
-        <li class="rvo-item-list__item">Het account zelf, inclusief inloggegevens en rollen.</li>
-        <li class="rvo-item-list__item">
+      <ul v-else class="invulhulp-item-list">
+        <li class="invulhulp-item-list__item">Het account zelf, inclusief inloggegevens en rollen.</li>
+        <li class="invulhulp-item-list__item">
           <template v-if="impact?.dossiersToDelete.length">
             {{ impact.dossiersToDelete.length }}
             {{ impact.dossiersToDelete.length === 1 ? 'dossier waarvan deze gebruiker de enige eigenaar is' : 'dossiers waarvan deze gebruiker de enige eigenaar is' }},
@@ -216,7 +227,7 @@
             Geen dossiers: deze gebruiker is nergens de enige eigenaar.
           </template>
         </li>
-        <li v-if="impact?.dossiersToUnshare" class="rvo-item-list__item">
+        <li v-if="impact?.dossiersToUnshare" class="invulhulp-item-list__item">
           {{ impact.dossiersToUnshare }}
           gedeeld{{ impact.dossiersToUnshare === 1 ? ' dossier blijft' : 'e dossiers blijven' }}
           bestaan; alleen de toegang van deze gebruiker vervalt.
@@ -369,6 +380,15 @@ function toggleAdmin(u: ManagedUser) {
 
 /** Rol aan- of uitzetten. De backend krijgt de volledige gewenste set, zodat er
  *  geen verschil kan ontstaan tussen wat het scherm toont en wat Keycloak weet. */
+/** Scope-rollen op het aanmaakformulier: v-model op een custom element
+ *  werkt niet, dus de array wordt hier zelf bijgehouden. */
+function toggleFormScopeRole(roleId: string, checked: boolean) {
+  const roles = form.value.scopeRoles
+  const at = roles.indexOf(roleId)
+  if (checked && at === -1) roles.push(roleId)
+  else if (!checked && at !== -1) roles.splice(at, 1)
+}
+
 function toggleScopeRole(u: ManagedUser, roleId: string) {
   const wanted = u.scopeRoles.includes(roleId)
     ? u.scopeRoles.filter((r) => r !== roleId)
@@ -480,19 +500,8 @@ async function copyTempPassword() {
   gap: var(--primitives-space-8);
 }
 
-/* Zelfde reden als in QuestionItem.vue: het RVO-vinkje komt uit een
-   mask-image die het component-CSS niet meelevert, dus zonder deze regel is een
-   aangevinkt vakje een wit blok. Statische url() — een runtime-binding wordt een
-   wit vlak in de productiebuild. */
-.user-mgmt .rvo-checkbox__input:checked::after {
-  -webkit-mask-image: url('@nl-rvo/assets/icons/functioneel/vinkje.svg');
-  mask-image: url('@nl-rvo/assets/icons/functioneel/vinkje.svg');
-}
-
-/* Zelfde ingreep als in QuestionItem.vue: rvo-form-fieldset brengt een grijze
-   achtergrond en eigen padding mee. Die hoort bij een fieldset die een heel
-   formulier omkadert, niet bij één keuzeveld tussen de andere velden — laat het
-   blok anders als een misplaatst grijs vlak over de volle breedte staan. */
+/* Een kale fieldset: hij is er voor de groepssemantiek (NLDD heeft geen
+   checkbox-groep), niet voor een eigen vlak. */
 .user-mgmt__roles-fieldset {
   background: transparent;
   border: 0;
@@ -501,9 +510,9 @@ async function copyTempPassword() {
   min-inline-size: 0;
 }
 
-/* De legend is standaard 1,25rem/700 — een kop. Hier is het een veldlabel
-   tussen "Voornaam" en "E-mailadres", dus dezelfde tokens als .rvo-label. */
-.user-mgmt__roles-fieldset .rvo-form-fieldset__legend {
+/* De legend is standaard een kop. Hier is het een veldlabel tussen "Voornaam"
+   en "E-mailadres", dus dezelfde maat als een nldd-form-field-label. */
+.user-mgmt__roles-legend {
   padding: 0;
   margin: 0;
   font-size: var(--primitives-font-size-90);
@@ -511,12 +520,13 @@ async function copyTempPassword() {
   line-height: var(--primitives-line-height-snug);
 }
 
-.user-mgmt__roles-fieldset .rvo-form-field__description {
+.user-mgmt__roles-description {
   margin-block: var(--primitives-space-4) var(--primitives-space-8);
   color: var(--invulhulp-color-text-subtle);
 }
 
-.user-mgmt__roles {
+.user-mgmt__roles,
+.user-mgmt__roles-options {
   display: flex;
   flex-direction: column;
   gap: var(--primitives-space-4);

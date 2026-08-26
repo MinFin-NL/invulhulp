@@ -14,12 +14,12 @@
       />
     </div>
 
-    <ol class="rvo-progress-tracker invulhulp-nav__list">
+    <ol class="invulhulp-nav__list">
       <!-- Home -->
-      <li class="rvo-progress-tracker__step rvo-progress-tracker__step--start invulhulp-nav__step">
+      <li class="invulhulp-nav__step">
         <button
           type="button"
-          class="rvo-progress-tracker__step-link invulhulp-nav__link"
+          class="invulhulp-nav__link"
           :class="{ 'invulhulp-nav__link--active': store.currentView === 'home' }"
           :aria-current="store.currentView === 'home' ? 'page' : undefined"
           @click="navigate('home')"
@@ -34,18 +34,18 @@
         <!-- Subsections step: render section header + subsection items -->
         <template v-if="step.type === 'subsections'">
           <template v-if="!step.condition || store[step.condition.storeKey] !== false">
-            <li class="rvo-progress-tracker__step rvo-progress-tracker__step--start invulhulp-nav__step invulhulp-nav__step--header">
+            <li class="invulhulp-nav__step invulhulp-nav__step--header">
               <span class="invulhulp-nav__group-label">{{ getSectionTitle(step.sectionId) }}</span>
             </li>
             <li
               v-for="sub in getSubsections(step)"
               :key="sub.id"
-              class="rvo-progress-tracker__step rvo-progress-tracker__step--substep-start invulhulp-nav__step"
+              class="invulhulp-nav__step"
               :class="{ 'invulhulp-nav__step--completed': isSubsectionDone(sub.id) }"
             >
               <button
                 type="button"
-                class="rvo-progress-tracker__step-link invulhulp-nav__link"
+                class="invulhulp-nav__link"
                 :class="{ 'invulhulp-nav__link--active': store.currentView === sub.id }"
                 :aria-current="store.currentView === sub.id ? 'page' : undefined"
                 @click="navigate(sub.id)"
@@ -67,16 +67,16 @@
 
         <!-- Special view: skip summary (rendered at bottom) -->
         <template v-else-if="step.viewId !== 'summary'">
-          <li v-if="step.navGroupHeader" class="rvo-progress-tracker__step rvo-progress-tracker__step--start invulhulp-nav__step invulhulp-nav__step--header">
+          <li v-if="step.navGroupHeader" class="invulhulp-nav__step invulhulp-nav__step--header">
             <span class="invulhulp-nav__group-label">{{ step.navGroupHeader }}</span>
           </li>
           <li
-            class="rvo-progress-tracker__step rvo-progress-tracker__step--substep-start invulhulp-nav__step"
+            class="invulhulp-nav__step"
             :class="{ 'invulhulp-nav__step--completed': store.isSectionCompleted(completionId(step)) }"
           >
             <button
               type="button"
-              class="rvo-progress-tracker__step-link invulhulp-nav__link"
+              class="invulhulp-nav__link"
               :class="{ 'invulhulp-nav__link--active': store.currentView === step.viewId }"
               :aria-current="store.currentView === step.viewId ? 'page' : undefined"
               @click="navigate(step.viewId)"
@@ -97,10 +97,10 @@
       </template>
 
       <!-- Summary -->
-      <li class="rvo-progress-tracker__step rvo-progress-tracker__step--end invulhulp-nav__step invulhulp-nav__step--summary">
+      <li class="invulhulp-nav__step invulhulp-nav__step--summary">
         <button
           type="button"
-          class="rvo-progress-tracker__step-link invulhulp-nav__link invulhulp-nav__link--summary"
+          class="invulhulp-nav__link invulhulp-nav__link--summary"
           :class="{ 'invulhulp-nav__link--active': store.currentView === 'summary' }"
           :aria-current="store.currentView === 'summary' ? 'page' : undefined"
           @click="navigate('summary')"

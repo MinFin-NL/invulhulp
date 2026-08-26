@@ -3,10 +3,10 @@
     <div class="invulhulp-measure invulhulp-measure--lg invulhulp-measure--pad">
 
       <!-- Hero -->
-      <section class="rvo-hero rvo-hero--lichtblauw dossier-list-hero">
-        <div class="rvo-hero__content">
-          <nldd-title size="1"><h1 class="rvo-hero__title">FinDocs</h1></nldd-title>
-          <nldd-text size="lg" class="rvo-hero__subtitle">
+      <section class="dossier-list-hero">
+        <div class="dossier-list-hero__content">
+          <nldd-title size="1"><h1 class="dossier-list-hero__title">FinDocs</h1></nldd-title>
+          <nldd-text size="lg" color="inherit" class="dossier-list-hero__subtitle">
             Digitale instrumenten voor IV-projecten, privacy en AI-impact assessments — Ministerie van Financiën
           </nldd-text>
         </div>
@@ -160,8 +160,28 @@ function onCreateConfirmed(name: string) {
   min-height: 100%;
 }
 
+/* NLDD's hero lives inside nldd-page-sections, which this page does not use;
+   the band is drawn here on the tinted-surface tokens instead. */
 .dossier-list-hero {
   margin-block-end: var(--primitives-space-48);
+  background: var(--semantics-categories-accent-tinted-background-color);
+  color: var(--semantics-categories-accent-tinted-content-color);
+  border-radius: var(--primitives-corner-radius-md);
+  padding: var(--primitives-space-48) var(--primitives-space-32);
+}
+
+.dossier-list-hero__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--primitives-space-8);
+}
+
+.dossier-list-hero__title {
+  margin: 0;
+}
+
+.dossier-list-hero__subtitle {
+  max-inline-size: 52ch;
 }
 
 .dossier-list__header {

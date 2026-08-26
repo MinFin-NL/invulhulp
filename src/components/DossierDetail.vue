@@ -250,12 +250,12 @@
             @click="fileInputEl?.click()"
           />
 
-          <details class="rvo-expandable-content rvo-expandable-content--subtle docs-info-details">
-            <summary class="rvo-expandable-content__summary invulhulp-text--sm">
+          <details class="invulhulp-disclosure docs-info-details">
+            <summary class="invulhulp-text--sm">
               <nldd-icon class="docs-info-icon" name="info-circle" size="16" />
               Ondersteunde bestandstypen
             </summary>
-            <div class="rvo-expandable-content__details">
+            <div class="invulhulp-disclosure__details">
               <ul class="invulhulp-text--sm docs-info-list">
                 <li><strong>.txt / .md</strong> — platte tekst, volledig gebruikt</li>
                 <li><strong>.docx</strong> — Word-document, tekst en opmaak worden gelezen</li>
@@ -485,13 +485,13 @@
           <!-- Not applicable, collapsed but never hidden: a decision nobody can
                find is worse than a form nobody fills in (docs §5.6). Opening a
                form from here still works — the scan advises, the user decides. -->
-          <details v-if="nvtForms(group).length > 0" class="rvo-expandable-content rvo-expandable-content--subtle nvt-group">
-            <summary class="rvo-expandable-content__summary invulhulp-text--sm">
+          <details v-if="nvtForms(group).length > 0" class="invulhulp-disclosure nvt-group">
+            <summary class="invulhulp-text--sm">
               Niet van toepassing in dit dossier ({{ nvtForms(group).length }})
             </summary>
-            <div class="rvo-expandable-content__details">
-              <ul class="rvo-item-list nvt-list">
-                <li v-for="form in nvtForms(group)" :key="form.id" class="rvo-item-list__item nvt-item">
+            <div class="invulhulp-disclosure__details">
+              <ul class="invulhulp-item-list nvt-list">
+                <li v-for="form in nvtForms(group)" :key="form.id" class="invulhulp-item-list__item nvt-item">
                   <div class="nvt-item__text">
                     <span class="nvt-item__title">{{ form.title }}</span>
                     <span class="invulhulp-text--sm invulhulp-text--subtle">{{ verdictFor(form.id).reason }}</span>
@@ -545,8 +545,8 @@
       @confirm="onDeleteConfirmed"
     >
       <template #danger>
-        <ul class="rvo-item-list">
-          <li v-for="line in deleteImpact" :key="line" class="rvo-item-list__item">{{ line }}</li>
+        <ul class="invulhulp-item-list">
+          <li v-for="line in deleteImpact" :key="line" class="invulhulp-item-list__item">{{ line }}</li>
         </ul>
       </template>
     </ConfirmDialog>
@@ -1506,11 +1506,9 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   position: relative;
 }
 
-.docs-info-details :deep(.rvo-expandable-content__summary::after) {
-  display: none;
-}
-
-.docs-info-details :deep(.rvo-expandable-content__details) {
+/* This disclosure opens as a popover over the row rather than pushing it
+   down, so its panel is positioned instead of flowing. */
+.docs-info-details > .invulhulp-disclosure__details {
   position: absolute;
   inset-block-start: calc(100% + var(--primitives-space-4));
   inset-inline-start: 0;
@@ -1982,7 +1980,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   align-self: center;
 }
 
-/* --- Niet van toepassing, per phase. Stock rvo-item-list rows; only the
+/* --- Niet van toepassing, per phase. Stock item-list rows; only the
    layout inside a row and the struck-through title are ours. --- */
 .nvt-group {
   margin-block-start: var(--primitives-space-16);

@@ -7,15 +7,15 @@
   >
     <div class="invulhulp-modal__container">
       <header class="invulhulp-modal__header">
-        <h3 :id="titleId" class="utrecht-heading-3 invulhulp-modal__title">
+        <nldd-title size="3"><h3 :id="titleId" class="invulhulp-modal__title">
           {{ title }}
-        </h3>
+        </h3></nldd-title>
         <button type="button" class="invulhulp-modal__close" aria-label="Sluiten" @click="close">
           <span aria-hidden="true">×</span>
         </button>
       </header>
 
-      <hr class="rvo-hr invulhulp-modal__divider" />
+      <nldd-divider class="invulhulp-modal__divider" />
 
       <div class="invulhulp-modal__body image-lightbox__body">
         <img v-if="src" class="image-lightbox__image" :src="src" :alt="title" />

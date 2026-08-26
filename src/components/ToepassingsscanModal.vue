@@ -17,7 +17,7 @@
             </nldd-text>
           </div>
         </div>
-        <!-- Plain button, not rvo-button: on the dark header an rvo-button
+        <!-- Plain button, not nldd-button: on the dark header a filled button
              variant would need overriding anyway. Mirrors BeslishulpModal. -->
         <button type="button" class="scan__close" aria-label="Sluiten" @click="close">
           <span aria-hidden="true">×</span>
@@ -91,8 +91,8 @@
           <nldd-text size="sm" color="secondary" v-if="consequences.length === 0">
             Beantwoord de vragen hierboven — hier verschijnt meteen per formulier of het geldt.
           </nldd-text>
-          <ul v-else class="rvo-item-list scan__consequences">
-            <li v-for="row in consequences" :key="row.id" class="rvo-item-list__item scan__consequence">
+          <ul v-else class="invulhulp-item-list scan__consequences">
+            <li v-for="row in consequences" :key="row.id" class="invulhulp-item-list__item scan__consequence">
               <span class="scan__consequence-title">{{ row.title }}</span>
               <nldd-tag
                 size="sm"
@@ -122,7 +122,7 @@
       </div>
 
       <footer class="scan__footer">
-        <div class="rvo-action-group scan__footer-actions">
+        <div class="invulhulp-row invulhulp-gap--sm scan__footer-actions">
           <nldd-button
             variant="primary"
             size="sm"
@@ -330,9 +330,6 @@ defineExpose({ open })
   gap: var(--primitives-space-16);
 }
 
-/* .rvo-icon zet alleen een min-inline-size — zonder expliciete box heeft het
-   masker geen hoogte om in te tekenen: een onzichtbaar icoon dat wél breedte
-   inneemt. Zelfde patroon als de andere hergekleurde iconen in de app. */
 .scan__brand-icon {
   margin-block-start: var(--primitives-space-2);
   flex-shrink: 0;

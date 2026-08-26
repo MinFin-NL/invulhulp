@@ -147,6 +147,73 @@ body {
 /* A button that has to read as a link (a "terug"-crumb, an inline "verwijder"
    action inside a row). nldd-link renders an <a>, so a real <button> keeps its
    own element and borrows the link tokens. */
+/* ── Disclosure (native <details>) ───────────────────────────────────────── */
+/* NLDD ships no accordion, so these stay a native <details>/<summary> — which
+   is the accessible control anyway — dressed in NLDD tokens. */
+
+.invulhulp-disclosure > summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--primitives-space-8);
+  padding: var(--primitives-space-4) 0;
+  color: var(--semantics-links-color);
+  list-style: none;
+}
+
+.invulhulp-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* The chevron is drawn, not masked: the old --rvo-icon-* mask needed an asset
+   and a token that had to be kept in sync. */
+.invulhulp-disclosure > summary::before {
+  content: '';
+  inline-size: 0.5rem;
+  block-size: 0.5rem;
+  flex-shrink: 0;
+  border-inline-end: 2px solid currentColor;
+  border-block-end: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform var(--invulhulp-duration-fast);
+}
+
+.invulhulp-disclosure[open] > summary::before {
+  transform: rotate(45deg);
+}
+
+.invulhulp-disclosure > summary:focus-visible {
+  outline: var(--semantics-focus-ring-outline);
+  outline-offset: var(--semantics-focus-ring-outline-offset);
+}
+
+.invulhulp-disclosure__details {
+  padding-block: var(--primitives-space-8);
+  padding-inline-start: var(--primitives-space-16);
+}
+
+/* ── Item list ───────────────────────────────────────────────────────────── */
+/* A plain bulleted-free list of rows. nldd-list is the component, but it needs
+   nldd-list-item children and brings its own frame; these are short inline
+   lists inside a dialog or a disclosure, where that is too much furniture. */
+
+.invulhulp-item-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.invulhulp-item-list__item {
+  padding-block: var(--primitives-space-4);
+  border-block-end: 1px solid var(--invulhulp-color-border);
+}
+
+.invulhulp-item-list__item:last-child {
+  border-block-end: 0;
+}
+
 /* ── Layout utilities ────────────────────────────────────────────────────── */
 /* NLDD ships nldd-box / nldd-container / nldd-spacer for layout, but those are
    custom elements: putting one around a flex child inserts a shadow boundary

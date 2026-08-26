@@ -40,18 +40,16 @@
       </nldd-banner>
 
       <!-- Name input -->
-      <div class="rvo-form-field">
-        <label class="rvo-form-field__label" for="summary-system-name">
-          {{ props.formConfig.meta.systemNamePlaceholder ? 'Naam (voor export)' : 'Naam van het AI-systeem (voor export)' }}
-        </label>
-        <input
-          id="summary-system-name"
-          v-model="systemName"
-          type="text"
-          class="utrecht-textbox utrecht-textbox--md"
+      <nldd-form-field
+        :label="props.formConfig.meta.systemNamePlaceholder ? 'Naam (voor export)' : 'Naam van het AI-systeem (voor export)'"
+      >
+        <nldd-text-field
+          input-id="summary-system-name"
+          :value="systemName"
           :placeholder="props.formConfig.meta.systemNamePlaceholder ?? 'Naam van het systeem...'"
+          @input="systemName = $event.detail.value"
         />
-      </div>
+      </nldd-form-field>
 
       <!-- Export buttons -->
       <div class="invulhulp-row invulhulp-gap--md summary-view__exports">

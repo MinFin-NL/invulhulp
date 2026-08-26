@@ -7,29 +7,26 @@
   >
     <div class="invulhulp-modal__container">
       <header class="invulhulp-modal__header">
-        <h3 :id="titleId" class="utrecht-heading-3 invulhulp-modal__title">Dossier delen</h3>
+        <nldd-title size="3"><h3 :id="titleId" class="invulhulp-modal__title">Dossier delen</h3></nldd-title>
         <button type="button" class="invulhulp-modal__close" aria-label="Sluiten" @click="close">
           <span aria-hidden="true">×</span>
         </button>
       </header>
 
-      <hr class="rvo-hr invulhulp-modal__divider" />
+      <nldd-divider class="invulhulp-modal__divider" />
 
       <div class="invulhulp-modal__body">
         <!-- Search -->
-        <div class="rvo-form-field">
-          <label class="rvo-form-field__label" :for="searchId">Zoek op naam of e-mailadres</label>
-          <input
-            :id="searchId"
+        <nldd-form-field label="Zoek op naam of e-mailadres">
+          <nldd-search-field
             ref="searchEl"
-            v-model="query"
-            type="search"
-            class="utrecht-textbox utrecht-textbox--md invulhulp-modal__input"
+            class="invulhulp-modal__input"
             placeholder="bijv. Jansen of j.jansen@minfin.nl"
             autocomplete="off"
-            @input="onQueryInput"
+            :value="query"
+            @input="query = $event.detail.value; onQueryInput()"
           />
-        </div>
+        </nldd-form-field>
 
         <nldd-text size="sm" color="inherit" class="share-dialog__hint" v-if="searching">Zoeken…</nldd-text>
         <ul v-else-if="results.length" class="share-dialog__results">
@@ -38,9 +35,16 @@
               <span class="share-dialog__name">{{ user.name || user.email }}</span>
               <span v-if="user.name && user.email" class="share-dialog__email">{{ user.email }}</span>
             </div>
-            <select v-model="pendingRoles[user.id]" class="utrecht-select share-dialog__role" aria-label="Rol">
-              <option v-for="(label, role) in roleLabels" :key="role" :value="role">{{ label }}</option>
-            </select>
+            <nldd-dropdown
+              class="share-dialog__role"
+              size="sm"
+              accessible-label="Rol"
+              @change="pendingRoles[user.id] = $event.detail.value as DossierRole"
+            >
+              <select :value="pendingRoles[user.id]">
+                <option v-for="(label, role) in roleLabels" :key="role" :value="role">{{ label }}</option>
+              </select>
+            </nldd-dropdown>
             <nldd-button
               variant="primary"
               text="Toevoegen"
@@ -53,7 +57,7 @@
         </nldd-text>
 
         <!-- Current grants -->
-        <h4 class="utrecht-heading-4 share-dialog__subtitle">Personen met toegang</h4>
+        <nldd-title size="4"><h4 class="share-dialog__subtitle">Personen met toegang</h4></nldd-title>
         <nldd-text size="sm" color="inherit" class="share-dialog__hint" v-if="grants.length === 0">Nog niet gedeeld.</nldd-text>
         <ul v-else class="share-dialog__results">
           <li v-for="grant in grants" :key="grant.sub" class="share-dialog__row">
@@ -64,15 +68,17 @@
               </span>
               <span v-if="grant.name && grant.email" class="share-dialog__email">{{ grant.email }}</span>
             </div>
-            <select
-              class="utrecht-select share-dialog__role"
-              aria-label="Rol"
-              :value="grant.role"
+            <nldd-dropdown
+              class="share-dialog__role"
+              size="sm"
+              accessible-label="Rol"
               :disabled="isLastOwner(grant)"
-              @change="changeRole(grant, ($event.target as HTMLSelectElement).value as DossierRole)"
+              @change="changeRole(grant, $event.detail.value as DossierRole)"
             >
-              <option v-for="(label, role) in roleLabels" :key="role" :value="role">{{ label }}</option>
-            </select>
+              <select :value="grant.role">
+                <option v-for="(label, role) in roleLabels" :key="role" :value="role">{{ label }}</option>
+              </select>
+            </nldd-dropdown>
             <nldd-button
               variant="secondary"
               text="Verwijderen"
@@ -135,10 +141,9 @@ const auth = useAuthStore()
 const mySub = auth.user?.sub
 
 const dialogEl = ref<HTMLDialogElement | null>(null)
-const searchEl = ref<HTMLInputElement | null>(null)
+const searchEl = ref<HTMLElement | null>(null)
 const uid = Math.random().toString(36).slice(2, 9)
 const titleId = `share-dialog-title-${uid}`
-const searchId = `share-dialog-search-${uid}`
 
 const query = ref('')
 const results = ref<UserSearchResult[]>([])
@@ -359,9 +364,10 @@ defineExpose({ open })
 }
 
 .share-dialog__role {
-  /* .utrecht-select forces inline-size: 100%; left unchecked it eats the whole
-     flex row and collapses .share-dialog__who (flex-basis 0) to zero width,
-     hiding the name/e-mail behind overflow: hidden. Size it to its content. */
+  /* nldd-dropdown stretches to fill its container by default; left unchecked
+     it eats the whole flex row and collapses .share-dialog__who (flex-basis 0)
+     to zero width, hiding the name/e-mail behind overflow: hidden. Size it to
+     its content instead. */
   flex: 0 0 auto;
   inline-size: auto;
   min-inline-size: 8rem;

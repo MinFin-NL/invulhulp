@@ -7,9 +7,9 @@
   >
     <div class="invulhulp-modal__container">
       <header class="invulhulp-modal__header">
-        <h3 :id="titleId" class="utrecht-heading-3 invulhulp-modal__title">
+        <nldd-title size="3"><h3 :id="titleId" class="invulhulp-modal__title">
           {{ source?.docName ?? 'Brondocument' }}
-        </h3>
+        </h3></nldd-title>
         <button
           type="button"
           class="invulhulp-modal__close"
@@ -20,7 +20,7 @@
         </button>
       </header>
 
-      <hr class="rvo-hr invulhulp-modal__divider" />
+      <nldd-divider class="invulhulp-modal__divider" />
 
       <div class="invulhulp-modal__body doc-viewer__body">
         <nldd-text color="inherit" class="doc-viewer__missing" v-if="!documentContent">
