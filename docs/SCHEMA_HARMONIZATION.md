@@ -10,7 +10,8 @@ which encodes the **Model DPIA Rijksdienst** as YAML. Our app already described 
 "conform het Model DPIA Rijksdienst", so the content is meant to be the same thing — this change
 makes that link explicit and reproducible.
 
-The two projects are architecturally close (Vue 3, Pinia, RVO Design System, Keycloak, pdfmake)
+The two projects are architecturally close (Vue 3, Pinia, Keycloak, pdfmake; par-dpia-form is
+still on the RVO design system, where this app has moved to NLDD)
 but their **form schemas differ fundamentally**:
 
 | | Our app (findocs) | par-dpia-form |

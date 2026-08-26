@@ -367,7 +367,7 @@ function onCheckboxToggle(option: string) {
 }
 
 /* The radio and checkbox controls are nldd-* custom elements: they draw
-   themselves inside a shadow root, so all of RVO's control-level overrides
+   themselves inside a shadow root, so all the old control-level overrides
    (the hand-drawn radio dot, the vinkje mask for the checkmark) are gone.
    What is left here is only the layout around them. */
 .invulhulp-question__fieldset {

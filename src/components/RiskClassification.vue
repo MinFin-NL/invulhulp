@@ -107,7 +107,8 @@ const conclusionText = computed(() => {
   return tree.value.conclusions.find((c) => c.conclusionId === id)?.conclusion ?? ''
 })
 
-// levelInfo carries RVO-era colour names; map them onto NLDD banner variants.
+// levelInfo carries the form JSON's own colour names; map them onto NLDD
+// banner variants.
 const alertVariant = computed(() => {
   switch (levelInfo.value?.color) {
     case 'error': return 'critical'

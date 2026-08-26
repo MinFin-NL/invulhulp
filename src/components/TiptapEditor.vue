@@ -428,7 +428,7 @@ function rejectSuggestion() {
   white-space: nowrap;
 }
 
-/* AI-Modus huisstijl (blauw/paars) — bewust buiten het RVO-palet, gelijk aan
+/* AI-Modus huisstijl (blauw/paars) — bewust buiten het NLDD-palet, gelijk aan
    AiModeToggle. Zit als strook vast bovenop het invoerveld. */
 .tiptap-ai-busy {
   display: flex;

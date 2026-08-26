@@ -51,7 +51,7 @@ describe('toepassingsscan components render', () => {
 
 /**
  * NL Design System guard rail. The scan is itself a form, so it must use the
- * RVO form components and no bespoke inputs — see the NLDS rule in CLAUDE.md.
+ * NLDD form components and no bespoke inputs — see the NLDD rule in CLAUDE.md.
  */
 describe('NLDD design system conformance', () => {
   it('renders the tile as a card with NLDD tags', async () => {

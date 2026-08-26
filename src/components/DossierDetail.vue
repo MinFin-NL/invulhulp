@@ -1389,7 +1389,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 /* Dossier-brede AI-vulling. Draagt bewust de AI-Modus-huisstijl (blauw/paars,
-   buiten het RVO-palet) die AiModeToggle en de bannier ook gebruiken — het is
+   buiten het NLDD-palet) die AiModeToggle en de bannier ook gebruiken — het is
    dezelfde functie, dus dezelfde taal. Spacing en radii blijven tokens. */
 .bulk-ai {
   display: flex;
@@ -1595,7 +1595,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   inline-size: 20px;
   block-size: 20px;
   flex-shrink: 0;
-  /* Tint the SVG to the RVO groen colour via a CSS filter */
+  /* Tint the SVG to the success colour via a CSS filter */
   filter: invert(40%) sepia(80%) saturate(500%) hue-rotate(65deg) brightness(90%);
 }
 

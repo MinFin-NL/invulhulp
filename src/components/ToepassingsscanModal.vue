@@ -28,7 +28,7 @@
 
         <!-- Six independent questions, so they go on one page: a wizard would
              add eight screens of chrome around forty words of question. Each is
-             a fieldset/legend with native inputs and the RVO classes, exactly as
+             a labelled group of NLDD radio or checkbox fields, exactly as
              QuestionItem renders a form question. -->
         <ol class="scan__questions">
           <li v-for="question in SCAN_QUESTIONS" :key="question.id">
@@ -284,7 +284,7 @@ defineExpose({ open })
 
 <style scoped>
 /* Layout and the modal shell only — every colour, space and font value is an
-   RVO token. The shell mirrors BeslishulpModal (their styles are scoped, so it
+   NLDD token. The shell mirrors BeslishulpModal (their styles are scoped, so it
    is repeated here rather than shared — same trade-off as ConfirmDialog). */
 .invulhulp-modal {
   border: 0;
@@ -418,12 +418,6 @@ defineExpose({ open })
 
 .scan__result-title {
   margin: 0 0 var(--primitives-space-12);
-}
-
-/* The hint under an option label: a block inside the RVO label span, so the
-   whole thing stays one click target and one accessible name. */
-.scan__hint {
-  display: block;
 }
 
 .scan__note {

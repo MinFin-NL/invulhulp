@@ -202,7 +202,7 @@ overwegen waard, maar staat los van de indeling.
 - `src/utils/tracks.ts` — `TRACK_META` (labels, beschrijvingen, volgorde, `emptyHint`),
   `TrackId`, `TRACK_IDS`, `groupFormsByTrack`, `trackLabel`, `connectorGlyph`
 - `src/components/DossierDetail.vue` — de fasebalk bovenaan (`.phase-rail`, met per fase
-  een NLDS-icoon in een cirkel die zich vult naar `done/total`), de verticale tijdlijn
+  een NLDD-icoon in een cirkel die zich vult naar `done/total`), de verticale tijdlijn
   (`.track-timeline`) en `DOMAIN_LABELS`. De faseknoppen scrollen naar `#fase-<track>`.
   De icoon-maskers staan als **statische** `url()`-regels in het `<style>`-blok, één per
   fase — een runtime `:style`-binding levert in de productiebuild witte vierkanten op.

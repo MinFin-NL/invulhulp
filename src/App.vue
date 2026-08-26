@@ -185,7 +185,7 @@ onMounted(async () => {
   border-radius: 999px;
 }
 
-/* The Rijkslogo is a 1:2 portrait mark, unlike RVO's square emblem — set the
+/* The Rijkslogo is a 1:2 portrait mark — set the
    height and let the width follow, or it renders stretched. */
 .findocs-brand__emblem {
   block-size: 2rem;

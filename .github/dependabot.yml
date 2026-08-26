@@ -28,10 +28,9 @@ updates:
           - "@tiptap/*"
           - "yjs"
           - "y-*"
-      nl-design-system:
+      design-system:
         patterns:
-          - "@nl-rvo/*"
-          - "@utrecht/*"
+          - "@nldd/*"
       dev-dependencies:
         dependency-type: "development"
       minor-and-patch:

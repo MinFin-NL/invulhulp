@@ -222,18 +222,19 @@ want `DossierDetail.vue` is al 2059 regels; die rendert alleen
 
 De markup kopieert het brondocumenten-paneel:
 
-- `portal-card` / `portal-card__header` / `__title` (`rvo-heading rvo-heading--lg`)
-  / `__desc` (`rvo-text`)
-- titelveld: `rvo-form-fieldset` + `utrecht-form-label` +
-  `utrecht-textbox utrecht-textbox--html-input`
-- knoppen: `rvo-button rvo-button--primary` ("Opname starten"),
-  `rvo-button--warning-subtle` ("Opname stoppen"),
-  `rvo-button--secondary rvo-button--size-sm` als `<label>` om een verborgen
+- `portal-card` / `portal-card__header` / `__title` (`<nldd-title size="2">` om een
+  `<h2>`) / `__desc` (`<nldd-text>`)
+- titelveld: `<nldd-form-field label="…">` met een `<nldd-text-field>` erin
+- knoppen: `<nldd-button variant="primary" text="Opname starten">`,
+  `<nldd-button variant="destructive" text="Opname stoppen">`, en voor het
+  uploaden een `<nldd-button variant="secondary" size="sm">` die een verborgen
   `<input type="file" accept="audio/*" class="invulhulp-visually-hidden">`
-- status: `rvo-alert rvo-alert--info|success|error rvo-alert--padding-sm` met de
-  verplichte `rvo-alert__container`-child, binnen `<div role="status" aria-live="polite">`
-- lijst opnames: `rvo-item-list` / `rvo-item-list__item`, per item een
-  `rvo-tag rvo-tag--info rvo-tag--pill` met de status
+  aanklikt — een `<label>` eromheen werkt niet, want de echte knop zit in de
+  shadow root (zie de upload-knop in `DossierDetail.vue`)
+- status: `<nldd-banner variant="accent|success|critical" size="sm">` binnen
+  `<div role="status" aria-live="polite">`
+- lijst opnames: `.invulhulp-item-list` / `__item`, per item een
+  `<nldd-tag size="sm" color="accent">` met de status
 
 **Toegankelijkheid (WCAG 2.2 AA):**
 
@@ -243,11 +244,10 @@ De markup kopieert het brondocumenten-paneel:
   seconde-update — kondig per 30 s aan, anders ratelt de screenreader
 - Nederlandse `aria-label`s, echte `<button>`-elementen (dus toetsenbord werkt),
   zichtbare focus
-- alleen design tokens: `var(--rvo-color-*)`, `var(--rvo-space-*)`; geen hardcoded
-  kleuren of spacing
-- recolorde NLDS-iconen hebben een **statische** `mask: url(...)` in `<style>`
-  nodig plus de `-webkit-mask`-tweeling — een runtime-binding wordt een wit vlak
-  in de productiebuild (zie `docs`/skill `frontend`)
+- alleen design tokens: `var(--primitives-space-*)`, `var(--semantics-content-*)`;
+  geen hardcoded kleuren of spacing
+- iconen via `<nldd-icon name="…" size="…">` uit de NLDD-registry (zie skill
+  `frontend`); de oude NLDS-maskeertruc is weg en komt niet terug
 
 ### `assessmentStore.ts`
 
