@@ -22,6 +22,7 @@
           v-if="streamingText || suggestion !== null"
           :aria-busy="isLoading"
         >
+        <div class="doc-suggestion__panel-body">
         <div class="doc-suggestion__panel-header">
           <span class="doc-suggestion__panel-label">✦ Extractie uit brondocumenten</span>
           <span v-if="rationale" class="doc-suggestion__rationale">{{ rationale }}</span>
@@ -105,7 +106,8 @@
             />
           </div>
         </template>
-    </nldd-banner>
+        </div>
+        </nldd-banner>
 
     <!-- Action button (hidden while streaming or when suggestion is shown) -->
     <div v-if="canSuggest && suggestion === null && !streamingText" class="doc-suggestion__actions">
@@ -123,7 +125,7 @@
       </nldd-button>
     </div>
 
-    <span v-if="error" class="doc-suggestion__error rvo-text rvo-text--sm" role="alert">{{ error }}</span>
+    <span v-if="error" class="doc-suggestion__error invulhulp-text--sm" role="alert">{{ error }}</span>
 
     <DocumentViewerModal ref="docViewer" />
   </div>
@@ -354,9 +356,13 @@ function rejectSuggestion() {
   margin-block: var(--primitives-space-4) var(--primitives-space-8);
 }
 
-.doc-suggestion__panel :deep(.rvo-alert__container) {
+/* The banner's own container is in its shadow root; the slotted content is
+   laid out here instead. */
+.doc-suggestion__panel-body {
+  display: flex;
   flex-direction: column;
   align-items: flex-start;
+  inline-size: 100%;
 }
 
 .doc-suggestion__panel-header {

@@ -3,8 +3,8 @@
     <div class="rvo-layout-column rvo-layout-gap--xl">
 
       <div class="summary-view__intro">
-        <h1 class="rvo-heading rvo-heading--xl summary-view__title">Samenvatting</h1>
-        <p class="rvo-text summary-view__lead">Overzicht van alle ingevulde antwoorden.</p>
+        <nldd-title size="1"><h1 class="summary-view__title">Samenvatting</h1></nldd-title>
+        <nldd-text color="inherit" class="summary-view__lead">Overzicht van alle ingevulde antwoorden.</nldd-text>
       </div>
 
       <!-- Risk level (forms with riskClassification feature) -->
@@ -25,13 +25,13 @@
       >
           <div class="summary-view__unanswered-content">
             <strong>Verplichte vragen niet ingevuld ({{ unansweredMandatory.length }})</strong>
-            <p class="rvo-text rvo-text--sm summary-view__unanswered-intro">De volgende verplichte vragen zijn nog niet beantwoord:</p>
+            <nldd-text size="sm" class="summary-view__unanswered-intro">De volgende verplichte vragen zijn nog niet beantwoord:</nldd-text>
             <div v-for="group in unansweredGrouped" :key="group.sectionTitle" class="summary-view__unanswered-group">
-              <p class="rvo-text rvo-text--sm summary-view__unanswered-section">
+              <nldd-text weight="bold" size="sm" class="summary-view__unanswered-section">
                 {{ group.sectionTitle }}
-              </p>
+              </nldd-text>
               <ul class="summary-view__unanswered-list">
-                <li v-for="q in group.questions" :key="q.id" class="rvo-text rvo-text--sm">
+                <li v-for="q in group.questions" :key="q.id" class="invulhulp-text--sm">
                   <em>{{ q.subsectionTitle }}</em> — {{ q.text }}
                 </li>
               </ul>
@@ -70,9 +70,9 @@
 
       <!-- Import -->
       <div>
-        <p class="rvo-text rvo-text--sm summary-view__import-hint">
+        <nldd-text color="inherit" size="sm" class="summary-view__import-hint">
           Of laad een eerder opgeslagen JSON-bestand om verder te gaan waar u gebleven was:
-        </p>
+        </nldd-text>
         <div class="rvo-layout-row rvo-layout-gap--sm summary-view__import-row">
           <input ref="fileInput" type="file" accept=".json" class="invulhulp-visually-hidden" @change="handleImport" />
           <nldd-button
@@ -80,20 +80,20 @@
             text="JSON importeren"
             @click="fileInput?.click()"
           />
-          <span v-if="importError" class="rvo-text rvo-text--sm summary-view__import-error">{{ importError }}</span>
-          <span v-if="importSuccess" class="rvo-text rvo-text--sm summary-view__import-success">Gegevens hersteld!</span>
+          <span v-if="importError" class="invulhulp-text--sm summary-view__import-error">{{ importError }}</span>
+          <span v-if="importSuccess" class="invulhulp-text--sm summary-view__import-success">Gegevens hersteld!</span>
         </div>
       </div>
 
       <!-- Answers by section -->
       <div v-for="section in visibleSections" :key="section.id" class="rvo-layout-column rvo-layout-gap--lg">
-        <h2 class="rvo-heading rvo-heading--lg summary-view__section-title">
+        <nldd-title size="2"><h2 class="summary-view__section-title">
           {{ section.title }}
-        </h2>
+        </h2></nldd-title>
         <hr class="invulhulp-divider summary-view__section-divider" />
 
         <div v-for="subsection in section.subsections" :key="subsection.id" class="rvo-layout-column rvo-layout-gap--md">
-          <h3 class="rvo-heading rvo-heading--md summary-view__subsection-title">{{ subsection.title }}</h3>
+          <nldd-title size="3"><h3 class="summary-view__subsection-title">{{ subsection.title }}</h3></nldd-title>
 
           <article
             v-for="question in subsection.questions"
@@ -102,22 +102,19 @@
             :class="`summary-view__card--${question.importance}`"
           >
             <div class="summary-view__card-body">
-              <p class="rvo-text rvo-text--sm summary-view__question">
+              <nldd-text weight="bold" color="inherit" size="sm" class="summary-view__question">
                 {{ question.text }}
-              </p>
+              </nldd-text>
 
               <!-- The answer keeps the shape it was written in: paragraphs and
                    lists as markup, checkbox answers as a list, a table answer
                    as an actual table. -->
               <template v-for="answer in [renderedAnswers[question.id]]" :key="question.id">
-                <p
-                  v-if="!answer || answer.kind === 'empty'"
-                  class="rvo-text rvo-text--sm summary-view__answer summary-view__answer--empty"
-                >
+                <nldd-text color="inherit" size="sm" class="summary-view__answer summary-view__answer--empty" v-if="!answer || answer.kind === 'empty'">
                   (niet ingevuld)
-                </p>
+                </nldd-text>
 
-                <ul v-else-if="answer.kind === 'list'" class="rvo-text rvo-text--sm summary-view__answer summary-view__answer-list">
+                <ul v-else-if="answer.kind === 'list'" class="invulhulp-text--sm summary-view__answer summary-view__answer-list">
                   <li v-for="item in answer.items" :key="item">{{ item }}</li>
                 </ul>
 
@@ -138,12 +135,12 @@
                       </tbody>
                     </table>
                   </div>
-                  <div v-if="answer.table.notes" class="rvo-text rvo-text--sm summary-view__answer-html" v-html="answer.notesHtml"></div>
+                  <div v-if="answer.table.notes" class="invulhulp-text--sm summary-view__answer-html" v-html="answer.notesHtml"></div>
                 </div>
 
                 <div
                   v-else
-                  class="rvo-text rvo-text--sm summary-view__answer summary-view__answer-html"
+                  class="invulhulp-text--sm summary-view__answer summary-view__answer-html"
                   v-html="answer.html"
                 ></div>
               </template>
@@ -371,7 +368,6 @@ async function handleImport(event: Event) {
 
 .summary-view__unanswered-section {
   margin: var(--primitives-space-4) 0;
-  font-weight: var(--primitives-font-weight-body-semi-bold);
 }
 
 .summary-view__unanswered-list {
@@ -436,7 +432,6 @@ async function handleImport(event: Event) {
 }
 
 .summary-view__question {
-  font-weight: var(--primitives-font-weight-body-semi-bold);
   margin: 0;
   color: var(--semantics-content-color);
 }

@@ -93,7 +93,7 @@
       </nldd-button>
     </div>
 
-    <span v-if="error" class="cross-suggestion__error rvo-text rvo-text--sm" role="alert">{{ error }}</span>
+    <span v-if="error" class="cross-suggestion__error invulhulp-text--sm" role="alert">{{ error }}</span>
   </div>
 </template>
 

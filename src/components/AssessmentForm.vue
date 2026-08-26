@@ -51,7 +51,7 @@
     </main>
 
     <div v-else-if="isLoading" class="assessment-shell__loading">
-      <p class="rvo-text assessment-shell__loading-text">Formulier laden...</p>
+      <nldd-text color="inherit" class="assessment-shell__loading-text">Formulier laden...</nldd-text>
     </div>
 
     <div v-else-if="formConfig" class="assessment-shell__layout">
@@ -67,13 +67,14 @@
       <main class="assessment-shell__main">
 
         <!-- Answers taken over verbatim from an earlier form on opening -->
-                <nldd-banner
-                  variant="accent"
-                  size="sm"
-                  class="assessment-shell__prefill"
-                  v-if="prefill"
-                  role="status"
-                >
+        <nldd-banner
+          variant="accent"
+          size="sm"
+          class="assessment-shell__prefill"
+          v-if="prefill"
+          role="status"
+        >
+          <div class="assessment-shell__prefill-row">
             <span>{{ prefillMessage }}</span>
             <nldd-button
               variant="neutral-transparent"
@@ -82,6 +83,7 @@
               aria-label="Melding over overgenomen antwoorden sluiten"
               @click="prefill = null"
             />
+          </div>
         </nldd-banner>
 
         <!-- Home -->
@@ -431,14 +433,14 @@ function onDecisionNext(go: boolean) {
   margin: var(--primitives-space-16) var(--primitives-space-24) 0;
 }
 
-.assessment-shell__prefill .rvo-alert__container {
+.assessment-shell__prefill-row {
   display: flex;
   align-items: center;
   gap: var(--primitives-space-16);
   flex-wrap: wrap;
 }
 
-.assessment-shell__prefill .rvo-alert__container > span {
+.assessment-shell__prefill-row > span {
   flex: 1 1 20rem;
 }
 

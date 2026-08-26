@@ -3,10 +3,10 @@
     <div class="rvo-layout-column rvo-layout-gap--xl">
 
       <header>
-        <h1 class="rvo-heading rvo-heading--2xl form-intro__title">{{ formConfig.title }}</h1>
-        <p class="rvo-text rvo-text--lg form-intro__subtitle">
+        <nldd-title size="1"><h1 class="form-intro__title">{{ formConfig.title }}</h1></nldd-title>
+        <nldd-text color="inherit" size="lg" class="form-intro__subtitle">
           Versie {{ formConfig.version }} — Ministerie van Financiën
-        </p>
+        </nldd-text>
       </header>
 
             <nldd-banner
@@ -16,10 +16,10 @@
       </nldd-banner>
 
       <section class="rvo-layout-column rvo-layout-gap--md">
-        <h2 class="rvo-heading rvo-heading--xl form-intro__section-title">Over dit instrument</h2>
-        <p class="rvo-text">{{ content.description }}</p>
-        <p v-if="content.steps.length > 0" class="rvo-text">Dit formulier omvat de volgende onderdelen:</p>
-        <ul v-if="content.steps.length > 0" class="rvo-ul">
+        <nldd-title size="2"><h2 class="form-intro__section-title">Over dit instrument</h2></nldd-title>
+        <nldd-text>{{ content.description }}</nldd-text>
+        <nldd-text v-if="content.steps.length > 0">Dit formulier omvat de volgende onderdelen:</nldd-text>
+        <ul v-if="content.steps.length > 0" class="">
           <li v-for="step in content.steps" :key="step">{{ step }}</li>
         </ul>
 
@@ -37,15 +37,15 @@
       </section>
 
       <section class="rvo-layout-column rvo-layout-gap--sm">
-        <h2 class="rvo-heading rvo-heading--xl form-intro__section-title">Kleurcodering vragen</h2>
+        <nldd-title size="2"><h2 class="form-intro__section-title">Kleurcodering vragen</h2></nldd-title>
         <ul class="form-intro__legend">
           <li class="form-intro__legend-item">
             <span class="form-intro__legend-swatch form-intro__legend-swatch--mandatory" aria-hidden="true"></span>
-            <span class="rvo-text"><strong>Blauw – verplicht:</strong> moet altijd worden ingevuld</span>
+            <span class=""><strong>Blauw – verplicht:</strong> moet altijd worden ingevuld</span>
           </li>
           <li class="form-intro__legend-item">
             <span class="form-intro__legend-swatch form-intro__legend-swatch--optional" aria-hidden="true"></span>
-            <span class="rvo-text"><strong>Groen – aanvullend:</strong> invullen indien van toepassing</span>
+            <span class=""><strong>Groen – aanvullend:</strong> invullen indien van toepassing</span>
           </li>
         </ul>
       </section>
@@ -74,14 +74,14 @@
             @dismiss="dismissAiModeDone"
             @undo-smoothing="undoSmoothing"
           />
-          <p class="rvo-text rvo-text--sm form-intro__ai-hint">
+          <nldd-text color="inherit" size="sm" class="form-intro__ai-hint">
             <template v-if="readyDocIds.length > 0">
               Vul alle vragen automatisch in op basis van je {{ readyDocIds.length }} brondocument{{ readyDocIds.length === 1 ? '' : 'en' }}.
             </template>
             <template v-else>
               Upload brondocumenten om AI Modus te gebruiken.
             </template>
-          </p>
+          </nldd-text>
         </div>
       </div>
 

@@ -3,13 +3,13 @@
     <div class="rvo-layout-column rvo-layout-gap--xl">
 
       <div>
-        <p class="rvo-text rvo-text--sm risk-classification__kicker">Bijlage 1</p>
-        <h1 class="rvo-heading rvo-heading--xl risk-classification__title">Risicoclassificatie AI-verordening</h1>
-        <p class="rvo-text risk-classification__lead">
+        <nldd-text color="inherit" size="sm" class="risk-classification__kicker">Bijlage 1</nldd-text>
+        <nldd-title size="1"><h1 class="risk-classification__title">Risicoclassificatie AI-verordening</h1></nldd-title>
+        <nldd-text class="risk-classification__lead">
           De risicogroep van dit AI-systeem wordt bepaald met de <strong>Beslishulp AI-verordening</strong> van
           MinBZK — dezelfde beslisboom die het Algoritmekader hanteert. De uitkomst geldt voor het hele dossier
           en wordt hier overgenomen als risiconiveau voor dit assessment.
-        </p>
+        </nldd-text>
       </div>
 
       <!-- Not run yet: the beslishulp is the way in. -->
@@ -38,22 +38,22 @@
         </nldd-banner>
 
         <section v-if="conclusionText && levelInfo" class="risk-classification__conclusion">
-          <h2 class="rvo-heading rvo-heading--md risk-classification__subtitle">Conclusie van de beslishulp</h2>
-          <p class="rvo-text rvo-text--sm">{{ conclusionText }}</p>
+          <nldd-title size="2"><h2 class="risk-classification__subtitle">Conclusie van de beslishulp</h2></nldd-title>
+          <nldd-text size="sm">{{ conclusionText }}</nldd-text>
         </section>
 
         <section v-if="run.labels.length > 0">
-          <h2 class="rvo-heading rvo-heading--md risk-classification__subtitle">Vastgestelde kenmerken</h2>
+          <nldd-title size="2"><h2 class="risk-classification__subtitle">Vastgestelde kenmerken</h2></nldd-title>
           <ul class="risk-classification__labels">
             <li v-for="label in run.labels" :key="label" class="risk-classification__label">{{ label }}</li>
           </ul>
         </section>
 
-        <p class="rvo-text rvo-text--sm risk-classification__meta">
+        <nldd-text color="inherit" size="sm" class="risk-classification__meta">
           Doorlopen op {{ completedOn }}<template v-if="run.completedBy"> door {{ run.completedBy }}</template>
           · {{ run.steps.length }} {{ run.steps.length === 1 ? 'vraag' : 'vragen' }} beantwoord
           <template v-if="adopted"> · overgenomen in dit assessment</template>
-        </p>
+        </nldd-text>
 
         <div class="rvo-layout-row rvo-layout-gap--md risk-classification__result-actions">
           <nldd-button

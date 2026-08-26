@@ -12,13 +12,13 @@
       class="invulhulp-card form-card form-card--placeholder"
     >
       <div class="form-card__body">
-        <h3 class="rvo-heading rvo-heading--md form-card__title">{{ form.title }}</h3>
+        <nldd-title size="3"><h3 class="form-card__title">{{ form.title }}</h3></nldd-title>
         <ul v-if="form.domains?.length" class="form-card__domains">
           <li v-for="domain in form.domains" :key="domain" class="form-card__domain">
             {{ domainLabel(domain) }}
           </li>
         </ul>
-        <p class="rvo-text rvo-text--sm form-card__desc">{{ form.shortDescription }}</p>
+        <nldd-text line-height="snug" color="inherit" size="sm" class="form-card__desc">{{ form.shortDescription }}</nldd-text>
       </div>
       <div class="form-card__actions">
         <nldd-tag
@@ -46,13 +46,13 @@
       }"
     >
       <div class="form-card__body">
-        <h3 class="rvo-heading rvo-heading--md form-card__title">{{ form.title }}</h3>
+        <nldd-title size="3"><h3 class="form-card__title">{{ form.title }}</h3></nldd-title>
         <ul v-if="form.domains?.length" class="form-card__domains">
           <li v-for="domain in form.domains" :key="domain" class="form-card__domain">
             {{ domainLabel(domain) }}
           </li>
         </ul>
-        <p class="rvo-text rvo-text--sm form-card__desc">{{ form.shortDescription }}</p>
+        <nldd-text line-height="snug" color="inherit" size="sm" class="form-card__desc">{{ form.shortDescription }}</nldd-text>
       </div>
       <div class="form-card__actions">
         <!-- The beslishulp verdict, echoed on the card it belongs to. -->
@@ -345,7 +345,6 @@ const openLabel = computed(() => {
 
 .form-card__desc {
   color: var(--invulhulp-color-text-subtle);
-  line-height: var(--primitives-line-height-snug);
   overflow-wrap: break-word;
   hyphens: auto;
 }

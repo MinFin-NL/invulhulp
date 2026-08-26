@@ -31,7 +31,7 @@
           />
         </div>
 
-        <p v-if="searching" class="rvo-text share-dialog__hint">Zoeken…</p>
+        <nldd-text size="sm" color="inherit" class="share-dialog__hint" v-if="searching">Zoeken…</nldd-text>
         <ul v-else-if="results.length" class="share-dialog__results">
           <li v-for="user in results" :key="user.id" class="share-dialog__row">
             <div class="share-dialog__who">
@@ -48,13 +48,13 @@
             />
           </li>
         </ul>
-        <p v-else-if="query.trim().length >= 2 && searched" class="rvo-text share-dialog__hint">
+        <nldd-text size="sm" color="inherit" class="share-dialog__hint" v-else-if="query.trim().length >= 2 && searched">
           Geen gebruikers gevonden.
-        </p>
+        </nldd-text>
 
         <!-- Current grants -->
         <h4 class="utrecht-heading-4 share-dialog__subtitle">Personen met toegang</h4>
-        <p v-if="grants.length === 0" class="rvo-text share-dialog__hint">Nog niet gedeeld.</p>
+        <nldd-text size="sm" color="inherit" class="share-dialog__hint" v-if="grants.length === 0">Nog niet gedeeld.</nldd-text>
         <ul v-else class="share-dialog__results">
           <li v-for="grant in grants" :key="grant.sub" class="share-dialog__row">
             <div class="share-dialog__who">
@@ -82,9 +82,9 @@
             />
           </li>
         </ul>
-        <p v-if="grants.some(isLastOwner)" class="rvo-text share-dialog__hint">
+        <nldd-text size="sm" color="inherit" class="share-dialog__hint" v-if="grants.some(isLastOwner)">
           Minimaal één eigenaar vereist.
-        </p>
+        </nldd-text>
 
         <nldd-banner
           variant="critical"
@@ -369,7 +369,6 @@ defineExpose({ open })
 
 .share-dialog__hint {
   margin: 0;
-  font-size: var(--primitives-font-size-90);
   color: var(--invulhulp-color-text-muted);
 }
 </style>

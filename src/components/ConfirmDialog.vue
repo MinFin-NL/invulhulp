@@ -22,7 +22,7 @@
       <hr class="rvo-hr invulhulp-modal__divider" />
 
       <div class="invulhulp-modal__body">
-        <p v-if="message" class="rvo-text invulhulp-modal__message">{{ message }}</p>
+        <nldd-text class="invulhulp-modal__message" v-if="message">{{ message }}</nldd-text>
 
         <!-- Danger zone: onomkeerbare actie. De gevolgen staan er voluit,
              daarna typt de gebruiker de naam over — een bevestigingsknop alleen
@@ -47,7 +47,7 @@
                 class="utrecht-textbox utrecht-textbox--md invulhulp-modal__input"
                 :aria-describedby="phraseHintId"
               />
-              <span :id="phraseHintId" class="rvo-text rvo-text--sm invulhulp-modal__danger-hint">
+              <span :id="phraseHintId" class="invulhulp-text--sm invulhulp-modal__danger-hint">
                 {{ phraseMatches
                   ? 'De naam komt overeen — de knop is nu actief.'
                   : 'De knop wordt actief zodra de naam exact overeenkomt.' }}

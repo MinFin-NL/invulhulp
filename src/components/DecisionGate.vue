@@ -3,8 +3,8 @@
     <div class="rvo-layout-column rvo-layout-gap--xl">
 
       <div>
-        <p class="rvo-text rvo-text--sm decision-gate__kicker">Sectie 3 – Afweging</p>
-        <h1 class="rvo-heading rvo-heading--xl decision-gate__title">Beslissing: inzet AI-systeem</h1>
+        <nldd-text color="inherit" size="sm" class="decision-gate__kicker">Sectie 3 – Afweging</nldd-text>
+        <nldd-title size="1"><h1 class="decision-gate__title">Beslissing: inzet AI-systeem</h1></nldd-title>
       </div>
 
       <!-- Risk level reminder -->

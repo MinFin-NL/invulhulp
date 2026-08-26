@@ -3,7 +3,7 @@
 
     <!-- Progress -->
     <div class="invulhulp-nav__progress">
-      <div class="rvo-text rvo-text--sm invulhulp-nav__progress-label">
+      <div class="invulhulp-text--sm invulhulp-nav__progress-label">
         Voortgang: {{ completedCount }}/{{ totalCount }}
       </div>
       <progress
@@ -113,7 +113,7 @@
     <!-- AI Mode: always reachable while working in the form -->
     <div class="invulhulp-nav__ai-mode">
       <hr class="invulhulp-divider" />
-      <p class="rvo-text rvo-text--sm invulhulp-nav__ai-label">AI Modus</p>
+      <nldd-text size="xxs" weight="bold" color="inherit" class="invulhulp-nav__ai-label">AI Modus</nldd-text>
       <AiModeToggle
         :form-id="formConfig.id"
         :has-documents="readyDocIds.length > 0"
@@ -129,14 +129,14 @@
         @dismiss="dismissAiModeDone"
         @undo-smoothing="undoSmoothing"
       />
-      <p class="rvo-text rvo-text--sm invulhulp-nav__ai-hint">
+      <nldd-text line-height="snug" size="xxs" color="inherit" class="invulhulp-nav__ai-hint">
         <template v-if="readyDocIds.length > 0">
           Overschrijft alle antwoorden met AI op basis van {{ readyDocIds.length }} brondocument{{ readyDocIds.length === 1 ? '' : 'en' }}.
         </template>
         <template v-else>
           Upload brondocumenten op de startpagina om AI Modus te gebruiken.
         </template>
-      </p>
+      </nldd-text>
     </div>
   </nav>
 </template>
@@ -346,17 +346,13 @@ function navigate(id: string) {
 
 .invulhulp-nav__ai-label {
   margin: 0;
-  font-weight: var(--primitives-font-weight-body-semi-bold);
   color: var(--semantics-content-secondary-color);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  font-size: var(--primitives-font-size-70);
 }
 
 .invulhulp-nav__ai-hint {
   margin: 0;
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--primitives-font-size-70);
-  line-height: var(--primitives-line-height-snug);
 }
 </style>

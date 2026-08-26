@@ -147,6 +147,31 @@ body {
 /* A button that has to read as a link (a "terug"-crumb, an inline "verwijder"
    action inside a row). nldd-link renders an <a>, so a real <button> keeps its
    own element and borrows the link tokens. */
+/* nldd-text is display:block, so it cannot stand in for text set inline —
+   a <span> in a sentence, a <summary>, an <li>. These match its scale so the
+   two render identically: sm = --primitives-font-size-90, xs = -80. */
+.invulhulp-text--sm {
+  font-size: var(--primitives-font-size-90);
+  line-height: var(--primitives-line-height-snug);
+}
+
+.invulhulp-text--xs {
+  font-size: var(--primitives-font-size-80);
+  line-height: var(--primitives-line-height-snug);
+}
+
+.invulhulp-text--subtle {
+  color: var(--semantics-content-secondary-color);
+}
+
+/* Matches nldd-title size 3 for a heading that has to be an inline element
+   (a card name inside a <button>, where a block would break the row). */
+.invulhulp-heading--md {
+  font-size: var(--primitives-font-size-200);
+  font-weight: var(--primitives-font-weight-body-bold);
+  line-height: var(--primitives-line-height-tight);
+}
+
 .invulhulp-linkbutton {
   border: 0;
   padding: 0;

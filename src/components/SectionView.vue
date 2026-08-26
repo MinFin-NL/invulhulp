@@ -5,22 +5,22 @@
       <!-- Section header -->
       <header>
         <div class="section-view__kicker-row">
-          <p class="rvo-text rvo-text--sm section-view__kicker">
+          <nldd-text color="inherit" size="sm" class="section-view__kicker">
             {{ kicker }}
-          </p>
+          </nldd-text>
           <!-- Opslagstatus. Antwoorden gaan meteen naar localStorage en
                gedebounced naar de server; zonder deze regel krijgt iemand die
                drie kwartier aan een DPIA werkt nooit te horen dat zijn werk
                ergens staat. Bewust geen live region voor de normale statussen:
                die wisselen bij elke toetsaanslag en zouden een schermlezer
                onophoudelijk onderbreken. De foutmelding hieronder wél. -->
-          <p v-if="saveLabel" class="rvo-text rvo-text--sm section-view__save">
+          <nldd-text color="inherit" size="sm" class="section-view__save" v-if="saveLabel">
             {{ saveLabel }}
-          </p>
+          </nldd-text>
         </div>
-        <h1 class="rvo-heading rvo-heading--xl section-view__title">
+        <nldd-title size="1"><h1 class="section-view__title">
           {{ section.title }}
-        </h1>
+        </h1></nldd-title>
       </header>
 
       <nldd-banner
@@ -42,12 +42,12 @@
       <!-- Subsections -->
       <div v-for="subsection in section.subsections" :key="subsection.id" class="rvo-layout-column rvo-layout-gap--lg">
         <div>
-          <h2 class="rvo-heading rvo-heading--lg section-view__subsection-title">
+          <nldd-title size="2"><h2 class="section-view__subsection-title">
             {{ subsection.title }}
-          </h2>
-          <p v-if="subsection.description" class="rvo-text rvo-text--sm section-view__subsection-desc">
+          </h2></nldd-title>
+          <nldd-text color="inherit" size="sm" class="section-view__subsection-desc" v-if="subsection.description">
             {{ subsection.description }}
-          </p>
+          </nldd-text>
         </div>
 
         <QuestionItem

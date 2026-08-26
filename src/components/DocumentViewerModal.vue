@@ -23,9 +23,9 @@
       <hr class="rvo-hr invulhulp-modal__divider" />
 
       <div class="invulhulp-modal__body doc-viewer__body">
-        <p v-if="!documentContent" class="rvo-text doc-viewer__missing">
+        <nldd-text color="inherit" class="doc-viewer__missing" v-if="!documentContent">
           Dit document is niet meer beschikbaar. Hieronder staat het bewaarde fragment.
-        </p>
+        </nldd-text>
 
         <div class="doc-viewer__text">
           <template v-if="documentContent && chunkPos !== null">

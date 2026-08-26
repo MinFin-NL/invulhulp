@@ -14,9 +14,9 @@
         <div class="dossier-header__row">
           <div class="dossier-header__title-group">
             <nldd-icon class="dossier-header__icon" name="folder" size="32" color="accent" />
-            <h1 id="dossier-title" class="rvo-heading rvo-heading--2xl dossier-header__name">
+            <nldd-title size="1"><h1 class="dossier-header__name" id="dossier-title">
               {{ store.activeDossier.name }}
-            </h1>
+            </h1></nldd-title>
           </div>
           <div class="dossier-actions">
             <nldd-button
@@ -47,9 +47,9 @@
             />
           </div>
         </div>
-        <p class="rvo-text dossier-header__desc">
+        <nldd-text size="sm" color="inherit" class="dossier-header__desc">
           Dit dossier groepeert de brondocumenten en formulierantwoorden voor één project of systeem.
-        </p>
+        </nldd-text>
         <nldd-banner
           variant="accent"
           size="sm"
@@ -71,15 +71,15 @@
            documenten zou uploaden. De belofte staat nu op de plek waar hij
            wordt ingelost. -->
       <section v-if="isFirstRun" class="first-run" aria-labelledby="first-run-title">
-        <p class="rvo-text rvo-text--sm first-run__eyebrow">Stap 1 van 2</p>
-        <h2 id="first-run-title" class="rvo-heading rvo-heading--xl first-run__title">
+        <nldd-text size="xs" color="inherit" class="first-run__eyebrow">Stap 1 van 2</nldd-text>
+        <nldd-title size="2"><h2 class="first-run__title" id="first-run-title">
           Begin met je brondocumenten
-        </h2>
-        <p class="rvo-text first-run__lead">
+        </h2></nldd-title>
+        <nldd-text color="inherit" class="first-run__lead">
           Upload wat er al ligt: notulen, een projectplan, een brainstorm of een architectuurschets.
           FinDocs leest ze en vult daarna de formulieren van dit dossier voor je in — elk antwoord met
           een verwijzing naar de passage waar het vandaan komt. Jij controleert, past aan en stelt vast.
-        </p>
+        </nldd-text>
 
         <label
           class="first-run__dropzone"
@@ -100,10 +100,10 @@
             @change="onFilesSelected"
           />
           <nldd-icon class="first-run__dropzone-icon" name="arrow-up-out-bucket" size="40" color="accent" />
-          <span class="rvo-heading rvo-heading--md first-run__dropzone-title">
+          <span class="invulhulp-heading--md first-run__dropzone-title">
             {{ isUploading ? 'Bezig met inlezen…' : 'Sleep je documenten hierheen' }}
           </span>
-          <span class="rvo-text rvo-text--sm first-run__dropzone-hint">
+          <span class="invulhulp-text--sm first-run__dropzone-hint">
             of klik om ze te kiezen — .docx, .pdf, .xlsx, .pptx, .txt of .md
           </span>
         </label>
@@ -142,11 +142,11 @@
            afspeuren naar de kaart met "Bezig". -->
       <section v-if="nextStep" class="next-step" aria-labelledby="next-step-title">
         <div class="next-step__body">
-          <p class="rvo-text rvo-text--sm next-step__eyebrow">{{ nextStep.eyebrow }}</p>
-          <h2 id="next-step-title" class="rvo-heading rvo-heading--md next-step__title">
+          <nldd-text size="xs" color="inherit" class="next-step__eyebrow">{{ nextStep.eyebrow }}</nldd-text>
+          <nldd-title size="2"><h2 class="next-step__title" id="next-step-title">
             {{ nextStep.form.title }}
-          </h2>
-          <p class="rvo-text rvo-text--sm next-step__reason">{{ nextStep.reason }}</p>
+          </h2></nldd-title>
+          <nldd-text color="inherit" size="sm" class="next-step__reason">{{ nextStep.reason }}</nldd-text>
         </div>
         <nldd-button
           class="next-step__btn"
@@ -207,7 +207,7 @@
       <section class="portal-card" aria-labelledby="docs-title">
         <div class="portal-card__header">
           <div class="docs-title-row">
-            <h2 id="docs-title" class="rvo-heading rvo-heading--lg portal-card__title">Brondocumenten</h2>
+            <nldd-title size="2"><h2 class="portal-card__title" id="docs-title">Brondocumenten</h2></nldd-title>
             <nldd-tag v-if="store.documents.length > 0" size="sm" color="accent" aria-live="polite">
               {{ store.documents.length }} {{ store.documents.length === 1 ? 'document' : 'documenten' }} beschikbaar
             </nldd-tag>
@@ -222,10 +222,10 @@
               @click="showGraph = !showGraph"
             />
           </div>
-          <p class="rvo-text portal-card__desc">
+          <nldd-text size="sm" color="inherit" class="portal-card__desc">
             Upload achtergronddocumenten (notulen, brainstorms, agenda's) in .txt, .md, .docx, .xlsx, .pptx of .pdf formaat.
             Bij het invullen van een formulier kun je per vraag automatisch een antwoord laten extraheren uit deze documenten.
-          </p>
+          </nldd-text>
         </div>
 
         <div v-if="store.canEdit" class="docs-controls">
@@ -251,12 +251,12 @@
           />
 
           <details class="rvo-expandable-content rvo-expandable-content--subtle docs-info-details">
-            <summary class="rvo-expandable-content__summary rvo-text rvo-text--sm">
+            <summary class="rvo-expandable-content__summary invulhulp-text--sm">
               <nldd-icon class="docs-info-icon" name="info-circle" size="16" />
               Ondersteunde bestandstypen
             </summary>
             <div class="rvo-expandable-content__details">
-              <ul class="rvo-ul rvo-text rvo-text--sm docs-info-list">
+              <ul class="invulhulp-text--sm docs-info-list">
                 <li><strong>.txt / .md</strong> — platte tekst, volledig gebruikt</li>
                 <li><strong>.docx</strong> — Word-document, tekst en opmaak worden gelezen</li>
                 <li><strong>.xlsx</strong> — Excel-spreadsheet, celinhoud per blad</li>
@@ -309,7 +309,7 @@
                 <nldd-icon class="docs-item__check" name="check-mark-circle" size="16" color="success" />
                 <div class="docs-item__text">
                   <span class="docs-item__name">{{ doc.name }}</span>
-                  <span class="docs-item__meta rvo-text rvo-text--sm">
+                  <span class="docs-item__meta invulhulp-text--sm">
                     {{ formatSize(doc.content.length) }}
                     <template v-if="doc.indexing"> · indexeren…</template>
                     <template v-else-if="doc.indexError"> · indexering mislukt</template>
@@ -327,10 +327,10 @@
               </button>
             </div>
             <DocumentOntology v-if="!doc.indexing && doc.ontology" :ontology="doc.ontology" />
-            <p v-else-if="doc.indexError" class="docs-item__error rvo-text rvo-text--sm">{{ doc.indexError }}</p>
+            <nldd-text color="inherit" size="sm" class="docs-item__error" v-else-if="doc.indexError">{{ doc.indexError }}</nldd-text>
           </li>
         </ul>
-        <p v-else-if="!isUploading" class="docs-empty rvo-text rvo-text--sm">Nog geen documenten geüpload.</p>
+        <nldd-text color="inherit" size="sm" class="docs-empty" v-else-if="!isUploading">Nog geen documenten geüpload.</nldd-text>
       </section>
 
       <!-- Dossier-brede AI-vulling. Het hele punt van de tool is één knop, niet
@@ -343,10 +343,10 @@
         aria-labelledby="bulk-ai-title"
       >
         <div class="bulk-ai__body">
-          <h2 id="bulk-ai-title" class="rvo-heading rvo-heading--md bulk-ai__title">
+          <nldd-title size="2"><h2 class="bulk-ai__title" id="bulk-ai-title">
             Vul dit dossier in met AI
-          </h2>
-          <p class="rvo-text rvo-text--sm bulk-ai__desc" role="status" aria-live="polite">
+          </h2></nldd-title>
+          <nldd-text color="inherit" size="sm" class="bulk-ai__desc" role="status" aria-live="polite">
             <template v-if="dossierAiRun">
               Formulier {{ dossierAiRun.current + 1 }} van {{ dossierAiRun.formIds.length }}: {{ runningFormTitle }}<template
                 v-if="runningProgress"
@@ -364,7 +364,7 @@
               {{ bulkFillForms.length }} lege
               {{ bulkFillForms.length === 1 ? 'formulier' : 'formulieren' }} in één keer invullen.
             </template>
-          </p>
+          </nldd-text>
           <div v-if="dossierAiRun" class="bulk-ai__bar" aria-hidden="true">
             <div class="bulk-ai__bar-fill" :style="{ inlineSize: `${bulkAiPct}%` }" />
           </div>
@@ -408,11 +408,11 @@
         aria-labelledby="prelude-title"
       >
         <div class="prelude__header">
-          <h2 id="prelude-title" class="rvo-heading rvo-heading--md prelude__title">Vooraf</h2>
-          <p class="rvo-text rvo-text--sm prelude__meta">
+          <nldd-title size="2"><h2 class="prelude__title" id="prelude-title">Vooraf</h2></nldd-title>
+          <nldd-text color="inherit" size="sm" class="prelude__meta">
             Nog geen projectfase<template v-if="preludeCount.total > 0">
               · {{ preludeCount.done }}/{{ preludeCount.total }} afgerond</template>
-          </p>
+          </nldd-text>
         </div>
         <div class="card-row">
           <template v-for="(form, idx) in preludeForms" :key="form.id">
@@ -450,17 +450,17 @@
               Fase {{ group.phaseNumber }} van {{ group.phaseCount }}
             </p>
             <div class="track-title-row">
-              <h2 :id="`track-${group.track}-title`" class="rvo-heading rvo-heading--xl track-title">{{ group.label }}</h2>
-              <span v-if="trackCount(group).total > 0" class="rvo-text rvo-text--sm track-count">
+              <nldd-title size="2"><h2 class="track-title" :id="`track-${group.track}-title`">{{ group.label }}</h2></nldd-title>
+              <span v-if="trackCount(group).total > 0" class="invulhulp-text--sm track-count">
                 {{ trackCount(group).done }}/{{ trackCount(group).total }} afgerond
               </span>
             </div>
-            <p class="rvo-text track-desc">{{ group.description }}</p>
+            <nldd-text size="sm" color="inherit" class="track-desc">{{ group.description }}</nldd-text>
           </div>
 
-          <p v-if="group.forms.length === 0" class="rvo-text rvo-text--sm track-empty">
+          <nldd-text color="inherit" size="sm" class="track-empty" v-if="group.forms.length === 0">
             {{ group.emptyHint }}
-          </p>
+          </nldd-text>
 
           <div v-else-if="applicableForms(group).length > 0" class="card-row">
             <!-- Connector + card travel as one unit, so a wrapping row never
@@ -486,7 +486,7 @@
                find is worse than a form nobody fills in (docs §5.6). Opening a
                form from here still works — the scan advises, the user decides. -->
           <details v-if="nvtForms(group).length > 0" class="rvo-expandable-content rvo-expandable-content--subtle nvt-group">
-            <summary class="rvo-expandable-content__summary rvo-text rvo-text--sm">
+            <summary class="rvo-expandable-content__summary invulhulp-text--sm">
               Niet van toepassing in dit dossier ({{ nvtForms(group).length }})
             </summary>
             <div class="rvo-expandable-content__details">
@@ -494,7 +494,7 @@
                 <li v-for="form in nvtForms(group)" :key="form.id" class="rvo-item-list__item nvt-item">
                   <div class="nvt-item__text">
                     <span class="nvt-item__title">{{ form.title }}</span>
-                    <span class="rvo-text rvo-text--sm rvo-text--subtle">{{ verdictFor(form.id).reason }}</span>
+                    <span class="invulhulp-text--sm invulhulp-text--subtle">{{ verdictFor(form.id).reason }}</span>
                   </div>
                   <nldd-button
                     variant="neutral-transparent"
@@ -504,10 +504,10 @@
                   />
                 </li>
               </ul>
-              <p class="rvo-text rvo-text--sm rvo-text--subtle nvt-note">
+              <nldd-text size="sm" color="secondary" class="nvt-note">
                 Advies van de toepassingsscan, geen juridisch oordeel. Al ingevulde antwoorden
                 blijven bewaard.
-              </p>
+              </nldd-text>
             </div>
           </details>
         </div>
@@ -1236,7 +1236,6 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 
 .dossier-header__desc {
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--primitives-font-size-90);
   margin: var(--primitives-space-4) 0 0;
 }
 
@@ -1276,7 +1275,6 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: var(--primitives-font-size-80);
 }
 
 .first-run__title {
@@ -1369,7 +1367,6 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: var(--primitives-font-size-80);
 }
 
 .next-step__title {
@@ -1456,7 +1453,6 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 
 .portal-card__desc {
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--primitives-font-size-90);
   margin: 0;
 }
 
@@ -1949,7 +1945,6 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 
 .track-desc {
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--primitives-font-size-90);
   margin: 0;
 }
 

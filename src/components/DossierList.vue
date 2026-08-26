@@ -5,10 +5,10 @@
       <!-- Hero -->
       <section class="rvo-hero rvo-hero--lichtblauw dossier-list-hero">
         <div class="rvo-hero__content">
-          <h1 class="rvo-heading rvo-heading--2xl rvo-hero__title">FinDocs</h1>
-          <p class="rvo-text rvo-text--lg rvo-hero__subtitle">
+          <nldd-title size="1"><h1 class="rvo-hero__title">FinDocs</h1></nldd-title>
+          <nldd-text size="lg" class="rvo-hero__subtitle">
             Digitale instrumenten voor IV-projecten, privacy en AI-impact assessments — Ministerie van Financiën
-          </p>
+          </nldd-text>
         </div>
       </section>
 
@@ -16,17 +16,17 @@
       <section aria-labelledby="dossiers-title">
         <div class="dossier-list__header">
           <div>
-            <h2 id="dossiers-title" class="rvo-heading rvo-heading--xl dossier-list__title">Mijn dossiers</h2>
+            <nldd-title size="2"><h2 class="dossier-list__title" id="dossiers-title">Mijn dossiers</h2></nldd-title>
             <!-- ensureDossier() maakt altijd een dossier aan, dus de lege staat
                  van deze lijst bestaat niet en er was nergens een eerste
                  instructie. Bij één ongebruikt dossier staat die hier. -->
-            <p v-if="isFirstVisit" class="rvo-text dossier-list__desc">
+            <nldd-text size="sm" color="inherit" class="dossier-list__desc" v-if="isFirstVisit">
               Open je dossier en upload je eerste document — daarna vult FinDocs de formulieren
               voor je in, met een bronverwijzing per antwoord.
-            </p>
-            <p v-else class="rvo-text dossier-list__desc">
+            </nldd-text>
+            <nldd-text size="sm" color="inherit" class="dossier-list__desc" v-else>
               Een dossier groepeert brondocumenten en formulierantwoorden rond één project of systeem.
-            </p>
+            </nldd-text>
           </div>
           <nldd-button
             variant="primary"
@@ -44,12 +44,12 @@
             >
               <nldd-icon class="dossier-card__icon" name="folder" size="32" color="accent" />
               <span class="dossier-card__body">
-                <span class="rvo-heading rvo-heading--md dossier-card__name">{{ d.name }}</span>
+                <span class="invulhulp-heading--md dossier-card__name">{{ d.name }}</span>
                 <nldd-tag v-if="d.sharedWithMe" size="sm" color="accent" class="dossier-card__shared">
                   Gedeeld door {{ d.ownerName ?? 'een collega' }}
                   <template v-if="d.myRole"> · {{ roleLabels[d.myRole] }}</template>
                 </nldd-tag>
-                <span class="rvo-text rvo-text--sm dossier-card__meta">
+                <span class="invulhulp-text--sm dossier-card__meta">
                   {{ d.documents.length }} {{ d.documents.length === 1 ? 'document' : 'documenten' }}
                   · {{ summaryFor(d).done }}/{{ summaryFor(d).total }} formulieren afgerond
                 </span>
@@ -73,7 +73,7 @@
                     />
                   </span>
                 </span>
-                <span class="rvo-text rvo-text--sm dossier-card__date">
+                <span class="invulhulp-text--sm dossier-card__date">
                   Laatst bewerkt: {{ formatDate(d.updatedAt ?? d.createdAt) }}
                 </span>
               </span>
@@ -180,7 +180,6 @@ function onCreateConfirmed(name: string) {
 
 .dossier-list__desc {
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--primitives-font-size-90);
   margin: 0;
 }
 

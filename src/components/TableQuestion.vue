@@ -2,9 +2,9 @@
   <div class="invulhulp-table-question">
     <!-- Optional grid, still closed: the toelichting below is the whole answer
          until the user asks for a table. -->
-    <p v-if="!gridOpen" class="rvo-text rvo-text--sm invulhulp-table-question__optional-hint">
+    <nldd-text color="inherit" size="sm" class="invulhulp-table-question__optional-hint" v-if="!gridOpen">
       Een tabel is hier optioneel. Beantwoord de vraag in de toelichting hieronder, of voeg een tabel toe.
-    </p>
+    </nldd-text>
     <nldd-button
       variant="neutral-transparent"
       class="invulhulp-table-question__toggle-btn"
@@ -36,15 +36,17 @@
           <tr v-for="(row, rowIndex) in table.rows" :key="rowIndex" class="rvo-table-row">
             <td v-for="(col, colIndex) in columns" :key="col.id" class="rvo-table-cell">
               <!-- Dropdown cell (upstream select/radio column) -->
-              <select
+              <!-- nldd-dropdown wraps a native <select>: the options stay
+                   ordinary markup and the component supplies the chrome. -->
+              <nldd-dropdown
                 v-if="col.type === 'select'"
-                class="rvo-select__input invulhulp-table-question__cell-input"
-                :value="row[colIndex] ?? ''"
-                :aria-label="`${col.label}, rij ${rowIndex + 1}`"
-                :title="col.hint"
+                class="invulhulp-table-question__cell-input"
+                size="sm"
+                :accessible-label="`${col.label}, rij ${rowIndex + 1}`"
                 :disabled="store.readOnly"
-                @change="onCellInput(rowIndex, colIndex, $event)"
+                @change="onCellValue(rowIndex, colIndex, $event)"
               >
+              <select :value="row[colIndex] ?? ''" :title="col.hint">
                 <option value="">–</option>
                 <option
                   v-if="row[colIndex] && !colOptions(col).includes(row[colIndex])"
@@ -52,34 +54,37 @@
                 >{{ row[colIndex] }}</option>
                 <option v-for="opt in colOptions(col)" :key="opt" :value="opt">{{ opt }}</option>
               </select>
+              </nldd-dropdown>
 
               <!-- Free-text cell with suggestions (upstream checkbox/multiselect column) -->
-              <template v-else-if="col.type === 'suggest'">
-                <input
-                  type="text"
-                  class="rvo-text-input invulhulp-table-question__cell-input"
-                  :value="row[colIndex] ?? ''"
-                  :list="`dl-${questionId}-${col.id}`"
-                  :aria-label="`${col.label}, rij ${rowIndex + 1}`"
-                  :placeholder="cellPlaceholder(col)"
-                  :disabled="store.readOnly"
-                  @input="onCellInput(rowIndex, colIndex, $event)"
-                />
-                <datalist :id="`dl-${questionId}-${col.id}`">
-                  <option v-for="opt in colOptions(col)" :key="opt" :value="opt" />
-                </datalist>
-              </template>
-
-              <!-- Plain text cell -->
-              <input
-                v-else
-                type="text"
-                class="rvo-text-input invulhulp-table-question__cell-input"
-                :value="row[colIndex] ?? ''"
-                :aria-label="`${col.label}, rij ${rowIndex + 1}`"
+              <!-- allow-custom keeps the old <datalist> behaviour: the options
+                   are suggestions, not a closed list. -->
+              <nldd-combo-box
+                v-else-if="col.type === 'suggest'"
+                class="invulhulp-table-question__cell-input"
+                size="sm"
+                allow-custom
+                :text="row[colIndex] ?? ''"
+                :accessible-label="`${col.label}, rij ${rowIndex + 1}`"
                 :placeholder="cellPlaceholder(col)"
                 :disabled="store.readOnly"
-                @input="onCellInput(rowIndex, colIndex, $event)"
+                @input="onCellValue(rowIndex, colIndex, $event)"
+              >
+                <nldd-menu>
+                  <nldd-menu-item v-for="opt in colOptions(col)" :key="opt" :text="opt" />
+                </nldd-menu>
+              </nldd-combo-box>
+
+              <!-- Plain text cell -->
+              <nldd-text-field
+                v-else
+                class="invulhulp-table-question__cell-input"
+                size="sm"
+                :value="row[colIndex] ?? ''"
+                :accessible-label="`${col.label}, rij ${rowIndex + 1}`"
+                :placeholder="cellPlaceholder(col)"
+                :disabled="store.readOnly"
+                @input="onCellValue(rowIndex, colIndex, $event)"
               />
             </td>
             <td class="rvo-table-cell invulhulp-table-question__actions-cell">
@@ -146,19 +151,15 @@
       />
     </div>
 
-    <div class="rvo-form-field invulhulp-table-question__notes">
-      <label :for="`${questionId}-notes`" class="rvo-form-field__label invulhulp-table-question__notes-label">
-        {{ notesLabel }}
-      </label>
-      <textarea
-        :id="`${questionId}-notes`"
-        class="rvo-textarea invulhulp-table-question__notes-input"
-        rows="3"
+    <nldd-form-field :label="notesLabel" class="invulhulp-table-question__notes">
+      <nldd-multi-line-text-field
+        class="invulhulp-table-question__notes-input"
+        :rows="3"
         :value="table.notes"
         :disabled="store.readOnly"
-        @input="onNotesInput($event)"
-      ></textarea>
-    </div>
+        @input="onNotesValue($event)"
+      />
+    </nldd-form-field>
   </div>
 </template>
 
@@ -185,7 +186,6 @@ const columns = computed<TableColumn[]>(() => props.question.columns ?? [])
 const minRows = computed(() => Math.max(props.question.minRows ?? 1, 0))
 const maxRows = computed(() => props.question.maxRows ?? 25)
 const notesLabel = computed(() => props.question.notesLabel ?? 'Toelichting')
-const questionId = computed(() => props.question.id)
 
 // Horizontal-scroll affordance: track whether the grid overflows its viewport
 // and where we are in the scroll, to drive the edge fades + "scroll voor meer"
@@ -317,13 +317,15 @@ function emitValue() {
   emit('update:modelValue', serializeTableAnswer(table))
 }
 
-function onCellInput(rowIndex: number, colIndex: number, event: Event) {
-  table.rows[rowIndex][colIndex] = (event.target as HTMLInputElement).value
+/** The NLDD input components report their value in the event detail; the
+ *  target is the custom element, not the inner <input>. */
+function onCellValue(rowIndex: number, colIndex: number, event: Event) {
+  table.rows[rowIndex][colIndex] = (event as CustomEvent<{ value: string }>).detail.value
   emitValue()
 }
 
-function onNotesInput(event: Event) {
-  table.notes = (event.target as HTMLTextAreaElement).value
+function onNotesValue(event: Event) {
+  table.notes = (event as CustomEvent<{ value: string }>).detail.value
   emitValue()
 }
 

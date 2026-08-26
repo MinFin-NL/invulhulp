@@ -2,12 +2,12 @@
   <section :id="id" class="entity-graph" aria-labelledby="entity-graph-heading">
     <div class="entity-graph__header">
       <div>
-        <h3 id="entity-graph-heading" class="rvo-heading rvo-heading--md entity-graph__title">
+        <nldd-title size="3"><h3 class="entity-graph__title" id="entity-graph-heading">
           Entiteitengrafiek
-        </h3>
-        <p class="rvo-text rvo-text--sm entity-graph__desc">
+        </h3></nldd-title>
+        <nldd-text color="inherit" size="sm" class="entity-graph__desc">
           Verbindingen tussen entiteiten en brondocumenten. Entiteiten die in meerdere documenten voorkomen zijn extra groot weergegeven.
-        </p>
+        </nldd-text>
       </div>
       <nldd-button
         variant="secondary"
@@ -35,9 +35,9 @@
       </label>
     </fieldset>
 
-    <p v-if="!hasAnyEntities" class="entity-graph__empty rvo-text rvo-text--sm">
+    <nldd-text color="inherit" size="sm" class="entity-graph__empty" v-if="!hasAnyEntities">
       Nog geen entiteiten beschikbaar — wacht tot indexering klaar is.
-    </p>
+    </nldd-text>
 
     <div
       v-show="hasAnyEntities"

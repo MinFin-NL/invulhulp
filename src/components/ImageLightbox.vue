@@ -21,13 +21,13 @@
         <img v-if="src" class="image-lightbox__image" :src="src" :alt="title" />
       </div>
 
-      <p v-if="src" class="rvo-text rvo-text--sm image-lightbox__footer">
+      <nldd-text color="inherit" size="sm" class="image-lightbox__footer" v-if="src">
         <!-- A diagram lifted from a PDF can be denser than 80vh allows; the raw
              image opens at its own resolution for the fine print. -->
         <nldd-link :href="src" target="_blank" rel="noopener">
           Open op ware grootte in een nieuw tabblad
         </nldd-link>
-      </p>
+      </nldd-text>
     </div>
   </dialog>
 </template>

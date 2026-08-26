@@ -17,13 +17,13 @@
     aria-labelledby="scan-tile-title"
   >
     <div class="scan-tile__body">
-      <p class="rvo-text rvo-text--sm rvo-text--bold scan-tile__kicker">
+      <nldd-text color="inherit" size="sm" weight="bold" class="scan-tile__kicker">
         <nldd-icon class="scan-tile__icon" name="magnifier" size="24" color="accent" />
         Toepassingsscan
-      </p>
-      <h2 id="scan-tile-title" class="rvo-heading rvo-heading--lg scan-tile__title">
+      </nldd-text>
+      <nldd-title size="2"><h2 class="scan-tile__title" id="scan-tile-title">
         {{ run ? 'Kenmerken van dit dossier' : 'Welke formulieren gelden hier eigenlijk?' }}
-      </h2>
+      </h2></nldd-title>
 
       <template v-if="run">
         <ul v-if="tags.length > 0" class="scan-tile__tags">
@@ -31,25 +31,25 @@
             <nldd-tag size="sm" :text="KENMERK_LABEL[k]" />
           </li>
         </ul>
-        <p v-else class="rvo-text rvo-text--sm rvo-text--subtle scan-tile__line">
+        <nldd-text line-height="snug" size="sm" color="secondary" class="scan-tile__line" v-else>
           De scan stelde geen van de kenmerken vast.
-        </p>
-        <p class="rvo-text rvo-text--sm rvo-text--subtle scan-tile__line">
+        </nldd-text>
+        <nldd-text line-height="snug" size="sm" color="secondary" class="scan-tile__line">
           {{ counts.verplicht }} van toepassing · {{ counts.mogelijk }} mogelijk relevant ·
           {{ counts.nvt }} niet van toepassing ·
           gescand op {{ completedOn }}<template v-if="run.completedBy"> door {{ run.completedBy }}</template>
-        </p>
-        <p v-if="unknowns.length > 0" class="rvo-text rvo-text--sm rvo-text--subtle scan-tile__line">
+        </nldd-text>
+        <nldd-text line-height="snug" size="sm" color="secondary" class="scan-tile__line" v-if="unknowns.length > 0">
           Nog onbekend: {{ unknowns.map((k) => KENMERK_LABEL[k]).join(', ') }}.
-        </p>
+        </nldd-text>
       </template>
 
       <!-- Question count from the scan itself: a hardcoded "acht vragen" drifts
            the moment a question is added or dropped. -->
-      <p v-else class="rvo-text rvo-text--sm scan-tile__line scan-tile__intro">
+      <nldd-text line-height="snug" size="sm" class="scan-tile__line scan-tile__intro" v-else>
         {{ SCAN_QUESTIONS.length }} vragen over wat dit project doet en oplevert. Daarna staat per
         formulier of het geldt — en zo niet, waarom niet.
-      </p>
+      </nldd-text>
     </div>
 
     <div class="scan-tile__actions">
@@ -133,7 +133,6 @@ const completedOn = computed(() =>
 
 .scan-tile__line {
   margin: 0;
-  line-height: var(--primitives-line-height-snug);
 }
 
 .scan-tile__intro {

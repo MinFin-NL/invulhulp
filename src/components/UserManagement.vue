@@ -3,10 +3,10 @@
     <div class="rvo-layout-column rvo-layout-gap--lg">
       <div>
         <h1 class="utrecht-heading-1 user-mgmt__title">Gebruikersbeheer</h1>
-        <p class="rvo-text user-mgmt__intro">
+        <nldd-text color="inherit" class="user-mgmt__intro">
           Gebruikers worden aangemaakt in Keycloak en loggen in via SSO. Een nieuwe gebruiker
           krijgt een tijdelijk wachtwoord en moet dat bij de eerste keer inloggen wijzigen.
-        </p>
+        </nldd-text>
       </div>
 
       <nldd-banner
@@ -107,7 +107,7 @@
       <!-- Bestaande gebruikers -->
       <section class="user-mgmt__panel">
         <h2 class="utrecht-heading-2 user-mgmt__panel-title">Gebruikers ({{ users.length }})</h2>
-        <p v-if="loading" class="rvo-text">Gebruikers laden…</p>
+        <nldd-text v-if="loading">Gebruikers laden…</nldd-text>
         <div v-else class="user-mgmt__table-wrap">
           <table class="rvo-table user-mgmt__table">
             <thead class="rvo-table-head">
@@ -208,7 +208,7 @@
     @confirm="deleteUser"
   >
     <template #danger>
-      <p v-if="impactLoading" class="rvo-text">Bezig met bepalen welke dossiers meegaan…</p>
+      <nldd-text v-if="impactLoading">Bezig met bepalen welke dossiers meegaan…</nldd-text>
       <ul v-else class="rvo-item-list">
         <li class="rvo-item-list__item">Het account zelf, inclusief inloggegevens en rollen.</li>
         <li class="rvo-item-list__item">

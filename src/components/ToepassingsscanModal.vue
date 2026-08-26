@@ -11,10 +11,10 @@
         <div class="scan__brand">
           <nldd-icon class="scan__brand-icon" name="magnifier" size="48" />
           <div>
-            <h2 id="scan-title" class="rvo-heading rvo-heading--xl scan__title">Toepassingsscan</h2>
-            <p class="rvo-text rvo-text--sm scan__subtitle">
+            <nldd-title size="2"><h2 class="scan__title" id="scan-title">Toepassingsscan</h2></nldd-title>
+            <nldd-text line-height="snug" color="inherit" size="sm" class="scan__subtitle">
               Wat doet en levert dit project? Daarmee bepalen we welke formulieren hier gelden.
-            </p>
+            </nldd-text>
           </div>
         </div>
         <!-- Plain button, not rvo-button: on the dark header an rvo-button
@@ -79,18 +79,18 @@
         <!-- The consequence list, live: answering a question moves a form in it
              immediately, which is the whole argument for asking. -->
         <section class="scan__result" aria-labelledby="scan-result-title">
-          <h3 id="scan-result-title" class="rvo-heading rvo-heading--md scan__result-title">
+          <nldd-title size="3"><h3 class="scan__result-title" id="scan-result-title">
             Wat dit betekent voor de formulieren
-          </h3>
+          </h3></nldd-title>
 
           <!-- The list updates on every answer. Announcing all ten rows each
                time would drown a screenreader, so the live region carries the
                tally and the list itself stays quiet. -->
           <p class="invulhulp-visually-hidden" role="status">{{ tally }}</p>
 
-          <p v-if="consequences.length === 0" class="rvo-text rvo-text--sm rvo-text--subtle">
+          <nldd-text size="sm" color="secondary" v-if="consequences.length === 0">
             Beantwoord de vragen hierboven — hier verschijnt meteen per formulier of het geldt.
-          </p>
+          </nldd-text>
           <ul v-else class="rvo-item-list scan__consequences">
             <li v-for="row in consequences" :key="row.id" class="rvo-item-list__item scan__consequence">
               <span class="scan__consequence-title">{{ row.title }}</span>
@@ -99,25 +99,25 @@
                 :color="tagColor(row.status)"
                 :text="applicabilityLabel(row.status)"
               />
-              <span class="rvo-text rvo-text--sm rvo-text--subtle scan__consequence-reason">{{ row.reason }}</span>
+              <span class="invulhulp-text--sm invulhulp-text--subtle scan__consequence-reason">{{ row.reason }}</span>
             </li>
           </ul>
 
-                    <nldd-banner
-                      variant="accent"
-                      class="scan__alert"
-                      v-if="!hasBeslishulp && kenmerken.algoritme_of_ai !== false"
-                    >
-              <div>
+          <nldd-banner
+            variant="accent"
+            class="scan__alert"
+            v-if="!hasBeslishulp && kenmerken.algoritme_of_ai !== false"
+          >
+            <div class="scan__alert-body">
                 Of de AI-verordening geldt, bepaalt de <strong>Beslishulp AI-verordening</strong> —
                 op de dossierpagina bij de EU AI Act-kaart.
               </div>
           </nldd-banner>
 
-          <p class="rvo-text rvo-text--sm rvo-text--subtle scan__note">
+          <nldd-text size="sm" color="secondary" class="scan__note">
             Advies, geen juridisch oordeel: leg een "niet van toepassing" voor aan de FG, privacy
             officer of CISO.
-          </p>
+          </nldd-text>
         </section>
       </div>
 
@@ -137,7 +137,7 @@
             @click="restart"
           />
         </div>
-        <p v-if="savedNotice" class="rvo-text rvo-text--sm scan__saved" role="status">{{ savedNotice }}</p>
+        <nldd-text color="inherit" size="sm" class="scan__saved" v-if="savedNotice" role="status">{{ savedNotice }}</nldd-text>
       </footer>
     </div>
   </dialog>
@@ -346,7 +346,6 @@ defineExpose({ open })
 .scan__subtitle {
   margin: var(--primitives-space-8) 0 0;
   max-inline-size: 56ch;
-  line-height: var(--primitives-line-height-snug);
   /* Solid tint rather than an opacity, so the contrast ratio is knowable. */
   color: var(--semantics-categories-accent-tinted-background-color);
 }
@@ -465,7 +464,7 @@ defineExpose({ open })
 
 /* Lopende tekst in een gekleurd vlak heeft lucht nodig: padding-md in plaats
    van -sm op het vlak zelf, en een ruimere regelafstand erbinnen. */
-.scan__alert .rvo-alert__container {
+.scan__alert-body {
   line-height: var(--primitives-line-height-snug);
   max-inline-size: 72ch;
 }

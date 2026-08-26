@@ -75,9 +75,9 @@
         {{ uploading ? 'Bezig met uploaden…' : 'Afbeelding toevoegen' }}
         </span>
       </nldd-button>
-      <span class="rvo-text rvo-text--sm question-attachments__hint">of plak een afbeelding (Ctrl+V)</span>
+      <span class="invulhulp-text--sm question-attachments__hint">of plak een afbeelding (Ctrl+V)</span>
     </div>
-    <p v-if="error" class="rvo-text rvo-text--sm question-attachments__error" role="alert">{{ error }}</p>
+    <nldd-text color="inherit" size="sm" class="question-attachments__error" v-if="error" role="alert">{{ error }}</nldd-text>
 
     <ImageLightbox ref="lightbox" />
   </div>

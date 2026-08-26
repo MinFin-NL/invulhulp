@@ -41,7 +41,7 @@
 
       <div class="beslishulp__body">
 
-        <p v-if="loading" class="rvo-text beslishulp__status">Beslishulp laden…</p>
+        <nldd-text color="inherit" class="beslishulp__status" v-if="loading">Beslishulp laden…</nldd-text>
 
         <nldd-banner
           variant="critical"
@@ -78,7 +78,7 @@
           </ul>
 
           <details v-if="relevantDefinitions.length > 0" class="rvo-expandable-content rvo-expandable-content--subtle beslishulp__details">
-            <summary class="rvo-expandable-content__summary rvo-text rvo-text--sm">
+            <summary class="rvo-expandable-content__summary invulhulp-text--sm">
               Begrippen in deze vraag ({{ relevantDefinitions.length }})
             </summary>
             <div class="rvo-expandable-content__details">
@@ -92,11 +92,11 @@
           </details>
 
           <details v-if="position.question.sources.length > 0" class="rvo-expandable-content rvo-expandable-content--subtle beslishulp__details">
-            <summary class="rvo-expandable-content__summary rvo-text rvo-text--sm">
+            <summary class="rvo-expandable-content__summary invulhulp-text--sm">
               Bronnen bij deze vraag ({{ position.question.sources.length }})
             </summary>
             <div class="rvo-expandable-content__details">
-              <ul class="rvo-ul beslishulp__sources">
+              <ul class="beslishulp__sources">
                 <li v-for="src in position.question.sources" :key="src.url">
                   <nldd-link :href="src.url" target="_blank" rel="noopener noreferrer">{{ src.source }}</nldd-link>
                 </li>
@@ -107,15 +107,14 @@
 
         <!-- ---------------- Conclusion ---------------- -->
         <template v-else-if="position?.kind === 'conclusion'">
-                    <nldd-banner
-                      class="beslishulp__verdict"
-                      :variant="alertVariant"
-                    >
+          <nldd-banner class="beslishulp__verdict" :variant="alertVariant">
+            <div class="beslishulp__verdict-row">
               <strong>{{ verdictLine }}</strong>
               <span v-if="savedNotice" class="beslishulp__saved">{{ savedNotice }}</span>
+            </div>
           </nldd-banner>
 
-          <p class="rvo-text beslishulp__conclusion">{{ position.conclusion.conclusion }}</p>
+          <nldd-text class="beslishulp__conclusion">{{ position.conclusion.conclusion }}</nldd-text>
 
           <section v-if="position.conclusion.obligation" class="beslishulp__obligation-block">
             <h4 class="beslishulp__section-title">Wat betekent dit voor jou?</h4>
@@ -131,7 +130,7 @@
           </section>
 
           <details class="rvo-expandable-content rvo-expandable-content--subtle beslishulp__details">
-            <summary class="rvo-expandable-content__summary rvo-text rvo-text--sm">
+            <summary class="rvo-expandable-content__summary invulhulp-text--sm">
               Jouw antwoorden ({{ steps.length }})
             </summary>
             <div class="rvo-expandable-content__details">
@@ -148,11 +147,11 @@
           </details>
 
           <details v-if="position.conclusion.sources.length > 0" class="rvo-expandable-content rvo-expandable-content--subtle beslishulp__details">
-            <summary class="rvo-expandable-content__summary rvo-text rvo-text--sm">
+            <summary class="rvo-expandable-content__summary invulhulp-text--sm">
               Bronnen bij deze conclusie ({{ position.conclusion.sources.length }})
             </summary>
             <div class="rvo-expandable-content__details">
-              <ul class="rvo-ul beslishulp__sources">
+              <ul class="beslishulp__sources">
                 <li v-for="src in position.conclusion.sources" :key="src.url">
                   <nldd-link :href="src.url" target="_blank" rel="noopener noreferrer">{{ src.source }}</nldd-link>
                 </li>
@@ -638,7 +637,7 @@ defineExpose({ open })
 }
 
 /* --- Conclusion --- */
-.beslishulp__verdict .rvo-alert__container {
+.beslishulp__verdict-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
