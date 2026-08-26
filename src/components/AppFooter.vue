@@ -10,10 +10,9 @@
             >
           <p class="rvo-text rvo-text--sm invulhulp-footer__text">
             Dit is een bètaversie van dit hulpmiddel. Vragen of feedback?
-            <a
-              class="rvo-link"
-              href="mailto:innovatiemanagamentfinancien@minfin.nl"
-            >innovatiemanagamentfinancien@minfin.nl</a>
+            <nldd-link
+              href="mailto:innovatiemanagamentfinancien@minfin.nl">
+            innovatiemanagamentfinancien@minfin.nl</nldd-link>
           </p>
       </nldd-banner>
     </div>

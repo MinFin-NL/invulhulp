@@ -83,13 +83,13 @@
             >
               <svg v-if="store.isSectionCompleted(completionId(step))" class="invulhulp-nav__check" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="currentColor" d="m41.262 6.164c-1.133-.836-2.707-.676-3.641.367l-15.879 17.77-9.547-8.27a2.7 2.7 0 0 0 -3.516-.027 2.71 2.71 0 0 0 -.586 3.469l11.563 19.301a2.72 2.72 0 0 0 2.316 1.316c.957 0 1.836-.492 2.328-1.301l17.66-29.043c.727-1.195.426-2.75-.699-3.582zm0 0"/></svg>
               {{ step.navLabel ?? step.viewId }}
-              <span
+              <nldd-tag
                 v-if="step.viewId === 'risk' && store.riskLevel"
-                class="rvo-tag invulhulp-nav__tag"
-                :class="riskTagClass(store.riskLevel)"
-              >
-                {{ riskLabels[store.riskLevel!] }}
-              </span>
+                class="invulhulp-nav__tag"
+                size="sm"
+                :color="riskTagColor(store.riskLevel)"
+                :text="riskLabels[store.riskLevel!]"
+              />
             </button>
           </li>
         </template>
@@ -164,12 +164,12 @@ const riskLabels: Record<string, string> = {
   minimaal: 'Minimaal',
 }
 
-function riskTagClass(level: string): string {
+function riskTagColor(level: string): string {
   switch (level) {
-    case 'onaanvaardbaar': return 'rvo-tag--error'
-    case 'hoog': return 'rvo-tag--warning'
-    case 'beperkt': return 'rvo-tag--info'
-    default: return 'rvo-tag--success'
+    case 'onaanvaardbaar': return 'critical'
+    case 'hoog': return 'warning'
+    case 'beperkt': return 'accent'
+    default: return 'success'
   }
 }
 

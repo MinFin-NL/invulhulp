@@ -128,6 +128,48 @@ body {
   border: 0;
 }
 
+/* A card frame in the light DOM. nldd-card is the real component and is used
+   where a card is just a card, but several cards here paint their own border
+   (the AI-Modus gradient ring on a form card, the fused beslishulp pair), and
+   a shadow root cannot be reached by that CSS. Those use this instead, built
+   on the same card tokens so the two kinds sit side by side without drifting. */
+.invulhulp-card {
+  background: var(--components-card-background-color, var(--semantics-surfaces-base-background-color));
+  border: var(--semantics-surfaces-border-width, 1px) solid var(--invulhulp-color-border);
+  border-radius: var(--components-card-corner-radius, var(--primitives-corner-radius-md));
+  padding: var(--primitives-space-16);
+  box-sizing: border-box;
+}
+
+.invulhulp-card--padding-sm { padding: var(--primitives-space-12); }
+.invulhulp-card--padding-xl { padding: var(--primitives-space-32); }
+
+/* A button that has to read as a link (a "terug"-crumb, an inline "verwijder"
+   action inside a row). nldd-link renders an <a>, so a real <button> keeps its
+   own element and borrows the link tokens. */
+.invulhulp-linkbutton {
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: var(--semantics-links-color);
+  text-decoration: underline;
+  cursor: var(--semantics-controls-link-cursor, pointer);
+}
+
+.invulhulp-linkbutton:hover {
+  color: var(--semantics-links-is-hovered-color);
+}
+
+.invulhulp-linkbutton:active {
+  color: var(--semantics-links-is-active-color);
+}
+
+.invulhulp-linkbutton:focus-visible {
+  outline: var(--semantics-focus-ring-outline);
+  outline-offset: var(--semantics-focus-ring-outline-offset);
+}
+
 .invulhulp-divider {
   border: 0;
   border-block-end: var(--semantics-dividers-thickness, 1px) solid

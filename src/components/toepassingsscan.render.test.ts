@@ -53,26 +53,29 @@ describe('toepassingsscan components render', () => {
  * NL Design System guard rail. The scan is itself a form, so it must use the
  * RVO form components and no bespoke inputs — see the NLDS rule in CLAUDE.md.
  */
-describe('NL Design System conformance', () => {
-  it('renders the tile as an RVO card with RVO tags', async () => {
+describe('NLDD design system conformance', () => {
+  it('renders the tile as a card with NLDD tags', async () => {
     const answers = { pg: ['ja'] }
     const html = await render(ToepassingsscanTile, {
       run: { scanVersion: SCAN_VERSION, answers, kenmerken: deriveKenmerken(answers), completedAt: Date.now() },
       kenmerken: deriveKenmerken(answers),
       counts: { verplicht: 1, mogelijk: 0, nvt: 0 },
     })
-    expect(html).toContain('rvo-card')
-    expect(html).toContain('rvo-tag rvo-tag--pill')
-    expect(html).toContain('rvo-button')
+    expect(html).toContain('invulhulp-card')
+    expect(html).toContain('<nldd-tag')
+    expect(html).toContain('<nldd-button')
   })
 
-  it('asks the questions with RVO fieldset + radio markup', async () => {
+  it('asks the questions with NLDD radio and checkbox fields', async () => {
     const html = await render(ToepassingsscanModal)
-    expect(html).toContain('rvo-form-fieldset')
-    expect(html).toContain('rvo-form-fieldset__legend')
-    expect(html).toContain('rvo-radio-button__group')
-    // The radio input class RVO actually styles — not rvo-radio-button__input.
-    expect(html).toContain('utrecht-radio-button utrecht-radio-button--html-input')
+    // Single-choice questions are a radio group; the group owns the a11y
+    // semantics, so it points at the question text instead of a <legend>.
+    expect(html).toContain('<nldd-radio-button-group')
+    expect(html).toContain('<nldd-radio-button-field')
+    expect(html).toContain('accessible-labeled-by')
+    // Multi-choice keeps a real fieldset: NLDD ships no checkbox *group*.
+    expect(html).toContain('<fieldset')
+    expect(html).toContain('<nldd-checkbox-field')
   })
 
   it('uses no colours of its own', async () => {

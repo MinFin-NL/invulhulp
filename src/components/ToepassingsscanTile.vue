@@ -13,7 +13,7 @@
        the icon rides along in the kicker line instead of in a column of its
        own. -->
   <section
-    class="rvo-card rvo-card--outline rvo-card--padding--xl scan-tile"
+    class="invulhulp-card invulhulp-card--padding-xl scan-tile"
     aria-labelledby="scan-tile-title"
   >
     <div class="scan-tile__body">
@@ -28,7 +28,7 @@
       <template v-if="run">
         <ul v-if="tags.length > 0" class="scan-tile__tags">
           <li v-for="k in tags" :key="k">
-            <span class="rvo-tag rvo-tag--pill">{{ KENMERK_LABEL[k] }}</span>
+            <nldd-tag size="sm" :text="KENMERK_LABEL[k]" />
           </li>
         </ul>
         <p v-else class="rvo-text rvo-text--sm rvo-text--subtle scan-tile__line">

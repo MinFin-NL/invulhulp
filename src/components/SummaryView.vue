@@ -98,7 +98,7 @@
           <article
             v-for="question in subsection.questions"
             :key="question.id"
-            class="rvo-card rvo-card--outline rvo-card--padding--sm summary-view__card"
+            class="invulhulp-card invulhulp-card--padding-sm summary-view__card"
             :class="`summary-view__card--${question.importance}`"
           >
             <div class="summary-view__card-body">

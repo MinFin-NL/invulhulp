@@ -98,7 +98,7 @@
             <div class="rvo-expandable-content__details">
               <ul class="rvo-ul beslishulp__sources">
                 <li v-for="src in position.question.sources" :key="src.url">
-                  <a class="rvo-link" :href="src.url" target="_blank" rel="noopener noreferrer">{{ src.source }}</a>
+                  <nldd-link :href="src.url" target="_blank" rel="noopener noreferrer">{{ src.source }}</nldd-link>
                 </li>
               </ul>
             </div>
@@ -139,7 +139,7 @@
                 <li v-for="(step, index) in steps" :key="index">
                   <span class="beslishulp__trail-q">{{ questionTextFor(step.questionId) }}</span>
                   <span class="beslishulp__trail-a">{{ step.answerLabel }}</span>
-                  <button type="button" class="rvo-link beslishulp__trail-back" @click="rewindTo(index)">
+                  <button type="button" class="invulhulp-linkbutton beslishulp__trail-back" @click="rewindTo(index)">
                     Terug naar deze vraag
                   </button>
                 </li>
@@ -154,7 +154,7 @@
             <div class="rvo-expandable-content__details">
               <ul class="rvo-ul beslishulp__sources">
                 <li v-for="src in position.conclusion.sources" :key="src.url">
-                  <a class="rvo-link" :href="src.url" target="_blank" rel="noopener noreferrer">{{ src.source }}</a>
+                  <nldd-link :href="src.url" target="_blank" rel="noopener noreferrer">{{ src.source }}</nldd-link>
                 </li>
               </ul>
             </div>
@@ -173,7 +173,7 @@
               <strong>Geen vervolgvraag gevonden.</strong><br />
               Deze combinatie van antwoorden leidt in de beslisboom niet naar een vervolgvraag of conclusie.
               Ga een stap terug en kies een ander antwoord, of raadpleeg
-              <a class="rvo-link" href="mailto:ai-verordening@minbzk.nl">ai-verordening@minbzk.nl</a>.
+              <nldd-link href="mailto:ai-verordening@minbzk.nl">ai-verordening@minbzk.nl</nldd-link>.
             </div>
         </nldd-banner>
       </div>
@@ -205,9 +205,9 @@
         </div>
         <p class="beslishulp__credit">
           Beslisboom:
-          <a class="rvo-link" :href="tree?.source.repository" target="_blank" rel="noopener noreferrer">
+          <nldd-link :href="tree?.source.repository" target="_blank" rel="noopener noreferrer">
             Beslishulp AI-verordening
-          </a>
+          </nldd-link>
           — AI Validatieteam, MinBZK (EUPL-1.2). Geen juridisch advies.
         </p>
       </footer>

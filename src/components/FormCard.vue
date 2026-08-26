@@ -9,7 +9,7 @@
          lijken. -->
     <article
       v-if="form.placeholder"
-      class="rvo-card rvo-card--outline rvo-card--padding--md form-card form-card--placeholder"
+      class="invulhulp-card form-card form-card--placeholder"
     >
       <div class="form-card__body">
         <h3 class="rvo-heading rvo-heading--md form-card__title">{{ form.title }}</h3>
@@ -21,12 +21,12 @@
         <p class="rvo-text rvo-text--sm form-card__desc">{{ form.shortDescription }}</p>
       </div>
       <div class="form-card__actions">
-        <span
-          class="rvo-tag rvo-tag--pill form-card__status"
-          :class="{ 'rvo-tag--warning': form.placeholder === 'onzeker' }"
-        >
-          {{ PLACEHOLDER_LABELS[form.placeholder] }}
-        </span>
+        <nldd-tag
+          class="form-card__status"
+          size="sm"
+          :color="form.placeholder === 'onzeker' ? 'warning' : 'neutral'"
+          :text="PLACEHOLDER_LABELS[form.placeholder]"
+        />
         <nldd-button
           variant="secondary"
           size="sm"
@@ -39,7 +39,7 @@
 
     <article
       v-else
-      class="rvo-card rvo-card--outline rvo-card--padding--md form-card"
+      class="invulhulp-card form-card"
       :class="{
         'form-card--ai-mode': aiActive,
         'form-card--paired': paired,
@@ -56,36 +56,32 @@
       </div>
       <div class="form-card__actions">
         <!-- The beslishulp verdict, echoed on the card it belongs to. -->
-        <span
+        <nldd-tag
           v-if="beslishulpVerdict"
-          class="rvo-tag rvo-tag--pill form-card__status form-card__verdict"
-          :class="`form-card__verdict--${beslishulpVerdict.tone}`"
-        >
-          {{ beslishulpVerdict.label }}
-        </span>
+          class="form-card__status form-card__verdict"
+          size="sm"
+          :color="verdictColor(beslishulpVerdict.tone)"
+          :text="beslishulpVerdict.label"
+        />
         <!-- Why this form is here at all, per the toepassingsscan. The reason is
              hidden text rather than only a `title`, which a keyboard or screen
              reader never reaches. -->
-        <span
+        <nldd-tag
           v-if="verdict.status === 'verplicht' || verdict.status === 'mogelijk'"
-          class="rvo-tag rvo-tag--pill form-card__status"
-          :class="{ 'rvo-tag--warning': verdict.status === 'mogelijk' }"
-          :title="verdict.reason"
+          class="form-card__status"
+          size="sm"
+          :color="verdict.status === 'mogelijk' ? 'warning' : 'neutral'"
         >
           {{ applicabilityLabel(verdict.status) }}
           <span class="invulhulp-visually-hidden">: {{ verdict.reason }}</span>
-        </span>
-        <span
+        </nldd-tag>
+        <nldd-tag
           v-if="status"
-          class="rvo-tag rvo-tag--pill form-card__status"
-          :class="{
-            'rvo-tag--info': status.status === 'bezig',
-            'rvo-tag--warning': status.status === 'onvolledig',
-            'rvo-tag--success': status.status === 'afgerond',
-          }"
-        >
-          {{ statusLabel(status) }}
-        </span>
+          class="form-card__status"
+          size="sm"
+          :color="statusColor(status.status)"
+          :text="statusLabel(status)"
+        />
         <!-- Secundair, bewust. Een fasetijdlijn met twaalf primaire knoppen
              wijst nergens heen; de ene primaire actie van de dossierpagina
              staat bovenaan in de "volgende stap"-band. -->
@@ -188,6 +184,26 @@ function domainLabel(domain: string): string {
   return DOMAIN_LABELS[domain] ?? domain
 }
 
+/** Beslishulp tone / voortgangsstatus -> nldd-tag kleurnaam. Deze kaart
+ *  introduceert geen eigen kleuren: alles komt uit de semantische set. */
+function verdictColor(tone: string): string {
+  switch (tone) {
+    case 'success': return 'success'
+    case 'warning': return 'warning'
+    case 'error': return 'critical'
+    default: return 'accent'
+  }
+}
+
+function statusColor(status: string): string {
+  switch (status) {
+    case 'bezig': return 'accent'
+    case 'onvolledig': return 'warning'
+    case 'afgerond': return 'success'
+    default: return 'neutral'
+  }
+}
+
 function statusLabel(p: FormProgress): string {
   if (p.status === 'afgerond') return 'Afgerond'
   // Doorgeklikt maar niet ingevuld: zeg hoeveel verplichte vragen nog open
@@ -260,14 +276,6 @@ const openLabel = computed(() => {
   cursor: not-allowed;
 }
 
-.form-card__verdict {
-  border: 1px solid transparent;
-}
-
-.form-card__verdict--success { background: #e6f6ec; color: #1d6b3a; border-color: #b7e4c7; }
-.form-card__verdict--info    { background: var(--semantics-surfaces-tinted-background-color); color: var(--semantics-content-accent-color); border-color: var(--semantics-dividers-color); }
-.form-card__verdict--warning { background: #fdf3e0; color: #8a5a00; border-color: #f0d49b; }
-.form-card__verdict--error   { background: #fdecea; color: #8f2436; border-color: #f5c2bd; }
 
 /* AI Mode active: animated gradient border + pulsing glow */
 .form-card--ai-mode {
@@ -347,10 +355,6 @@ const openLabel = computed(() => {
   flex-direction: column;
   align-items: flex-start;
   gap: var(--primitives-space-8);
-}
-
-.form-card__status {
-  font-size: var(--primitives-font-size-70);
 }
 
 .form-card__btn {

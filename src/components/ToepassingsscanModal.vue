@@ -32,50 +32,45 @@
              QuestionItem renders a form question. -->
         <ol class="scan__questions">
           <li v-for="question in SCAN_QUESTIONS" :key="question.id">
-            <fieldset class="rvo-form-fieldset scan__fieldset">
-              <legend class="rvo-form-fieldset__legend scan__legend">
+            <div v-if="question.type === 'single'" class="scan__fieldset">
+              <p :id="`${question.id}-label`" class="scan__legend">
                 <span class="scan__question">{{ question.vraag }}</span>
-              </legend>
-              <p v-if="question.toelichting" class="rvo-text rvo-text--sm scan__explanation">
+              </p>
+              <p v-if="question.toelichting" class="scan__explanation">
                 {{ question.toelichting }}
               </p>
+              <nldd-radio-button-group
+                :name="question.id"
+                :accessible-labeled-by="`${question.id}-label`"
+                @change="chooseSingle(question.id, $event.detail.value)"
+              >
+                <nldd-radio-button-field
+                  v-for="option in question.opties"
+                  :key="option.id"
+                  :label="optionLabel(option)"
+                  :value="option.id"
+                  :checked="isChosen(question.id, option.id)"
+                />
+              </nldd-radio-button-group>
+            </div>
 
-              <div v-if="question.type === 'single'" class="rvo-radio-button__group">
-                <label v-for="option in question.opties" :key="option.id" class="rvo-radio-button">
-                  <input
-                    type="radio"
-                    class="utrecht-radio-button utrecht-radio-button--html-input"
-                    :name="question.id"
-                    :value="option.id"
-                    :checked="isChosen(question.id, option.id)"
-                    @change="chooseSingle(question.id, option.id)"
-                  />
-                  <span class="rvo-radio-button__label">
-                    {{ option.label }}
-                    <span v-if="option.hint" class="rvo-text rvo-text--sm rvo-text--subtle scan__hint">
-                      {{ option.hint }}
-                    </span>
-                  </span>
-                </label>
-              </div>
-
-              <div v-else class="rvo-checkbox__group">
-                <label v-for="option in question.opties" :key="option.id" class="rvo-checkbox">
-                  <input
-                    type="checkbox"
-                    class="rvo-checkbox__input"
-                    :name="question.id"
-                    :value="option.id"
-                    :checked="isChosen(question.id, option.id)"
-                    @change="toggleMulti(question.id, option.id)"
-                  />
-                  <span class="rvo-checkbox__label">
-                    {{ option.label }}
-                    <span v-if="option.hint" class="rvo-text rvo-text--sm rvo-text--subtle scan__hint">
-                      {{ option.hint }}
-                    </span>
-                  </span>
-                </label>
+            <fieldset v-else class="scan__fieldset">
+              <legend class="scan__legend">
+                <span class="scan__question">{{ question.vraag }}</span>
+              </legend>
+              <p v-if="question.toelichting" class="scan__explanation">
+                {{ question.toelichting }}
+              </p>
+              <div class="scan__options">
+                <nldd-checkbox-field
+                  v-for="option in question.opties"
+                  :key="option.id"
+                  :label="optionLabel(option)"
+                  :name="question.id"
+                  :value="option.id"
+                  :checked="isChosen(question.id, option.id)"
+                  @change="toggleMulti(question.id, option.id)"
+                />
               </div>
             </fieldset>
           </li>
@@ -99,9 +94,11 @@
           <ul v-else class="rvo-item-list scan__consequences">
             <li v-for="row in consequences" :key="row.id" class="rvo-item-list__item scan__consequence">
               <span class="scan__consequence-title">{{ row.title }}</span>
-              <span class="rvo-tag rvo-tag--pill" :class="tagModifier(row.status)">
-                {{ applicabilityLabel(row.status) }}
-              </span>
+              <nldd-tag
+                size="sm"
+                :color="tagColor(row.status)"
+                :text="applicabilityLabel(row.status)"
+              />
               <span class="rvo-text rvo-text--sm rvo-text--subtle scan__consequence-reason">{{ row.reason }}</span>
             </li>
           </ul>
@@ -198,16 +195,25 @@ const tally = computed(() => {
   return `${count('verplicht')} van toepassing, ${count('mogelijk')} mogelijk relevant, ${count('nvt')} niet van toepassing.`
 })
 
-/** Stock rvo-tag modifiers, so the scan introduces no colours of its own.
+/** Stock nldd-tag colours, so the scan introduces none of its own.
  *  "Van toepassing" stays the neutral default — it is the ordinary case; the
- *  two states worth noticing get the warning and subtle treatments. */
-function tagModifier(status: ApplicabilityStatus): string {
-  if (status === 'mogelijk') return 'rvo-tag--warning'
-  if (status === 'nvt') return 'scan__tag--nvt'
-  return ''
+ *  one state worth noticing gets the warning treatment, and "niet van
+ *  toepassing" recedes into the secondary channel. */
+function tagColor(status: ApplicabilityStatus): string {
+  if (status === 'mogelijk') return 'warning'
+  if (status === 'nvt') return 'neutral'
+  return 'accent'
 }
 
 // ---- Answering ------------------------------------------------------------
+/** nldd-radio-button-field en -checkbox-field nemen hun label als platte
+ *  tekst — er is geen slot voor een tweede regel. De hint schuift daarom in
+ *  het label zelf, zodat hij zichtbaar blijft én in de toegankelijke naam
+ *  staat, zoals in de oude <label>-opmaak. */
+function optionLabel(option: { label: string; hint?: string }): string {
+  return option.hint ? `${option.label} — ${option.hint}` : option.label
+}
+
 function isChosen(questionId: string, optionId: string): boolean {
   return (answers.value[questionId] ?? []).includes(optionId)
 }
@@ -362,11 +368,16 @@ defineExpose({ open })
   overflow-y: auto;
 }
 
-/* Grijze vlak van .rvo-form-fieldset eraf, net als in QuestionItem.vue — dat
-   vlak kan een vraag niet netjes omsluiten: een native <legend> valt buiten de
-   padding-box (Chrome legt de bovenrand van de fieldset op halve legend-hoogte),
-   dus de kicker staat erboven en de vraag klemt tegen de bovenrand. De vraag
-   staat hier op het witte corpus, met de ruimte van .scan__body eromheen. */
+/* De vraag staat op het witte corpus, met de ruimte van .scan__body eromheen —
+   geen eigen vlak of rand. Bij het meerkeuzetype is dit een echte <fieldset>
+   (de groepssemantiek moet ergens vandaan komen); bij het enkelkeuzetype doet
+   nldd-radio-button-group dat zelf en is dit een gewone <div>. */
+.scan__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--semantics-forms-gap-tight, var(--primitives-space-8));
+}
+
 .scan__fieldset {
   background: transparent;
   border: 0;

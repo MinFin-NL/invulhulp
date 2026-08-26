@@ -24,9 +24,9 @@
       <p v-if="src" class="rvo-text rvo-text--sm image-lightbox__footer">
         <!-- A diagram lifted from a PDF can be denser than 80vh allows; the raw
              image opens at its own resolution for the fine print. -->
-        <a class="rvo-link" :href="src" target="_blank" rel="noopener">
+        <nldd-link :href="src" target="_blank" rel="noopener">
           Open op ware grootte in een nieuw tabblad
-        </a>
+        </nldd-link>
       </p>
     </div>
   </dialog>

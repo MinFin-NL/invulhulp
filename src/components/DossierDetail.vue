@@ -6,7 +6,7 @@
       <section class="dossier-header" aria-labelledby="dossier-title">
         <button
           type="button"
-          class="rvo-link dossier-header__back"
+          class="invulhulp-linkbutton dossier-header__back"
           @click="store.goToDossierList()"
         >
           ‹ Alle dossiers
@@ -128,7 +128,7 @@
 
         <button
           type="button"
-          class="rvo-link first-run__skip"
+          class="invulhulp-linkbutton first-run__skip"
           @click="showFullDossier = true"
         >
           Ik heb geen documenten — laat me de formulieren zelf invullen
@@ -208,9 +208,9 @@
         <div class="portal-card__header">
           <div class="docs-title-row">
             <h2 id="docs-title" class="rvo-heading rvo-heading--lg portal-card__title">Brondocumenten</h2>
-            <span v-if="store.documents.length > 0" class="rvo-tag rvo-tag--info rvo-tag--pill" aria-live="polite">
+            <nldd-tag v-if="store.documents.length > 0" size="sm" color="accent" aria-live="polite">
               {{ store.documents.length }} {{ store.documents.length === 1 ? 'document' : 'documenten' }} beschikbaar
-            </span>
+            </nldd-tag>
             <nldd-button
               variant="secondary"
               size="sm"
@@ -320,7 +320,7 @@
               <button
                 v-if="store.canEdit"
                 type="button"
-                class="rvo-link docs-item__remove"
+                class="invulhulp-linkbutton docs-item__remove"
                 @click="store.removeDocument(doc.id)"
               >
                 Verwijderen

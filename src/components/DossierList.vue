@@ -39,16 +39,16 @@
           <li v-for="d in store.dossierList" :key="d.id" class="dossier-grid__item">
             <button
               type="button"
-              class="rvo-card rvo-card--outline rvo-card--padding--md dossier-card"
+              class="invulhulp-card dossier-card"
               @click="store.openDossier(d.id)"
             >
               <nldd-icon class="dossier-card__icon" name="folder" size="32" color="accent" />
               <span class="dossier-card__body">
                 <span class="rvo-heading rvo-heading--md dossier-card__name">{{ d.name }}</span>
-                <span v-if="d.sharedWithMe" class="rvo-tag rvo-tag--info rvo-tag--pill dossier-card__shared">
+                <nldd-tag v-if="d.sharedWithMe" size="sm" color="accent" class="dossier-card__shared">
                   Gedeeld door {{ d.ownerName ?? 'een collega' }}
                   <template v-if="d.myRole"> · {{ roleLabels[d.myRole] }}</template>
-                </span>
+                </nldd-tag>
                 <span class="rvo-text rvo-text--sm dossier-card__meta">
                   {{ d.documents.length }} {{ d.documents.length === 1 ? 'document' : 'documenten' }}
                   · {{ summaryFor(d).done }}/{{ summaryFor(d).total }} formulieren afgerond
