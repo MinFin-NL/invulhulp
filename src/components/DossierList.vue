@@ -28,13 +28,11 @@
               Een dossier groepeert brondocumenten en formulierantwoorden rond één project of systeem.
             </p>
           </div>
-          <button
-            type="button"
-            class="rvo-button rvo-button--primary"
+          <nldd-button
+            variant="primary"
+            text="+ Nieuw dossier"
             @click="openCreateDialog"
-          >
-            + Nieuw dossier
-          </button>
+          />
         </div>
 
         <ul class="dossier-grid">
@@ -44,7 +42,7 @@
               class="rvo-card rvo-card--outline rvo-card--padding--md dossier-card"
               @click="store.openDossier(d.id)"
             >
-              <span class="dossier-card__icon" aria-hidden="true" />
+              <nldd-icon class="dossier-card__icon" name="folder" size="32" color="accent" />
               <span class="dossier-card__body">
                 <span class="rvo-heading rvo-heading--md dossier-card__name">{{ d.name }}</span>
                 <span v-if="d.sharedWithMe" class="rvo-tag rvo-tag--info rvo-tag--pill dossier-card__shared">
@@ -157,32 +155,32 @@ function onCreateConfirmed(name: string) {
 
 <style scoped>
 .dossier-list-page {
-  padding: var(--rvo-space-3xl) 0 var(--rvo-space-4xl);
-  background: var(--rvo-color-lichtblauw-150);
+  padding: var(--primitives-space-48) 0 var(--primitives-space-64);
+  background: var(--semantics-surfaces-tinted-background-color);
   min-height: 100%;
 }
 
 .dossier-list-hero {
-  margin-block-end: var(--rvo-space-3xl);
+  margin-block-end: var(--primitives-space-48);
 }
 
 .dossier-list__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
   flex-wrap: wrap;
-  margin-block-end: var(--rvo-space-lg);
+  margin-block-end: var(--primitives-space-24);
 }
 
 .dossier-list__title {
-  color: var(--rvo-color-lintblauw);
-  margin: 0 0 var(--rvo-space-2xs);
+  color: var(--semantics-content-accent-color);
+  margin: 0 0 var(--primitives-space-4);
 }
 
 .dossier-list__desc {
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
   margin: 0;
 }
 
@@ -192,7 +190,7 @@ function onCreateConfirmed(name: string) {
   padding: 0;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
 }
 
 .dossier-grid__item {
@@ -202,10 +200,10 @@ function onCreateConfirmed(name: string) {
 .dossier-card {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
   inline-size: 100%;
-  background: var(--rvo-color-wit);
-  border: 1px solid var(--rvo-color-lichtblauw-300);
+  background: var(--semantics-surfaces-base-background-color);
+  border: 1px solid var(--semantics-dividers-color);
   cursor: pointer;
   font: inherit;
   text-align: start;
@@ -213,48 +211,40 @@ function onCreateConfirmed(name: string) {
 }
 
 .dossier-card:hover {
-  border-color: var(--rvo-color-lintblauw);
+  border-color: var(--semantics-content-accent-color);
   box-shadow: 0 2px 8px rgb(21 66 115 / 0.12);
 }
 
 .dossier-card:focus-visible {
-  outline: 2px solid var(--rvo-color-lintblauw);
+  outline: 2px solid var(--semantics-content-accent-color);
   outline-offset: 2px;
 }
 
-/* Static mask URL so Vite resolves the NLDS icon in the production build —
-   a runtime url(...) binding renders as a white square. */
 .dossier-card__icon {
-  display: inline-block;
-  inline-size: 2rem;
-  block-size: 2rem;
   flex-shrink: 0;
-  background-color: var(--rvo-color-lintblauw);
-  -webkit-mask: url('@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg') center / contain no-repeat;
 }
 
 .dossier-card__body {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-3xs);
+  gap: var(--primitives-space-2);
   min-inline-size: 0;
   flex: 1;
 }
 
 .dossier-card__name {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   margin: 0;
   overflow-wrap: anywhere;
 }
 
 .dossier-card__meta {
-  color: var(--rvo-color-grijs-800);
+  color: var(--semantics-content-color);
 }
 
 .dossier-card__shared {
   align-self: flex-start;
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
 }
 
 /* Phase bar: the same five lifecycle steps as the dossier timeline, so the
@@ -263,7 +253,7 @@ function onCreateConfirmed(name: string) {
   display: flex;
   gap: 3px;
   inline-size: 100%;
-  margin-block: var(--rvo-space-3xs);
+  margin-block: var(--primitives-space-2);
 }
 
 .dossier-card__phase {
@@ -271,20 +261,20 @@ function onCreateConfirmed(name: string) {
   flex: 1;
   block-size: 5px;
   border-radius: 999px;
-  background: var(--rvo-color-lichtblauw-300);
+  background: var(--semantics-dividers-color);
   overflow: hidden;
 }
 
 /* A phase without forms yet (afronding) — visibly present, visibly unfillable. */
 .dossier-card__phase--empty {
   background: transparent;
-  box-shadow: inset 0 0 0 1px var(--rvo-color-grijs-400);
+  box-shadow: inset 0 0 0 1px var(--semantics-content-secondary-color);
 }
 
 .dossier-card__phase-fill {
   display: block;
   block-size: 100%;
-  background: var(--rvo-color-lintblauw);
+  background: var(--semantics-content-accent-color);
 }
 
 .dossier-card__date {
@@ -292,8 +282,8 @@ function onCreateConfirmed(name: string) {
 }
 
 .dossier-card__chevron {
-  color: var(--rvo-color-grijs-400);
-  font-size: var(--rvo-font-size-xl);
+  color: var(--semantics-content-secondary-color);
+  font-size: var(--primitives-font-size-300);
   flex-shrink: 0;
 }
 </style>

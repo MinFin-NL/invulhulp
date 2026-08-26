@@ -13,37 +13,38 @@
         </button>
         <div class="dossier-header__row">
           <div class="dossier-header__title-group">
-            <span class="dossier-header__icon" aria-hidden="true" />
+            <nldd-icon class="dossier-header__icon" name="folder" size="32" color="accent" />
             <h1 id="dossier-title" class="rvo-heading rvo-heading--2xl dossier-header__name">
               {{ store.activeDossier.name }}
             </h1>
           </div>
           <div class="dossier-actions">
-            <button
+            <nldd-button
+              variant="neutral-transparent"
+              size="sm"
+              class="dossier-actions__share"
               v-if="store.isOwner"
-              type="button"
-              class="rvo-button rvo-button--tertiary rvo-button--size-sm dossier-actions__share"
               @click="openShareDialog"
             >
-              <span class="dossier-actions__share-icon" aria-hidden="true" />
+              <span slot="text">
+<nldd-icon class="dossier-actions__share-icon" name="square-arrow-up" size="16" />
               Delen
-            </button>
-            <button
+              </span>
+            </nldd-button>
+            <nldd-button
+              variant="neutral-transparent"
+              size="sm"
+              text="Hernoemen"
               v-if="store.canEdit"
-              type="button"
-              class="rvo-button rvo-button--tertiary rvo-button--size-sm"
               @click="openRenameDialog"
-            >
-              Hernoemen
-            </button>
-            <button
+            />
+            <nldd-button
+              variant="secondary"
+              size="sm"
+              text="Verwijderen"
               v-if="store.isOwner"
-              type="button"
-              class="rvo-button rvo-button--warning-subtle rvo-button--size-sm"
               @click="openDeleteDialog"
-            >
-              Verwijderen
-            </button>
+            />
           </div>
         </div>
         <p class="rvo-text dossier-header__desc">
@@ -93,7 +94,7 @@
             class="invulhulp-visually-hidden"
             @change="onFilesSelected"
           />
-          <span class="first-run__dropzone-icon" aria-hidden="true" />
+          <nldd-icon class="first-run__dropzone-icon" name="arrow-up-out-bucket" size="40" color="accent" />
           <span class="rvo-heading rvo-heading--md first-run__dropzone-title">
             {{ isUploading ? 'Bezig met inlezen…' : 'Sleep je documenten hierheen' }}
           </span>
@@ -136,14 +137,12 @@
           </h2>
           <p class="rvo-text rvo-text--sm next-step__reason">{{ nextStep.reason }}</p>
         </div>
-        <button
-          type="button"
-          class="rvo-button next-step__btn"
-          :class="primaryAction === 'resume' ? 'rvo-button--primary' : 'rvo-button--secondary'"
+        <nldd-button
+          class="next-step__btn"
+          :text="nextStep.cta"
+          :variant="primaryAction === 'resume' ? 'primary' : 'secondary'"
           @click="$emit('open', nextStep.form.id)"
-        >
-          {{ nextStep.cta }}
-        </button>
+        />
       </section>
 
       <!-- Alles wat van toepassing is, is af. Dat is een mijlpaal: benoem hem,
@@ -174,12 +173,11 @@
                 class="phase-rail__circle"
                 :class="[
                   `phase-rail__circle--${markerState(group)}`,
-                  `phase-rail__circle--icon-${group.track}`,
                   { 'phase-rail__circle--minor': !group.isPhase },
                 ]"
                 :style="{ '--phase-fill': phaseFill(group) }"
               >
-                <span class="phase-rail__icon" aria-hidden="true" />
+                <nldd-icon class="phase-rail__icon" :name="trackIcon(group.track)" size="20" />
               </span>
               <span class="phase-rail__label">{{ group.label }}</span>
               <span class="phase-rail__count">
@@ -200,16 +198,16 @@
             <span v-if="store.documents.length > 0" class="rvo-tag rvo-tag--info rvo-tag--pill" aria-live="polite">
               {{ store.documents.length }} {{ store.documents.length === 1 ? 'document' : 'documenten' }} beschikbaar
             </span>
-            <button
+            <nldd-button
+              variant="secondary"
+              size="sm"
+              class="docs-graph-btn"
+              :text="showGraph ? 'Verberg entiteitengrafiek' : 'Toon entiteitengrafiek'"
               v-if="hasAnyOntology"
-              type="button"
-              class="rvo-button rvo-button--secondary rvo-button--size-sm docs-graph-btn"
               :aria-pressed="showGraph"
               aria-controls="entity-graph-region"
               @click="showGraph = !showGraph"
-            >
-              {{ showGraph ? 'Verberg entiteitengrafiek' : 'Toon entiteitengrafiek' }}
-            </button>
+            />
           </div>
           <p class="rvo-text portal-card__desc">
             Upload achtergronddocumenten (notulen, brainstorms, agenda's) in .txt, .md, .docx, .xlsx, .pptx of .pdf formaat.
@@ -218,30 +216,30 @@
         </div>
 
         <div v-if="store.canEdit" class="docs-controls">
-          <label
-            class="rvo-button docs-upload-btn"
-            :class="[
-              primaryAction === 'upload' ? 'rvo-button--primary' : 'rvo-button--secondary',
-              { 'docs-upload-btn--busy': isUploading },
-            ]"
-            :aria-disabled="isUploading"
-          >
-            <input
-              type="file"
-              :accept="UPLOAD_ACCEPT"
-              multiple
-              :disabled="isUploading"
-              class="invulhulp-visually-hidden"
-              @change="onFilesSelected"
-            />
-            <span v-if="!isUploading" aria-hidden="true">↑</span>
-            <span v-if="isUploading">Bezig met inlezen…</span>
-            <span v-else>Document(en) uploaden</span>
-          </label>
+          <!-- A <label> around the file input can't be an nldd-button: the
+               real <button> lives in the component's shadow root, so the label
+               would never reach it. The button drives the hidden input instead. -->
+          <input
+            ref="fileInputEl"
+            type="file"
+            :accept="UPLOAD_ACCEPT"
+            multiple
+            :disabled="isUploading"
+            class="invulhulp-visually-hidden"
+            @change="onFilesSelected"
+          />
+          <nldd-button
+            class="docs-upload-btn"
+            :variant="primaryAction === 'upload' ? 'primary' : 'secondary'"
+            start-icon="arrow-up-out-bucket"
+            :text="isUploading ? 'Bezig met inlezen…' : 'Document(en) uploaden'"
+            :loading="isUploading"
+            @click="fileInputEl?.click()"
+          />
 
           <details class="rvo-expandable-content rvo-expandable-content--subtle docs-info-details">
             <summary class="rvo-expandable-content__summary rvo-text rvo-text--sm">
-              <img :src="infoIcon" class="docs-info-icon" aria-hidden="true" alt="" />
+              <nldd-icon class="docs-info-icon" name="info-circle" size="16" />
               Ondersteunde bestandstypen
             </summary>
             <div class="rvo-expandable-content__details">
@@ -288,7 +286,7 @@
           >
             <div class="docs-item__row">
               <div class="docs-item__info">
-                <img :src="bevestigingIcon" class="docs-item__check" aria-hidden="true" alt="" />
+                <nldd-icon class="docs-item__check" name="check-mark-circle" size="16" color="success" />
                 <div class="docs-item__text">
                   <span class="docs-item__name">{{ doc.name }}</span>
                   <span class="docs-item__meta rvo-text rvo-text--sm">
@@ -351,25 +349,25 @@
             <div class="bulk-ai__bar-fill" :style="{ inlineSize: `${bulkAiPct}%` }" />
           </div>
         </div>
-        <button
+        <nldd-button
+          variant="secondary"
+          class="bulk-ai__btn"
+          text="Stop"
           v-if="dossierAiRun"
-          type="button"
-          class="rvo-button rvo-button--secondary bulk-ai__btn"
           @click="cancelDossierAiMode()"
-        >
-          Stop
-        </button>
-        <button
+        />
+        <nldd-button
+          class="bulk-ai__btn"
           v-else
-          type="button"
-          class="rvo-button bulk-ai__btn"
-          :class="primaryAction === 'bulk-ai' ? 'rvo-button--primary' : 'rvo-button--secondary'"
+          :variant="primaryAction === 'bulk-ai' ? 'primary' : 'secondary'"
           :disabled="readyDocIds.length === 0"
           @click="startDossierAiMode(bulkFillForms.map((f) => f.id))"
         >
-          <span class="bulk-ai__spark" aria-hidden="true">✦</span>
+          <span slot="text">
+<span class="bulk-ai__spark" aria-hidden="true">✦</span>
           {{ bulkFillForms.length === 1 ? 'Vul 1 formulier in' : `Vul ${bulkFillForms.length} formulieren in` }}
-        </button>
+          </span>
+        </nldd-button>
       </section>
 
       <!-- Toepassingsscan: which of the forms below actually apply here. -->
@@ -478,13 +476,12 @@
                     <span class="nvt-item__title">{{ form.title }}</span>
                     <span class="rvo-text rvo-text--sm rvo-text--subtle">{{ verdictFor(form.id).reason }}</span>
                   </div>
-                  <button
-                    type="button"
-                    class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+                  <nldd-button
+                    variant="neutral-transparent"
+                    size="sm"
+                    text="Toch openen"
                     @click="$emit('open', form.id)"
-                  >
-                    Toch openen
-                  </button>
+                  />
                 </li>
               </ul>
               <p class="rvo-text rvo-text--sm rvo-text--subtle nvt-note">
@@ -545,14 +542,12 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
-import bevestigingIcon from '@nl-rvo/assets/icons/status/bevestiging.svg'
-import infoIcon from '@nl-rvo/assets/icons/functioneel/info.svg'
 import { loadFormRegistry, type FormIndexEntry } from '../services/formLoader'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAiMode } from '../composables/useAiMode'
 import { useFormProgress } from '../composables/useFormProgress'
 import type { FormProgress } from '../utils/formProgress'
-import { groupFormsByTrack, connectorGlyph, type TrackGroup } from '../utils/tracks'
+import { groupFormsByTrack, connectorGlyph, trackIcon, type TrackGroup } from '../utils/tracks'
 import DocumentOntology from './DocumentOntology.vue'
 import EntityGraph from './EntityGraph.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
@@ -584,6 +579,8 @@ const isDragOver = ref(false)
 const showFullDossier = ref(false)
 const successMessage = ref('')
 const isUploading = ref(false)
+// Drives the visually hidden file input behind the upload button.
+const fileInputEl = ref<HTMLInputElement | null>(null)
 const uploadingLabel = ref('')
 const recentlyAddedIds = ref<Set<string>>(new Set())
 const showGraph = ref(false)
@@ -1170,13 +1167,13 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
      invisible against the lichtblauw-150 page background — tint the page's own
      lintblauw down instead, as the card shadows do. */
   --track-line: rgb(21 66 115 / 0.22);
-  padding: var(--rvo-space-3xl) 0 var(--rvo-space-4xl);
-  background: var(--rvo-color-lichtblauw-150);
+  padding: var(--primitives-space-48) 0 var(--primitives-space-64);
+  background: var(--semantics-surfaces-tinted-background-color);
   min-height: 100%;
 }
 
 .dossier-header {
-  margin-block-end: var(--rvo-space-2xl);
+  margin-block-end: var(--primitives-space-40);
 }
 
 .dossier-header__back {
@@ -1186,58 +1183,50 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   padding: 0;
   cursor: pointer;
   font: inherit;
-  font-size: var(--rvo-font-size-sm);
-  color: var(--rvo-color-lintblauw);
+  font-size: var(--primitives-font-size-90);
+  color: var(--semantics-content-accent-color);
   text-decoration: underline;
-  margin-block-end: var(--rvo-space-sm);
+  margin-block-end: var(--primitives-space-12);
 }
 
 .dossier-header__row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
   flex-wrap: wrap;
 }
 
 .dossier-header__title-group {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
   min-inline-size: 0;
 }
 
-/* Static mask URL so Vite resolves the NLDS icon in the production build —
-   a runtime url(...) binding renders as a white square. */
 .dossier-header__icon {
-  display: inline-block;
-  inline-size: 2rem;
-  block-size: 2rem;
   flex-shrink: 0;
-  background-color: var(--rvo-color-lintblauw);
-  -webkit-mask: url('@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg') center / contain no-repeat;
 }
 
 .dossier-header__name {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   margin: 0;
   overflow-wrap: anywhere;
 }
 
 .dossier-header__desc {
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--rvo-font-size-sm);
-  margin: var(--rvo-space-2xs) 0 0;
+  font-size: var(--primitives-font-size-90);
+  margin: var(--primitives-space-4) 0 0;
 }
 
 .portal-card {
   position: relative;
-  margin-block-end: var(--rvo-space-2xl);
-  padding: var(--rvo-space-lg) var(--rvo-space-xl);
-  background: var(--rvo-color-wit);
-  border: 1px solid var(--rvo-color-lichtblauw-300);
-  border-radius: var(--rvo-border-radius-md);
+  margin-block-end: var(--primitives-space-40);
+  padding: var(--primitives-space-24) var(--primitives-space-32);
+  background: var(--semantics-surfaces-base-background-color);
+  border: 1px solid var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
   box-shadow: 0 1px 3px rgb(21 66 115 / 0.06), 0 4px 12px rgb(21 66 115 / 0.04);
 }
 
@@ -1247,18 +1236,18 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   inset-block-start: 0;
   inset-inline: 0;
   block-size: 4px;
-  background: var(--rvo-color-lintblauw);
-  border-start-start-radius: var(--rvo-border-radius-md);
-  border-start-end-radius: var(--rvo-border-radius-md);
+  background: var(--semantics-content-accent-color);
+  border-start-start-radius: var(--primitives-corner-radius-md);
+  border-start-end-radius: var(--primitives-corner-radius-md);
 }
 
 /* ===== Eerste keer: één scherm, één handeling ===== */
 .first-run {
-  margin-block-end: var(--rvo-space-2xl);
-  padding: var(--rvo-space-2xl) var(--rvo-space-xl);
-  background: var(--rvo-color-wit);
-  border: 1px solid var(--rvo-color-lichtblauw-300);
-  border-radius: var(--rvo-border-radius-md);
+  margin-block-end: var(--primitives-space-40);
+  padding: var(--primitives-space-40) var(--primitives-space-32);
+  background: var(--semantics-surfaces-base-background-color);
+  border: 1px solid var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
   text-align: center;
 }
 
@@ -1267,17 +1256,17 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
 }
 
 .first-run__title {
-  color: var(--rvo-color-lintblauw);
-  margin: var(--rvo-space-2xs) 0 var(--rvo-space-sm);
+  color: var(--semantics-content-accent-color);
+  margin: var(--primitives-space-4) 0 var(--primitives-space-12);
 }
 
 .first-run__lead {
   color: var(--invulhulp-color-text-subtle);
-  margin: 0 auto var(--rvo-space-xl);
+  margin: 0 auto var(--primitives-space-32);
   max-inline-size: 40rem;
 }
 
@@ -1285,24 +1274,24 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--rvo-space-2xs);
-  padding: var(--rvo-space-2xl) var(--rvo-space-lg);
-  border: 2px dashed var(--rvo-color-lichtblauw-300);
-  border-radius: var(--rvo-border-radius-md);
-  background: var(--rvo-color-lichtblauw-150);
+  gap: var(--primitives-space-4);
+  padding: var(--primitives-space-40) var(--primitives-space-24);
+  border: 2px dashed var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
+  background: var(--semantics-surfaces-tinted-background-color);
   cursor: pointer;
   transition: border-color var(--invulhulp-duration-fast), background var(--invulhulp-duration-fast);
 }
 
 .first-run__dropzone:hover,
 .first-run__dropzone--over {
-  border-color: var(--rvo-color-lintblauw);
-  background: var(--rvo-color-wit);
+  border-color: var(--semantics-content-accent-color);
+  background: var(--semantics-surfaces-base-background-color);
 }
 
 /* De input zit visueel verstopt in de label, dus de focusring hoort hier. */
 .first-run__dropzone:focus-within {
-  outline: 2px solid var(--rvo-color-lintblauw);
+  outline: 2px solid var(--semantics-content-accent-color);
   outline-offset: 2px;
 }
 
@@ -1314,16 +1303,11 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 /* Statische mask-url zodat Vite het NLDS-icoon in de productiebuild oplost —
    een runtime url()-binding wordt een wit vlak. */
 .first-run__dropzone-icon {
-  inline-size: 2.5rem;
-  block-size: 2.5rem;
-  margin-block-end: var(--rvo-space-2xs);
-  background-color: var(--rvo-color-lintblauw);
-  -webkit-mask: url('@nl-rvo/assets/icons/functioneel/upload.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/functioneel/upload.svg') center / contain no-repeat;
+  margin-block-end: var(--primitives-space-4);
 }
 
 .first-run__dropzone-title {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   margin: 0;
 }
 
@@ -1332,7 +1316,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .first-run__skip {
-  margin-block-start: var(--rvo-space-lg);
+  margin-block-start: var(--primitives-space-24);
   background: none;
   border: none;
   font: inherit;
@@ -1345,14 +1329,14 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 .next-step {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-lg);
+  gap: var(--primitives-space-24);
   flex-wrap: wrap;
-  margin-block-end: var(--rvo-space-xl);
-  padding: var(--rvo-space-md) var(--rvo-space-xl);
-  background: var(--rvo-color-wit);
-  border: 1px solid var(--rvo-color-lichtblauw-300);
-  border-inline-start: 4px solid var(--rvo-color-lintblauw);
-  border-radius: var(--rvo-border-radius-md);
+  margin-block-end: var(--primitives-space-32);
+  padding: var(--primitives-space-16) var(--primitives-space-32);
+  background: var(--semantics-surfaces-base-background-color);
+  border: 1px solid var(--semantics-dividers-color);
+  border-inline-start: 4px solid var(--semantics-content-accent-color);
+  border-radius: var(--primitives-corner-radius-md);
 }
 
 .next-step__body {
@@ -1365,12 +1349,12 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
 }
 
 .next-step__title {
-  color: var(--rvo-color-lintblauw);
-  margin: var(--rvo-space-3xs) 0 var(--rvo-space-3xs);
+  color: var(--semantics-content-accent-color);
+  margin: var(--primitives-space-2) 0 var(--primitives-space-2);
 }
 
 .next-step__reason {
@@ -1384,7 +1368,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .next-step__done {
-  margin-block-end: var(--rvo-space-xl);
+  margin-block-end: var(--primitives-space-32);
 }
 
 /* Dossier-brede AI-vulling. Draagt bewust de AI-Modus-huisstijl (blauw/paars,
@@ -1393,13 +1377,13 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 .bulk-ai {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-lg);
+  gap: var(--primitives-space-24);
   flex-wrap: wrap;
-  margin-block-end: var(--rvo-space-2xl);
-  padding: var(--rvo-space-lg) var(--rvo-space-xl);
+  margin-block-end: var(--primitives-space-40);
+  padding: var(--primitives-space-24) var(--primitives-space-32);
   background: linear-gradient(135deg, rgba(15, 45, 92, 0.04), rgba(91, 33, 182, 0.06));
   border: 1px solid rgba(91, 33, 182, 0.2);
-  border-radius: var(--rvo-border-radius-md);
+  border-radius: var(--primitives-corner-radius-md);
 }
 
 .bulk-ai__body {
@@ -1408,8 +1392,8 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .bulk-ai__title {
-  color: var(--rvo-color-lintblauw);
-  margin: 0 0 var(--rvo-space-2xs);
+  color: var(--semantics-content-accent-color);
+  margin: 0 0 var(--primitives-space-4);
 }
 
 .bulk-ai__desc {
@@ -1419,16 +1403,16 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .bulk-ai__bar {
-  margin-block-start: var(--rvo-space-sm);
-  block-size: var(--rvo-space-2xs);
-  border-radius: var(--rvo-border-radius-sm);
+  margin-block-start: var(--primitives-space-12);
+  block-size: var(--primitives-space-4);
+  border-radius: var(--primitives-corner-radius-sm);
   background: rgba(15, 45, 92, 0.12);
   overflow: hidden;
 }
 
 .bulk-ai__bar-fill {
   block-size: 100%;
-  border-radius: var(--rvo-border-radius-sm);
+  border-radius: var(--primitives-corner-radius-sm);
   background: linear-gradient(90deg, #0f2d5c, #5b21b6, #0ea5e9);
   transition: inline-size var(--invulhulp-duration-slow) var(--invulhulp-ease);
 }
@@ -1438,21 +1422,21 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .bulk-ai__spark {
-  margin-inline-end: var(--rvo-space-2xs);
+  margin-inline-end: var(--primitives-space-4);
 }
 
 .portal-card__header {
-  margin-block-end: var(--rvo-space-md);
+  margin-block-end: var(--primitives-space-16);
 }
 
 .portal-card__title {
-  color: var(--rvo-color-lintblauw);
-  margin: 0 0 var(--rvo-space-2xs);
+  color: var(--semantics-content-accent-color);
+  margin: 0 0 var(--primitives-space-4);
 }
 
 .portal-card__desc {
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
   margin: 0;
 }
 
@@ -1460,40 +1444,32 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
   flex-wrap: wrap;
 }
 
 .dossier-actions {
   display: flex;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
   align-items: center;
 }
 
 .dossier-actions__share {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-3xs);
+  gap: var(--primitives-space-2);
 }
 
-/* Static mask URL so Vite resolves the NLDS icon in the production build —
-   a runtime url(...) binding renders as a white square. */
 .dossier-actions__share-icon {
-  display: inline-block;
-  inline-size: 1rem;
-  block-size: 1rem;
   flex-shrink: 0;
-  background-color: currentColor;
-  -webkit-mask: url('@nl-rvo/assets/icons/functioneel/delen.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/functioneel/delen.svg') center / contain no-repeat;
 }
 
 .docs-title-row {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
   flex-wrap: wrap;
-  margin-block-end: var(--rvo-space-2xs);
+  margin-block-end: var(--primitives-space-4);
 }
 
 .docs-graph-btn {
@@ -1503,18 +1479,11 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 .docs-controls {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-sm);
-  margin-block-end: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
+  margin-block-end: var(--primitives-space-12);
 }
 
-.docs-upload-btn {
-  cursor: pointer;
-}
-.docs-upload-btn--busy {
-  cursor: progress;
-  opacity: 0.7;
-  pointer-events: none;
-}
+/* nldd-button carries its own busy affordance via the `loading` attribute. */
 
 .docs-info-details {
   align-self: center;
@@ -1527,14 +1496,14 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 
 .docs-info-details :deep(.rvo-expandable-content__details) {
   position: absolute;
-  inset-block-start: calc(100% + var(--rvo-space-2xs));
+  inset-block-start: calc(100% + var(--primitives-space-4));
   inset-inline-start: 0;
   z-index: 100;
-  background: var(--rvo-color-wit);
+  background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm);
+  border-radius: var(--primitives-corner-radius-sm);
   box-shadow: 0 4px 12px rgb(21 66 115 / 0.12);
-  padding: var(--rvo-space-xs) var(--rvo-space-sm);
+  padding: var(--primitives-space-8) var(--primitives-space-12);
   min-inline-size: 280px;
   max-inline-size: 380px;
 }
@@ -1547,15 +1516,15 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .docs-info-list {
-  margin-block-start: var(--rvo-space-2xs);
+  margin-block-start: var(--primitives-space-4);
   margin-block-end: 0;
 }
 
 .docs-alerts {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-xs);
-  margin-block-end: var(--rvo-space-sm);
+  gap: var(--primitives-space-8);
+  margin-block-end: var(--primitives-space-12);
 }
 
 .docs-list {
@@ -1564,17 +1533,17 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .docs-item {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
-  padding: var(--rvo-space-xs) var(--rvo-space-sm);
-  background: var(--rvo-color-grijs-100);
+  gap: var(--primitives-space-4);
+  padding: var(--primitives-space-8) var(--primitives-space-12);
+  background: var(--semantics-surfaces-tinted-background-color);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm);
+  border-radius: var(--primitives-corner-radius-sm);
   transition: background var(--invulhulp-duration-deliberate) var(--invulhulp-ease), border-color var(--invulhulp-duration-deliberate) var(--invulhulp-ease);
 }
 
@@ -1582,30 +1551,30 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
 }
 
 .docs-item__error {
-  margin: var(--rvo-space-2xs) 0 0;
-  color: var(--rvo-color-rood);
+  margin: var(--primitives-space-4) 0 0;
+  color: var(--semantics-content-critical-color);
 }
 
 .docs-item--new {
-  background: var(--rvo-color-groen-150);
-  border-color: var(--rvo-color-groen);
+  background: var(--semantics-categories-success-tinted-background-color);
+  border-color: var(--semantics-content-success-color);
   animation: doc-pulse var(--invulhulp-duration-highlight) var(--invulhulp-ease-out);
 }
 
 @keyframes doc-pulse {
-  0% { background: var(--rvo-color-groen-300); }
-  100% { background: var(--rvo-color-groen-150); }
+  0% { background: var(--semantics-categories-success-tinted-highlight-border-color); }
+  100% { background: var(--semantics-categories-success-tinted-background-color); }
 }
 
 
 .docs-item__info {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
 }
 
 .docs-item__check {
@@ -1622,9 +1591,9 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .docs-item__name {
-  font-weight: var(--rvo-font-weight-semibold);
-  color: var(--rvo-color-grijs-800);
-  font-size: var(--rvo-font-size-sm);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  color: var(--semantics-content-color);
+  font-size: var(--primitives-font-size-90);
 }
 
 .docs-item__meta {
@@ -1634,15 +1603,15 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 .docs-item__remove {
   background: none;
   border: 0;
-  color: var(--rvo-color-rood);
+  color: var(--semantics-content-critical-color);
   cursor: pointer;
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
   text-decoration: underline;
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  padding: var(--primitives-space-4) var(--primitives-space-8);
 }
 
 .docs-empty {
-  color: var(--rvo-color-grijs-500);
+  color: var(--semantics-content-secondary-color);
   font-style: italic;
   margin: 0;
 }
@@ -1650,11 +1619,11 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 /* ---- Phase rail ------------------------------------------------------- */
 
 .phase-rail {
-  margin-block-end: var(--rvo-space-2xl);
-  padding: var(--rvo-space-lg) var(--rvo-space-md);
-  background: var(--rvo-color-wit);
-  border: 1px solid var(--rvo-color-lichtblauw-300);
-  border-radius: var(--rvo-border-radius-md);
+  margin-block-end: var(--primitives-space-40);
+  padding: var(--primitives-space-24) var(--primitives-space-16);
+  background: var(--semantics-surfaces-base-background-color);
+  border: 1px solid var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
   box-shadow: 0 1px 3px rgb(21 66 115 / 0.06), 0 4px 12px rgb(21 66 115 / 0.04);
   /* Six phases don't fit a phone; scroll the rail rather than the page. */
   overflow-x: auto;
@@ -1704,20 +1673,20 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   inline-size: 100%;
   border: 0;
   background: transparent;
   font: inherit;
   cursor: pointer;
-  padding: var(--rvo-space-2xs) var(--rvo-space-3xs);
+  padding: var(--primitives-space-4) var(--primitives-space-2);
 }
 
 /* Hover lands on the circle and the label, never on the cell: a filled block
    would paint over the connector line running behind it. */
 .phase-rail__step:hover .phase-rail__circle {
-  border-color: var(--rvo-color-lintblauw);
-  box-shadow: 0 0 0 4px var(--rvo-color-lichtblauw-300);
+  border-color: var(--semantics-content-accent-color);
+  box-shadow: 0 0 0 4px var(--semantics-dividers-color);
 }
 
 .phase-rail__step:hover .phase-rail__label {
@@ -1729,7 +1698,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .phase-rail__step:focus-visible .phase-rail__circle {
-  outline: 2px solid var(--rvo-color-lintblauw);
+  outline: 2px solid var(--semantics-content-accent-color);
   outline-offset: 3px;
 }
 
@@ -1749,32 +1718,32 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   justify-content: center;
   box-sizing: border-box;
   border: 2px solid var(--track-line);
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   transition: border-color var(--invulhulp-duration-fast), box-shadow var(--invulhulp-duration-fast);
   background:
     linear-gradient(
       to top,
-      var(--rvo-color-lichtblauw-750) 0 var(--phase-fill, 0%),
-      var(--rvo-color-wit) var(--phase-fill, 0%) 100%
+      var(--semantics-categories-accent-tinted-content-color) 0 var(--phase-fill, 0%),
+      var(--semantics-surfaces-base-background-color) var(--phase-fill, 0%) 100%
     );
 }
 
 .phase-rail__circle--busy {
-  border-color: var(--rvo-color-lintblauw);
+  border-color: var(--semantics-content-accent-color);
 }
 
 .phase-rail__circle--done {
-  border-color: var(--rvo-color-lintblauw);
-  background: var(--rvo-color-lintblauw);
-  color: var(--rvo-color-wit);
+  border-color: var(--semantics-content-accent-color);
+  background: var(--semantics-content-accent-color);
+  color: var(--semantics-surfaces-base-background-color);
 }
 
 /* A phase with no forms yet (beheer) — deliberately visible, visibly unfillable. */
 .phase-rail__circle--empty {
   border-style: dashed;
-  border-color: var(--rvo-color-grijs-400);
-  color: var(--rvo-color-grijs-500);
-  background: var(--rvo-color-wit);
+  border-color: var(--semantics-content-secondary-color);
+  color: var(--semantics-content-secondary-color);
+  background: var(--semantics-surfaces-base-background-color);
 }
 
 .phase-rail__icon {
@@ -1784,40 +1753,17 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   background-color: currentColor;
 }
 
-/* Static mask URLs so Vite resolves the NLDS icons in the production build —
-   a runtime url(...) binding renders as a white square. One rule per phase. */
-.phase-rail__circle--icon-intake .phase-rail__icon {
-  -webkit-mask: url('@nl-rvo/assets/icons/op-kantoor/document-met-lijnen.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/op-kantoor/document-met-lijnen.svg') center / contain no-repeat;
-}
-.phase-rail__circle--icon-aanbieding .phase-rail__icon {
-  -webkit-mask: url('@nl-rvo/assets/icons/op-kantoor/document-met-lijnen-en-lint.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/op-kantoor/document-met-lijnen-en-lint.svg') center / contain no-repeat;
-}
-.phase-rail__circle--icon-initiatie .phase-rail__icon {
-  -webkit-mask: url('@nl-rvo/assets/icons/navigatie/kompas.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/navigatie/kompas.svg') center / contain no-repeat;
-}
-.phase-rail__circle--icon-uitvoering .phase-rail__icon {
-  -webkit-mask: url('@nl-rvo/assets/icons/gereedschap/moersleutel-en-schroevendraaier.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/gereedschap/moersleutel-en-schroevendraaier.svg') center / contain no-repeat;
-}
-.phase-rail__circle--icon-afronding .phase-rail__icon {
-  -webkit-mask: url('@nl-rvo/assets/icons/op-kantoor/klembord-met-vinkje.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/op-kantoor/klembord-met-vinkje.svg') center / contain no-repeat;
-}
-
 .phase-rail__label {
-  font-size: var(--rvo-font-size-2xs, 0.75rem);
+  font-size: var(--primitives-font-size-70, 0.75rem);
   line-height: 1.3;
-  font-weight: var(--rvo-font-weight-semibold);
-  color: var(--rvo-color-lintblauw);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  color: var(--semantics-content-accent-color);
   text-align: center;
   text-wrap: balance;
 }
 
 .phase-rail__count {
-  font-size: var(--rvo-font-size-2xs, 0.75rem);
+  font-size: var(--primitives-font-size-70, 0.75rem);
   color: var(--invulhulp-color-text-subtle);
 }
 
@@ -1826,27 +1772,27 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 /* Platter dan .portal-card en zonder de blauwe kaartrand bovenaan: de band mag
    niet concurreren met de fasen eronder — hij gaat eraan vooraf. */
 .prelude {
-  margin-block-end: var(--rvo-space-2xl);
+  margin-block-end: var(--primitives-space-40);
   /* Same inline padding as .portal-card, .bulk-ai en de toepassingsscan-tegel:
      alle koppen op deze pagina beginnen op dezelfde verticale lijn. */
-  padding: var(--rvo-space-lg) var(--rvo-space-xl);
-  background: var(--rvo-color-wit);
-  border: 1px solid var(--rvo-color-lichtblauw-300);
-  border-radius: var(--rvo-border-radius-md);
+  padding: var(--primitives-space-24) var(--primitives-space-32);
+  background: var(--semantics-surfaces-base-background-color);
+  border: 1px solid var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
   /* Clear the sticky header when the fase rail scrolls here. */
-  scroll-margin-block-start: calc(var(--invulhulp-header-height) + var(--rvo-space-lg));
+  scroll-margin-block-start: calc(var(--invulhulp-header-height) + var(--primitives-space-24));
 }
 
 .prelude__header {
   display: flex;
   align-items: baseline;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
   flex-wrap: wrap;
-  margin-block-end: var(--rvo-space-sm);
+  margin-block-end: var(--primitives-space-12);
 }
 
 .prelude__title {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   margin: 0;
 }
 
@@ -1871,9 +1817,9 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 .track-phase {
   position: relative;
   /* Clear the sticky header, or the fase rail scrolls a phase to right under it. */
-  scroll-margin-block-start: calc(var(--invulhulp-header-height) + var(--rvo-space-lg));
+  scroll-margin-block-start: calc(var(--invulhulp-header-height) + var(--primitives-space-24));
   padding-inline-start: var(--track-gutter);
-  padding-block-end: var(--rvo-space-3xl);
+  padding-block-end: var(--primitives-space-48);
 }
 
 .track-phase:last-child {
@@ -1905,11 +1851,11 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-bold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-bold);
   box-sizing: border-box;
-  background: var(--rvo-color-wit);
-  color: var(--rvo-color-lintblauw);
+  background: var(--semantics-surfaces-base-background-color);
+  color: var(--semantics-content-accent-color);
   border: 2px solid var(--track-line);
 }
 
@@ -1919,22 +1865,22 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .track-phase__marker--busy {
-  border-color: var(--rvo-color-lintblauw);
-  color: var(--rvo-color-lintblauw);
-  box-shadow: inset 0 0 0 3px var(--rvo-color-lichtblauw-150);
+  border-color: var(--semantics-content-accent-color);
+  color: var(--semantics-content-accent-color);
+  box-shadow: inset 0 0 0 3px var(--semantics-surfaces-tinted-background-color);
 }
 
 .track-phase__marker--done {
-  background: var(--rvo-color-lintblauw);
-  border-color: var(--rvo-color-lintblauw);
-  color: var(--rvo-color-wit);
+  background: var(--semantics-content-accent-color);
+  border-color: var(--semantics-content-accent-color);
+  color: var(--semantics-surfaces-base-background-color);
 }
 
 /* A phase with no forms yet (beheer) — deliberately visible, visibly unfilled. */
 .track-phase__marker--empty {
   border-style: dashed;
-  border-color: var(--rvo-color-grijs-400);
-  color: var(--rvo-color-grijs-500);
+  border-color: var(--semantics-content-secondary-color);
+  color: var(--semantics-content-secondary-color);
 }
 
 .track-phase__check {
@@ -1943,9 +1889,9 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .track-eyebrow {
-  margin: 0 0 var(--rvo-space-3xs);
-  font-size: var(--rvo-font-size-2xs, 0.75rem);
-  font-weight: var(--rvo-font-weight-semibold);
+  margin: 0 0 var(--primitives-space-2);
+  font-size: var(--primitives-font-size-70, 0.75rem);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--invulhulp-color-text-subtle);
@@ -1954,7 +1900,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 .track-title-row {
   display: flex;
   align-items: baseline;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
   flex-wrap: wrap;
 }
 
@@ -1966,7 +1912,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 .track-header {
   /* Reserve the marker's height so short headings still clear the spine. */
   min-block-size: var(--track-marker-size);
-  margin-block-end: var(--rvo-space-md);
+  margin-block-end: var(--primitives-space-16);
 }
 
 @media (max-width: 640px) {
@@ -1977,13 +1923,13 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .track-title {
-  color: var(--rvo-color-lintblauw);
-  margin: 0 0 var(--rvo-space-2xs);
+  color: var(--semantics-content-accent-color);
+  margin: 0 0 var(--primitives-space-4);
 }
 
 .track-desc {
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
   margin: 0;
 }
 
@@ -1991,16 +1937,16 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   color: var(--invulhulp-color-text-subtle);
   max-inline-size: 60ch;
   margin: 0;
-  padding: var(--rvo-space-md);
-  border: 1px dashed var(--rvo-color-grijs-400);
-  border-radius: var(--rvo-border-radius-md, 4px);
+  padding: var(--primitives-space-16);
+  border: 1px dashed var(--semantics-content-secondary-color);
+  border-radius: var(--primitives-corner-radius-md, 4px);
 }
 
 .card-row {
   display: flex;
   align-items: stretch;
   column-gap: 0;
-  row-gap: var(--rvo-space-md);
+  row-gap: var(--primitives-space-16);
   flex-wrap: wrap;
 }
 
@@ -2014,9 +1960,9 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 .card-connector {
   display: flex;
   align-items: center;
-  padding: 0 var(--rvo-space-xs);
-  color: var(--rvo-color-grijs-400);
-  font-size: var(--rvo-font-size-md);
+  padding: 0 var(--primitives-space-8);
+  color: var(--semantics-content-secondary-color);
+  font-size: var(--primitives-font-size-100);
   flex-shrink: 0;
   align-self: center;
 }
@@ -2024,7 +1970,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 /* --- Niet van toepassing, per phase. Stock rvo-item-list rows; only the
    layout inside a row and the struck-through title are ours. --- */
 .nvt-group {
-  margin-block-start: var(--rvo-space-md);
+  margin-block-start: var(--primitives-space-16);
   max-inline-size: 52rem;
 }
 
@@ -2036,7 +1982,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
 }
 
 .nvt-item__text {
@@ -2045,14 +1991,14 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .nvt-item__title {
-  font-weight: var(--rvo-font-weight-semibold);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   text-decoration: line-through;
-  text-decoration-color: var(--rvo-color-grijs-500);
-  color: var(--rvo-color-grijs-700);
+  text-decoration-color: var(--semantics-content-secondary-color);
+  color: var(--semantics-content-secondary-color);
 }
 
 .nvt-note {
-  margin-block: var(--rvo-space-sm) 0;
+  margin-block: var(--primitives-space-12) 0;
   max-inline-size: 68ch;
 }
 

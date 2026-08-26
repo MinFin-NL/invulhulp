@@ -94,22 +94,22 @@ const hasContent = computed(() => {
 
 <style scoped>
 .ontology {
-  margin-block-start: var(--rvo-space-2xs);
+  margin-block-start: var(--primitives-space-4);
   border-block-start: 1px dashed var(--invulhulp-color-border);
-  padding-block-start: var(--rvo-space-2xs);
+  padding-block-start: var(--primitives-space-4);
 }
 
 .ontology-toggle {
   background: none;
   border: 0;
-  padding: var(--rvo-space-3xs) 0;
+  padding: var(--primitives-space-2) 0;
   cursor: pointer;
-  font-size: var(--rvo-font-size-sm);
-  color: var(--rvo-color-lintblauw);
+  font-size: var(--primitives-font-size-90);
+  color: var(--semantics-content-accent-color);
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
-  font-weight: var(--rvo-font-weight-semibold);
+  gap: var(--primitives-space-4);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
 }
 
 .ontology-toggle:hover {
@@ -117,27 +117,27 @@ const hasContent = computed(() => {
 }
 
 .ontology-toggle-icon {
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
 }
 
 .ontology-body {
-  margin-block-start: var(--rvo-space-xs);
-  padding: var(--rvo-space-xs) var(--rvo-space-sm);
-  background: var(--rvo-color-hemelblauw-150);
-  border: 1px solid var(--rvo-color-hemelblauw-300);
-  border-radius: var(--rvo-border-radius-sm);
-  font-size: var(--rvo-font-size-sm);
-  color: var(--rvo-color-grijs-800);
+  margin-block-start: var(--primitives-space-8);
+  padding: var(--primitives-space-8) var(--primitives-space-12);
+  background: var(--semantics-categories-accent-tinted-background-color);
+  border: 1px solid var(--semantics-categories-accent-tinted-highlight-border-color);
+  border-radius: var(--primitives-corner-radius-sm);
+  font-size: var(--primitives-font-size-90);
+  color: var(--semantics-content-color);
 }
 
 .ontology-summary {
-  margin: 0 0 var(--rvo-space-xs);
+  margin: 0 0 var(--primitives-space-8);
   font-style: italic;
-  line-height: var(--rvo-line-height-md);
+  line-height: var(--primitives-line-height-snug);
 }
 
 .ontology-row {
-  margin-block-end: var(--rvo-space-xs);
+  margin-block-end: var(--primitives-space-8);
 }
 
 .ontology-row:last-child {
@@ -146,51 +146,51 @@ const hasContent = computed(() => {
 
 .ontology-label {
   display: block;
-  font-size: var(--rvo-font-size-2xs);
+  font-size: var(--primitives-font-size-70);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  font-weight: var(--rvo-font-weight-semibold);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   color: var(--invulhulp-color-text-muted);
-  margin-block-end: var(--rvo-space-3xs);
+  margin-block-end: var(--primitives-space-2);
 }
 
 .ontology-chips {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-3xs) var(--rvo-space-2xs);
+  gap: var(--primitives-space-2) var(--primitives-space-4);
 }
 
 .ontology-chip {
-  background: var(--rvo-color-hemelblauw-150);
-  border: 1px solid var(--rvo-color-hemelblauw-300);
-  color: var(--rvo-color-lintblauw);
+  background: var(--semantics-categories-accent-tinted-background-color);
+  border: 1px solid var(--semantics-categories-accent-tinted-highlight-border-color);
+  color: var(--semantics-content-accent-color);
   border-radius: 999px;
   padding: 2px 9px;
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
   line-height: 1.4;
 }
 
 .ontology-chip--ent {
-  background: var(--rvo-color-groen-150);
-  border-color: var(--rvo-color-groen-300);
-  color: var(--rvo-color-groen-750);
+  background: var(--semantics-categories-success-tinted-background-color);
+  border-color: var(--semantics-categories-success-tinted-highlight-border-color);
+  color: var(--semantics-categories-success-tinted-content-color);
 }
 
 .ontology-list {
   margin: 0;
-  padding-inline-start: var(--rvo-space-md);
-  line-height: var(--rvo-line-height-md);
+  padding-inline-start: var(--primitives-space-16);
+  line-height: var(--primitives-line-height-snug);
 }
 
 .ontology-date {
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
 }
 
 .ontology-note {
-  margin: var(--rvo-space-xs) 0 0;
-  font-size: var(--rvo-font-size-xs);
-  color: var(--rvo-color-oranje-750);
+  margin: var(--primitives-space-8) 0 0;
+  font-size: var(--primitives-font-size-80);
+  color: var(--semantics-categories-warning-tinted-content-color);
   font-style: italic;
 }
 </style>

@@ -33,21 +33,19 @@
             @keydown.enter.prevent="submitClarification"
           />
           <div class="tiptap-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
-            <button
-              type="button"
-              class="rvo-button rvo-button--primary rvo-button--size-sm"
+            <nldd-button
+              variant="primary"
+              size="sm"
+              text="Verstuur"
               :disabled="!clarificationInput.trim()"
               @click="submitClarification"
-            >
-              Verstuur
-            </button>
-            <button
-              type="button"
-              class="rvo-button rvo-button--secondary rvo-button--size-sm"
+            />
+            <nldd-button
+              variant="secondary"
+              size="sm"
+              text="Annuleer"
               @click="cancelClarification"
-            >
-              Annuleer
-            </button>
+            />
           </div>
         </template>
 
@@ -80,20 +78,18 @@
           ></div>
 
           <div class="tiptap-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
-            <button
-              type="button"
-              class="rvo-button rvo-button--primary rvo-button--size-sm"
+            <nldd-button
+              variant="primary"
+              size="sm"
+              text="Overnemen"
               @click="acceptSuggestion"
-            >
-              Overnemen
-            </button>
-            <button
-              type="button"
-              class="rvo-button rvo-button--secondary rvo-button--size-sm"
+            />
+            <nldd-button
+              variant="secondary"
+              size="sm"
+              text="Afwijzen"
               @click="rejectSuggestion"
-            >
-              Afwijzen
-            </button>
+            />
           </div>
         </template>
       </div>
@@ -102,9 +98,10 @@
     <!-- Toolbar row: improve button + error -->
     <div class="tiptap-toolbar">
       <template v-if="!store.readOnly">
-        <button
-          type="button"
-          class="rvo-button rvo-button--tertiary rvo-button--size-sm tiptap-mark-btn"
+        <nldd-button
+          variant="neutral-transparent"
+          size="sm"
+          class="tiptap-mark-btn"
           :class="{ 'tiptap-mark-btn--active': editor?.isActive('bold') }"
           :aria-pressed="editor?.isActive('bold') ?? false"
           aria-label="Vetgedrukt (Ctrl+B)"
@@ -112,11 +109,14 @@
           @mousedown.prevent
           @click="editor?.chain().focus().toggleBold().run()"
         >
-          <strong>B</strong>
-        </button>
-        <button
-          type="button"
-          class="rvo-button rvo-button--tertiary rvo-button--size-sm tiptap-mark-btn"
+          <span slot="text">
+<strong>B</strong>
+          </span>
+        </nldd-button>
+        <nldd-button
+          variant="neutral-transparent"
+          size="sm"
+          class="tiptap-mark-btn"
           :class="{ 'tiptap-mark-btn--active': editor?.isActive('italic') }"
           :aria-pressed="editor?.isActive('italic') ?? false"
           aria-label="Cursief (Ctrl+I)"
@@ -124,19 +124,23 @@
           @mousedown.prevent
           @click="editor?.chain().focus().toggleItalic().run()"
         >
-          <em>I</em>
-        </button>
+          <span slot="text">
+<em>I</em>
+          </span>
+        </nldd-button>
       </template>
-      <button
+      <nldd-button
+        variant="neutral-transparent"
+        size="sm"
         v-if="!store.readOnly && suggestion === null && !streamingText && pendingClarification === null"
-        type="button"
         :disabled="isLoading || !hasContent"
-        class="rvo-button rvo-button--tertiary rvo-button--size-sm"
         @click="requestImprovement"
       >
-        <span v-if="isLoading">Bezig…</span>
+        <span slot="text">
+<span v-if="isLoading">Bezig…</span>
         <span v-else>✦ Verbeter tekst</span>
-      </button>
+        </span>
+      </nldd-button>
       <span v-if="error" class="tiptap-toolbar__error rvo-text rvo-text--sm" role="alert">{{ error }}</span>
     </div>
   </div>
@@ -420,7 +424,7 @@ function rejectSuggestion() {
   border-radius: 3px 3px 3px 0;
   color: #fff;
   font-size: 0.7rem;
-  font-weight: var(--rvo-font-weight-bold, 700);
+  font-weight: var(--primitives-font-weight-body-bold, 700);
   left: -1px;
   line-height: normal;
   padding: 0.05rem 0.3rem;
@@ -435,17 +439,17 @@ function rejectSuggestion() {
 .tiptap-ai-busy {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   margin: 0;
-  padding: var(--rvo-space-2xs) var(--rvo-space-sm);
+  padding: var(--primitives-space-4) var(--primitives-space-12);
   box-sizing: border-box;
   background: linear-gradient(135deg, rgba(15, 45, 92, 0.08), rgba(91, 33, 182, 0.12));
   border: 1px solid rgba(91, 33, 182, 0.4);
   border-block-end: 0;
-  border-radius: var(--rvo-border-radius-sm) var(--rvo-border-radius-sm) 0 0;
+  border-radius: var(--primitives-corner-radius-sm) var(--primitives-corner-radius-sm) 0 0;
   color: #0f2d5c;
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
 }
 
 /* Het veld eronder sluit aan op de strook. */
@@ -492,37 +496,37 @@ function rejectSuggestion() {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .tiptap-suggestion__label {
-  font-size: var(--rvo-font-size-xs);
-  font-weight: var(--rvo-font-weight-bold);
+  font-size: var(--primitives-font-size-80);
+  font-weight: var(--primitives-font-weight-body-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
 }
 
 .tiptap-suggestion__rationale {
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
   color: var(--invulhulp-color-text-muted);
   font-style: italic;
 }
 
 .tiptap-suggestion__actions {
-  margin-block-start: var(--rvo-space-xs);
+  margin-block-start: var(--primitives-space-8);
 }
 
 .tiptap-diff {
-  font-size: var(--rvo-font-size-sm);
-  line-height: var(--rvo-line-height-md);
-  padding: var(--rvo-space-xs) var(--rvo-space-sm);
-  background: var(--rvo-color-wit);
+  font-size: var(--primitives-font-size-90);
+  line-height: var(--primitives-line-height-snug);
+  padding: var(--primitives-space-8) var(--primitives-space-12);
+  background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm);
+  border-radius: var(--primitives-corner-radius-sm);
   white-space: pre-wrap;
   word-break: break-word;
-  margin-block: var(--rvo-space-xs);
+  margin-block: var(--primitives-space-8);
 }
 
 .tiptap-diff__empty {
@@ -533,19 +537,19 @@ function rejectSuggestion() {
 .tiptap-diff__cursor {
   animation: invulhulp-blink var(--invulhulp-loop-blink) step-end infinite;
   margin-inline-start: 1px;
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
 }
 
 .tiptap-diff__add {
-  background: var(--rvo-color-groen-150);
-  color: var(--rvo-color-groen-750);
+  background: var(--semantics-categories-success-tinted-background-color);
+  color: var(--semantics-categories-success-tinted-content-color);
   border-radius: 2px;
   padding-inline: 1px;
 }
 
 .tiptap-diff__del {
-  background: var(--rvo-color-rood-150);
-  color: var(--rvo-color-rood-750);
+  background: var(--semantics-categories-critical-tinted-background-color);
+  color: var(--semantics-categories-critical-tinted-content-color);
   text-decoration: line-through;
   border-radius: 2px;
   padding-inline: 1px;
@@ -554,16 +558,16 @@ function rejectSuggestion() {
 .tiptap-toolbar {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
+  padding: var(--primitives-space-4) var(--primitives-space-8);
   border: 1px solid var(--invulhulp-color-border-strong);
   border-block-start: 0;
-  border-radius: 0 0 var(--rvo-border-radius-sm) var(--rvo-border-radius-sm);
-  background: var(--rvo-color-grijs-050, #fafafa);
+  border-radius: 0 0 var(--primitives-corner-radius-sm) var(--primitives-corner-radius-sm);
+  background: var(--semantics-surfaces-tinted-background-color, #fafafa);
 }
 
 .tiptap-toolbar__error {
-  color: var(--rvo-color-rood);
+  color: var(--semantics-content-critical-color);
 }
 
 .tiptap-mark-btn {
@@ -572,21 +576,21 @@ function rejectSuggestion() {
 }
 
 .tiptap-mark-btn--active {
-  background: var(--rvo-color-hemelblauw-150, #d9ebf7);
-  border-radius: var(--rvo-border-radius-sm);
+  background: var(--semantics-categories-accent-tinted-background-color, #d9ebf7);
+  border-radius: var(--primitives-corner-radius-sm);
 }
 
 .tiptap-clarification__question {
-  font-size: var(--rvo-font-size-sm);
-  margin-block: var(--rvo-space-2xs) var(--rvo-space-xs);
+  font-size: var(--primitives-font-size-90);
+  margin-block: var(--primitives-space-4) var(--primitives-space-8);
 }
 
 .tiptap-diagram {
-  background: var(--rvo-color-wit);
+  background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm);
-  padding: var(--rvo-space-xs);
-  margin-block-end: var(--rvo-space-xs);
+  border-radius: var(--primitives-corner-radius-sm);
+  padding: var(--primitives-space-8);
+  margin-block-end: var(--primitives-space-8);
   overflow-x: auto;
 }
 

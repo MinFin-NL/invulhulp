@@ -20,10 +20,13 @@
             u kunt daarna terugkeren naar dit assessment.
           </div>
         </div>
-        <button type="button" class="rvo-button rvo-button--primary risk-classification__start" @click="openModal">
-          <span class="risk-classification__start-icon" aria-hidden="true" />
-          Beslishulp AI-verordening doorlopen
-        </button>
+        <nldd-button
+          class="risk-classification__start"
+          variant="primary"
+          start-icon="score-meter"
+          text="Beslishulp AI-verordening doorlopen"
+          @click="openModal"
+        />
       </div>
 
       <!-- Run available: show it, then let the user adopt it for this assessment. -->
@@ -59,12 +62,16 @@
         </p>
 
         <div class="rvo-layout-row rvo-layout-gap--md risk-classification__result-actions">
-          <button type="button" class="rvo-button rvo-button--secondary" @click="openModal">
-            Beslishulp bekijken of herzien
-          </button>
-          <button type="button" class="rvo-button rvo-button--primary" @click="onConfirm">
-            {{ adopted ? 'Doorgaan →' : 'Overnemen en doorgaan →' }}
-          </button>
+          <nldd-button
+            variant="secondary"
+            text="Beslishulp bekijken of herzien"
+            @click="openModal"
+          />
+          <nldd-button
+            variant="primary"
+            :text="adopted ? 'Doorgaan →' : 'Overnemen en doorgaan →'"
+            @click="onConfirm"
+          />
         </div>
       </div>
     </div>
@@ -139,61 +146,51 @@ function onConfirm() {
 
 <style scoped>
 .risk-classification {
-  padding-block: var(--rvo-space-2xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-40) var(--primitives-space-48);
 }
 
 .risk-classification__kicker {
   color: var(--invulhulp-color-text-subtle);
-  margin: 0 0 var(--rvo-space-3xs);
+  margin: 0 0 var(--primitives-space-2);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .risk-classification__title {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   margin: 0;
 }
 
 .risk-classification__lead {
-  margin-block-start: var(--rvo-space-sm);
+  margin-block-start: var(--primitives-space-12);
 }
 
 .risk-classification__subtitle {
-  color: var(--rvo-color-lintblauw);
-  margin: 0 0 var(--rvo-space-2xs);
+  color: var(--semantics-content-accent-color);
+  margin: 0 0 var(--primitives-space-4);
 }
 
 .risk-classification__start {
   align-self: flex-start;
-  gap: var(--rvo-space-2xs);
-}
-
-.risk-classification__start-icon {
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-  flex-shrink: 0;
-  background-color: currentColor;
-  /* Static stylesheet url() — see the NLDS icon-mask note in DossierDetail.vue. */
-  -webkit-mask: url('@nl-rvo/assets/icons/gebruiksvoorwerpen/weegschaal.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/gebruiksvoorwerpen/weegschaal.svg') center / contain no-repeat;
+  gap: var(--primitives-space-4);
 }
 
 .risk-classification__labels {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .risk-classification__label {
-  font-size: var(--rvo-font-size-sm);
-  padding: 0 var(--rvo-space-2xs);
-  background: var(--rvo-color-lichtblauw-150);
-  border: 1px solid var(--rvo-color-lichtblauw-300);
-  border-radius: var(--rvo-border-radius-md);
-  color: var(--rvo-color-lintblauw);
+  font-size: var(--primitives-font-size-90);
+  padding: 0 var(--primitives-space-4);
+  background: var(--semantics-surfaces-tinted-background-color);
+  border: 1px solid var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
+  color: var(--semantics-content-accent-color);
 }
 
 .risk-classification__meta {

@@ -37,7 +37,7 @@ function initials(name: string): string {
 .presence-bar {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-2xs, 0.25rem);
+  gap: var(--primitives-space-4, 0.25rem);
 }
 
 .presence-avatar {
@@ -49,8 +49,8 @@ function initials(name: string): string {
   border-radius: 50%;
   color: #fff;
   font-size: 0.7rem;
-  font-weight: var(--rvo-font-weight-bold, 700);
-  border: 2px solid var(--rvo-color-wit, #fff);
+  font-weight: var(--primitives-font-weight-body-bold, 700);
+  border: 2px solid var(--semantics-surfaces-base-background-color, #fff);
   margin-inline-start: -0.5rem;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
 }
@@ -60,8 +60,8 @@ function initials(name: string): string {
 }
 
 .presence-label {
-  margin-inline-start: var(--rvo-space-xs, 0.5rem);
-  font-size: var(--rvo-font-size-sm, 0.875rem);
+  margin-inline-start: var(--primitives-space-8, 0.5rem);
+  font-size: var(--primitives-font-size-90, 0.875rem);
   color: var(--invulhulp-color-text-muted, #6b7280);
   font-style: italic;
 }

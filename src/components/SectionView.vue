@@ -65,20 +65,21 @@
 
       <!-- Navigation -->
       <div class="rvo-layout-row rvo-layout-gap--md section-view__nav">
-        <button
+        <nldd-button
+          variant="secondary"
+          text="← Vorige"
           v-if="hasPrev"
           @click="$emit('prev')"
-          class="rvo-button rvo-button--secondary"
-        >
-          ← Vorige
-        </button>
+        />
         <div v-else aria-hidden="true"></div>
-        <button
+        <nldd-button
+          variant="primary"
           @click="onNext"
-          class="rvo-button rvo-button--primary"
         >
-          {{ nextLabel }} →
-        </button>
+          <span slot="text">
+{{ nextLabel }} →
+          </span>
+        </nldd-button>
       </div>
 
     </div>
@@ -139,16 +140,16 @@ function onNext() {
 
 <style scoped>
 .section-view {
-  padding-block: var(--rvo-space-2xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-40) var(--primitives-space-48);
 }
 
 .section-view__kicker-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
   flex-wrap: wrap;
-  margin-block-end: var(--rvo-space-3xs);
+  margin-block-end: var(--primitives-space-2);
 }
 
 .section-view__kicker {
@@ -165,13 +166,13 @@ function onNext() {
 }
 
 .section-view__title {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   margin: 0;
 }
 
 .section-view__subsection-title {
-  color: var(--rvo-color-grijs-800);
-  margin: 0 0 var(--rvo-space-2xs);
+  color: var(--semantics-content-color);
+  margin: 0 0 var(--primitives-space-4);
 }
 
 .section-view__subsection-desc {
@@ -184,6 +185,6 @@ function onNext() {
 .section-view__nav {
   justify-content: space-between;
   border-block-start: 1px solid var(--invulhulp-color-border);
-  padding-block-start: var(--rvo-space-xl);
+  padding-block-start: var(--primitives-space-32);
 }
 </style>

@@ -8,13 +8,13 @@
       <span class="source-panel__warning-text">
         ⚠ Niet teruggevonden in de bronnen — controleer dit antwoord
       </span>
-      <button
-        type="button"
-        class="rvo-button rvo-button--tertiary rvo-button--size-sm source-panel__warning-dismiss"
+      <nldd-button
+        variant="neutral-transparent"
+        size="sm"
+        class="source-panel__warning-dismiss"
+        text="Gecontroleerd"
         @click="emit('dismiss-warning')"
-      >
-        Gecontroleerd
-      </button>
+      />
     </div>
 
     <template v-if="sources.length > 0">
@@ -47,13 +47,13 @@
               :class="{ 'source-panel__mark': seg.marked }"
             >{{ seg.text }}</span>
           </div>
-          <button
-            type="button"
-            class="rvo-button rvo-button--tertiary rvo-button--size-sm source-panel__show-doc"
+          <nldd-button
+            variant="neutral-transparent"
+            size="sm"
+            class="source-panel__show-doc"
+            text="Toon in document"
             @click="emit('show-document', entry.source)"
-          >
-            Toon in document
-          </button>
+          />
         </div>
       </div>
     </template>
@@ -109,13 +109,13 @@ function fragmentLabel(source: AnswerSource): string {
 
 <style scoped>
 .source-panel {
-  margin-block-start: var(--rvo-space-xs);
+  margin-block-start: var(--primitives-space-8);
 }
 
 .source-panel__stale {
-  margin: var(--rvo-space-2xs) 0;
-  font-size: var(--rvo-font-size-sm);
-  color: var(--rvo-color-grijs-700, #4f5457);
+  margin: var(--primitives-space-4) 0;
+  font-size: var(--primitives-font-size-90);
+  color: var(--semantics-content-secondary-color, #4f5457);
 }
 
 .source-panel__warning {
@@ -123,18 +123,18 @@ function fragmentLabel(source: AnswerSource): string {
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: var(--rvo-space-xs);
-  background: var(--rvo-color-donkergeel-150);
-  border: 1px solid var(--rvo-color-donkergeel-300);
-  border-radius: var(--rvo-border-radius-sm);
-  padding: var(--rvo-space-2xs) var(--rvo-space-sm);
-  margin-block-end: var(--rvo-space-2xs);
+  gap: var(--primitives-space-8);
+  background: var(--semantics-categories-warning-tinted-background-color);
+  border: 1px solid var(--semantics-categories-warning-tinted-highlight-border-color);
+  border-radius: var(--primitives-corner-radius-sm);
+  padding: var(--primitives-space-4) var(--primitives-space-12);
+  margin-block-end: var(--primitives-space-4);
 }
 
 .source-panel__warning-text {
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold);
-  color: var(--rvo-color-oranje-750);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  color: var(--semantics-categories-warning-tinted-content-color);
 }
 
 .source-panel__warning-dismiss {
@@ -144,64 +144,64 @@ function fragmentLabel(source: AnswerSource): string {
 .source-panel__toggle {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   background: none;
   border: 0;
   padding: 0;
   cursor: pointer;
-  font-weight: var(--rvo-font-weight-semibold);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   color: var(--invulhulp-color-text-muted);
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .source-panel__toggle:hover {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
 }
 
 .source-panel__chevron {
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
 }
 
 .source-panel__cards {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-xs);
-  margin-block-start: var(--rvo-space-2xs);
+  gap: var(--primitives-space-8);
+  margin-block-start: var(--primitives-space-4);
 }
 
 .source-panel__card {
-  background: var(--rvo-color-wit);
+  background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm);
-  padding: var(--rvo-space-xs) var(--rvo-space-sm);
+  border-radius: var(--primitives-corner-radius-sm);
+  padding: var(--primitives-space-8) var(--primitives-space-12);
 }
 
 .source-panel__card-header {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--rvo-space-sm);
-  margin-block-end: var(--rvo-space-2xs);
+  gap: var(--primitives-space-12);
+  margin-block-end: var(--primitives-space-4);
 }
 
 .source-panel__doc-name {
-  font-weight: var(--rvo-font-weight-semibold);
-  font-size: var(--rvo-font-size-sm);
-  color: var(--rvo-color-lintblauw);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  font-size: var(--primitives-font-size-90);
+  color: var(--semantics-content-accent-color);
   word-break: break-word;
 }
 
 .source-panel__fragment {
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
   color: var(--invulhulp-color-text-subtle);
   flex-shrink: 0;
 }
 
 .source-panel__snippet {
-  font-size: var(--rvo-font-size-sm);
-  line-height: var(--rvo-line-height-md);
+  font-size: var(--primitives-font-size-90);
+  line-height: var(--primitives-line-height-snug);
   white-space: pre-wrap;
   word-break: break-word;
   max-block-size: 12em;
@@ -210,13 +210,13 @@ function fragmentLabel(source: AnswerSource): string {
 }
 
 .source-panel__mark {
-  background: var(--rvo-color-donkergeel-150);
-  color: var(--rvo-color-zwart, inherit);
+  background: var(--semantics-categories-warning-tinted-background-color);
+  color: var(--semantics-content-color, inherit);
   border-radius: 2px;
-  box-shadow: 0 0 0 2px var(--rvo-color-donkergeel-150);
+  box-shadow: 0 0 0 2px var(--semantics-categories-warning-tinted-background-color);
 }
 
 .source-panel__show-doc {
-  margin-block-start: var(--rvo-space-2xs);
+  margin-block-start: var(--primitives-space-4);
 }
 </style>

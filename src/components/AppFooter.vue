@@ -30,7 +30,7 @@
 .invulhulp-footer__inner {
   pointer-events: auto;
   padding-block: 3px;
-  padding-inline: var(--rvo-space-md);
+  padding-inline: var(--primitives-space-16);
 }
 
 .invulhulp-footer__alert {

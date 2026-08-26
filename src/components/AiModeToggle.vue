@@ -12,20 +12,18 @@
         <span class="ai-mode-empty__hint">Controleer of je de juiste brondocumenten hebt geüpload.</span>
       </span>
       <span class="ai-mode-empty__actions">
-        <button
-          type="button"
-          class="rvo-button rvo-button--primary rvo-button--size-sm"
+        <nldd-button
+          variant="primary"
+          size="sm"
+          text="Probeer opnieuw"
           @click="$emit('activate', formId)"
-        >
-          Probeer opnieuw
-        </button>
-        <button
-          type="button"
-          class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+        />
+        <nldd-button
+          variant="neutral-transparent"
+          size="sm"
+          text="Sluiten"
           @click="$emit('dismiss', formId)"
-        >
-          Sluiten
-        </button>
+        />
       </span>
     </div>
 
@@ -73,13 +71,13 @@
         <template v-if="phase">Gladstrijken<span class="ai-mode-active__progress">{{ Math.min(phase.current + 1, phase.total) }}/{{ phase.total }}</span></template>
         <template v-else>AI Modus<template v-if="progress"><span class="ai-mode-active__progress">{{ progress.filled }}/{{ progress.total }}</span></template></template>
       </span>
-      <button
-        type="button"
-        class="rvo-button rvo-button--tertiary rvo-button--size-sm ai-mode-stop-btn"
+      <nldd-button
+        variant="neutral-transparent"
+        size="sm"
+        class="ai-mode-stop-btn"
+        text="Stop"
         @click="$emit('cancel', formId)"
-      >
-        Stop
-      </button>
+      />
     </div>
 
     <!-- Idle state -->
@@ -133,7 +131,7 @@ defineEmits<{
 
 <style scoped>
 .ai-mode-toggle {
-  margin-block-start: var(--rvo-space-sm);
+  margin-block-start: var(--primitives-space-12);
   width: 100%;
 }
 
@@ -142,16 +140,16 @@ defineEmits<{
 .ai-mode-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
-  padding: var(--rvo-space-2xs) var(--rvo-space-sm);
+  gap: var(--primitives-space-4);
+  padding: var(--primitives-space-4) var(--primitives-space-12);
   background: linear-gradient(135deg, #0f2d5c 0%, #5b21b6 50%, #0ea5e9 100%);
   background-size: 200% 100%;
   color: #fff;
   border: 0;
   border-radius: 999px;
   font: inherit;
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   cursor: pointer;
   letter-spacing: 0.01em;
   transition: box-shadow var(--invulhulp-duration-normal), background-position var(--invulhulp-duration-deliberate) var(--invulhulp-ease);
@@ -184,12 +182,12 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--rvo-space-2xs);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  gap: var(--primitives-space-4);
+  padding: var(--primitives-space-4) var(--primitives-space-8);
   background: linear-gradient(135deg, rgba(15, 45, 92, 0.08), rgba(91, 33, 182, 0.12));
   border: 1px solid rgba(91, 33, 182, 0.4);
   border-radius: 999px;
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
   width: 100%;
   box-sizing: border-box;
 }
@@ -205,8 +203,8 @@ defineEmits<{
 .ai-mode-active__label {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
-  font-weight: var(--rvo-font-weight-semibold);
+  gap: var(--primitives-space-4);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   color: #0f2d5c;
   white-space: nowrap;
   flex-shrink: 1;
@@ -221,16 +219,16 @@ defineEmits<{
   background: rgba(91, 33, 182, 0.12);
   border-radius: 999px;
   font-size: 0.8em;
-  font-weight: var(--rvo-font-weight-bold);
+  font-weight: var(--primitives-font-weight-body-bold);
   color: #5b21b6;
   letter-spacing: 0.02em;
 }
 
 .ai-mode-stop-btn {
-  color: var(--rvo-color-rood) !important;
+  color: var(--semantics-content-critical-color) !important;
   flex-shrink: 0;
   flex-grow: 0;
-  padding-inline: var(--rvo-space-xs) !important;
+  padding-inline: var(--primitives-space-8) !important;
   min-inline-size: 0 !important;
 }
 
@@ -239,12 +237,12 @@ defineEmits<{
 .ai-mode-done {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs) var(--rvo-space-2xs) var(--rvo-space-sm);
+  gap: var(--primitives-space-4);
+  padding: var(--primitives-space-4) var(--primitives-space-8) var(--primitives-space-4) var(--primitives-space-12);
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(15, 45, 92, 0.1));
   border: 1px solid rgba(14, 165, 233, 0.45);
-  border-radius: var(--rvo-border-radius-md, 8px);
-  font-size: var(--rvo-font-size-sm);
+  border-radius: var(--primitives-corner-radius-md, 8px);
+  font-size: var(--primitives-font-size-90);
   width: 100%;
   box-sizing: border-box;
 }
@@ -266,13 +264,13 @@ defineEmits<{
 }
 
 .ai-mode-done__count {
-  font-weight: var(--rvo-font-weight-semibold);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   color: #0f2d5c;
 }
 
 .ai-mode-done__skipped {
-  font-weight: var(--rvo-font-weight-normal);
-  font-size: var(--rvo-font-size-xs);
+  font-weight: var(--primitives-font-weight-body-regular);
+  font-size: var(--primitives-font-size-80);
   color: var(--invulhulp-color-text-subtle, #6b7280);
 }
 
@@ -282,7 +280,7 @@ defineEmits<{
   border: 0;
   background: transparent;
   color: #0f2d5c;
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
   text-decoration: underline;
   cursor: pointer;
 }
@@ -325,12 +323,12 @@ defineEmits<{
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--rvo-space-xs);
-  padding: var(--rvo-space-xs) var(--rvo-space-sm);
+  gap: var(--primitives-space-8);
+  padding: var(--primitives-space-8) var(--primitives-space-12);
   background: #fdf6ec;
   border: 1px solid #e0b561;
-  border-radius: var(--rvo-border-radius-md, 8px);
-  font-size: var(--rvo-font-size-sm);
+  border-radius: var(--primitives-corner-radius-md, 8px);
+  font-size: var(--primitives-font-size-90);
   width: 100%;
   box-sizing: border-box;
 }
@@ -351,20 +349,20 @@ defineEmits<{
 }
 
 .ai-mode-empty__title {
-  font-weight: var(--rvo-font-weight-semibold);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   color: #7a5b06;
 }
 
 .ai-mode-empty__hint {
   color: #8a6d3b;
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
 }
 
 .ai-mode-empty__actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 /* ── Keyframes ───────────────────────────────────────────────────────────── */

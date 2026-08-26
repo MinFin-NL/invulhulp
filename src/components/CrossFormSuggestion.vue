@@ -51,20 +51,18 @@
           </div>
 
           <div class="cross-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
-            <button
-              type="button"
-              class="rvo-button rvo-button--primary rvo-button--size-sm"
+            <nldd-button
+              variant="primary"
+              size="sm"
+              text="Overnemen"
               @click="acceptSuggestion"
-            >
-              Overnemen
-            </button>
-            <button
-              type="button"
-              class="rvo-button rvo-button--secondary rvo-button--size-sm"
+            />
+            <nldd-button
+              variant="secondary"
+              size="sm"
+              text="Afwijzen"
               @click="rejectSuggestion"
-            >
-              Afwijzen
-            </button>
+            />
           </div>
         </template>
       </div>
@@ -77,24 +75,25 @@
       v-if="(canCopy || canSynthesize) && suggestion === null && !streamingText"
       class="cross-suggestion__actions rvo-layout-row rvo-layout-gap--xs"
     >
-      <button
+      <nldd-button
+        variant="secondary"
+        size="sm"
+        :text="alreadyCopied ? 'Opnieuw overnemen' : 'Gebruik direct'"
         v-if="canCopy"
-        type="button"
-        class="rvo-button rvo-button--secondary rvo-button--size-sm"
         @click="useDirectly"
-      >
-        {{ alreadyCopied ? 'Opnieuw overnemen' : 'Gebruik direct' }}
-      </button>
-      <button
+      />
+      <nldd-button
+        variant="primary"
+        size="sm"
         v-if="canSynthesize"
-        type="button"
-        class="rvo-button rvo-button--primary rvo-button--size-sm"
         :disabled="isLoading"
         @click="requestSynthesis"
       >
-        <span v-if="isLoading">Bezig…</span>
+        <span slot="text">
+<span v-if="isLoading">Bezig…</span>
         <span v-else>✦ AI-suggestie</span>
-      </button>
+        </span>
+      </nldd-button>
     </div>
 
     <span v-if="error" class="cross-suggestion__error rvo-text rvo-text--sm" role="alert">{{ error }}</span>
@@ -266,52 +265,52 @@ function rejectSuggestion() {
 
 <style scoped>
 .cross-suggestion {
-  margin-block-start: var(--rvo-space-sm);
-  border: 1px solid var(--rvo-color-hemelblauw-300);
-  border-radius: var(--rvo-border-radius-md);
-  background: var(--rvo-color-hemelblauw-150);
-  padding: var(--rvo-space-sm) var(--rvo-space-md);
-  font-size: var(--rvo-font-size-sm);
+  margin-block-start: var(--primitives-space-12);
+  border: 1px solid var(--semantics-categories-accent-tinted-highlight-border-color);
+  border-radius: var(--primitives-corner-radius-md);
+  background: var(--semantics-categories-accent-tinted-background-color);
+  padding: var(--primitives-space-12) var(--primitives-space-16);
+  font-size: var(--primitives-font-size-90);
 }
 
 .cross-suggestion__header {
   display: flex;
   align-items: baseline;
-  gap: var(--rvo-space-xs);
-  margin-block-end: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
+  margin-block-end: var(--primitives-space-8);
   flex-wrap: wrap;
 }
 
 .cross-suggestion__note {
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
   color: var(--invulhulp-color-text-muted);
 }
 
 .cross-suggestion__label {
-  font-weight: var(--rvo-font-weight-semibold);
-  color: var(--rvo-color-lintblauw);
-  font-size: var(--rvo-font-size-xs);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  color: var(--semantics-content-accent-color);
+  font-size: var(--primitives-font-size-80);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .cross-suggestion__block {
-  background: var(--rvo-color-wit);
-  border: 1px solid var(--rvo-color-hemelblauw-300);
-  border-radius: var(--rvo-border-radius-sm);
-  padding: var(--rvo-space-xs) var(--rvo-space-sm);
-  margin-block-end: var(--rvo-space-xs);
+  background: var(--semantics-surfaces-base-background-color);
+  border: 1px solid var(--semantics-categories-accent-tinted-highlight-border-color);
+  border-radius: var(--primitives-corner-radius-sm);
+  padding: var(--primitives-space-8) var(--primitives-space-12);
+  margin-block-end: var(--primitives-space-8);
 }
 
 .cross-suggestion__question {
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
   color: var(--invulhulp-color-text-muted);
-  font-weight: var(--rvo-font-weight-semibold);
-  margin-block-end: var(--rvo-space-3xs);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  margin-block-end: var(--primitives-space-2);
 }
 
 .cross-suggestion__answer {
-  color: var(--rvo-color-grijs-800);
+  color: var(--semantics-content-color);
   white-space: pre-wrap;
   word-break: break-word;
   max-block-size: 100px;
@@ -319,52 +318,52 @@ function rejectSuggestion() {
 }
 
 .cross-suggestion__actions {
-  margin-block-start: var(--rvo-space-xs);
+  margin-block-start: var(--primitives-space-8);
   align-items: center;
   flex-wrap: wrap;
 }
 
 .cross-suggestion__panel {
-  margin-block: var(--rvo-space-xs) var(--rvo-space-xs);
+  margin-block: var(--primitives-space-8) var(--primitives-space-8);
 }
 
 .cross-suggestion__panel-header {
   display: flex;
   align-items: baseline;
-  gap: var(--rvo-space-xs);
-  margin-block-end: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
+  margin-block-end: var(--primitives-space-8);
   flex-wrap: wrap;
 }
 
 .cross-suggestion__panel-label {
-  font-weight: var(--rvo-font-weight-bold);
-  font-size: var(--rvo-font-size-xs);
-  color: var(--rvo-color-groen-750);
+  font-weight: var(--primitives-font-weight-body-bold);
+  font-size: var(--primitives-font-size-80);
+  color: var(--semantics-categories-success-tinted-content-color);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .cross-suggestion__rationale {
-  font-size: var(--rvo-font-size-xs);
-  color: var(--rvo-color-groen-600);
+  font-size: var(--primitives-font-size-80);
+  color: var(--semantics-categories-success-tinted-content-color);
   font-style: italic;
 }
 
 .cross-suggestion__error {
-  color: var(--rvo-color-rood);
-  margin-block-start: var(--rvo-space-2xs);
+  color: var(--semantics-content-critical-color);
+  margin-block-start: var(--primitives-space-4);
   display: block;
 }
 
 .cross-diff {
-  font-size: var(--rvo-font-size-sm);
-  line-height: var(--rvo-line-height-md);
+  font-size: var(--primitives-font-size-90);
+  line-height: var(--primitives-line-height-snug);
   white-space: pre-wrap;
   word-break: break-word;
-  background: var(--rvo-color-wit);
-  border-radius: var(--rvo-border-radius-sm);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
-  margin-block-end: var(--rvo-space-xs);
+  background: var(--semantics-surfaces-base-background-color);
+  border-radius: var(--primitives-corner-radius-sm);
+  padding: var(--primitives-space-4) var(--primitives-space-8);
+  margin-block-end: var(--primitives-space-8);
 }
 
 .cross-diff__empty {
@@ -375,18 +374,18 @@ function rejectSuggestion() {
 .cross-diff__cursor {
   display: inline-block;
   margin-inline-start: 2px;
-  color: var(--rvo-color-grijs-500);
+  color: var(--semantics-content-secondary-color);
   animation: invulhulp-blink var(--invulhulp-loop-blink) steps(2, start) infinite;
 }
 
 .cross-diff__add {
-  background: var(--rvo-color-groen-150);
-  color: var(--rvo-color-groen-750);
+  background: var(--semantics-categories-success-tinted-background-color);
+  color: var(--semantics-categories-success-tinted-content-color);
 }
 
 .cross-diff__del {
-  background: var(--rvo-color-rood-150);
-  color: var(--rvo-color-rood-750);
+  background: var(--semantics-categories-critical-tinted-background-color);
+  color: var(--semantics-categories-critical-tinted-content-color);
   text-decoration: line-through;
 }
 </style>

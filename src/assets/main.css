@@ -1,48 +1,30 @@
-@import '@nl-rvo/assets/fonts/index.css';
-@import '@nl-rvo/design-tokens/dist/index.css';
-@import '@nl-rvo/component-library-css/dist/index.css';
+/* NLDD design system — global stylesheet (fonts, reset, tokens, form layout).
+   Tokens land on :root, so unlike RVO's .rvo-theme there is no theme class to
+   wrap the app in. The scheme is pinned to light on <html data-scheme="light">
+   in index.html; NLDD ships light-dark() pairs for every colour, so dropping
+   that attribute is all it takes to enable dark mode later. */
+@import '@nldd/design-system/styles';
 
 /* ── Project-wide aliases ────────────────────────────────────────────────── */
-/* RVO ships its color tokens scoped to .rvo-theme, so the aliases must live  */
-/* inside the same scope or they would resolve to `initial` (often black).    */
-.rvo-theme {
-  /* Legacy alias kept for any third-party consumers; canonical primary is lintblauw */
-  --rvo-color-primary: var(--rvo-color-lintblauw);
-
-  /* Project-internal aliases */
-  --invulhulp-color-mandatory: var(--rvo-color-hemelblauw);
-  --invulhulp-color-optional: var(--rvo-color-groen);
-  --invulhulp-color-page-bg: var(--rvo-color-grijs-100);
-  --invulhulp-color-border: var(--rvo-color-grijs-200);
-  --invulhulp-color-border-strong: var(--rvo-color-grijs-300);
-  --invulhulp-color-text-muted: var(--rvo-color-grijs-700);
-  --invulhulp-color-text-subtle: var(--rvo-color-grijs-600);
-
-  /* RVO's component CSS masks its chevrons with --rvo-icon-* tokens, but those
-     are defined in @nl-rvo/assets/icons/index.css — a 5000-line sheet that would
-     emit every icon as a build asset, so we don't import it. Without the token
-     the mask resolves to nothing and the ::after renders as a solid coloured
-     block (visible on every <details class="rvo-expandable-content">). Define
-     just the icons we actually use. Static url() on purpose: a runtime
-     one breaks in the production build (see the icon-mask note in
-     DossierDetail.vue).
-
-     Het vinkje is hetzelfde verhaal, maar erger: een aangevinkte
-     .rvo-checkbox__input tekent ::before als blauw vlak en legt daar ::after
-     (het witte vinkje) overheen. Zonder de mask blijft die ::after een massief
-     wit vierkant dat het blauwe vlak volledig afdekt — een aangevinkt vakje
-     zag er dan precies zo uit als een leeg vakje. */
-  --rvo-icon-delta-omlaag: url('@nl-rvo/assets/icons/functioneel/delta-omlaag.svg');
-  --rvo-icon-delta-omhoog: url('@nl-rvo/assets/icons/functioneel/delta-omhoog.svg');
-  --rvo-icon-vinkje: url('@nl-rvo/assets/icons/functioneel/vinkje.svg');
+/* Names the app reasons in, mapped onto NLDD semantics. Plain :root — NLDD
+   scopes nothing, so these resolve everywhere. */
+:root {
+  --invulhulp-color-mandatory: var(--semantics-content-accent-color);
+  --invulhulp-color-optional: var(--semantics-content-success-color);
+  --invulhulp-color-page-bg: var(--semantics-surfaces-tinted-background-color);
+  --invulhulp-color-surface: var(--semantics-surfaces-base-background-color);
+  --invulhulp-color-border: var(--semantics-dividers-color);
+  --invulhulp-color-border-strong: var(--semantics-surfaces-base-border-color);
+  --invulhulp-color-text: var(--semantics-content-color);
+  --invulhulp-color-text-muted: var(--semantics-content-secondary-color);
+  --invulhulp-color-text-subtle: var(--semantics-content-secondary-color);
+  --invulhulp-color-accent: var(--semantics-content-accent-color);
+  --invulhulp-color-critical: var(--semantics-content-critical-color);
 }
 
 /* ── Motion ──────────────────────────────────────────────────────────────── */
-/* RVO ships geen motion-tokens (@nl-rvo/design-tokens bevat geen duration,
-   easing of timing), dus deze schaal is van ons. Op :root en niet op
-   .rvo-theme: anders dan de kleuraliassen verwijzen ze naar niets dat RVO
-   scoped, en de reduced-motion-override moet ook elementen buiten .rvo-theme
-   bereiken.
+/* NLDD ships no motion tokens (variables.css has no duration or easing beyond
+   the sheet-animation pair), so this scale stays ours.
 
    Kies een duur op rol, niet op gevoel:
      instant      indrukken, hover-state die omklapt
@@ -100,9 +82,7 @@
 }
 
 /* Starting value for the first paint only. AppHeader measures the real header
-   and overwrites this as an inline style on :root, which outranks this rule.
-   Declared on :root and NOT on .rvo-theme on purpose — a .rvo-theme
-   declaration would shadow the inherited measured value. */
+   and overwrites this as an inline style on :root, which outranks this rule. */
 :root {
   --invulhulp-header-height: 173px;
   /* Non-zero only while the AI Modus banner is on screen. */
@@ -115,22 +95,26 @@
 
 body {
   margin: 0;
-  background-color: #f1f5f9; /* fallback before .rvo-theme mounts */
+  background-color: var(--invulhulp-color-page-bg);
+  color: var(--invulhulp-color-text);
+  font-family: var(--primitives-font-family-body, system-ui, sans-serif);
+  font-size: var(--primitives-font-size-90);
+  line-height: var(--primitives-line-height-snug);
 }
 
-.rvo-theme {
+.invulhulp-app {
   background-color: var(--invulhulp-color-page-bg);
   min-block-size: 100vh;
 }
 
 /* ── Footer: don't overlap the sidebar nav ───────────────────────────────── */
 /* When .invulhulp-nav (the form sidebar) is present, push the footer past it */
-.rvo-theme:has(.invulhulp-nav) .invulhulp-footer {
+.invulhulp-app:has(.invulhulp-nav) .invulhulp-footer {
   inset-inline-start: 240px;
   inset-inline-end: 240px;
 }
 
-/* ── Project utilities NL DS doesn't ship ────────────────────────────────── */
+/* ── Project utilities the design system doesn't ship ────────────────────── */
 
 .invulhulp-visually-hidden {
   position: absolute;
@@ -146,48 +130,15 @@ body {
 
 .invulhulp-divider {
   border: 0;
-  border-block-end: 1px solid var(--invulhulp-color-border);
-  margin-block: var(--rvo-space-md) 0;
-}
-
-.invulhulp-progress {
-  inline-size: 100%;
-  block-size: 10px;
-  appearance: none;
-  border: 1px solid var(--invulhulp-color-border-strong);
-  background-color: var(--rvo-color-grijs-200);
-  border-radius: var(--rvo-border-radius-md);
-  overflow: hidden;
-}
-.invulhulp-progress::-webkit-progress-bar {
-  background-color: var(--rvo-color-grijs-200);
-  border-radius: var(--rvo-border-radius-md);
-}
-.invulhulp-progress::-webkit-progress-value {
-  background-color: var(--rvo-color-lintblauw);
-  border-radius: var(--rvo-border-radius-md);
-  transition: inline-size var(--invulhulp-duration-slow) var(--invulhulp-ease);
-}
-.invulhulp-progress::-moz-progress-bar {
-  background-color: var(--rvo-color-lintblauw);
-  border-radius: var(--rvo-border-radius-md);
-}
-
-/* Inverse buttons for dark backgrounds (used in AppHeader). */
-[data-rvo-on-dark] .rvo-button--secondary,
-[data-rvo-on-dark] .rvo-button--tertiary {
-  --utrecht-button-background-color: transparent;
-  --utrecht-button-color: var(--rvo-color-wit);
-  --utrecht-button-border-color: rgb(255 255 255 / 0.6);
-}
-[data-rvo-on-dark] .rvo-button--secondary:hover,
-[data-rvo-on-dark] .rvo-button--tertiary:hover {
-  --utrecht-button-background-color: rgb(255 255 255 / 0.12);
-  --utrecht-button-border-color: var(--rvo-color-wit);
+  border-block-end: var(--semantics-dividers-thickness, 1px) solid
+    var(--invulhulp-color-border);
+  margin-block: var(--primitives-space-16) 0;
 }
 
 /* ── Tiptap (ProseMirror) baseline ───────────────────────────────────────── */
-/* ProseMirror is not an NL DS component; styling stays local but uses tokens. */
+/* ProseMirror is not an NLDD component and can't live in a shadow root, so it
+   is styled here — on NLDD's input-field tokens, so it sits next to
+   <nldd-text-field> without drifting. */
 
 .tiptap-wrapper {
   display: flex;
@@ -198,30 +149,32 @@ body {
 .tiptap-editor {
   inline-size: 100%;
   box-sizing: border-box;
-  border: 1px solid var(--invulhulp-color-border-strong);
-  border-radius: var(--rvo-border-radius-sm) var(--rvo-border-radius-sm) 0 0;
-  background: var(--rvo-color-wit);
+  border: var(--semantics-input-fields-border-width, 1px) solid
+    var(--semantics-input-fields-border-color);
+  border-radius: var(--primitives-corner-radius-sm)
+    var(--primitives-corner-radius-sm) 0 0;
+  background: var(--semantics-input-fields-background-color);
   transition: border-color var(--invulhulp-duration-normal);
 }
 
 .tiptap-editor:focus-within {
-  border-color: var(--rvo-color-lintblauw);
-  box-shadow: 0 0 0 2px rgb(21 66 115 / 0.2);
-  outline: none;
+  border-color: var(--semantics-content-accent-color);
+  outline: var(--semantics-focus-ring-outline);
+  outline-offset: var(--semantics-focus-ring-outline-offset);
 }
 
 .tiptap-editor .ProseMirror {
-  padding: var(--rvo-space-xs) var(--rvo-space-sm);
+  padding: var(--primitives-space-8) var(--primitives-space-12);
   min-block-size: 100px;
   font-family: inherit;
-  font-size: var(--rvo-font-size-md);
-  line-height: var(--rvo-line-height-md);
+  font-size: var(--primitives-font-size-90);
+  line-height: var(--primitives-line-height-snug);
   outline: none;
 }
 
 .tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
-  color: var(--rvo-color-grijs-500);
+  color: var(--semantics-input-fields-placeholder-color);
   pointer-events: none;
   float: left;
   block-size: 0;

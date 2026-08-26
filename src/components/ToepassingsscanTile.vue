@@ -18,7 +18,7 @@
   >
     <div class="scan-tile__body">
       <p class="rvo-text rvo-text--sm rvo-text--bold scan-tile__kicker">
-        <span class="rvo-icon rvo-icon--md scan-tile__icon" aria-hidden="true" />
+        <nldd-icon class="scan-tile__icon" name="magnifier" size="24" color="accent" />
         Toepassingsscan
       </p>
       <h2 id="scan-tile-title" class="rvo-heading rvo-heading--lg scan-tile__title">
@@ -53,9 +53,12 @@
     </div>
 
     <div class="scan-tile__actions">
-      <button type="button" class="rvo-button rvo-button--primary rvo-button--size-sm" @click="$emit('open')">
-        {{ run ? 'Scan bekijken of bijwerken' : 'Start toepassingsscan' }}
-      </button>
+      <nldd-button
+        variant="primary"
+        size="sm"
+        :text="run ? 'Scan bekijken of bijwerken' : 'Start toepassingsscan'"
+        @click="$emit('open')"
+      />
     </div>
   </section>
 </template>
@@ -97,32 +100,21 @@ const completedOn = computed(() =>
   align-items: flex-start;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: var(--rvo-space-md);
-  margin-block-end: var(--rvo-space-2xl);
+  gap: var(--primitives-space-16);
+  margin-block-end: var(--primitives-space-40);
   /* Same frame as the bands above and below it (bulk-ai, Vooraf), so the four
      dossier-level blocks read as one column instead of four stray boxes. */
-  --rvo-card-outline-border-color: var(--rvo-color-lichtblauw-300);
-  border-radius: var(--rvo-border-radius-md);
+  --rvo-card-outline-border-color: var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
 }
 
 .scan-tile__body {
   flex: 1 1 28rem;
 }
 
-/* .rvo-icon only sets a min-inline-size — without an explicit box the mask has
-   no height to paint in, which leaves an invisible icon that still takes up
-   its width. Sized here like every other recoloured icon in the app. */
 .scan-tile__icon {
-  display: inline-block;
-  inline-size: var(--rvo-size-md);
-  block-size: var(--rvo-size-md);
   flex-shrink: 0;
-  margin-inline-end: var(--rvo-space-2xs);
-  background-color: var(--rvo-color-lintblauw);
-  /* Static stylesheet url() — a runtime url() renders as a white square in the
-     production build (see the icon-mask note in DossierDetail.vue). */
-  -webkit-mask: url('@nl-rvo/assets/icons/functioneel/zoek.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/functioneel/zoek.svg') center / contain no-repeat;
+  margin-inline-end: var(--primitives-space-4);
 }
 
 .scan-tile__kicker {
@@ -131,17 +123,17 @@ const completedOn = computed(() =>
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
 }
 
 .scan-tile__title {
-  margin: 0 0 var(--rvo-space-2xs);
-  color: var(--rvo-color-lintblauw);
+  margin: 0 0 var(--primitives-space-4);
+  color: var(--semantics-content-accent-color);
 }
 
 .scan-tile__line {
   margin: 0;
-  line-height: var(--rvo-line-height-md);
+  line-height: var(--primitives-line-height-snug);
 }
 
 .scan-tile__intro {
@@ -152,14 +144,14 @@ const completedOn = computed(() =>
   list-style: none;
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-2xs);
-  margin: 0 0 var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
+  margin: 0 0 var(--primitives-space-4);
   padding: 0;
 }
 
 .scan-tile__actions {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 </style>

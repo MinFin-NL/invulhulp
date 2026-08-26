@@ -9,7 +9,7 @@
 
       <header class="scan__header">
         <div class="scan__brand">
-          <span class="rvo-icon rvo-icon--xl scan__brand-icon" aria-hidden="true" />
+          <nldd-icon class="scan__brand-icon" name="magnifier" size="48" />
           <div>
             <h2 id="scan-title" class="rvo-heading rvo-heading--xl scan__title">Toepassingsscan</h2>
             <p class="rvo-text rvo-text--sm scan__subtitle">
@@ -129,21 +129,19 @@
 
       <footer class="scan__footer">
         <div class="rvo-action-group scan__footer-actions">
-          <button
-            type="button"
-            class="rvo-button rvo-button--primary rvo-button--size-sm"
+          <nldd-button
+            variant="primary"
+            size="sm"
+            text="Opslaan in dossier"
             :disabled="!store.canEdit"
             @click="save"
-          >
-            Opslaan in dossier
-          </button>
-          <button
-            type="button"
-            class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+          />
+          <nldd-button
+            variant="neutral-transparent"
+            size="sm"
+            text="Opnieuw beginnen"
             @click="restart"
-          >
-            Opnieuw beginnen
-          </button>
+          />
         </div>
         <p v-if="savedNotice" class="rvo-text rvo-text--sm scan__saved" role="status">{{ savedNotice }}</p>
       </footer>
@@ -300,8 +298,8 @@ defineExpose({ open })
 }
 
 .scan__container {
-  background: var(--rvo-color-wit);
-  border-radius: var(--rvo-border-radius-lg);
+  background: var(--semantics-surfaces-base-background-color);
+  border-radius: var(--primitives-corner-radius-lg);
   box-shadow: 0 0 1.5em 0 rgb(0 0 0 / 35%);
   display: flex;
   flex-direction: column;
@@ -317,61 +315,53 @@ defineExpose({ open })
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--rvo-space-md);
-  padding: var(--rvo-space-xl);
-  background: var(--rvo-color-lintblauw);
-  color: var(--rvo-color-wit);
+  gap: var(--primitives-space-16);
+  padding: var(--primitives-space-32);
+  background: var(--semantics-content-accent-color);
+  color: var(--semantics-surfaces-base-background-color);
 }
 
 .scan__brand {
   display: flex;
   align-items: flex-start;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
 }
 
 /* .rvo-icon zet alleen een min-inline-size — zonder expliciete box heeft het
    masker geen hoogte om in te tekenen: een onzichtbaar icoon dat wél breedte
    inneemt. Zelfde patroon als de andere hergekleurde iconen in de app. */
 .scan__brand-icon {
-  display: inline-block;
-  inline-size: var(--rvo-size-xl);
-  block-size: var(--rvo-size-xl);
-  margin-block-start: var(--rvo-space-3xs);
+  margin-block-start: var(--primitives-space-2);
   flex-shrink: 0;
-  background-color: currentColor;
-  /* Static stylesheet url() — a runtime url() renders as a white square in the
-     production build (see the icon-mask note in DossierDetail.vue). */
-  -webkit-mask: url('@nl-rvo/assets/icons/functioneel/zoek.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/functioneel/zoek.svg') center / contain no-repeat;
 }
 
 .scan__title {
   margin: 0;
-  color: var(--rvo-color-wit);
+  color: var(--semantics-surfaces-base-background-color);
 }
 
 .scan__subtitle {
-  margin: var(--rvo-space-xs) 0 0;
+  margin: var(--primitives-space-8) 0 0;
   max-inline-size: 56ch;
-  line-height: var(--rvo-line-height-md);
+  line-height: var(--primitives-line-height-snug);
   /* Solid tint rather than an opacity, so the contrast ratio is knowable. */
-  color: var(--rvo-color-lintblauw-150);
+  color: var(--semantics-categories-accent-tinted-background-color);
 }
 
 .scan__close {
   font: inherit;
-  font-size: var(--rvo-font-size-xl);
+  font-size: var(--primitives-font-size-300);
   line-height: 1;
   cursor: pointer;
-  padding: 0 var(--rvo-space-2xs);
-  color: var(--rvo-color-wit);
+  padding: 0 var(--primitives-space-4);
+  color: var(--semantics-surfaces-base-background-color);
   background: transparent;
   border: 0;
 }
 
 /* --- Body --- */
 .scan__body {
-  padding: var(--rvo-space-xl);
+  padding: var(--primitives-space-32);
   overflow-y: auto;
 }
 
@@ -396,34 +386,34 @@ defineExpose({ open })
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-xl);
+  gap: var(--primitives-space-32);
 }
 
 .scan__legend {
   padding: 0;
-  margin: 0 0 var(--rvo-space-2xs);
+  margin: 0 0 var(--primitives-space-4);
 }
 
 .scan__question {
-  font-size: var(--rvo-font-size-lg);
-  font-weight: var(--rvo-font-weight-bold);
-  line-height: var(--rvo-line-height-sm);
+  font-size: var(--primitives-font-size-200);
+  font-weight: var(--primitives-font-weight-body-bold);
+  line-height: var(--primitives-line-height-tight);
 }
 
 .scan__explanation {
-  margin: 0 0 var(--rvo-space-sm);
+  margin: 0 0 var(--primitives-space-12);
   max-inline-size: 68ch;
 }
 
 /* --- Result --- */
 .scan__result {
-  margin-block-start: var(--rvo-space-xl);
-  padding-block-start: var(--rvo-space-lg);
-  border-block-start: 1px solid var(--rvo-color-grijs-300);
+  margin-block-start: var(--primitives-space-32);
+  padding-block-start: var(--primitives-space-24);
+  border-block-start: 1px solid var(--semantics-dividers-color);
 }
 
 .scan__result-title {
-  margin: 0 0 var(--rvo-space-sm);
+  margin: 0 0 var(--primitives-space-12);
 }
 
 /* The hint under an option label: a block inside the RVO label span, so the
@@ -433,7 +423,7 @@ defineExpose({ open })
 }
 
 .scan__note {
-  margin: var(--rvo-space-md) 0 0;
+  margin: var(--primitives-space-16) 0 0;
   max-inline-size: 68ch;
 }
 
@@ -445,11 +435,11 @@ defineExpose({ open })
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--rvo-space-3xs) var(--rvo-space-sm);
+  gap: var(--primitives-space-2) var(--primitives-space-12);
 }
 
 .scan__consequence-title {
-  font-weight: var(--rvo-font-weight-semibold);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
 }
 
 .scan__consequence-reason {
@@ -458,23 +448,23 @@ defineExpose({ open })
 
 /* Not-applicable rows are quieter than the rest of the list, but never hidden. */
 .scan__tag--nvt {
-  color: var(--rvo-color-grijs-700);
+  color: var(--semantics-content-secondary-color);
 }
 
 .scan__alert {
-  margin-block-start: var(--rvo-space-md);
+  margin-block-start: var(--primitives-space-16);
 }
 
 /* Lopende tekst in een gekleurd vlak heeft lucht nodig: padding-md in plaats
    van -sm op het vlak zelf, en een ruimere regelafstand erbinnen. */
 .scan__alert .rvo-alert__container {
-  line-height: var(--rvo-line-height-md);
+  line-height: var(--primitives-line-height-snug);
   max-inline-size: 72ch;
 }
 
 .scan__saved {
   margin: 0;
-  color: var(--rvo-color-groen);
+  color: var(--semantics-content-success-color);
 }
 
 /* --- Footer --- */
@@ -483,15 +473,15 @@ defineExpose({ open })
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: var(--rvo-space-sm);
-  padding: var(--rvo-space-md) var(--rvo-space-xl);
-  border-block-start: 1px solid var(--rvo-color-grijs-300);
-  background: var(--rvo-color-grijs-100);
+  gap: var(--primitives-space-12);
+  padding: var(--primitives-space-16) var(--primitives-space-32);
+  border-block-start: 1px solid var(--semantics-dividers-color);
+  background: var(--semantics-surfaces-tinted-background-color);
 }
 
 .scan__footer-actions {
   display: flex;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   flex-wrap: wrap;
 }
 </style>

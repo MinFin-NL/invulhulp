@@ -5,14 +5,13 @@
     <p v-if="!gridOpen" class="rvo-text rvo-text--sm invulhulp-table-question__optional-hint">
       Een tabel is hier optioneel. Beantwoord de vraag in de toelichting hieronder, of voeg een tabel toe.
     </p>
-    <button
+    <nldd-button
+      variant="neutral-transparent"
+      class="invulhulp-table-question__toggle-btn"
+      text="+ Tabel toevoegen"
       v-if="!gridOpen && !store.readOnly"
-      type="button"
-      class="rvo-button rvo-button--tertiary rvo-button--sm invulhulp-table-question__toggle-btn"
       @click="openGrid"
-    >
-      + Tabel toevoegen
-    </button>
+    />
 
     <div v-show="gridOpen" class="invulhulp-table-question__viewport">
       <div class="invulhulp-table-question__scroll" ref="scrollEl" @scroll="updateScrollState">
@@ -84,16 +83,15 @@
               />
             </td>
             <td class="rvo-table-cell invulhulp-table-question__actions-cell">
-              <button
+              <nldd-button
+                variant="neutral-transparent"
+                class="invulhulp-table-question__remove-btn"
+                text="✕"
                 v-if="!store.readOnly"
-                type="button"
-                class="rvo-button rvo-button--tertiary rvo-button--sm invulhulp-table-question__remove-btn"
                 :aria-label="`Rij ${rowIndex + 1} verwijderen`"
                 title="Rij verwijderen"
                 @click="removeRow(rowIndex)"
-              >
-                ✕
-              </button>
+              />
             </td>
           </tr>
         </tbody>
@@ -130,24 +128,22 @@
     </p>
 
     <div v-if="gridOpen && !store.readOnly" class="invulhulp-table-question__grid-actions">
-      <button
-        type="button"
-        class="rvo-button rvo-button--tertiary rvo-button--sm invulhulp-table-question__add-btn"
+      <nldd-button
+        variant="neutral-transparent"
+        class="invulhulp-table-question__add-btn"
+        text="+ Rij toevoegen"
         :disabled="table.rows.length >= maxRows"
         @click="addRow"
-      >
-        + Rij toevoegen
-      </button>
+      />
       <!-- Only offered while the grid is still empty: closing it drops the rows,
            and silently discarding typed cells would be a data loss. -->
-      <button
+      <nldd-button
+        variant="neutral-transparent"
+        class="invulhulp-table-question__toggle-btn"
+        text="Tabel weglaten"
         v-if="optionalTable && !hasRowContent"
-        type="button"
-        class="rvo-button rvo-button--tertiary rvo-button--sm invulhulp-table-question__toggle-btn"
         @click="closeGrid"
-      >
-        Tabel weglaten
-      </button>
+      />
     </div>
 
     <div class="rvo-form-field invulhulp-table-question__notes">
@@ -367,20 +363,20 @@ function removeRow(rowIndex: number) {
   inline-size: 2.25rem;
   block-size: 2.25rem;
   padding: 0;
-  color: var(--rvo-color-hemelblauw, #007bc7);
-  background: var(--rvo-color-wit, #fff);
-  border: 1px solid var(--rvo-color-hemelblauw, #007bc7);
-  border-radius: var(--rvo-border-radius-md, 8px);
+  color: var(--semantics-content-accent-color, #007bc7);
+  background: var(--semantics-surfaces-base-background-color, #fff);
+  border: 1px solid var(--semantics-content-accent-color, #007bc7);
+  border-radius: var(--primitives-corner-radius-md, 8px);
   box-shadow: 0 1px 4px rgb(21 66 115 / 0.18);
   cursor: pointer;
   transition: background-color var(--invulhulp-duration-instant), color var(--invulhulp-duration-instant);
 }
 .invulhulp-table-question__scroll-btn:hover {
-  background: var(--rvo-color-hemelblauw, #007bc7);
-  color: var(--rvo-color-wit, #fff);
+  background: var(--semantics-content-accent-color, #007bc7);
+  color: var(--semantics-surfaces-base-background-color, #fff);
 }
 .invulhulp-table-question__scroll-btn:focus-visible {
-  outline: var(--rvo-color-donkerblauw, #01689b) solid 2px;
+  outline: var(--semantics-content-accent-color, #01689b) solid 2px;
   outline-offset: 2px;
 }
 .invulhulp-table-question__scroll-btn--left {
@@ -395,15 +391,15 @@ function removeRow(rowIndex: number) {
 .invulhulp-table-question__scroll-hint {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
-  margin: var(--rvo-space-xs) 0 0;
-  padding: var(--rvo-space-2xs) var(--rvo-space-sm);
-  background: var(--rvo-color-lichtblauw-150, #e5f0f8);
-  border-inline-start: 4px solid var(--rvo-color-hemelblauw, #007bc7);
-  border-radius: var(--rvo-border-radius-sm, 4px);
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold, 600);
-  color: var(--rvo-color-lintblauw, #154273);
+  gap: var(--primitives-space-4);
+  margin: var(--primitives-space-8) 0 0;
+  padding: var(--primitives-space-4) var(--primitives-space-12);
+  background: var(--semantics-surfaces-tinted-background-color, #e5f0f8);
+  border-inline-start: 4px solid var(--semantics-content-accent-color, #007bc7);
+  border-radius: var(--primitives-corner-radius-sm, 4px);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-semi-bold, 600);
+  color: var(--semantics-content-accent-color, #154273);
 }
 .invulhulp-table-question__scroll-hint-icon {
   font-size: 1.15rem;
@@ -435,14 +431,14 @@ function removeRow(rowIndex: number) {
 
 .invulhulp-table-question__table .rvo-table-header {
   text-align: start;
-  font-size: var(--rvo-font-size-sm);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  font-size: var(--primitives-font-size-90);
+  padding: var(--primitives-space-4) var(--primitives-space-8);
   background: var(--invulhulp-color-surface, #f0f4f8);
   border-block-end: 1px solid var(--invulhulp-color-border);
 }
 
 .invulhulp-table-question__table .rvo-table-cell {
-  padding: var(--rvo-space-3xs, 4px) var(--rvo-space-2xs);
+  padding: var(--primitives-space-2, 4px) var(--primitives-space-4);
   border-block-end: 1px solid var(--invulhulp-color-border);
   vertical-align: middle;
 }
@@ -450,10 +446,10 @@ function removeRow(rowIndex: number) {
 .invulhulp-table-question__cell-input {
   width: 100%;
   min-width: 0;
-  font-size: var(--rvo-font-size-sm);
-  padding: var(--rvo-space-3xs, 4px) var(--rvo-space-2xs);
+  font-size: var(--primitives-font-size-90);
+  padding: var(--primitives-space-2, 4px) var(--primitives-space-4);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm, 4px);
+  border-radius: var(--primitives-corner-radius-sm, 4px);
 }
 
 /* Pinned to the right edge of the scroll container so the delete action
@@ -472,26 +468,26 @@ function removeRow(rowIndex: number) {
 }
 
 .invulhulp-table-question__remove-btn {
-  padding: var(--rvo-space-3xs, 4px) var(--rvo-space-2xs);
+  padding: var(--primitives-space-2, 4px) var(--primitives-space-4);
   line-height: 1;
 }
 
 .invulhulp-table-question__remove-btn,
 .invulhulp-table-question__add-btn {
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
 }
 
 .invulhulp-table-question__grid-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   align-items: center;
 }
 
 .invulhulp-table-question__add-btn,
 .invulhulp-table-question__toggle-btn {
-  margin-block-start: var(--rvo-space-2xs);
-  font-size: var(--rvo-font-size-sm);
+  margin-block-start: var(--primitives-space-4);
+  font-size: var(--primitives-font-size-90);
 }
 
 .invulhulp-table-question__optional-hint {
@@ -500,21 +496,21 @@ function removeRow(rowIndex: number) {
 }
 
 .invulhulp-table-question__notes {
-  margin-block-start: var(--rvo-space-sm);
+  margin-block-start: var(--primitives-space-12);
 }
 
 .invulhulp-table-question__notes-label {
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-bold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-bold);
 }
 
 .invulhulp-table-question__notes-input {
   width: 100%;
   font: inherit;
-  font-size: var(--rvo-font-size-sm);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  font-size: var(--primitives-font-size-90);
+  padding: var(--primitives-space-4) var(--primitives-space-8);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm, 4px);
+  border-radius: var(--primitives-corner-radius-sm, 4px);
   resize: vertical;
 }
 

@@ -58,12 +58,17 @@
 
       <!-- Export buttons -->
       <div class="rvo-layout-row rvo-layout-gap--md summary-view__exports">
-        <button @click="exportWord" class="rvo-button rvo-button--primary">
-          Download Word rapport
-        </button>
-        <button v-if="showLegacyExport" @click="exportLegacy" class="rvo-button rvo-button--secondary">
-          Download origineel format (Word)
-        </button>
+        <nldd-button
+          variant="primary"
+          text="Download Word rapport"
+          @click="exportWord"
+        />
+        <nldd-button
+          variant="secondary"
+          text="Download origineel format (Word)"
+          v-if="showLegacyExport"
+          @click="exportLegacy"
+        />
       </div>
 
       <!-- Import -->
@@ -73,9 +78,11 @@
         </p>
         <div class="rvo-layout-row rvo-layout-gap--sm summary-view__import-row">
           <input ref="fileInput" type="file" accept=".json" class="invulhulp-visually-hidden" @change="handleImport" />
-          <button @click="fileInput?.click()" class="rvo-button rvo-button--tertiary">
-            JSON importeren
-          </button>
+          <nldd-button
+            variant="neutral-transparent"
+            text="JSON importeren"
+            @click="fileInput?.click()"
+          />
           <span v-if="importError" class="rvo-text rvo-text--sm summary-view__import-error">{{ importError }}</span>
           <span v-if="importSuccess" class="rvo-text rvo-text--sm summary-view__import-success">Gegevens hersteld!</span>
         </div>
@@ -338,12 +345,12 @@ async function handleImport(event: Event) {
 
 <style scoped>
 .summary-view {
-  padding-block: var(--rvo-space-2xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-40) var(--primitives-space-48);
 }
 
 .summary-view__title {
-  color: var(--rvo-color-lintblauw);
-  margin: 0 0 var(--rvo-space-xs);
+  color: var(--semantics-content-accent-color);
+  margin: 0 0 var(--primitives-space-8);
 }
 
 .summary-view__lead {
@@ -354,7 +361,7 @@ async function handleImport(event: Event) {
 .summary-view__unanswered-content {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .summary-view__unanswered-intro {
@@ -362,17 +369,17 @@ async function handleImport(event: Event) {
 }
 
 .summary-view__unanswered-group {
-  margin-block-start: var(--rvo-space-2xs);
+  margin-block-start: var(--primitives-space-4);
 }
 
 .summary-view__unanswered-section {
-  margin: var(--rvo-space-2xs) 0;
-  font-weight: var(--rvo-font-weight-semibold);
+  margin: var(--primitives-space-4) 0;
+  font-weight: var(--primitives-font-weight-body-semi-bold);
 }
 
 .summary-view__unanswered-list {
-  margin: 0 0 var(--rvo-space-xs);
-  padding-inline-start: var(--rvo-space-md);
+  margin: 0 0 var(--primitives-space-8);
+  padding-inline-start: var(--primitives-space-16);
 }
 
 .summary-view__exports {
@@ -381,7 +388,7 @@ async function handleImport(event: Event) {
 
 .summary-view__import-hint {
   color: var(--invulhulp-color-text-muted);
-  margin: 0 0 var(--rvo-space-xs);
+  margin: 0 0 var(--primitives-space-8);
 }
 
 .summary-view__import-row {
@@ -390,26 +397,26 @@ async function handleImport(event: Event) {
 }
 
 .summary-view__import-error {
-  color: var(--rvo-color-rood);
+  color: var(--semantics-content-critical-color);
 }
 
 .summary-view__import-success {
-  color: var(--rvo-color-groen);
+  color: var(--semantics-content-success-color);
 }
 
 .summary-view__section-title {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   margin: 0;
 }
 
 .summary-view__section-divider {
-  border-block-end-color: var(--rvo-color-lintblauw);
+  border-block-end-color: var(--semantics-content-accent-color);
   border-block-end-width: 2px;
   margin: 0;
 }
 
 .summary-view__subsection-title {
-  color: var(--rvo-color-grijs-800);
+  color: var(--semantics-content-color);
   margin: 0;
 }
 
@@ -428,29 +435,29 @@ async function handleImport(event: Event) {
 .summary-view__card-body {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .summary-view__question {
-  font-weight: var(--rvo-font-weight-semibold);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   margin: 0;
-  color: var(--rvo-color-grijs-800);
+  color: var(--semantics-content-color);
 }
 
 .summary-view__answer {
   margin: 0;
-  color: var(--rvo-color-grijs-900, var(--rvo-color-grijs-800));
+  color: var(--semantics-content-color, var(--semantics-content-color));
 }
 
 .summary-view__answer--empty {
-  color: var(--rvo-color-grijs-500);
+  color: var(--semantics-content-secondary-color);
   font-style: italic;
 }
 
 /* Rich answers keep their own block rhythm: paragraphs stay apart, lists keep
    their bullets, so a long answer reads as text instead of one wall. */
 .summary-view__answer-html :deep(p) {
-  margin: 0 0 var(--rvo-space-2xs);
+  margin: 0 0 var(--primitives-space-4);
 }
 
 .summary-view__answer-html :deep(p:last-child) {
@@ -460,8 +467,8 @@ async function handleImport(event: Event) {
 .summary-view__answer-html :deep(ul),
 .summary-view__answer-html :deep(ol),
 .summary-view__answer-list {
-  margin: 0 0 var(--rvo-space-2xs);
-  padding-inline-start: var(--rvo-space-md);
+  margin: 0 0 var(--primitives-space-4);
+  padding-inline-start: var(--primitives-space-16);
 }
 
 .summary-view__answer-html :deep(ul:last-child),
@@ -470,7 +477,7 @@ async function handleImport(event: Event) {
 }
 
 .summary-view__answer-html :deep(li) {
-  margin-block-end: var(--rvo-space-3xs, 4px);
+  margin-block-end: var(--primitives-space-2, 4px);
 }
 
 .summary-view__answer-html :deep(li > p) {
@@ -478,8 +485,8 @@ async function handleImport(event: Event) {
 }
 
 .summary-view__answer-html :deep(blockquote) {
-  margin: 0 0 var(--rvo-space-2xs);
-  padding-inline-start: var(--rvo-space-xs);
+  margin: 0 0 var(--primitives-space-4);
+  padding-inline-start: var(--primitives-space-8);
   border-inline-start: 2px solid var(--invulhulp-color-border);
 }
 
@@ -488,25 +495,25 @@ async function handleImport(event: Event) {
 }
 
 .summary-view__table-scroll + .summary-view__answer-html {
-  margin-block-start: var(--rvo-space-2xs);
+  margin-block-start: var(--primitives-space-4);
 }
 
 .summary-view__table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
 }
 
 .summary-view__table .rvo-table-header,
 .summary-view__table .rvo-table-cell {
   text-align: start;
   vertical-align: top;
-  padding: var(--rvo-space-3xs, 4px) var(--rvo-space-2xs);
+  padding: var(--primitives-space-2, 4px) var(--primitives-space-4);
   border-block-end: 1px solid var(--invulhulp-color-border);
 }
 
 .summary-view__table .rvo-table-header {
   background: var(--invulhulp-color-surface, #f0f4f8);
-  font-weight: var(--rvo-font-weight-bold);
+  font-weight: var(--primitives-font-weight-body-bold);
 }
 </style>

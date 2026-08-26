@@ -24,6 +24,9 @@ export interface TrackMeta {
    *  tijdlijn, maar krijgen geen fasenummer ("Fase 1 van 3"). */
   isPhase: boolean
   emptyHint?: string
+  /** Naam van het NLDD-icoon voor deze fase in de fasetijdlijn
+   *  (<nldd-icon name="…">). */
+  icon: string
 }
 
 // `emptyHint` is shown instead of cards for a track we deliberately want
@@ -34,36 +37,42 @@ export const TRACK_META: Record<TrackId, TrackMeta> = {
     description: 'Het startpunt: registreer het IV-verzoek. Nog geen projectfase.',
     order: 1,
     isPhase: false,
+    icon: 'file-text',
   },
   aanbieding: {
     label: 'Aanbieding',
     description: 'Bied het project aan voor de portfolioafweging. Ook nog geen projectfase.',
     order: 2,
     isPhase: false,
+    icon: 'certificate',
   },
   initiatie: {
     label: 'Initiatiefase',
     description: 'Werk het project uit en toets het: plan, architectuur en de verplichte scans en assessments.',
     order: 3,
     isPhase: true,
+    icon: 'map',
   },
   uitvoering: {
     label: 'Uitvoeringsfase',
     description: 'Stuur bij tijdens de bouw en leg vast wat er daadwerkelijk live gaat.',
     order: 4,
     isPhase: true,
+    icon: 'gear',
   },
   afronding: {
     label: 'Afrondingsfase',
     description: 'Sluit het project af: evalueer de opbrengst en draag de resterende risico’s over.',
     order: 5,
     isPhase: true,
+    icon: 'check-list',
   },
   onbekend: {
     label: 'Niet ingedeeld',
     description: 'Deze formulieren hebben een onbekend spoor in index.json en zijn daardoor niet ingedeeld.',
     order: 98,
     isPhase: false,
+    icon: 'question-mark-circle',
   },
 }
 
@@ -152,4 +161,11 @@ export function connectorGlyph(group: { track: string; forms: FormIndexEntry[] }
   const pair = new Set([prev, curr])
   if (pair.has('ppm') && pair.has('psa')) return '↔'
   return '→'
+}
+
+/** Het NLDD-icoon dat bij een fase hoort. Valt terug op het icoon van
+ *  `onbekend` zodat een typefout in index.json geen leeg vlak oplevert. */
+export function trackIcon(track: string | undefined): string {
+  const t = (track ?? 'onbekend') as TrackId
+  return TRACK_META[t]?.icon ?? TRACK_META.onbekend.icon
 }

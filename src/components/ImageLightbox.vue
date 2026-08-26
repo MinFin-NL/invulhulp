@@ -79,26 +79,26 @@ defineExpose({ open })
 }
 
 .invulhulp-modal__container {
-  background: var(--rvo-color-wit);
-  border-radius: var(--rvo-border-radius-lg);
+  background: var(--semantics-surfaces-base-background-color);
+  border-radius: var(--primitives-corner-radius-lg);
   box-shadow: 0 0 1em 0 rgb(0 0 0 / 30%);
-  padding: var(--rvo-space-md);
+  padding: var(--primitives-space-16);
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
 }
 
 .invulhulp-modal__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
 }
 
 .invulhulp-modal__title {
   margin: 0;
   flex: 1;
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   word-break: break-word;
 }
 
@@ -109,7 +109,7 @@ defineExpose({ open })
   line-height: 1;
   cursor: pointer;
   color: var(--invulhulp-color-text-muted);
-  padding: 0 var(--rvo-space-3xs);
+  padding: 0 var(--primitives-space-2);
 }
 
 .invulhulp-modal__divider {
@@ -126,7 +126,7 @@ defineExpose({ open })
   /* Leaves room for the header, footer link and the dialog's own margins. */
   max-block-size: 76vh;
   object-fit: contain;
-  background: var(--rvo-color-grijs-100, #f3f3f3);
+  background: var(--semantics-surfaces-tinted-background-color, #f3f3f3);
 }
 
 .image-lightbox__footer {

@@ -62,17 +62,19 @@
         class="invulhulp-visually-hidden"
         @change="onFilesSelected"
       />
-      <button
-        type="button"
-        class="rvo-button rvo-button--tertiary rvo-button--sm question-attachments__add"
+      <nldd-button
+        variant="neutral-transparent"
+        class="question-attachments__add"
         :disabled="uploading"
         @click="fileInput?.click()"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
+        <span slot="text">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true">
           <path fill="currentColor" d="M19 5v14H5V5h14Zm0-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2Zm-4.86 8.86-3 3.87L9 13.14 6 17h12l-3.86-5.14Z"/>
         </svg>
         {{ uploading ? 'Bezig met uploaden…' : 'Afbeelding toevoegen' }}
-      </button>
+        </span>
+      </nldd-button>
       <span class="rvo-text rvo-text--sm question-attachments__hint">of plak een afbeelding (Ctrl+V)</span>
     </div>
     <p v-if="error" class="rvo-text rvo-text--sm question-attachments__error" role="alert">{{ error }}</p>
@@ -187,21 +189,21 @@ function onPaste(event: ClipboardEvent) {
 
 <style scoped>
 .question-attachments {
-  margin-block-start: var(--rvo-space-xs);
+  margin-block-start: var(--primitives-space-8);
 }
 
 .question-attachments__list {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-sm);
-  margin-block-end: var(--rvo-space-xs);
+  gap: var(--primitives-space-12);
+  margin-block-end: var(--primitives-space-8);
 }
 
 .question-attachments__item {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-3xs);
+  gap: var(--primitives-space-2);
   max-inline-size: 240px;
 }
 
@@ -218,11 +220,11 @@ function onPaste(event: ClipboardEvent) {
   border: 0;
   background: none;
   cursor: zoom-in;
-  border-radius: var(--rvo-border-radius-sm, 4px);
+  border-radius: var(--primitives-corner-radius-sm, 4px);
 }
 
 .question-attachments__zoom:hover .question-attachments__thumb {
-  border-color: var(--rvo-color-lintblauw);
+  border-color: var(--semantics-content-accent-color);
 }
 
 .question-attachments__thumb {
@@ -230,8 +232,8 @@ function onPaste(event: ClipboardEvent) {
   max-block-size: 160px;
   object-fit: contain;
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm, 4px);
-  background: var(--rvo-color-grijs-100, #f3f3f3);
+  border-radius: var(--primitives-corner-radius-sm, 4px);
+  background: var(--semantics-surfaces-tinted-background-color, #f3f3f3);
 }
 
 .question-attachments__thumb--missing {
@@ -240,9 +242,9 @@ function onPaste(event: ClipboardEvent) {
   justify-content: center;
   inline-size: 240px;
   block-size: 80px;
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
   font-style: italic;
-  color: var(--rvo-color-grijs-500, #999);
+  color: var(--semantics-content-secondary-color, #999);
 }
 
 .question-attachments__delete {
@@ -256,14 +258,14 @@ function onPaste(event: ClipboardEvent) {
   block-size: 24px;
   padding: 0;
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm, 4px);
-  background: var(--rvo-color-wit);
-  color: var(--rvo-color-grijs-700, #555);
+  border-radius: var(--primitives-corner-radius-sm, 4px);
+  background: var(--semantics-surfaces-base-background-color);
+  color: var(--semantics-content-secondary-color, #555);
   cursor: pointer;
 }
 
 .question-attachments__delete:hover {
-  color: var(--rvo-color-rood);
+  color: var(--semantics-content-critical-color);
 }
 
 /* Reads as a caption, edits as a field: no chrome until you hover or focus it.
@@ -271,12 +273,12 @@ function onPaste(event: ClipboardEvent) {
 .question-attachments__caption {
   inline-size: 100%;
   font-family: inherit;
-  font-size: var(--rvo-font-size-sm);
-  line-height: var(--rvo-line-height-md);
+  font-size: var(--primitives-font-size-90);
+  line-height: var(--primitives-line-height-snug);
   color: var(--invulhulp-color-text-subtle);
-  padding: var(--rvo-space-3xs);
+  padding: var(--primitives-space-2);
   border: 1px solid transparent;
-  border-radius: var(--rvo-border-radius-sm, 4px);
+  border-radius: var(--primitives-corner-radius-sm, 4px);
   background: transparent;
   resize: none;
   overflow: hidden;
@@ -285,7 +287,7 @@ function onPaste(event: ClipboardEvent) {
 .question-attachments__caption:hover:not(:read-only),
 .question-attachments__caption:focus {
   border-color: var(--invulhulp-color-border);
-  background: var(--rvo-color-wit);
+  background: var(--semantics-surfaces-base-background-color);
   color: inherit;
 }
 
@@ -296,14 +298,14 @@ function onPaste(event: ClipboardEvent) {
 .question-attachments__actions {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
   flex-wrap: wrap;
 }
 
 .question-attachments__add {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-3xs);
+  gap: var(--primitives-space-2);
 }
 
 .question-attachments__hint {
@@ -311,7 +313,7 @@ function onPaste(event: ClipboardEvent) {
 }
 
 .question-attachments__error {
-  margin: var(--rvo-space-3xs) 0 0;
-  color: var(--rvo-color-rood);
+  margin: var(--primitives-space-2) 0 0;
+  color: var(--semantics-content-critical-color);
 }
 </style>

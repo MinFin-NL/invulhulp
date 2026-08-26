@@ -139,26 +139,26 @@ defineExpose({ open })
 }
 
 .invulhulp-modal__container {
-  background: var(--rvo-color-wit);
-  border-radius: var(--rvo-border-radius-lg);
+  background: var(--semantics-surfaces-base-background-color);
+  border-radius: var(--primitives-corner-radius-lg);
   box-shadow: 0 0 1em 0 rgb(0 0 0 / 30%);
-  padding: var(--rvo-space-md);
+  padding: var(--primitives-space-16);
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
 }
 
 .invulhulp-modal__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
 }
 
 .invulhulp-modal__title {
   margin: 0;
   flex: 1;
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   word-break: break-word;
 }
 
@@ -169,7 +169,7 @@ defineExpose({ open })
   line-height: 1;
   cursor: pointer;
   color: var(--invulhulp-color-text-muted);
-  padding: 0 var(--rvo-space-3xs);
+  padding: 0 var(--primitives-space-2);
 }
 
 .invulhulp-modal__divider {
@@ -188,8 +188,8 @@ defineExpose({ open })
 }
 
 .doc-viewer__text {
-  font-size: var(--rvo-font-size-sm);
-  line-height: var(--rvo-line-height-md);
+  font-size: var(--primitives-font-size-90);
+  line-height: var(--primitives-line-height-snug);
   white-space: pre-wrap;
   word-break: break-word;
   color: var(--invulhulp-color-text-subtle);
@@ -197,16 +197,16 @@ defineExpose({ open })
 
 .doc-viewer__chunk {
   display: inline;
-  background: var(--rvo-color-lichtblauw-150, var(--rvo-color-grijs-100));
-  box-shadow: 0 0 0 2px var(--rvo-color-lichtblauw-150, var(--rvo-color-grijs-100));
+  background: var(--semantics-surfaces-tinted-background-color, var(--semantics-surfaces-tinted-background-color));
+  box-shadow: 0 0 0 2px var(--semantics-surfaces-tinted-background-color, var(--semantics-surfaces-tinted-background-color));
   border-radius: 2px;
-  color: var(--rvo-color-zwart, inherit);
+  color: var(--semantics-content-color, inherit);
 }
 
 .doc-viewer__mark {
-  background: var(--rvo-color-donkergeel-150);
-  box-shadow: 0 0 0 2px var(--rvo-color-donkergeel-150);
+  background: var(--semantics-categories-warning-tinted-background-color);
+  box-shadow: 0 0 0 2px var(--semantics-categories-warning-tinted-background-color);
   border-radius: 2px;
-  font-weight: var(--rvo-font-weight-semibold);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
 }
 </style>

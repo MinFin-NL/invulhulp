@@ -1,14 +1,16 @@
 <template>
   <div class="invulhulp-question" :class="`invulhulp-question--${question.importance}`">
-    <!-- Text question: regular label/control pair via rvo-form-field -->
+    <!-- Text question: label/control pair around the rich-text editor. Tiptap
+         is not an NLDD input, so it is not slotted into nldd-form-field; the
+         label keeps its own for/id wiring to the editor. -->
     <template v-if="question.type === 'text'">
-      <div class="rvo-form-field">
-        <label :for="question.id" class="rvo-form-field__label">
+      <div class="invulhulp-question__field">
+        <label :for="question.id" class="invulhulp-question__legend">
           <span class="invulhulp-question__label-text">{{ question.text }}</span>
           <span v-if="question.importance === 'mandatory'" class="invulhulp-question__required">(verplicht)</span>
           <span v-else class="invulhulp-question__optional">(aanvullend)</span>
         </label>
-        <p v-if="question.guidance" class="rvo-text rvo-text--sm invulhulp-question__guidance">
+        <p v-if="question.guidance" class="invulhulp-question__guidance">
           {{ question.guidance }}
         </p>
         <TiptapEditor
@@ -25,35 +27,33 @@
       </div>
     </template>
 
-    <!-- Radio question: fieldset/legend semantics + native inputs -->
-    <fieldset v-else-if="question.type === 'radio'" class="rvo-form-fieldset invulhulp-question__fieldset">
-      <legend class="rvo-form-fieldset__legend">
+    <!-- Radio question. nldd-radio-button-group owns the roving focus and the
+         group semantics, so the legend is a plain element it points at with
+         accessible-labeled-by rather than a <fieldset>/<legend> pair. -->
+    <div v-else-if="question.type === 'radio'" class="invulhulp-question__fieldset">
+      <p :id="`${question.id}-label`" class="invulhulp-question__legend">
         <span class="invulhulp-question__label-text">{{ question.text }}</span>
         <span v-if="question.importance === 'mandatory'" class="invulhulp-question__required">(verplicht)</span>
         <span v-else class="invulhulp-question__optional">(aanvullend)</span>
-      </legend>
-      <p v-if="question.guidance" class="rvo-text rvo-text--sm invulhulp-question__guidance">
+      </p>
+      <p v-if="question.guidance" class="invulhulp-question__guidance">
         {{ question.guidance }}
       </p>
-      <div class="rvo-radio-button__group">
-        <label
+      <nldd-radio-button-group
+        :name="question.id"
+        :disabled="store.readOnly"
+        :required="question.importance === 'mandatory'"
+        :accessible-labeled-by="`${question.id}-label`"
+        @change="onRadioSelect($event.detail.value)"
+      >
+        <nldd-radio-button-field
           v-for="option in resolvedOptions"
           :key="option"
-          class="rvo-radio-button"
-        >
-          <input
-            type="radio"
-            class="utrecht-radio-button utrecht-radio-button--html-input"
-            :name="question.id"
-            :value="option"
-            :checked="radioValue === option"
-            :disabled="store.readOnly"
-            :aria-required="question.importance === 'mandatory' ? 'true' : undefined"
-            @change="onRadioSelect(option)"
-          />
-          <span class="rvo-radio-button__label">{{ option }}</span>
-        </label>
-      </div>
+          :label="option"
+          :value="option"
+          :checked="radioValue === option"
+        />
+      </nldd-radio-button-group>
 
       <!-- Follow-up text for radio answers also gets Tiptap + LLM -->
       <TiptapEditor
@@ -63,46 +63,42 @@
         :placeholder="question.followUp"
         :question-context="question.followUp"
       />
-    </fieldset>
+    </div>
 
-    <!-- Checkbox question: fieldset/legend semantics + native inputs -->
-    <fieldset v-else-if="question.type === 'checkbox'" class="rvo-form-fieldset invulhulp-question__fieldset">
-      <legend class="rvo-form-fieldset__legend">
+    <!-- Checkbox question. The design system has no checkbox *group*, so the
+         grouping stays a real fieldset/legend — the semantics have to come
+         from somewhere. -->
+    <fieldset v-else-if="question.type === 'checkbox'" class="invulhulp-question__fieldset">
+      <legend class="invulhulp-question__legend">
         <span class="invulhulp-question__label-text">{{ question.text }}</span>
         <span v-if="question.importance === 'mandatory'" class="invulhulp-question__required">(verplicht)</span>
         <span v-else class="invulhulp-question__optional">(aanvullend)</span>
       </legend>
-      <p v-if="question.guidance" class="rvo-text rvo-text--sm invulhulp-question__guidance">
+      <p v-if="question.guidance" class="invulhulp-question__guidance">
         {{ question.guidance }}
       </p>
-      <div class="rvo-checkbox__group">
-        <label
+      <div class="invulhulp-question__options">
+        <nldd-checkbox-field
           v-for="option in resolvedOptions"
           :key="option"
-          class="rvo-checkbox"
-        >
-          <input
-            type="checkbox"
-            class="rvo-checkbox__input"
-            :name="question.id"
-            :value="option"
-            :checked="checkboxValues.includes(option)"
-            :disabled="store.readOnly"
-            @change="onCheckboxToggle(option)"
-          />
-          <span class="rvo-checkbox__label">{{ option }}</span>
-        </label>
+          :label="option"
+          :name="question.id"
+          :value="option"
+          :checked="checkboxValues.includes(option)"
+          :disabled="store.readOnly"
+          @change="onCheckboxToggle(option)"
+        />
       </div>
     </fieldset>
 
     <!-- Table question: fixed columns from the form JSON, user edits rows -->
-    <fieldset v-else-if="question.type === 'table'" class="rvo-form-fieldset invulhulp-question__fieldset">
-      <legend class="rvo-form-fieldset__legend">
+    <fieldset v-else-if="question.type === 'table'" class="invulhulp-question__fieldset">
+      <legend class="invulhulp-question__legend">
         <span class="invulhulp-question__label-text">{{ question.text }}</span>
         <span v-if="question.importance === 'mandatory'" class="invulhulp-question__required">(verplicht)</span>
         <span v-else class="invulhulp-question__optional">(aanvullend)</span>
       </legend>
-      <p v-if="question.guidance" class="rvo-text rvo-text--sm invulhulp-question__guidance">
+      <p v-if="question.guidance" class="invulhulp-question__guidance">
         {{ question.guidance }}
       </p>
       <TableQuestion :question="question" v-model="tableModel" />
@@ -127,14 +123,13 @@
       <span class="invulhulp-question__ai-smoothed-text">
         Gladgestreken door AI Modus — herhaling uit andere antwoorden is geschrapt.
       </span>
-      <button
+      <nldd-button
+        variant="neutral-transparent"
+        size="sm"
+        text="Herstel origineel"
         v-if="store.canEdit"
-        type="button"
-        class="rvo-button rvo-button--tertiary rvo-button--size-sm"
         @click="restoreBeforeSmoothing"
-      >
-        Herstel origineel
-      </button>
+      />
     </p>
 
     <!-- Persisted citations for AI-extracted answers (AI Mode / accepted suggestions) -->
@@ -356,12 +351,12 @@ function onCheckboxToggle(option: string) {
 
 <style scoped>
 .invulhulp-question {
-  margin-block-end: var(--rvo-space-lg);
-  padding: var(--rvo-space-md) var(--rvo-space-lg);
-  background: var(--rvo-color-wit);
+  margin-block-end: var(--primitives-space-24);
+  padding: var(--primitives-space-16) var(--primitives-space-24);
+  background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--invulhulp-color-border);
   border-inline-start: 4px solid transparent;
-  border-radius: var(--rvo-border-radius-md);
+  border-radius: var(--primitives-corner-radius-md);
   box-shadow: 0 1px 2px rgb(21 66 115 / 0.04);
 }
 .invulhulp-question--mandatory {
@@ -371,51 +366,10 @@ function onCheckboxToggle(option: string) {
   border-inline-start-color: var(--invulhulp-color-optional);
 }
 
-/* RVO's radio design tokens are incomplete in this package version
-   (--utrecht-radio-button-checked-color / -checked-background-color are never
-   defined), so the native radio renders as a plain white circle with no
-   selected dot. Style the control explicitly instead of relying on RVO's
-   broken CSS-variable chain. Mirrors the RVO checkbox look. */
-.invulhulp-question__fieldset :deep(.utrecht-radio-button--html-input) {
-  -webkit-appearance: none;
-  appearance: none;
-  flex: 0 0 auto;
-  inline-size: var(--utrecht-radio-button-size, 24px);
-  block-size: var(--utrecht-radio-button-size, 24px);
-  margin: 0;
-  padding: 0;
-  border: var(--utrecht-form-control-border-width, 2px) solid
-    var(--rvo-color-lintblauw, #154273);
-  border-radius: 50%;
-  background-color: var(--rvo-color-wit, #fff);
-  background-image: none;
-  cursor: pointer;
-}
-.invulhulp-question__fieldset :deep(.utrecht-radio-button--html-input:checked) {
-  background-image: radial-gradient(
-    circle,
-    var(--rvo-color-lintblauw, #154273) 0 45%,
-    var(--rvo-color-wit, #fff) 50%
-  );
-}
-.invulhulp-question__fieldset :deep(.utrecht-radio-button--html-input:disabled) {
-  border-color: var(--rvo-color-grijs-300, #b8b8b8);
-  cursor: not-allowed;
-}
-
-/* RVO's checkbox draws its checkmark with `mask-image: var(--rvo-icon-vinkje)`,
-   but the app never imports @nl-rvo/assets/icons/index.css where that variable
-   is defined — so a checked checkbox shows a solid white square instead of a
-   tick. Supply the vinkje mask directly with a static url (Vite bundles it;
-   same pattern as the recolored icons elsewhere in the app). */
-.invulhulp-question__fieldset :deep(.rvo-checkbox__input:checked)::after {
-  -webkit-mask-image: url('@nl-rvo/assets/icons/functioneel/vinkje.svg');
-  mask-image: url('@nl-rvo/assets/icons/functioneel/vinkje.svg');
-}
-
-/* Strip the fieldset's default grey background + padding so radio/checkbox
-   groups blend seamlessly into the white question card, matching open
-   questions. */
+/* The radio and checkbox controls are nldd-* custom elements: they draw
+   themselves inside a shadow root, so all of RVO's control-level overrides
+   (the hand-drawn radio dot, the vinkje mask for the checkmark) are gone.
+   What is left here is only the layout around them. */
 .invulhulp-question__fieldset {
   background: transparent;
   border: 0;
@@ -424,26 +378,23 @@ function onCheckboxToggle(option: string) {
   min-inline-size: 0;
 }
 
-.invulhulp-question__fieldset :deep(.rvo-form-fieldset__legend) {
-  padding: 0;
-  margin: 0 0 var(--rvo-space-2xs);
+.invulhulp-question__options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--semantics-forms-gap-tight, var(--primitives-space-8));
 }
 
-/* Open-question label inherits the rvo-form-field__label box; force the
-   same typographic weight + size as the fieldset legend so both question
-   types render with identical headings. */
-.invulhulp-question .rvo-form-field__label,
-.invulhulp-question :deep(.rvo-form-fieldset__legend) {
-  font-size: var(--rvo-font-size-lg);
-  font-weight: var(--rvo-font-weight-bold);
-  line-height: var(--rvo-line-height-md);
-}
-
-/* RVO ships rvo-form-field__label as a column flexbox, which would push the
-   (verplicht) / (aanvullend) marker onto its own line below the question. Use
-   normal inline flow so the marker always trails the text, like the legend. */
-.invulhulp-question .rvo-form-field__label {
+/* One heading style for all four question types — the <label> of an open
+   question, the <legend> of a checkbox/table fieldset, and the labelling
+   paragraph a radio group points at with accessible-labeled-by. */
+.invulhulp-question__legend {
   display: block;
+  padding: 0;
+  margin: 0 0 var(--primitives-space-4);
+  font-size: var(--primitives-font-size-200);
+  font-weight: var(--primitives-font-weight-body-bold);
+  line-height: var(--primitives-line-height-snug);
+  color: var(--invulhulp-color-text);
 }
 
 .invulhulp-question__label-text {
@@ -458,40 +409,40 @@ function onCheckboxToggle(option: string) {
    De kleurcodering op de vraag blijft, maar draagt de betekenis nu niet meer
    alleen. */
 .invulhulp-question__required {
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
   color: var(--invulhulp-color-mandatory);
-  margin-inline-start: var(--rvo-space-2xs);
-  font-weight: var(--rvo-font-weight-normal);
+  margin-inline-start: var(--primitives-space-4);
+  font-weight: var(--primitives-font-weight-body-regular);
 }
 
 .invulhulp-question__optional {
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
   color: var(--invulhulp-color-optional);
-  margin-inline-start: var(--rvo-space-2xs);
-  font-weight: var(--rvo-font-weight-normal);
+  margin-inline-start: var(--primitives-space-4);
+  font-weight: var(--primitives-font-weight-body-regular);
 }
 
 .invulhulp-question__guidance {
   color: var(--invulhulp-color-text-subtle);
-  margin: 0 0 var(--rvo-space-xs);
+  margin: 0 0 var(--primitives-space-8);
   /* Preserve paragraph breaks / bullet lines coming from the form JSON. */
   white-space: pre-line;
 }
 
 .invulhulp-question__followup {
-  margin-block-start: var(--rvo-space-xs);
+  margin-block-start: var(--primitives-space-8);
 }
 
 .invulhulp-question__ai-empty {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
-  margin: var(--rvo-space-xs) 0 0;
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  gap: var(--primitives-space-4);
+  margin: var(--primitives-space-8) 0 0;
+  padding: var(--primitives-space-4) var(--primitives-space-8);
   background: #fdf6ec;
   border-inline-start: 3px solid #e0b561;
-  border-radius: var(--rvo-border-radius-sm, 4px);
-  font-size: var(--rvo-font-size-sm);
+  border-radius: var(--primitives-corner-radius-sm, 4px);
+  font-size: var(--primitives-font-size-90);
   color: #8a6d3b;
 }
 
@@ -506,15 +457,15 @@ function onCheckboxToggle(option: string) {
 .invulhulp-question__ai-smoothed {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
   flex-wrap: wrap;
-  margin: var(--rvo-space-xs) 0 0;
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
-  background: var(--rvo-color-grijs-100, #f3f5f6);
-  border-inline-start: 3px solid var(--rvo-color-grijs-500, #a1a7ad);
-  border-radius: var(--rvo-border-radius-sm, 4px);
-  font-size: var(--rvo-font-size-sm);
-  color: var(--rvo-color-grijs-700, #4f5457);
+  margin: var(--primitives-space-8) 0 0;
+  padding: var(--primitives-space-4) var(--primitives-space-8);
+  background: var(--semantics-surfaces-tinted-background-color, #f3f5f6);
+  border-inline-start: 3px solid var(--semantics-content-secondary-color, #a1a7ad);
+  border-radius: var(--primitives-corner-radius-sm, 4px);
+  font-size: var(--primitives-font-size-90);
+  color: var(--semantics-content-secondary-color, #4f5457);
 }
 
 .invulhulp-question__ai-smoothed-text {

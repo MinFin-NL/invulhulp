@@ -52,9 +52,12 @@
       </section>
 
       <div class="form-intro__actions">
-        <button @click="$emit('start')" class="rvo-button rvo-button--primary form-intro__cta">
-          {{ content.buttonLabel }}
-        </button>
+        <nldd-button
+          variant="primary"
+          class="form-intro__cta"
+          :text="content.buttonLabel"
+          @click="$emit('start')"
+        />
 
         <div class="form-intro__ai-mode">
           <AiModeToggle
@@ -110,12 +113,12 @@ const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModePhase, read
 
 <style scoped>
 .form-intro {
-  padding-block: var(--rvo-space-3xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-48) var(--primitives-space-48);
 }
 
 .form-intro__title {
-  color: var(--rvo-color-lintblauw);
-  margin: 0 0 var(--rvo-space-xs);
+  color: var(--semantics-content-accent-color);
+  margin: 0 0 var(--primitives-space-8);
 }
 
 .form-intro__subtitle {
@@ -124,22 +127,22 @@ const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModePhase, read
 }
 
 .form-intro__section-title {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
 }
 
 /* rvo-data-list levert de dt/dd-opmaak; alleen de omlijsting en de
    monospace-weergave van de URN zelf zijn van ons. */
 .form-intro__urn {
-  padding: var(--rvo-space-md) var(--rvo-space-lg);
-  background: var(--rvo-color-wit);
+  padding: var(--primitives-space-16) var(--primitives-space-24);
+  background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-md);
+  border-radius: var(--primitives-corner-radius-md);
 }
 
 .form-intro__urn-value {
   font-family: monospace;
-  font-size: var(--rvo-font-size-sm);
-  color: var(--rvo-color-zwart);
+  font-size: var(--primitives-font-size-90);
+  color: var(--semantics-content-color);
   overflow-wrap: anywhere;
 }
 
@@ -148,20 +151,20 @@ const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModePhase, read
   padding: 0;
   margin: 0;
   display: flex;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
   flex-wrap: wrap;
 }
 
 .form-intro__legend-item {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
 }
 
 .form-intro__legend-swatch {
   inline-size: 16px;
   block-size: 16px;
-  border-radius: var(--rvo-border-radius-sm);
+  border-radius: var(--primitives-corner-radius-sm);
   flex-shrink: 0;
 }
 
@@ -176,24 +179,24 @@ const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModePhase, read
 .form-intro__actions {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-lg);
+  gap: var(--primitives-space-24);
 }
 
 .form-intro__cta {
-  font-size: var(--rvo-font-size-lg);
-  padding-block: var(--rvo-space-sm);
-  padding-inline: var(--rvo-space-2xl);
+  font-size: var(--primitives-font-size-200);
+  padding-block: var(--primitives-space-12);
+  padding-inline: var(--primitives-space-40);
   align-self: flex-start;
 }
 
 .form-intro__ai-mode {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
-  padding: var(--rvo-space-md) var(--rvo-space-lg);
+  gap: var(--primitives-space-4);
+  padding: var(--primitives-space-16) var(--primitives-space-24);
   background: linear-gradient(135deg, rgba(15, 45, 92, 0.04), rgba(91, 33, 182, 0.06));
   border: 1px solid rgba(91, 33, 182, 0.2);
-  border-radius: var(--rvo-border-radius-md);
+  border-radius: var(--primitives-corner-radius-md);
   align-self: flex-start;
 }
 

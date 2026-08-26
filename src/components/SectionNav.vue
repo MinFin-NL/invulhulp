@@ -214,9 +214,9 @@ function navigate(id: string) {
 .invulhulp-nav {
   inline-size: 240px;
   flex-shrink: 0;
-  background: var(--rvo-color-wit);
+  background: var(--semantics-surfaces-base-background-color);
   border-inline-end: 1px solid var(--invulhulp-color-border);
-  padding: 0 var(--rvo-space-md) var(--rvo-space-xl);
+  padding: 0 var(--primitives-space-16) var(--primitives-space-32);
   overflow-y: auto;
   /* Fill exactly the space under whatever is pinned above (the header, plus the
      AI Modus banner while it runs) and stick flush to its underside. Both
@@ -245,14 +245,14 @@ function navigate(id: string) {
   position: sticky;
   top: 0;
   z-index: 1;
-  background: var(--rvo-color-wit);
-  padding-block: var(--rvo-space-md);
-  margin-block-end: var(--rvo-space-xs);
+  background: var(--semantics-surfaces-base-background-color);
+  padding-block: var(--primitives-space-16);
+  margin-block-end: var(--primitives-space-8);
   border-block-end: 1px solid var(--invulhulp-color-border);
 }
 .invulhulp-nav__progress-label {
   color: var(--invulhulp-color-text-subtle);
-  margin-block-end: var(--rvo-space-2xs);
+  margin-block-end: var(--primitives-space-4);
 }
 
 .invulhulp-nav__list {
@@ -262,30 +262,30 @@ function navigate(id: string) {
 }
 
 .invulhulp-nav__step {
-  margin-block-end: var(--rvo-space-3xs);
+  margin-block-end: var(--primitives-space-2);
 }
 .invulhulp-nav__step--header {
-  margin-block-start: var(--rvo-space-sm);
+  margin-block-start: var(--primitives-space-12);
 }
 .invulhulp-nav__step--summary {
-  margin-block-start: var(--rvo-space-md);
+  margin-block-start: var(--primitives-space-16);
   border-block-start: 1px solid var(--invulhulp-color-border);
-  padding-block-start: var(--rvo-space-sm);
+  padding-block-start: var(--primitives-space-12);
 }
 
 .invulhulp-nav__group-label {
-  font-size: var(--rvo-font-size-2xs);
-  color: var(--rvo-color-grijs-500);
+  font-size: var(--primitives-font-size-70);
+  color: var(--semantics-content-secondary-color);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  padding: var(--rvo-space-xs) var(--rvo-space-xs) var(--rvo-space-2xs);
+  padding: var(--primitives-space-8) var(--primitives-space-8) var(--primitives-space-4);
   display: inline-block;
 }
 
 .invulhulp-nav__link {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   inline-size: 100%;
   text-align: start;
   background: none;
@@ -293,21 +293,21 @@ function navigate(id: string) {
   cursor: pointer;
   font: inherit;
   color: inherit;
-  font-size: var(--rvo-font-size-sm);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
-  border-radius: var(--rvo-border-radius-sm);
+  font-size: var(--primitives-font-size-90);
+  padding: var(--primitives-space-4) var(--primitives-space-8);
+  border-radius: var(--primitives-corner-radius-sm);
   transition: background var(--invulhulp-duration-fast);
 }
 .invulhulp-nav__link:hover {
-  background: var(--rvo-color-grijs-100);
+  background: var(--semantics-surfaces-tinted-background-color);
 }
 .invulhulp-nav__link--active {
   background: rgb(21 66 115 / 0.12);
-  font-weight: var(--rvo-font-weight-semibold);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
 }
 .invulhulp-nav__link--summary {
-  font-weight: var(--rvo-font-weight-semibold);
-  color: var(--rvo-color-lintblauw);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  color: var(--semantics-content-accent-color);
 }
 
 .invulhulp-nav__step--completed .invulhulp-nav__link {
@@ -328,35 +328,35 @@ function navigate(id: string) {
   block-size: 1em;
   flex-shrink: 0;
   border-radius: 50%;
-  box-shadow: inset 0 0 0 2px var(--rvo-color-oranje);
+  box-shadow: inset 0 0 0 2px var(--semantics-content-warning-color);
 }
 
 .invulhulp-nav__tag {
-  font-size: var(--rvo-font-size-2xs);
-  padding-inline: var(--rvo-space-2xs);
-  margin-inline-start: var(--rvo-space-2xs);
+  font-size: var(--primitives-font-size-70);
+  padding-inline: var(--primitives-space-4);
+  margin-inline-start: var(--primitives-space-4);
 }
 
 .invulhulp-nav__ai-mode {
-  margin-block-start: var(--rvo-space-md);
+  margin-block-start: var(--primitives-space-16);
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
 }
 
 .invulhulp-nav__ai-label {
   margin: 0;
-  font-weight: var(--rvo-font-weight-semibold);
-  color: var(--rvo-color-grijs-700);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  color: var(--semantics-content-secondary-color);
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  font-size: var(--rvo-font-size-2xs);
+  font-size: var(--primitives-font-size-70);
 }
 
 .invulhulp-nav__ai-hint {
   margin: 0;
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--rvo-font-size-2xs);
-  line-height: var(--rvo-line-height-md);
+  font-size: var(--primitives-font-size-70);
+  line-height: var(--primitives-line-height-snug);
 }
 </style>

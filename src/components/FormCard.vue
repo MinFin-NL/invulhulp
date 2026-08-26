@@ -27,13 +27,13 @@
         >
           {{ PLACEHOLDER_LABELS[form.placeholder] }}
         </span>
-        <button
-          type="button"
-          class="rvo-button rvo-button--secondary rvo-button--size-sm form-card__btn"
+        <nldd-button
+          variant="secondary"
+          size="sm"
+          class="form-card__btn"
+          text="Nog niet beschikbaar"
           disabled
-        >
-          Nog niet beschikbaar
-        </button>
+        />
       </div>
     </article>
 
@@ -89,12 +89,13 @@
         <!-- Secundair, bewust. Een fasetijdlijn met twaalf primaire knoppen
              wijst nergens heen; de ene primaire actie van de dossierpagina
              staat bovenaan in de "volgende stap"-band. -->
-        <button
-          class="rvo-button rvo-button--secondary rvo-button--size-sm form-card__btn"
+        <nldd-button
+          variant="secondary"
+          size="sm"
+          class="form-card__btn"
+          :text="openLabel"
           @click="emit('open', form.id)"
-        >
-          {{ openLabel }}
-        </button>
+        />
         <AiModeToggle
           v-if="canEdit"
           :form-id="form.id"
@@ -230,7 +231,7 @@ const openLabel = computed(() => {
 .form-card--paired {
   border-start-start-radius: 0;
   border-end-start-radius: 0;
-  border-inline-start-color: var(--rvo-color-lintblauw);
+  border-inline-start-color: var(--semantics-content-accent-color);
 }
 
 .form-slot--paired:hover .form-card--paired {
@@ -242,8 +243,8 @@ const openLabel = computed(() => {
    `disabled` — de status staat als tekst op de kaart, niet alleen in de kleur. */
 .form-card--placeholder {
   border-style: dashed;
-  border-color: var(--rvo-color-grijs-400);
-  background: var(--rvo-color-grijs-100);
+  border-color: var(--semantics-content-secondary-color);
+  background: var(--semantics-surfaces-tinted-background-color);
   box-shadow: none;
 }
 
@@ -252,7 +253,7 @@ const openLabel = computed(() => {
 }
 
 .form-card--placeholder .form-card__title {
-  color: var(--rvo-color-grijs-700);
+  color: var(--semantics-content-secondary-color);
 }
 
 .form-card--placeholder .form-card__btn[disabled] {
@@ -264,7 +265,7 @@ const openLabel = computed(() => {
 }
 
 .form-card__verdict--success { background: #e6f6ec; color: #1d6b3a; border-color: #b7e4c7; }
-.form-card__verdict--info    { background: var(--rvo-color-lichtblauw-150); color: var(--rvo-color-lintblauw); border-color: var(--rvo-color-lichtblauw-300); }
+.form-card__verdict--info    { background: var(--semantics-surfaces-tinted-background-color); color: var(--semantics-content-accent-color); border-color: var(--semantics-dividers-color); }
 .form-card__verdict--warning { background: #fdf3e0; color: #8a5a00; border-color: #f0d49b; }
 .form-card__verdict--error   { background: #fdecea; color: #8f2436; border-color: #f5c2bd; }
 
@@ -272,7 +273,7 @@ const openLabel = computed(() => {
 .form-card--ai-mode {
   border: 2px solid transparent;
   background-image:
-    linear-gradient(var(--rvo-color-wit), var(--rvo-color-wit)),
+    linear-gradient(var(--semantics-surfaces-base-background-color), var(--semantics-surfaces-base-background-color)),
     linear-gradient(135deg, #0f2d5c, #5b21b6, #0ea5e9, #5b21b6, #0f2d5c);
   background-origin: border-box;
   background-clip: padding-box, border-box;
@@ -301,14 +302,14 @@ const openLabel = computed(() => {
 }
 
 .form-card__body {
-  margin-block-end: var(--rvo-space-md);
+  margin-block-end: var(--primitives-space-16);
 }
 
 /* Dutch compound nouns ("Toegankelijkheidsverklaring") are wider than the
    210px card, so hyphenate and hard-break rather than overflow the border. */
 .form-card__title {
-  color: var(--rvo-color-lintblauw);
-  margin: 0 0 var(--rvo-space-xs);
+  color: var(--semantics-content-accent-color);
+  margin: 0 0 var(--primitives-space-8);
   overflow-wrap: break-word;
   hyphens: auto;
 }
@@ -318,25 +319,25 @@ const openLabel = computed(() => {
 .form-card__domains {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   list-style: none;
   padding: 0;
-  margin: 0 0 var(--rvo-space-xs);
+  margin: 0 0 var(--primitives-space-8);
 }
 
 .form-card__domain {
-  font-size: var(--rvo-font-size-2xs, 0.75rem);
+  font-size: var(--primitives-font-size-70, 0.75rem);
   line-height: 1.4;
   color: var(--invulhulp-color-text-subtle);
-  background: var(--rvo-color-lichtblauw-150);
-  border-radius: var(--rvo-border-radius-md, 4px);
-  padding: 0 var(--rvo-space-2xs);
+  background: var(--semantics-surfaces-tinted-background-color);
+  border-radius: var(--primitives-corner-radius-md, 4px);
+  padding: 0 var(--primitives-space-4);
   white-space: nowrap;
 }
 
 .form-card__desc {
   color: var(--invulhulp-color-text-subtle);
-  line-height: var(--rvo-line-height-md);
+  line-height: var(--primitives-line-height-snug);
   overflow-wrap: break-word;
   hyphens: auto;
 }
@@ -345,11 +346,11 @@ const openLabel = computed(() => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
 }
 
 .form-card__status {
-  font-size: var(--rvo-font-size-2xs);
+  font-size: var(--primitives-font-size-70);
 }
 
 .form-card__btn {

@@ -31,12 +31,16 @@
 
       <!-- Navigation -->
       <div class="rvo-layout-row rvo-layout-gap--md decision-gate__nav">
-        <button @click="$emit('prev')" class="rvo-button rvo-button--secondary">
-          ← Vorige
-        </button>
-        <button @click="onNext" class="rvo-button rvo-button--primary">
-          {{ goAnswer === 'Ja, het systeem wordt ingezet' ? 'Naar Deel B – Implementatie →' : goAnswer === 'Nee, het systeem wordt niet ingezet' ? 'Naar samenvatting →' : 'Volgende →' }}
-        </button>
+        <nldd-button
+          variant="secondary"
+          text="← Vorige"
+          @click="$emit('prev')"
+        />
+        <nldd-button
+          variant="primary"
+          :text="goAnswer === 'Ja, het systeem wordt ingezet' ? 'Naar Deel B – Implementatie →' : goAnswer === 'Nee, het systeem wordt niet ingezet' ? 'Naar samenvatting →' : 'Volgende →'"
+          @click="onNext"
+        />
       </div>
 
     </div>
@@ -89,24 +93,24 @@ function onNext() {
 
 <style scoped>
 .decision-gate {
-  padding-block: var(--rvo-space-2xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-40) var(--primitives-space-48);
 }
 
 .decision-gate__kicker {
   color: var(--invulhulp-color-text-subtle);
-  margin: 0 0 var(--rvo-space-3xs);
+  margin: 0 0 var(--primitives-space-2);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .decision-gate__title {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   margin: 0;
 }
 
 .decision-gate__nav {
   justify-content: space-between;
   border-block-start: 1px solid var(--invulhulp-color-border);
-  padding-block-start: var(--rvo-space-xl);
+  padding-block-start: var(--primitives-space-32);
 }
 </style>

@@ -67,17 +67,18 @@
       </div>
 
       <div class="invulhulp-modal__actions">
-        <button
+        <nldd-button
           type="submit"
-          class="rvo-button"
-          :class="confirmVariant"
+          :variant="confirmVariant"
+          :text="confirmLabel"
           :disabled="confirmDisabled"
-        >
-          {{ confirmLabel }}
-        </button>
-        <button v-if="cancelLabel" type="button" class="rvo-button rvo-button--secondary" @click="cancel">
-          {{ cancelLabel }}
-        </button>
+        />
+        <nldd-button
+          variant="secondary"
+          :text="cancelLabel"
+          v-if="cancelLabel"
+          @click="cancel"
+        />
       </div>
     </form>
   </dialog>
@@ -124,8 +125,10 @@ const phraseId = `invulhulp-dialog-phrase-${uid}`
 const phraseHintId = `invulhulp-dialog-phrase-hint-${uid}`
 const titleId = `invulhulp-dialog-title-${uid}`
 
+// A warning confirm is the destructive path (dossier wissen, gebruiker
+// verwijderen); everything else is the ordinary primary action.
 const confirmVariant = computed(() =>
-  props.variant === 'warning' ? 'rvo-button--warning' : 'rvo-button--primary',
+  props.variant === 'warning' ? 'destructive' : 'primary',
 )
 
 // Spaties aan de randen negeren (plakken uit de kaart levert die zo op), maar
@@ -204,26 +207,26 @@ defineExpose({ open })
 }
 
 .invulhulp-modal__container {
-  background: var(--rvo-color-wit);
-  border-radius: var(--rvo-border-radius-lg);
+  background: var(--semantics-surfaces-base-background-color);
+  border-radius: var(--primitives-corner-radius-lg);
   box-shadow: 0 0 1em 0 rgb(0 0 0 / 30%);
-  padding: var(--rvo-space-md);
+  padding: var(--primitives-space-16);
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
 }
 
 .invulhulp-modal__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
 }
 
 .invulhulp-modal__title {
   margin: 0;
   flex: 1;
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
 }
 
 .invulhulp-modal__close {
@@ -233,10 +236,10 @@ defineExpose({ open })
   line-height: 1;
   cursor: pointer;
   color: var(--invulhulp-color-text-muted);
-  padding: 0 var(--rvo-space-3xs);
+  padding: 0 var(--primitives-space-2);
 }
 .invulhulp-modal__close:hover {
-  color: var(--rvo-color-grijs-900, var(--rvo-color-grijs-800));
+  color: var(--semantics-content-color, var(--semantics-content-color));
 }
 
 .invulhulp-modal__divider {
@@ -246,7 +249,7 @@ defineExpose({ open })
 .invulhulp-modal__body {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
 }
 
 .invulhulp-modal__message {
@@ -260,7 +263,7 @@ defineExpose({ open })
 .invulhulp-modal__danger-body {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
 }
 
 .invulhulp-modal__danger-title {
@@ -270,7 +273,7 @@ defineExpose({ open })
 .invulhulp-modal__danger-field {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .invulhulp-modal__danger-hint {
@@ -279,7 +282,7 @@ defineExpose({ open })
 
 /* Een uitgeschakelde knop blijft leesbaar (contrast ≥ 4,5:1) — hij is de
    volgende stap, niet weggevallen decor. */
-.invulhulp-modal__actions .rvo-button[disabled] {
+.invulhulp-modal__actions nldd-button[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -287,7 +290,7 @@ defineExpose({ open })
 .invulhulp-modal__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-xs);
-  margin-block-start: var(--rvo-space-2xs);
+  gap: var(--primitives-space-8);
+  margin-block-start: var(--primitives-space-4);
 }
 </style>

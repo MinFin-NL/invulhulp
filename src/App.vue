@@ -1,5 +1,5 @@
 <template>
-  <div class="utrecht-document rvo-theme">
+  <div class="invulhulp-app">
     <!-- Also gate while booting: the form must not mount until loadFromServer
          finished, or its disconnectAll() tears down the collab sockets the
          freshly mounted editors just opened (1-second connect/close churn). -->
@@ -13,7 +13,7 @@
         <div class="findocs-hero__aurora" aria-hidden="true" />
         <div class="findocs-hero__inner">
           <div class="findocs-brand">
-            <img class="findocs-brand__emblem" :src="emblemUrl" alt="" />
+            <img class="findocs-brand__emblem" :src="rijkslogoUrl" alt="" />
             <span class="findocs-brand__org">Ministerie van Financiën</span>
           </div>
 
@@ -25,10 +25,14 @@
           </p>
 
           <div class="findocs-hero__cta">
-            <button class="rvo-button rvo-button--primary findocs-cta-btn" @click="auth.login()">
-              <span class="findocs-cta-btn__icon" aria-hidden="true" />
-              Inloggen met SSO
-            </button>
+            <nldd-button
+              class="findocs-cta-btn"
+              variant="inherit-filled"
+              size="lg"
+              start-icon="arrow-right-in-bucket"
+              text="Inloggen met SSO"
+              @click="auth.login()"
+            />
             <span class="findocs-hero__cta-note">Inloggen vereist · alleen voor medewerkers van het ministerie</span>
           </div>
         </div>
@@ -37,7 +41,7 @@
       <!-- Feature highlights -->
       <section class="findocs-features" aria-label="Wat FinDocs voor je doet">
         <article v-for="f in features" :key="f.title" class="findocs-feature">
-          <span class="findocs-feature__icon"><img :src="f.icon" alt="" /></span>
+          <span class="findocs-feature__icon"><nldd-icon :name="f.icon" size="28" color="accent" /></span>
           <h2 class="findocs-feature__title">{{ f.title }}</h2>
           <p class="findocs-feature__desc">{{ f.desc }}</p>
         </article>
@@ -54,10 +58,9 @@ import AssessmentForm from './components/AssessmentForm.vue'
 import { useAssessmentStore } from './stores/assessmentStore'
 import { useAuthStore } from './stores/authStore'
 import { setLocalUser } from './collab/dossierTransport'
-import emblemUrl from '@nl-rvo/assets/images/emblem.svg'
-import brondocIcon from '@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg'
-import aiIcon from '@nl-rvo/assets/icons/computer-en-internet/digitalisering.svg'
-import samenhangIcon from '@nl-rvo/assets/icons/op-kantoor/documenten-met-elkaar-verbonden.svg'
+// The design system draws the Rijkslogo inside <nldd-top-navigation-bar>, but
+// does not export the mark on its own, so the landing hero uses a local copy.
+import rijkslogoUrl from './assets/rijkslogo.svg'
 
 const auth = useAuthStore()
 const booting = ref(true)
@@ -70,17 +73,17 @@ useAssessmentStore().beginServerLoad()
 
 const features = [
   {
-    icon: brondocIcon,
+    icon: 'folder',
     title: 'Brondocumenten',
     desc: 'Upload notulen, agenda’s en brainstorms in .docx, .xlsx, .pptx, .pdf, .txt of .md. FinDocs leest en indexeert ze automatisch.',
   },
   {
-    icon: aiIcon,
+    icon: 'sparkles',
     title: 'AI-extractie',
     desc: 'Per vraag stelt de AI een antwoord voor op basis van jouw documenten, mét bronverwijzing. Geen blanco pagina meer.',
   },
   {
-    icon: samenhangIcon,
+    icon: 'network-structure',
     title: 'Samenhangende fasen',
     desc: 'Van intake en business case tot PSA, BIO-quickscan en DPIA — de formulieren staan op volgorde van projectfase en delen antwoorden over de fasen heen.',
   },
@@ -114,28 +117,28 @@ onMounted(async () => {
 .invulhulp-auth-gate {
   max-inline-size: 32rem;
   margin: 6rem auto;
-  padding: var(--rvo-space-xl);
+  padding: var(--primitives-space-32);
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
 }
 
 /* ===== FinDocs landing / login screen ===== */
 .findocs-landing {
   min-block-size: 100vh;
-  background: var(--rvo-color-lichtblauw-150);
+  background: var(--semantics-surfaces-tinted-background-color);
 }
 
 /* --- Hero --- */
 .findocs-hero {
   position: relative;
   overflow: hidden;
-  background: var(--rvo-color-lintblauw);
-  color: var(--rvo-color-wit);
+  background: var(--semantics-content-accent-color);
+  color: var(--semantics-surfaces-base-background-color);
   padding-block: clamp(3rem, 9vw, 6rem) clamp(3.5rem, 10vw, 6.5rem);
-  padding-inline: var(--rvo-space-xl);
+  padding-inline: var(--primitives-space-32);
 }
 
 /* Flashy-but-tasteful drifting aurora using the app's AI-mode palette */
@@ -174,33 +177,35 @@ onMounted(async () => {
 .findocs-brand {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-sm);
-  padding: var(--rvo-space-2xs) var(--rvo-space-md);
-  margin-block-end: var(--rvo-space-lg);
+  gap: var(--primitives-space-12);
+  padding: var(--primitives-space-4) var(--primitives-space-16);
+  margin-block-end: var(--primitives-space-24);
   background: rgb(255 255 255 / 0.1);
   border: 1px solid rgb(255 255 255 / 0.18);
   border-radius: 999px;
 }
 
+/* The Rijkslogo is a 1:2 portrait mark, unlike RVO's square emblem — set the
+   height and let the width follow, or it renders stretched. */
 .findocs-brand__emblem {
-  inline-size: 1.5rem;
-  block-size: 1.5rem;
+  block-size: 2rem;
+  inline-size: auto;
 }
 
 .findocs-brand__org {
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   color: rgb(255 255 255 / 0.92);
   white-space: nowrap;
 }
 
 .findocs-hero__title {
   font-size: clamp(3rem, 11vw, 5.5rem);
-  font-weight: var(--rvo-font-weight-bold);
+  font-weight: var(--primitives-font-weight-body-bold);
   line-height: 1.02;
   letter-spacing: -0.02em;
   margin: 0;
-  color: var(--rvo-color-wit);
+  color: var(--semantics-surfaces-base-background-color);
 }
 
 .findocs-hero__title-accent {
@@ -222,50 +227,39 @@ onMounted(async () => {
 }
 
 .findocs-hero__tagline {
-  margin: var(--rvo-space-md) auto 0;
+  margin: var(--primitives-space-16) auto 0;
   max-inline-size: 36rem;
   font-size: clamp(1.125rem, 2.4vw, 1.5rem);
-  font-weight: var(--rvo-font-weight-semibold);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   color: rgb(255 255 255 / 0.95);
 }
 
 .findocs-hero__lead {
-  margin: var(--rvo-space-md) auto 0;
+  margin: var(--primitives-space-16) auto 0;
   max-inline-size: 38rem;
-  font-size: var(--rvo-font-size-md);
-  line-height: var(--rvo-line-height-lg);
+  font-size: var(--primitives-font-size-100);
+  line-height: var(--primitives-line-height-loose);
   color: rgb(255 255 255 / 0.8);
 }
 
 .findocs-hero__cta {
-  margin-block-start: var(--rvo-space-2xl);
+  margin-block-start: var(--primitives-space-40);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
 }
 
+/* inherit-filled derives its colours from the surrounding text colour, which on
+   the hero is white on the accent surface — exactly the contrast we want. The
+   shadow sits on the host; the button's own box is inside its shadow root. */
 .findocs-cta-btn {
-  gap: var(--rvo-space-sm);
-  font-size: var(--rvo-font-size-lg);
-  padding-inline: var(--rvo-space-2xl);
+  border-radius: var(--primitives-corner-radius-md);
   box-shadow: 0 6px 20px rgb(0 0 0 / 0.25);
 }
 
-.findocs-cta-btn__icon {
-  display: inline-block;
-  inline-size: 1.25rem;
-  block-size: 1.25rem;
-  flex-shrink: 0;
-  background-color: currentColor;
-  /* Static stylesheet url() so Vite resolves/encodes the NLDS icon correctly
-     in production; a runtime `url(${dataUri})` renders as a white square. */
-  -webkit-mask: url('@nl-rvo/assets/icons/functioneel/inloggen.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/functioneel/inloggen.svg') center / contain no-repeat;
-}
-
 .findocs-hero__cta-note {
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
   color: rgb(255 255 255 / 0.65);
 }
 
@@ -273,20 +267,20 @@ onMounted(async () => {
 .findocs-features {
   max-inline-size: 64rem;
   margin: clamp(-3rem, -6vw, -4rem) auto 0;
-  padding-inline: var(--rvo-space-xl);
-  padding-block-end: var(--rvo-space-4xl);
+  padding-inline: var(--primitives-space-32);
+  padding-block-end: var(--primitives-space-64);
   position: relative;
   z-index: 2;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-  gap: var(--rvo-space-lg);
+  gap: var(--primitives-space-24);
 }
 
 .findocs-feature {
-  background: var(--rvo-color-wit);
-  border: 1px solid var(--rvo-color-lichtblauw-300);
-  border-radius: var(--rvo-border-radius-md);
-  padding: var(--rvo-space-xl) var(--rvo-space-lg);
+  background: var(--semantics-surfaces-base-background-color);
+  border: 1px solid var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
+  padding: var(--primitives-space-32) var(--primitives-space-24);
   box-shadow: 0 1px 3px rgb(21 66 115 / 0.06), 0 10px 24px rgb(21 66 115 / 0.08);
   transition: transform var(--invulhulp-duration-fast), box-shadow var(--invulhulp-duration-fast);
 }
@@ -302,26 +296,21 @@ onMounted(async () => {
   justify-content: center;
   inline-size: 3rem;
   block-size: 3rem;
-  margin-block-end: var(--rvo-space-md);
-  background: var(--rvo-color-lichtblauw-150);
-  border-radius: var(--rvo-border-radius-sm);
-}
-
-.findocs-feature__icon img {
-  inline-size: 1.75rem;
-  block-size: 1.75rem;
+  margin-block-end: var(--primitives-space-16);
+  background: var(--semantics-surfaces-tinted-background-color);
+  border-radius: var(--primitives-corner-radius-sm);
 }
 
 .findocs-feature__title {
-  font-size: var(--rvo-font-size-lg);
-  font-weight: var(--rvo-font-weight-bold);
-  color: var(--rvo-color-lintblauw);
-  margin: 0 0 var(--rvo-space-xs);
+  font-size: var(--primitives-font-size-200);
+  font-weight: var(--primitives-font-weight-body-bold);
+  color: var(--semantics-content-accent-color);
+  margin: 0 0 var(--primitives-space-8);
 }
 
 .findocs-feature__desc {
-  font-size: var(--rvo-font-size-sm);
-  line-height: var(--rvo-line-height-md);
+  font-size: var(--primitives-font-size-90);
+  line-height: var(--primitives-line-height-snug);
   color: var(--invulhulp-color-text-subtle);
   margin: 0;
 }

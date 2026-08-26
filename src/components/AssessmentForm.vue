@@ -74,14 +74,13 @@
         >
           <div class="rvo-alert__container">
             <span>{{ prefillMessage }}</span>
-            <button
-              type="button"
-              class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+            <nldd-button
+              variant="neutral-transparent"
+              size="sm"
+              text="Sluiten"
               aria-label="Melding over overgenomen antwoorden sluiten"
               @click="prefill = null"
-            >
-              Sluiten
-            </button>
+            />
           </div>
         </div>
 
@@ -107,12 +106,16 @@
               </div>
             </div>
             <div class="rvo-layout-row rvo-layout-gap--md">
-              <button @click="store.setCurrentView('risk')" class="rvo-button rvo-button--secondary">
-                Risicoclassificatie herzien
-              </button>
-              <button @click="store.setCurrentView('summary')" class="rvo-button rvo-button--primary">
-                Samenvatting bekijken
-              </button>
+              <nldd-button
+                variant="secondary"
+                text="Risicoclassificatie herzien"
+                @click="store.setCurrentView('risk')"
+              />
+              <nldd-button
+                variant="primary"
+                text="Samenvatting bekijken"
+                @click="store.setCurrentView('summary')"
+              />
             </div>
           </div>
         </div>
@@ -425,13 +428,13 @@ function onDecisionNext(go: boolean) {
 }
 
 .assessment-shell__prefill {
-  margin: var(--rvo-space-md) var(--rvo-space-lg) 0;
+  margin: var(--primitives-space-16) var(--primitives-space-24) 0;
 }
 
 .assessment-shell__prefill .rvo-alert__container {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
   flex-wrap: wrap;
 }
 
@@ -442,11 +445,11 @@ function onDecisionNext(go: boolean) {
 .assessment-shell__main {
   flex: 1;
   overflow-y: auto;
-  padding-block-end: var(--rvo-space-3xl);
+  padding-block-end: var(--primitives-space-48);
 }
 
 .assessment-shell__forbidden {
-  padding-block: var(--rvo-space-3xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-48) var(--primitives-space-48);
 }
 
 /* ── AI Mode banner ──────────────────────────────────────────────────────── */
@@ -467,8 +470,8 @@ function onDecisionNext(go: boolean) {
 .ai-banner__inner {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-sm);
-  padding-block: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
+  padding-block: var(--primitives-space-12);
 }
 
 .ai-banner__spinner {
@@ -481,20 +484,20 @@ function onDecisionNext(go: boolean) {
 .ai-banner__body {
   display: flex;
   align-items: baseline;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
   flex-wrap: wrap;
   min-inline-size: 0;
 }
 
 .ai-banner__title {
-  font-weight: var(--rvo-font-weight-bold);
-  font-size: var(--rvo-font-size-md);
+  font-weight: var(--primitives-font-weight-body-bold);
+  font-size: var(--primitives-font-size-100);
   letter-spacing: 0.01em;
 }
 
 .ai-banner__count {
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   padding: 1px 8px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.2);
@@ -520,13 +523,13 @@ function onDecisionNext(go: boolean) {
 .ai-banner__stop {
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.95);
-  color: var(--rvo-color-rood, #d52b1e);
+  color: var(--semantics-content-critical-color, #d52b1e);
   border: 0;
   border-radius: 999px;
-  padding: var(--rvo-space-2xs) var(--rvo-space-md);
+  padding: var(--primitives-space-4) var(--primitives-space-16);
   font: inherit;
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-bold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-bold);
   cursor: pointer;
   transition: box-shadow var(--invulhulp-duration-fast), transform var(--invulhulp-duration-instant);
 }

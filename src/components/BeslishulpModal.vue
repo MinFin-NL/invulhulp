@@ -10,7 +10,7 @@
 
       <header class="beslishulp__header">
         <div class="beslishulp__brand">
-          <span class="beslishulp__brand-icon" aria-hidden="true" />
+          <nldd-icon class="beslishulp__brand-icon" name="score-meter" size="32" />
           <div>
             <h2 id="beslishulp-title" class="beslishulp__title">Beslishulp AI-verordening</h2>
             <p class="beslishulp__subtitle">
@@ -175,30 +175,28 @@
 
       <footer class="beslishulp__footer">
         <div class="beslishulp__footer-actions">
-          <button
+          <nldd-button
+            variant="neutral-transparent"
+            size="sm"
+            text="← Vorige vraag"
             v-if="steps.length > 0"
-            type="button"
-            class="rvo-button rvo-button--tertiary rvo-button--size-sm"
             @click="back"
-          >
-            ← Vorige vraag
-          </button>
-          <button
+          />
+          <nldd-button
+            variant="neutral-transparent"
+            size="sm"
+            text="Opnieuw beginnen"
             v-if="steps.length > 0"
-            type="button"
-            class="rvo-button rvo-button--tertiary rvo-button--size-sm"
             @click="restart"
-          >
-            Opnieuw beginnen
-          </button>
-          <button
+          />
+          <nldd-button
+            variant="primary"
+            size="sm"
+            class="beslishulp__done"
+            text="Sluiten"
             v-if="position?.kind === 'conclusion'"
-            type="button"
-            class="rvo-button rvo-button--primary rvo-button--size-sm beslishulp__done"
             @click="close"
-          >
-            Sluiten
-          </button>
+          />
         </div>
         <p class="beslishulp__credit">
           Beslisboom:
@@ -432,8 +430,8 @@ defineExpose({ open })
 }
 
 .beslishulp__container {
-  background: var(--rvo-color-wit);
-  border-radius: var(--rvo-border-radius-lg);
+  background: var(--semantics-surfaces-base-background-color);
+  border-radius: var(--primitives-corner-radius-lg);
   box-shadow: 0 0 1.5em 0 rgb(0 0 0 / 35%);
   display: flex;
   flex-direction: column;
@@ -446,39 +444,32 @@ defineExpose({ open })
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--rvo-space-sm);
-  padding: var(--rvo-space-lg) var(--rvo-space-lg) var(--rvo-space-md);
-  background: linear-gradient(135deg, var(--rvo-color-lintblauw) 0%, #1e3a6d 60%, #2a4a80 100%);
-  color: var(--rvo-color-wit);
+  gap: var(--primitives-space-12);
+  padding: var(--primitives-space-24) var(--primitives-space-24) var(--primitives-space-16);
+  background: linear-gradient(135deg, var(--semantics-content-accent-color) 0%, #1e3a6d 60%, #2a4a80 100%);
+  color: var(--semantics-surfaces-base-background-color);
 }
 
 .beslishulp__brand {
   display: flex;
   align-items: flex-start;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
 }
 
 .beslishulp__brand-icon {
-  inline-size: 2rem;
-  block-size: 2rem;
   flex-shrink: 0;
-  background-color: currentColor;
-  /* Static stylesheet url(): a runtime url() renders as a white square in the
-     production build (see the NLDS icon-mask note in DossierDetail.vue). */
-  -webkit-mask: url('@nl-rvo/assets/icons/gebruiksvoorwerpen/weegschaal.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/gebruiksvoorwerpen/weegschaal.svg') center / contain no-repeat;
 }
 
 .beslishulp__title {
   margin: 0;
-  font-size: var(--rvo-font-size-xl);
-  font-weight: var(--rvo-font-weight-bold);
-  color: var(--rvo-color-wit);
+  font-size: var(--primitives-font-size-300);
+  font-weight: var(--primitives-font-weight-body-bold);
+  color: var(--semantics-surfaces-base-background-color);
 }
 
 .beslishulp__subtitle {
-  margin: var(--rvo-space-3xs) 0 0;
-  font-size: var(--rvo-font-size-sm);
+  margin: var(--primitives-space-2) 0 0;
+  font-size: var(--primitives-font-size-90);
   color: rgb(255 255 255 / 0.8);
   max-inline-size: 52ch;
 }
@@ -490,11 +481,11 @@ defineExpose({ open })
   line-height: 1;
   cursor: pointer;
   color: rgb(255 255 255 / 0.8);
-  padding: 0 var(--rvo-space-3xs);
+  padding: 0 var(--primitives-space-2);
 }
 
 .beslishulp__close:hover {
-  color: var(--rvo-color-wit);
+  color: var(--semantics-surfaces-base-background-color);
 }
 
 /* --- Phase rail --- */
@@ -504,38 +495,38 @@ defineExpose({ open })
   list-style: none;
   margin: 0;
   padding: 0;
-  background: var(--rvo-color-lichtblauw-150);
+  background: var(--semantics-surfaces-tinted-background-color);
   border-block-end: 1px solid var(--invulhulp-color-border);
 }
 
 .beslishulp__phase {
   flex: 1;
-  padding: var(--rvo-space-2xs) var(--rvo-space-sm);
-  font-size: var(--rvo-font-size-2xs, 0.75rem);
-  font-weight: var(--rvo-font-weight-semibold);
+  padding: var(--primitives-space-4) var(--primitives-space-12);
+  font-size: var(--primitives-font-size-70, 0.75rem);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   color: var(--invulhulp-color-text-subtle);
   text-align: center;
   border-block-end: 3px solid transparent;
 }
 
 .beslishulp__phase--done {
-  color: var(--rvo-color-lintblauw);
-  border-block-end-color: var(--rvo-color-lichtblauw-300);
+  color: var(--semantics-content-accent-color);
+  border-block-end-color: var(--semantics-dividers-color);
 }
 
 .beslishulp__phase--active {
-  color: var(--rvo-color-lintblauw);
-  background: var(--rvo-color-wit);
-  border-block-end-color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
+  background: var(--semantics-surfaces-base-background-color);
+  border-block-end-color: var(--semantics-content-accent-color);
 }
 
 /* --- Body --- */
 .beslishulp__body {
-  padding: var(--rvo-space-lg);
+  padding: var(--primitives-space-24);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
 }
 
 .beslishulp__status {
@@ -546,9 +537,9 @@ defineExpose({ open })
 .beslishulp__kicker {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   margin: 0;
-  font-size: var(--rvo-font-size-2xs, 0.75rem);
+  font-size: var(--primitives-font-size-70, 0.75rem);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--invulhulp-color-text-subtle);
@@ -562,31 +553,31 @@ defineExpose({ open })
 
 .beslishulp__question {
   margin: 0;
-  font-size: var(--rvo-font-size-lg);
-  font-weight: var(--rvo-font-weight-bold);
-  line-height: var(--rvo-line-height-md);
-  color: var(--rvo-color-lintblauw);
+  font-size: var(--primitives-font-size-200);
+  font-weight: var(--primitives-font-weight-body-bold);
+  line-height: var(--primitives-line-height-snug);
+  color: var(--semantics-content-accent-color);
 }
 
 .beslishulp__explanation,
 .beslishulp__obligation {
-  font-size: var(--rvo-font-size-sm);
-  line-height: var(--rvo-line-height-lg);
+  font-size: var(--primitives-font-size-90);
+  line-height: var(--primitives-line-height-loose);
   color: var(--invulhulp-color-text-subtle);
   max-block-size: 22rem;
   /* Scroll internally instead of being squeezed to a clipped single line by the
      flex column when the answer list is tall. */
   flex-shrink: 0;
   overflow-y: auto;
-  padding: var(--rvo-space-sm) var(--rvo-space-md);
-  background: var(--rvo-color-lichtblauw-150);
-  border-inline-start: 3px solid var(--rvo-color-lichtblauw-300);
-  border-radius: var(--rvo-border-radius-sm);
+  padding: var(--primitives-space-12) var(--primitives-space-16);
+  background: var(--semantics-surfaces-tinted-background-color);
+  border-inline-start: 3px solid var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-sm);
 }
 
 .beslishulp__explanation :deep(strong),
 .beslishulp__obligation :deep(strong) {
-  color: var(--rvo-color-zwart);
+  color: var(--semantics-content-color);
 }
 
 /* --- Answers --- */
@@ -596,7 +587,7 @@ defineExpose({ open })
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   /* Never shrink away under the explanation: the options are the point of the screen. */
   flex-shrink: 0;
 }
@@ -617,27 +608,27 @@ defineExpose({ open })
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
   text-align: start;
   font: inherit;
-  font-size: var(--rvo-font-size-md);
+  font-size: var(--primitives-font-size-100);
   cursor: pointer;
-  padding: var(--rvo-space-sm) var(--rvo-space-md);
-  background: var(--rvo-color-wit);
+  padding: var(--primitives-space-12) var(--primitives-space-16);
+  background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-md);
-  color: var(--rvo-color-zwart);
+  border-radius: var(--primitives-corner-radius-md);
+  color: var(--semantics-content-color);
   transition: border-color var(--invulhulp-duration-instant), background var(--invulhulp-duration-instant), transform var(--invulhulp-duration-instant);
 }
 
 .beslishulp__answer:hover {
-  border-color: var(--rvo-color-lintblauw);
-  background: var(--rvo-color-lichtblauw-150);
+  border-color: var(--semantics-content-accent-color);
+  background: var(--semantics-surfaces-tinted-background-color);
   transform: translateX(2px);
 }
 
 .beslishulp__answer-arrow {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   flex-shrink: 0;
 }
 
@@ -646,12 +637,12 @@ defineExpose({ open })
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
   flex-wrap: wrap;
 }
 
 .beslishulp__saved {
-  font-size: var(--rvo-font-size-2xs, 0.75rem);
+  font-size: var(--primitives-font-size-70, 0.75rem);
   color: var(--invulhulp-color-text-subtle);
 }
 
@@ -660,28 +651,28 @@ defineExpose({ open })
 }
 
 .beslishulp__section-title {
-  margin: 0 0 var(--rvo-space-2xs);
-  font-size: var(--rvo-font-size-md);
-  font-weight: var(--rvo-font-weight-bold);
-  color: var(--rvo-color-lintblauw);
+  margin: 0 0 var(--primitives-space-4);
+  font-size: var(--primitives-font-size-100);
+  font-weight: var(--primitives-font-weight-body-bold);
+  color: var(--semantics-content-accent-color);
 }
 
 .beslishulp__labels {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .beslishulp__label {
-  font-size: var(--rvo-font-size-2xs, 0.75rem);
-  padding: 0 var(--rvo-space-2xs);
-  background: var(--rvo-color-lichtblauw-150);
-  border: 1px solid var(--rvo-color-lichtblauw-300);
-  border-radius: var(--rvo-border-radius-md);
-  color: var(--rvo-color-lintblauw);
+  font-size: var(--primitives-font-size-70, 0.75rem);
+  padding: 0 var(--primitives-space-4);
+  background: var(--semantics-surfaces-tinted-background-color);
+  border: 1px solid var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
+  color: var(--semantics-content-accent-color);
 }
 
 /* --- Trail & sources --- */
@@ -691,31 +682,31 @@ defineExpose({ open })
 
 .beslishulp__definitions {
   margin: 0;
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
 }
 
 .beslishulp__definitions dt {
-  font-weight: var(--rvo-font-weight-semibold);
-  color: var(--rvo-color-lintblauw);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  color: var(--semantics-content-accent-color);
 }
 
 .beslishulp__definitions dd {
-  margin: 0 0 var(--rvo-space-xs);
+  margin: 0 0 var(--primitives-space-8);
   color: var(--invulhulp-color-text-subtle);
 }
 
 .beslishulp__sources {
   margin: 0;
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
 }
 
 .beslishulp__trail {
   margin: 0;
-  padding-inline-start: var(--rvo-space-lg);
-  font-size: var(--rvo-font-size-sm);
+  padding-inline-start: var(--primitives-space-24);
+  font-size: var(--primitives-font-size-90);
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .beslishulp__trail-q {
@@ -724,35 +715,35 @@ defineExpose({ open })
 }
 
 .beslishulp__trail-a {
-  font-weight: var(--rvo-font-weight-semibold);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
 }
 
 .beslishulp__trail-back {
   background: none;
   border: 0;
   padding: 0;
-  margin-inline-start: var(--rvo-space-xs);
+  margin-inline-start: var(--primitives-space-8);
   font: inherit;
-  font-size: var(--rvo-font-size-2xs, 0.75rem);
+  font-size: var(--primitives-font-size-70, 0.75rem);
   cursor: pointer;
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   text-decoration: underline;
 }
 
 /* --- Footer --- */
 .beslishulp__footer {
-  padding: var(--rvo-space-sm) var(--rvo-space-lg) var(--rvo-space-md);
+  padding: var(--primitives-space-12) var(--primitives-space-24) var(--primitives-space-16);
   border-block-start: 1px solid var(--invulhulp-color-border);
-  background: var(--rvo-color-lichtblauw-150);
+  background: var(--semantics-surfaces-tinted-background-color);
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .beslishulp__footer-actions {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
   flex-wrap: wrap;
 }
 
@@ -762,7 +753,7 @@ defineExpose({ open })
 
 .beslishulp__credit {
   margin: 0;
-  font-size: var(--rvo-font-size-2xs, 0.75rem);
+  font-size: var(--primitives-font-size-70, 0.75rem);
   color: var(--invulhulp-color-text-subtle);
 }
 </style>

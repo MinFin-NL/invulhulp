@@ -27,12 +27,18 @@
             eerste login een eigen wachtwoord.
           </div>
           <div class="user-mgmt__temp-pw-actions">
-            <button class="rvo-button rvo-button--secondary rvo-button--size-sm" @click="copyTempPassword">
-              {{ copied ? 'Gekopieerd' : 'Kopieer' }}
-            </button>
-            <button class="rvo-button rvo-button--tertiary rvo-button--size-sm" @click="tempPassword = null">
-              Sluiten
-            </button>
+            <nldd-button
+              variant="secondary"
+              size="sm"
+              :text="copied ? 'Gekopieerd' : 'Kopieer'"
+              @click="copyTempPassword"
+            />
+            <nldd-button
+              variant="neutral-transparent"
+              size="sm"
+              text="Sluiten"
+              @click="tempPassword = null"
+            />
           </div>
         </div>
       </div>
@@ -80,9 +86,12 @@
             </div>
           </fieldset>
           <div>
-            <button class="rvo-button rvo-button--primary" type="submit" :disabled="busy">
-              {{ busy ? 'Bezig…' : 'Gebruiker aanmaken' }}
-            </button>
+            <nldd-button
+              type="submit"
+              variant="primary"
+              :text="busy ? 'Bezig…' : 'Gebruiker aanmaken'"
+              :disabled="busy"
+            />
           </div>
         </form>
       </section>
@@ -142,34 +151,35 @@
                   </span>
                 </td>
                 <td class="rvo-table-cell user-mgmt__actions">
-                  <button
-                    class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+                  <nldd-button
+                    variant="neutral-transparent"
+                    size="sm"
+                    text="Wachtwoord resetten"
                     :disabled="busy"
                     @click="resetPassword(u)"
-                  >
-                    Wachtwoord resetten
-                  </button>
-                  <button
-                    class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+                  />
+                  <nldd-button
+                    variant="neutral-transparent"
+                    size="sm"
+                    :text="u.isAdmin ? 'Beheerder afnemen' : 'Beheerder maken'"
                     :disabled="busy || u.isSelf"
                     @click="toggleAdmin(u)"
-                  >
-                    {{ u.isAdmin ? 'Beheerder afnemen' : 'Beheerder maken' }}
-                  </button>
-                  <button
-                    class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+                  />
+                  <nldd-button
+                    variant="neutral-transparent"
+                    size="sm"
+                    :text="u.enabled ? 'Deactiveren' : 'Activeren'"
                     :disabled="busy || u.isSelf"
                     @click="toggleEnabled(u)"
-                  >
-                    {{ u.enabled ? 'Deactiveren' : 'Activeren' }}
-                  </button>
-                  <button
-                    class="rvo-button rvo-button--tertiary rvo-button--size-sm user-mgmt__danger"
+                  />
+                  <nldd-button
+                    variant="neutral-transparent"
+                    size="sm"
+                    class="user-mgmt__danger"
+                    text="Verwijderen"
                     :disabled="busy || u.isSelf"
                     @click="askDelete(u)"
-                  >
-                    Verwijderen
-                  </button>
+                  />
                 </td>
               </tr>
             </tbody>
@@ -404,11 +414,11 @@ async function copyTempPassword() {
 
 <style scoped>
 .user-mgmt {
-  padding-block: var(--rvo-space-2xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-40) var(--primitives-space-48);
 }
 
 .user-mgmt__title {
-  margin-block-end: var(--rvo-space-xs);
+  margin-block-end: var(--primitives-space-8);
 }
 
 .user-mgmt__intro {
@@ -417,33 +427,33 @@ async function copyTempPassword() {
 }
 
 .user-mgmt__panel {
-  background: var(--rvo-color-wit);
-  border: 1px solid var(--rvo-color-lichtblauw-300);
-  border-radius: var(--rvo-border-radius-md);
-  padding: var(--rvo-space-lg);
+  background: var(--semantics-surfaces-base-background-color);
+  border: 1px solid var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
+  padding: var(--primitives-space-24);
 }
 
 .user-mgmt__panel-title {
-  margin-block: 0 var(--rvo-space-md);
-  font-size: var(--rvo-font-size-lg);
+  margin-block: 0 var(--primitives-space-16);
+  font-size: var(--primitives-font-size-200);
 }
 
 .user-mgmt__form {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
 }
 
 .user-mgmt__form-fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
 }
 
 .user-mgmt__field {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .user-mgmt__field--wide {
@@ -457,7 +467,7 @@ async function copyTempPassword() {
 .user-mgmt__admin-check {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
 }
 
 /* Zelfde reden als in QuestionItem.vue: het RVO-vinkje komt uit een
@@ -486,33 +496,33 @@ async function copyTempPassword() {
 .user-mgmt__roles-fieldset .rvo-form-fieldset__legend {
   padding: 0;
   margin: 0;
-  font-size: var(--rvo-label-font-size);
-  font-weight: var(--rvo-label-font-weight);
-  line-height: var(--rvo-line-height-md);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-medium);
+  line-height: var(--primitives-line-height-snug);
 }
 
 .user-mgmt__roles-fieldset .rvo-form-field__description {
-  margin-block: var(--rvo-space-2xs) var(--rvo-space-xs);
+  margin-block: var(--primitives-space-4) var(--primitives-space-8);
   color: var(--invulhulp-color-text-subtle);
 }
 
 .user-mgmt__roles {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .user-mgmt__role-check {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
   white-space: nowrap;
 }
 
 .user-mgmt__all-forms {
   display: block;
-  margin-block-start: var(--rvo-space-2xs);
-  font-size: var(--rvo-font-size-xs);
+  margin-block-start: var(--primitives-space-4);
+  font-size: var(--primitives-font-size-80);
   color: var(--invulhulp-color-text-subtle);
 }
 
@@ -530,66 +540,66 @@ async function copyTempPassword() {
 
 .user-mgmt__self {
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
 }
 
 .user-mgmt__badge {
   display: inline-block;
   padding: 1px 10px;
   border-radius: 999px;
-  font-size: var(--rvo-font-size-xs);
-  font-weight: var(--rvo-font-weight-semibold);
-  background: var(--rvo-color-lichtblauw-150);
-  color: var(--rvo-color-lintblauw);
+  font-size: var(--primitives-font-size-80);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  background: var(--semantics-surfaces-tinted-background-color);
+  color: var(--semantics-content-accent-color);
   white-space: nowrap;
 }
 
 .user-mgmt__badge--admin {
-  background: var(--rvo-color-lintblauw);
-  color: var(--rvo-color-wit);
+  background: var(--semantics-content-accent-color);
+  color: var(--semantics-surfaces-base-background-color);
 }
 
 .user-mgmt__badge--active {
-  background: var(--rvo-color-groen-150, #e1eddb);
-  color: var(--rvo-color-groen, #39870c);
+  background: var(--semantics-categories-success-tinted-background-color, #e1eddb);
+  color: var(--semantics-content-success-color, #39870c);
 }
 
 .user-mgmt__badge--off {
-  background: var(--rvo-color-grijs-200, #e6e6e6);
-  color: var(--rvo-color-grijs-700, #696969);
+  background: var(--semantics-dividers-color, #e6e6e6);
+  color: var(--semantics-content-secondary-color, #696969);
 }
 
 .user-mgmt__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .user-mgmt__danger {
-  color: var(--rvo-color-rood, #d52b1e) !important;
+  color: var(--semantics-content-critical-color, #d52b1e) !important;
 }
 
 .user-mgmt__temp-pw {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
   flex-wrap: wrap;
 }
 
 .user-mgmt__temp-pw-actions {
   display: inline-flex;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
   flex-shrink: 0;
 }
 
 .user-mgmt__pw-code {
   display: inline-block;
-  margin-inline-start: var(--rvo-space-xs);
+  margin-inline-start: var(--primitives-space-8);
   padding: 1px 8px;
   background: rgb(0 0 0 / 0.06);
-  border-radius: var(--rvo-border-radius-sm);
-  font-weight: var(--rvo-font-weight-bold);
+  border-radius: var(--primitives-corner-radius-sm);
+  font-weight: var(--primitives-font-weight-body-bold);
   user-select: all;
 }
 </style>

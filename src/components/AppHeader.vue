@@ -1,48 +1,45 @@
 <template>
-  <header ref="headerEl" data-rvo-on-dark class="invulhulp-header">
-    <div class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm">
+  <header ref="headerEl" class="invulhulp-header">
+    <div class="invulhulp-header__inner">
       <!-- Top bar: logo + reset button -->
-      <div class="rvo-layout-row rvo-layout-gap--md invulhulp-header__topbar">
+      <div class="invulhulp-header__topbar">
         <button
           type="button"
           @click="goHome"
           class="invulhulp-header__logo-btn"
           aria-label="Ga naar startpagina"
         >
-          <div class="rvo-logo invulhulp-header__logo">
-            <img class="rvo-logo__emblem" :src="emblemUrl" alt="" />
-            <div class="rvo-logo__wordmark">
-              <p class="rvo-logo__title">Ministerie van&#10;Financiën</p>
-            </div>
+          <div class="invulhulp-header__logo">
+            <img class="invulhulp-header__emblem" :src="rijkslogoUrl" alt="" />
+            <p class="invulhulp-header__wordmark">Ministerie van&#10;Financiën</p>
           </div>
         </button>
         <div class="invulhulp-header__actions">
-          <button
+          <nldd-button
             v-if="showResetButton"
+            variant="inherit-tinted"
+            size="sm"
+            text="Opnieuw beginnen"
             @click="openResetDialog"
-            class="rvo-button rvo-button--secondary rvo-button--size-sm"
-          >
-            Opnieuw beginnen
-          </button>
-          <button
+          />
+          <nldd-button
             v-if="auth.isAdmin"
+            variant="inherit-transparent"
+            size="sm"
+            :text="auth.userManagementOpen ? 'Terug naar dossiers' : 'Gebruikersbeheer'"
             @click="auth.userManagementOpen = !auth.userManagementOpen"
-            class="invulhulp-header__ghost-btn"
-            :aria-pressed="auth.userManagementOpen"
-          >
-            {{ auth.userManagementOpen ? 'Terug naar dossiers' : 'Gebruikersbeheer' }}
-          </button>
+          />
           <span v-if="auth.isAdmin" class="invulhulp-header__divider" aria-hidden="true" />
           <span v-if="auth.user" class="invulhulp-header__user">
             {{ auth.user.name ?? auth.user.email }}
           </span>
-          <button
+          <nldd-button
+            variant="inherit-transparent"
+            size="sm"
+            start-icon="arrow-right-out-bucket"
+            text="Uitloggen"
             @click="auth.logout()"
-            class="invulhulp-header__ghost-btn invulhulp-header__logout"
-          >
-            <span class="invulhulp-header__logout-icon" aria-hidden="true" />
-            Uitloggen
-          </button>
+          />
         </div>
       </div>
 
@@ -54,11 +51,11 @@
           class="invulhulp-header__crumb invulhulp-header__crumb--link"
           @click="store.goToPortal()"
         >
-          <span class="invulhulp-header__crumb-icon" aria-hidden="true" />
+          <nldd-icon name="folder" size="20" />
           {{ store.activeDossier.name }}
         </button>
         <span v-else class="invulhulp-header__crumb invulhulp-header__crumb--current" aria-current="page">
-          <span class="invulhulp-header__crumb-icon" aria-hidden="true" />
+          <nldd-icon name="folder" size="20" />
           {{ store.activeDossier.name }}
         </span>
         <!-- Lifecycle phase of the open form. Not a link: there is no
@@ -93,7 +90,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import emblemUrl from '@nl-rvo/assets/images/emblem.svg'
+import rijkslogoUrl from '../assets/rijkslogo.svg'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAuthStore } from '../stores/authStore'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
@@ -183,8 +180,8 @@ function openResetDialog() {
 
 <style scoped>
 .invulhulp-header {
-  background-color: var(--rvo-color-lintblauw);
-  color: var(--rvo-color-wit);
+  background-color: var(--semantics-content-accent-color);
+  color: var(--semantics-surfaces-base-background-color);
   padding: 0;
   /* Stays put: the form sidebar sticks to the header's underside via
      --invulhulp-header-height, which only lines up if the header itself never
@@ -193,6 +190,12 @@ function openResetDialog() {
   position: sticky;
   top: 0;
   z-index: 30;
+}
+
+.invulhulp-header__inner {
+  max-inline-size: var(--semantics-page-sections-body-max-width, 80rem);
+  margin-inline: auto;
+  padding-inline: var(--semantics-page-sections-md-margin-inline, var(--primitives-space-16));
 }
 
 /* Push the "who's here" avatars to the trailing edge of the breadcrumb row. */
@@ -206,11 +209,13 @@ function openResetDialog() {
 }
 
 .invulhulp-header__presence :deep(.presence-avatar) {
-  border-color: var(--rvo-color-lintblauw);
+  border-color: var(--semantics-content-accent-color);
 }
 
 .invulhulp-header__topbar {
-  padding-block: var(--rvo-space-sm);
+  display: flex;
+  gap: var(--primitives-space-16);
+  padding-block: var(--primitives-space-12);
   align-items: center;
   justify-content: space-between;
 }
@@ -218,57 +223,13 @@ function openResetDialog() {
 .invulhulp-header__actions {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
 }
 
-/* Ghost-style buttons for secondary header actions (gebruikersbeheer, uitloggen):
-   plain translucent text like the user-name label and tab links, instead of a
-   bordered rvo-button that reads as the primary action on the dark header. */
-.invulhulp-header__ghost-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--rvo-space-xs);
-  border: 0;
-  background: transparent;
-  color: rgb(255 255 255 / 0.75);
-  font: inherit;
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold);
-  white-space: nowrap;
-  padding: var(--rvo-space-3xs) var(--rvo-space-xs);
-  border-radius: var(--rvo-radius-md, 4px);
-  cursor: pointer;
-  transition: background var(--invulhulp-duration-fast), color var(--invulhulp-duration-fast);
-}
-
-.invulhulp-header__ghost-btn:hover {
-  background: rgb(255 255 255 / 0.12);
-  color: var(--rvo-color-wit);
-}
-
-.invulhulp-header__ghost-btn:focus-visible {
-  outline: 2px solid var(--rvo-color-wit);
-  outline-offset: 2px;
-}
-
-.invulhulp-header__logout {
-  gap: var(--rvo-space-xs);
-}
-
-/* Mirror the "inloggen" glyph so the arrow points out the door = uitloggen.
-   The mask URL is a static stylesheet reference so Vite resolves and encodes
-   the NL Design System icon correctly in the production build (a runtime
-   `url(${dataUri})` breaks once Vite inlines the SVG). */
-.invulhulp-header__logout-icon {
-  display: inline-block;
-  inline-size: 1.125rem;
-  block-size: 1.125rem;
-  flex-shrink: 0;
-  background-color: currentColor;
-  -webkit-mask: url('@nl-rvo/assets/icons/functioneel/inloggen.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/functioneel/inloggen.svg') center / contain no-repeat;
-  transform: scaleX(-1);
-}
+/* The header sits on the accent surface, so its buttons use the inherit-*
+   variants: those derive their colours from currentColor rather than the
+   default light-surface palette. Nothing here can reach inside their shadow
+   roots, which is why the old ghost-button rules are gone. */
 
 .invulhulp-header__divider {
   inline-size: 1px;
@@ -277,8 +238,8 @@ function openResetDialog() {
 }
 
 .invulhulp-header__user {
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   color: rgb(255 255 255 / 0.9);
   white-space: nowrap;
 }
@@ -292,33 +253,50 @@ function openResetDialog() {
 }
 
 .invulhulp-header__logo {
-  --rvo-logo-color: var(--rvo-color-wit);
-  --rvo-logo-font-family: inherit;
-  --rvo-logo-font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--primitives-space-12);
+  text-align: start;
+}
+
+/* 1:2 portrait mark — fix the height, let the width follow. */
+.invulhulp-header__emblem {
+  block-size: 2.75rem;
+  inline-size: auto;
+}
+
+.invulhulp-header__wordmark {
+  margin: 0;
+  /* The two-line "Ministerie van / Financiën" arrives as a literal newline. */
+  white-space: pre-line;
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-bold);
+  line-height: var(--primitives-line-height-tight);
+  color: var(--semantics-surfaces-base-background-color);
 }
 
 .invulhulp-header__breadcrumb {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   border-block-start: 1px solid rgb(255 255 255 / 0.15);
-  padding-block: var(--rvo-space-xs) var(--rvo-space-sm);
+  padding-block: var(--primitives-space-8) var(--primitives-space-12);
 }
 
 .invulhulp-header__crumb {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold);
+  gap: var(--primitives-space-8);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   white-space: nowrap;
-  padding: var(--rvo-space-3xs) var(--rvo-space-xs);
-  border-radius: var(--rvo-radius-md, 4px);
+  padding: var(--primitives-space-2) var(--primitives-space-8);
+  border-radius: var(--primitives-corner-radius-md, 4px);
 }
 
 .invulhulp-header__crumb--current {
-  color: var(--rvo-color-wit);
+  color: var(--semantics-surfaces-base-background-color);
 }
 
 .invulhulp-header__crumb--link {
@@ -326,32 +304,20 @@ function openResetDialog() {
   background: transparent;
   color: rgb(255 255 255 / 0.75);
   font: inherit;
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   cursor: pointer;
   transition: background var(--invulhulp-duration-fast), color var(--invulhulp-duration-fast);
 }
 
 .invulhulp-header__crumb--link:hover {
   background: rgb(255 255 255 / 0.12);
-  color: var(--rvo-color-wit);
+  color: var(--semantics-surfaces-base-background-color);
 }
 
 .invulhulp-header__crumb--link:focus-visible {
-  outline: 2px solid var(--rvo-color-wit);
+  outline: 2px solid var(--semantics-surfaces-base-background-color);
   outline-offset: 2px;
-}
-
-/* Static mask URL so Vite resolves the NLDS icon in the production build —
-   a runtime url(...) binding renders as a white square. */
-.invulhulp-header__crumb-icon {
-  display: inline-block;
-  inline-size: 1.125rem;
-  block-size: 1.125rem;
-  flex-shrink: 0;
-  background-color: currentColor;
-  -webkit-mask: url('@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg') center / contain no-repeat;
-  mask: url('@nl-rvo/assets/icons/op-kantoor/map-vol-documenten.svg') center / contain no-repeat;
 }
 
 .invulhulp-header__crumb-sep {
@@ -363,7 +329,7 @@ function openResetDialog() {
    sits between, and the first thing to go when the row gets tight. */
 .invulhulp-header__crumb--phase {
   color: rgb(255 255 255 / 0.75);
-  font-weight: var(--rvo-font-weight-normal);
+  font-weight: var(--primitives-font-weight-body-regular);
 }
 
 @media (max-width: 640px) {

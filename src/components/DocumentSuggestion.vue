@@ -96,21 +96,19 @@
           />
 
           <div class="doc-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
-            <button
+            <nldd-button
+              variant="primary"
+              size="sm"
+              :text="isChoiceType ? 'Selecteer deze optie' : 'Overnemen'"
               v-if="!isInsufficient && (!isChoiceType || (matchedOption && !isAlreadySelected))"
-              type="button"
-              class="rvo-button rvo-button--primary rvo-button--size-sm"
               @click="acceptSuggestion"
-            >
-              {{ isChoiceType ? 'Selecteer deze optie' : 'Overnemen' }}
-            </button>
-            <button
-              type="button"
-              class="rvo-button rvo-button--secondary rvo-button--size-sm"
+            />
+            <nldd-button
+              variant="secondary"
+              size="sm"
+              :text="isChoiceType && isAlreadySelected ? 'Sluiten' : 'Afwijzen'"
               @click="rejectSuggestion"
-            >
-              {{ isChoiceType && isAlreadySelected ? 'Sluiten' : 'Afwijzen' }}
-            </button>
+            />
           </div>
         </template>
       </div>
@@ -118,17 +116,18 @@
 
     <!-- Action button (hidden while streaming or when suggestion is shown) -->
     <div v-if="canSuggest && suggestion === null && !streamingText" class="doc-suggestion__actions">
-      <button
-        type="button"
-        class="rvo-button rvo-button--size-sm"
-        :class="isActive ? 'rvo-button--primary' : 'rvo-button--tertiary'"
+      <nldd-button
+        size="sm"
+        :variant="isActive ? 'primary' : 'neutral-transparent'"
         :disabled="isLoading"
         @click="requestExtraction"
       >
-        <span v-if="isLoading">Bezig…</span>
+        <span slot="text">
+<span v-if="isLoading">Bezig…</span>
         <span v-else-if="isChoiceType">✦ Stel keuze voor uit documenten</span>
         <span v-else>✦ Zoek in documenten</span>
-      </button>
+        </span>
+      </nldd-button>
     </div>
 
     <span v-if="error" class="doc-suggestion__error rvo-text rvo-text--sm" role="alert">{{ error }}</span>
@@ -326,16 +325,16 @@ function rejectSuggestion() {
 <style scoped>
 /* Rusttoestand: alleen de knop, geen kader. */
 .doc-suggestion {
-  margin-block-start: var(--rvo-space-2xs);
-  font-size: var(--rvo-font-size-sm);
+  margin-block-start: var(--primitives-space-4);
+  font-size: var(--primitives-font-size-90);
 }
 
 .doc-suggestion--active {
-  margin-block-start: var(--rvo-space-sm);
-  border: 1px solid var(--rvo-color-donkergeel-300);
-  border-radius: var(--rvo-border-radius-md);
-  background: var(--rvo-color-donkergeel-150);
-  padding: var(--rvo-space-sm) var(--rvo-space-md);
+  margin-block-start: var(--primitives-space-12);
+  border: 1px solid var(--semantics-categories-warning-tinted-highlight-border-color);
+  border-radius: var(--primitives-corner-radius-md);
+  background: var(--semantics-categories-warning-tinted-background-color);
+  padding: var(--primitives-space-12) var(--primitives-space-16);
 }
 
 /* De marge zit al op de container zolang die geen kader heeft. */
@@ -346,20 +345,20 @@ function rejectSuggestion() {
 .doc-suggestion__header {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
-  margin-block-end: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
+  margin-block-end: var(--primitives-space-8);
 }
 
 .doc-suggestion__label {
-  font-weight: var(--rvo-font-weight-semibold);
-  color: var(--rvo-color-oranje-750);
-  font-size: var(--rvo-font-size-xs);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  color: var(--semantics-categories-warning-tinted-content-color);
+  font-size: var(--primitives-font-size-80);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
 
 .doc-suggestion__panel {
-  margin-block: var(--rvo-space-2xs) var(--rvo-space-xs);
+  margin-block: var(--primitives-space-4) var(--primitives-space-8);
 }
 
 .doc-suggestion__panel :deep(.rvo-alert__container) {
@@ -371,47 +370,47 @@ function rejectSuggestion() {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--rvo-space-sm);
-  margin-block-end: var(--rvo-space-xs);
+  gap: var(--primitives-space-12);
+  margin-block-end: var(--primitives-space-8);
   flex-wrap: wrap;
 }
 
 .doc-suggestion__panel-label {
-  font-weight: var(--rvo-font-weight-bold);
-  font-size: var(--rvo-font-size-xs);
-  color: var(--rvo-color-groen-750);
+  font-weight: var(--primitives-font-weight-body-bold);
+  font-size: var(--primitives-font-size-80);
+  color: var(--semantics-categories-success-tinted-content-color);
   text-transform: uppercase;
   letter-spacing: 0.03em;
   flex-shrink: 0;
 }
 
 .doc-suggestion__rationale {
-  font-size: var(--rvo-font-size-xs);
-  color: var(--rvo-color-groen-600);
+  font-size: var(--primitives-font-size-80);
+  color: var(--semantics-categories-success-tinted-content-color);
   font-style: italic;
   text-align: right;
 }
 
 .doc-suggestion__actions {
-  margin-block-start: var(--rvo-space-xs);
+  margin-block-start: var(--primitives-space-8);
   align-items: center;
 }
 
 .doc-suggestion__error {
-  color: var(--rvo-color-rood);
-  margin-block-start: var(--rvo-space-2xs);
+  color: var(--semantics-content-critical-color);
+  margin-block-start: var(--primitives-space-4);
   display: block;
 }
 
 .doc-diff {
-  font-size: var(--rvo-font-size-md);
-  line-height: var(--rvo-line-height-md);
+  font-size: var(--primitives-font-size-100);
+  line-height: var(--primitives-line-height-snug);
   white-space: pre-wrap;
   word-break: break-word;
-  background: var(--rvo-color-wit);
-  border-radius: var(--rvo-border-radius-sm);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
-  margin-block-end: var(--rvo-space-xs);
+  background: var(--semantics-surfaces-base-background-color);
+  border-radius: var(--primitives-corner-radius-sm);
+  padding: var(--primitives-space-4) var(--primitives-space-8);
+  margin-block-end: var(--primitives-space-8);
 }
 
 .doc-diff__empty {
@@ -422,56 +421,56 @@ function rejectSuggestion() {
 .doc-diff__cursor {
   display: inline-block;
   margin-inline-start: 2px;
-  color: var(--rvo-color-grijs-500);
+  color: var(--semantics-content-secondary-color);
   animation: invulhulp-blink var(--invulhulp-loop-blink) steps(2, start) infinite;
 }
 
 .doc-diff__add {
-  background: var(--rvo-color-groen-150);
-  color: var(--rvo-color-groen-750);
+  background: var(--semantics-categories-success-tinted-background-color);
+  color: var(--semantics-categories-success-tinted-content-color);
 }
 
 .doc-diff__del {
-  background: var(--rvo-color-rood-150);
-  color: var(--rvo-color-rood-750);
+  background: var(--semantics-categories-critical-tinted-background-color);
+  color: var(--semantics-categories-critical-tinted-content-color);
   text-decoration: line-through;
 }
 
 .doc-choice {
-  margin-block-end: var(--rvo-space-xs);
+  margin-block-end: var(--primitives-space-8);
 }
 
 .doc-table-preview {
-  background: var(--rvo-color-wit);
-  border-radius: var(--rvo-border-radius-sm);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
-  margin-block-end: var(--rvo-space-xs);
+  background: var(--semantics-surfaces-base-background-color);
+  border-radius: var(--primitives-corner-radius-sm);
+  padding: var(--primitives-space-4) var(--primitives-space-8);
+  margin-block-end: var(--primitives-space-8);
   overflow-x: auto;
 }
 
 .doc-table-preview__table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
 }
 
 .doc-table-preview__table .rvo-table-header,
 .doc-table-preview__table .rvo-table-cell {
   text-align: start;
-  padding: var(--rvo-space-3xs, 4px) var(--rvo-space-2xs);
+  padding: var(--primitives-space-2, 4px) var(--primitives-space-4);
   border-block-end: 1px solid var(--invulhulp-color-border);
 }
 
 .doc-table-preview__notes {
-  margin: var(--rvo-space-2xs) 0 0;
-  font-size: var(--rvo-font-size-sm);
+  margin: var(--primitives-space-4) 0 0;
+  font-size: var(--primitives-font-size-90);
 }
 
 .doc-choice__label {
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
   color: var(--invulhulp-color-text-muted);
-  font-weight: var(--rvo-font-weight-semibold);
-  margin-block-end: var(--rvo-space-2xs);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  margin-block-end: var(--primitives-space-4);
   text-transform: uppercase;
   letter-spacing: 0.03em;
 }
@@ -479,20 +478,20 @@ function rejectSuggestion() {
 .doc-choice__pill {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
-  padding: var(--rvo-space-xs) var(--rvo-space-sm);
-  background: var(--rvo-color-wit);
-  border: 2px solid var(--rvo-color-lintblauw);
+  gap: var(--primitives-space-8);
+  padding: var(--primitives-space-8) var(--primitives-space-12);
+  background: var(--semantics-surfaces-base-background-color);
+  border: 2px solid var(--semantics-content-accent-color);
   border-radius: 999px;
-  font-size: var(--rvo-font-size-md);
-  color: var(--rvo-color-lintblauw);
-  font-weight: var(--rvo-font-weight-semibold);
+  font-size: var(--primitives-font-size-100);
+  color: var(--semantics-content-accent-color);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
 }
 
 .doc-choice__pill--selected {
-  background: var(--rvo-color-groen-150);
-  border-color: var(--rvo-color-groen);
-  color: var(--rvo-color-groen-750);
+  background: var(--semantics-categories-success-tinted-background-color);
+  border-color: var(--semantics-content-success-color);
+  color: var(--semantics-categories-success-tinted-content-color);
 }
 
 .doc-choice__radio {
@@ -514,8 +513,8 @@ function rejectSuggestion() {
 }
 
 .doc-choice__current {
-  font-size: var(--rvo-font-size-xs);
+  font-size: var(--primitives-font-size-80);
   font-style: italic;
-  color: var(--rvo-color-groen);
+  color: var(--semantics-content-success-color);
 }
 </style>

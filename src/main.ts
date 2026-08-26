@@ -2,6 +2,11 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import App from './App.vue'
+// Registers every <nldd-*> custom element. Side-effectful (customElements.define),
+// so it must be imported for the tag names to upgrade — and for the same reason
+// it does not tree-shake; narrow to per-component subpath imports
+// ('@nldd/design-system/button', …) if the bundle needs trimming.
+import '@nldd/design-system'
 import './assets/main.css'
 
 // When the BFF session expires, any /api call returns 401. Bounce the whole
