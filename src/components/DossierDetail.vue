@@ -429,19 +429,31 @@
            a process rather than as three unrelated lists. -->
       <ol class="track-timeline">
       <li
-        v-for="group in timelineGroups"
+        v-for="(group, phaseIdx) in timelineGroups"
         :key="group.track"
         :id="`fase-${group.track}`"
         class="track-phase"
         :aria-labelledby="`track-${group.track}-title`"
       >
-        <div
-          class="track-phase__marker"
-          :class="`track-phase__marker--${markerState(group)}`"
-          aria-hidden="true"
-        >
-          <svg v-if="markerState(group) === 'done'" class="track-phase__check" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" focusable="false"><path fill="currentColor" d="m41.262 6.164c-1.133-.836-2.707-.676-3.641.367l-15.879 17.77-9.547-8.27a2.7 2.7 0 0 0 -3.516-.027 2.71 2.71 0 0 0 -.586 3.469l11.563 19.301a2.72 2.72 0 0 0 2.316 1.316c.957 0 1.836-.492 2.328-1.301l17.66-29.043c.727-1.195.426-2.75-.699-3.582zm0 0"/></svg>
-          <template v-else-if="group.phaseNumber > 0">{{ group.phaseNumber }}</template>
+        <!-- De spine is de verticale tegenhanger van nldd-step-indicator: per
+             fase een step-cell op de kop, en daaronder een lijn-only cell die
+             de baan doortrekt langs de kaarten tot aan de volgende fase.
+             Decoratief — "Fase 1 van 3" en de teller staan in de kop. -->
+        <div class="track-phase__lane" aria-hidden="true">
+          <nldd-timeline-track-cell
+            class="track-phase__step"
+            variant="step"
+            :status="stepStatus(group)"
+            :position="stepPosition(phaseIdx)"
+            :icon="markerState(group) === 'done' ? 'check-mark-small' : ''"
+            :text="stepNumber(group)"
+          />
+          <nldd-timeline-track-cell
+            v-if="phaseIdx < timelineGroups.length - 1"
+            class="track-phase__rail"
+            variant="step"
+            status="none"
+          />
         </div>
 
         <div class="track-phase__body">
@@ -1173,6 +1185,32 @@ function goToPhase(group: TrackGroup) {
 /** Marker state on the spine: filled+check when the phase is finished, a solid
  *  dot while it is under way, an outline when nothing has been started, and a
  *  dashed outline for a phase that has no forms yet (`beheer`). */
+/** NLDD's step vocabulary for the vertical spine. `empty` has no counterpart —
+ *  a phase without forms reads as `future`, and the empty hint in its body says
+ *  why, which keeps that fact out of colour alone. */
+function stepStatus(group: TrackGroup): 'past' | 'current' | 'future' {
+  const state = markerState(group)
+  if (state === 'done') return 'past'
+  if (state === 'busy') return 'current'
+  return 'future'
+}
+
+/** Where this phase sits on the track: the first has no line above it, the last
+ *  none below, so the spine starts and stops at a marker. */
+function stepPosition(index: number): 'first' | 'between' | 'last' | 'only' {
+  const last = timelineGroups.value.length - 1
+  if (last === 0) return 'only'
+  if (index === 0) return 'first'
+  return index === last ? 'last' : 'between'
+}
+
+/** The number in the disc. A finished phase shows a check instead, and the
+ *  `onbekend` bucket is not a phase and has no number at all. */
+function stepNumber(group: TrackGroup): string {
+  if (markerState(group) === 'done' || group.phaseNumber === 0) return ''
+  return String(group.phaseNumber)
+}
+
 function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   const { done, total } = trackCount(group)
   if (total === 0) return 'empty'
@@ -1760,11 +1798,12 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   background: var(--semantics-surfaces-base-background-color);
 }
 
+/* nldd-icon tekent zijn eigen SVG in een shadow root en erft `color` van de
+   cirkel eromheen; `size="20"` bepaalt de maat. Een achtergrondkleur op de host
+   (de oude NLDS-maskeertruc) zou daar een dicht vlak overheen leggen. */
 .phase-rail__icon {
   display: block;
-  inline-size: 1.375rem;
-  block-size: 1.375rem;
-  background-color: currentColor;
+  flex-shrink: 0;
 }
 
 .phase-rail__label {
@@ -1824,82 +1863,48 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   list-style: none;
   margin: 0;
   padding: 0;
-  --track-marker-size: 2.25rem;
-  --track-gutter: 3.25rem;
+  /* The lane is the step marker's own width (nldd-timeline-track-cell,
+     variant="step"); only the gap to the content is ours. */
+  --track-gutter: var(--primitives-space-16);
 }
 
 .track-phase {
-  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: var(--track-gutter);
   /* Clear the sticky header, or the fase rail scrolls a phase to right under it. */
   scroll-margin-block-start: calc(var(--invulhulp-header-height) + var(--primitives-space-24));
-  padding-inline-start: var(--track-gutter);
+}
+
+/* The whitespace between two phases sits inside the body column, so the lane
+   next to it stretches over it and the track runs on without a break. */
+.track-phase__body {
   padding-block-end: var(--primitives-space-48);
 }
 
-.track-phase:last-child {
+.track-phase:last-child .track-phase__body {
   padding-block-end: 0;
 }
 
-/* The connecting line: from just under this marker down to the next one. */
-.track-phase::before {
-  content: "";
-  position: absolute;
-  inset-block-start: var(--track-marker-size);
-  inset-block-end: 0;
-  inset-inline-start: calc(var(--track-marker-size) / 2 - 1px);
-  inline-size: 2px;
-  background: var(--track-line);
-}
-
-.track-phase:last-child::before {
-  display: none;
-}
-
-.track-phase__marker {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  inline-size: var(--track-marker-size);
-  block-size: var(--track-marker-size);
-  border-radius: 50%;
+.track-phase__lane {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--primitives-font-size-90);
-  font-weight: var(--primitives-font-weight-body-bold);
-  box-sizing: border-box;
-  background: var(--semantics-surfaces-base-background-color);
-  color: var(--semantics-content-accent-color);
-  border: 2px solid var(--track-line);
+  flex-direction: column;
+  /* The marker's masking ring defaults to the base surface; the timeline sits
+     on the tinted page, so tell the cell what it is really standing on. */
+  --context-parent-background-color: var(--semantics-surfaces-tinted-background-color);
 }
 
-.track-phase__marker--todo {
-  border-color: var(--track-line);
-  color: var(--invulhulp-color-text-subtle);
+/* The disc centres itself in the cell, so this height decides how far down the
+   phase heading the marker lands — roughly on the title, under the eyebrow. */
+.track-phase__step {
+  flex: 0 0 auto;
+  block-size: 3rem;
 }
 
-.track-phase__marker--busy {
-  border-color: var(--semantics-content-accent-color);
-  color: var(--semantics-content-accent-color);
-  box-shadow: inset 0 0 0 3px var(--semantics-surfaces-tinted-background-color);
-}
-
-.track-phase__marker--done {
-  background: var(--semantics-content-accent-color);
-  border-color: var(--semantics-content-accent-color);
-  color: var(--semantics-surfaces-base-background-color);
-}
-
-/* A phase with no forms yet (beheer) — deliberately visible, visibly unfilled. */
-.track-phase__marker--empty {
-  border-style: dashed;
-  border-color: var(--semantics-content-secondary-color);
-  color: var(--semantics-content-secondary-color);
-}
-
-.track-phase__check {
-  inline-size: 1rem;
-  block-size: 1rem;
+/* Line only (status="none"): carries the track past the cards of this phase
+   down to the next marker. */
+.track-phase__rail {
+  flex: 1 1 auto;
 }
 
 .track-eyebrow {
@@ -1924,15 +1929,12 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .track-header {
-  /* Reserve the marker's height so short headings still clear the spine. */
-  min-block-size: var(--track-marker-size);
   margin-block-end: var(--primitives-space-16);
 }
 
 @media (max-width: 640px) {
   .track-timeline {
-    --track-marker-size: 1.75rem;
-    --track-gutter: 2.5rem;
+    --track-gutter: var(--primitives-space-12);
   }
 }
 

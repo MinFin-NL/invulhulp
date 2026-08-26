@@ -1,61 +1,69 @@
 <template>
   <header ref="headerEl" class="invulhulp-header">
-    <div class="invulhulp-header__inner">
-      <!-- Top bar: logo + reset button -->
-      <div class="invulhulp-header__topbar">
-        <button
-          type="button"
-          @click="goHome"
-          class="invulhulp-header__logo-btn"
-          aria-label="Ga naar startpagina"
-        >
-          <div class="invulhulp-header__logo">
-            <img class="invulhulp-header__emblem" :src="rijkslogoUrl" alt="" />
-            <p class="invulhulp-header__wordmark">Ministerie van&#10;Financiën</p>
-          </div>
-        </button>
-        <div class="invulhulp-header__actions">
-          <nldd-button
-            v-if="showResetButton"
-            variant="inherit-tinted"
-            size="sm"
-            text="Opnieuw beginnen"
-            @click="openResetDialog"
-          />
-          <nldd-button
-            v-if="auth.isAdmin"
-            variant="inherit-transparent"
-            size="sm"
-            :text="auth.userManagementOpen ? 'Terug naar dossiers' : 'Gebruikersbeheer'"
-            @click="auth.userManagementOpen = !auth.userManagementOpen"
-          />
-          <span v-if="auth.isAdmin" class="invulhulp-header__divider" aria-hidden="true" />
-          <span v-if="auth.user" class="invulhulp-header__user">
-            {{ auth.user.name ?? auth.user.email }}
-          </span>
-          <nldd-button
-            variant="inherit-transparent"
-            size="sm"
-            start-icon="arrow-right-out-bucket"
-            text="Uitloggen"
-            @click="auth.logout()"
-          />
-        </div>
-      </div>
+    <!-- Rijkslogo, woordmerk, hoofd- en utility-navigatie komen uit NLDD. De
+         globale menubalk klapt onder lg zelf in achter de menuknop. -->
+    <nldd-top-navigation-bar
+      logo-title="Ministerie van Financiën"
+      website-title="FinDocs"
+    >
+      <nldd-menu-bar slot="global" accessible-label="Hoofdnavigatie">
+        <nldd-menu-bar-item
+          text="Dossiers"
+          icon="folder"
+          :current="!auth.userManagementOpen"
+          @select="goHome"
+        />
+        <nldd-menu-bar-item
+          v-if="auth.isAdmin"
+          text="Gebruikersbeheer"
+          icon="gear"
+          :current="auth.userManagementOpen"
+          @select="openUserManagement"
+        />
+      </nldd-menu-bar>
 
-      <!-- Breadcrumb: dossier › formulier -->
-      <nav v-if="showBreadcrumb" class="invulhulp-header__breadcrumb" aria-label="Kruimelpad">
+      <nldd-menu-bar slot="utility" accessible-label="Accountnavigatie">
+        <nldd-menu-bar-item
+          v-if="showResetButton"
+          text="Opnieuw beginnen"
+          icon="arrow-2-counter-clockwise"
+          content-priority="text"
+          @select="openResetDialog"
+        />
+        <!-- De naam is geen bestemming maar de opener van het accountmenu; op
+             smalle breedtes blijft alleen het icoon staan. -->
+        <nldd-menu-bar-item
+          :text="userLabel"
+          icon="person"
+          expandable
+          content-priority="icon"
+          :accessible-label="`Account: ${userLabel}`"
+        >
+          <nldd-menu accessible-label="Accountmenu">
+            <nldd-menu-item
+              text="Uitloggen"
+              icon="arrow-right-out-bucket"
+              @select="auth.logout()"
+            />
+          </nldd-menu>
+        </nldd-menu-bar-item>
+      </nldd-menu-bar>
+    </nldd-top-navigation-bar>
+
+    <!-- Breadcrumb: dossier › fase › formulier -->
+    <div v-if="showBreadcrumb" class="invulhulp-header__breadcrumb-bar">
+      <nav class="invulhulp-header__breadcrumb" aria-label="Kruimelpad">
         <button
           v-if="store.activeFormId !== null"
           type="button"
           class="invulhulp-header__crumb invulhulp-header__crumb--link"
           @click="store.goToPortal()"
         >
-          <nldd-icon name="folder" size="20" />
+          <nldd-icon name="folder" size="20" color="inherit" />
           {{ store.activeDossier.name }}
         </button>
         <span v-else class="invulhulp-header__crumb invulhulp-header__crumb--current" aria-current="page">
-          <nldd-icon name="folder" size="20" />
+          <nldd-icon name="folder" size="20" color="inherit" />
           {{ store.activeDossier.name }}
         </span>
         <!-- Lifecycle phase of the open form. Not a link: there is no
@@ -90,7 +98,6 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
-import rijkslogoUrl from '../assets/rijkslogo.svg'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAuthStore } from '../stores/authStore'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
@@ -134,6 +141,8 @@ onBeforeUnmount(() => {
   document.documentElement.style.removeProperty('--invulhulp-header-height')
 })
 
+const userLabel = computed(() => auth.user?.name ?? auth.user?.email ?? 'Account')
+
 // Reset applies to a single form, so only offer it while a form is actually
 // open — not on the dossier list or dossier detail page, where activeFormId
 // can still hold a stale value from the last visited form.
@@ -173,6 +182,10 @@ function goHome() {
   store.goToDossierList()
 }
 
+function openUserManagement() {
+  auth.userManagementOpen = true
+}
+
 function openResetDialog() {
   resetDialog.value?.open()
 }
@@ -180,9 +193,7 @@ function openResetDialog() {
 
 <style scoped>
 .invulhulp-header {
-  background-color: var(--semantics-content-accent-color);
-  color: var(--semantics-surfaces-base-background-color);
-  padding: 0;
+  background-color: var(--semantics-surfaces-base-background-color);
   /* Stays put: the form sidebar sticks to the header's underside via
      --invulhulp-header-height, which only lines up if the header itself never
      leaves. Above the AI banner (z-index 20); native <dialog> modals render in
@@ -190,9 +201,12 @@ function openResetDialog() {
   position: sticky;
   top: 0;
   z-index: 30;
+  border-block-end: 1px solid var(--semantics-dividers-color);
 }
 
-.invulhulp-header__inner {
+/* The nav bar caps its own content to the page-section width; the breadcrumb
+   row below it has to line up with that same measure. */
+.invulhulp-header__breadcrumb-bar {
   max-inline-size: var(--semantics-page-sections-body-max-width, 80rem);
   margin-inline: auto;
   padding-inline: var(--semantics-page-sections-md-margin-inline, var(--primitives-space-16));
@@ -203,85 +217,13 @@ function openResetDialog() {
   margin-inline-start: auto;
 }
 
-/* The bar renders on the dark header — lighten its label + avatar rings. */
-.invulhulp-header__presence :deep(.presence-label) {
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.invulhulp-header__presence :deep(.presence-avatar) {
-  border-color: var(--semantics-content-accent-color);
-}
-
-.invulhulp-header__topbar {
-  display: flex;
-  gap: var(--primitives-space-16);
-  padding-block: var(--primitives-space-12);
-  align-items: center;
-  justify-content: space-between;
-}
-
-.invulhulp-header__actions {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--primitives-space-12);
-}
-
-/* The header sits on the accent surface, so its buttons use the inherit-*
-   variants: those derive their colours from currentColor rather than the
-   default light-surface palette. Nothing here can reach inside their shadow
-   roots, which is why the old ghost-button rules are gone. */
-
-.invulhulp-header__divider {
-  inline-size: 1px;
-  block-size: 1.25rem;
-  background: rgb(255 255 255 / 0.25);
-}
-
-.invulhulp-header__user {
-  font-size: var(--primitives-font-size-90);
-  font-weight: var(--primitives-font-weight-body-semi-bold);
-  color: rgb(255 255 255 / 0.9);
-  white-space: nowrap;
-}
-
-.invulhulp-header__logo-btn {
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  color: inherit;
-}
-
-.invulhulp-header__logo {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--primitives-space-12);
-  text-align: start;
-}
-
-/* 1:2 portrait mark — fix the height, let the width follow. */
-.invulhulp-header__emblem {
-  block-size: 2.75rem;
-  inline-size: auto;
-}
-
-.invulhulp-header__wordmark {
-  margin: 0;
-  /* The two-line "Ministerie van / Financiën" arrives as a literal newline. */
-  white-space: pre-line;
-  font-size: var(--primitives-font-size-90);
-  font-weight: var(--primitives-font-weight-body-bold);
-  line-height: var(--primitives-line-height-tight);
-  color: var(--semantics-surfaces-base-background-color);
-}
-
 .invulhulp-header__breadcrumb {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: var(--primitives-space-4);
-  border-block-start: 1px solid rgb(255 255 255 / 0.15);
-  padding-block: var(--primitives-space-8) var(--primitives-space-12);
+  border-block-start: 1px solid var(--semantics-dividers-color);
+  padding-block: var(--primitives-space-8);
 }
 
 .invulhulp-header__crumb {
@@ -296,13 +238,13 @@ function openResetDialog() {
 }
 
 .invulhulp-header__crumb--current {
-  color: var(--semantics-surfaces-base-background-color);
+  color: var(--semantics-content-color);
 }
 
 .invulhulp-header__crumb--link {
   border: 0;
   background: transparent;
-  color: rgb(255 255 255 / 0.75);
+  color: var(--invulhulp-color-text-subtle);
   font: inherit;
   font-size: var(--primitives-font-size-90);
   font-weight: var(--primitives-font-weight-body-semi-bold);
@@ -311,24 +253,24 @@ function openResetDialog() {
 }
 
 .invulhulp-header__crumb--link:hover {
-  background: rgb(255 255 255 / 0.12);
-  color: var(--semantics-surfaces-base-background-color);
+  background: var(--semantics-surfaces-tinted-background-color);
+  color: var(--semantics-content-accent-color);
 }
 
 .invulhulp-header__crumb--link:focus-visible {
-  outline: 2px solid var(--semantics-surfaces-base-background-color);
-  outline-offset: 2px;
+  outline: var(--semantics-focus-ring-outline);
+  outline-offset: var(--semantics-focus-ring-outline-offset);
 }
 
 .invulhulp-header__crumb-sep {
-  color: rgb(255 255 255 / 0.4);
+  color: var(--invulhulp-color-text-subtle);
   user-select: none;
 }
 
 /* The phase is context, not a destination — quieter than the two crumbs it
    sits between, and the first thing to go when the row gets tight. */
 .invulhulp-header__crumb--phase {
-  color: rgb(255 255 255 / 0.75);
+  color: var(--invulhulp-color-text-subtle);
   font-weight: var(--primitives-font-weight-body-regular);
 }
 

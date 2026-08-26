@@ -1,16 +1,17 @@
 <template>
   <nav class="invulhulp-nav" :aria-label="`Navigatie ${formConfig.title}`">
 
-    <!-- Progress -->
+    <!-- Progress. accessible-label overschrijft de aria-valuetext ("x%
+         voltooid") die de balk zelf zou opbouwen; secties tellen hier, geen
+         percentages. -->
     <div class="invulhulp-nav__progress">
-      <div class="invulhulp-text--sm invulhulp-nav__progress-label">
-        Voortgang: {{ completedCount }}/{{ totalCount }}
-      </div>
-      <progress
-        class="invulhulp-progress"
+      <nldd-progress-bar
+        size="sm"
+        text="Voortgang"
+        value-format="fraction"
         :value="completedCount"
         :max="totalCount"
-        :aria-label="`${completedCount} van ${totalCount} stappen voltooid`"
+        :accessible-label="`${completedCount} van ${totalCount} stappen voltooid`"
       />
     </div>
 
@@ -250,11 +251,6 @@ function navigate(id: string) {
   margin-block-end: var(--primitives-space-8);
   border-block-end: 1px solid var(--invulhulp-color-border);
 }
-.invulhulp-nav__progress-label {
-  color: var(--invulhulp-color-text-subtle);
-  margin-block-end: var(--primitives-space-4);
-}
-
 .invulhulp-nav__list {
   list-style: none;
   margin: 0;

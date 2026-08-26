@@ -93,8 +93,8 @@ async function render() {
 describe('de zijbalk toont voortgang en secties', () => {
   it('rendert de voortgangsbalk, de secties en de samenvatting', async () => {
     const html = await render()
-    expect(html).toContain('Voortgang:')
-    expect(html).toContain('invulhulp-progress')
+    expect(html).toContain('Voortgang')
+    expect(html).toContain('nldd-progress-bar')
     expect(html).toContain('Introductie')
     expect(html).toContain('1. Contactgegevens')
     expect(html).toContain('Samenvatting')

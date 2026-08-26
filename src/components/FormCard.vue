@@ -12,7 +12,7 @@
       class="invulhulp-card form-card form-card--placeholder"
     >
       <div class="form-card__body">
-        <nldd-title size="3"><h3 class="form-card__title">{{ form.title }}</h3></nldd-title>
+        <nldd-title size="5"><h3 class="form-card__title">{{ form.title }}</h3></nldd-title>
         <ul v-if="form.domains?.length" class="form-card__domains">
           <li v-for="domain in form.domains" :key="domain" class="form-card__domain">
             {{ domainLabel(domain) }}
@@ -46,7 +46,7 @@
       }"
     >
       <div class="form-card__body">
-        <nldd-title size="3"><h3 class="form-card__title">{{ form.title }}</h3></nldd-title>
+        <nldd-title size="5"><h3 class="form-card__title">{{ form.title }}</h3></nldd-title>
         <ul v-if="form.domains?.length" class="form-card__domains">
           <li v-for="domain in form.domains" :key="domain" class="form-card__domain">
             {{ domainLabel(domain) }}
