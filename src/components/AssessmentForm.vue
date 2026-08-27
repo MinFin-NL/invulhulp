@@ -168,6 +168,7 @@ import { computeNavOrder } from '../utils/formProgress'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAuthStore } from '../stores/authStore'
 import { useAiMode } from '../composables/useAiMode'
+import { useAppHistory } from '../composables/useAppHistory'
 import type { FormConfig, NavStepSubsections, NavStepSpecialView, Section } from '../models/Assessment'
 import AppHeader from './AppHeader.vue'
 import AppFooter from './AppFooter.vue'
@@ -184,6 +185,9 @@ import UserManagement from './UserManagement.vue'
 const store = useAssessmentStore()
 const auth = useAuthStore()
 const { aiModeActive, aiModeProgress, aiModePhase, cancelAiMode } = useAiMode()
+// Koppel de navigatiestatus aan de browserhistory: "vorige" gaat één scherm
+// terug in de app in plaats van de applicatie te verlaten.
+useAppHistory()
 const formConfig = ref<FormConfig | null>(null)
 const prefill = ref<PrefillSummary | null>(null)
 
