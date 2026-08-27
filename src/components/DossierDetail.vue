@@ -1305,7 +1305,6 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--semantics-dividers-color);
   border-radius: var(--primitives-corner-radius-md);
-  text-align: center;
 }
 
 .first-run__eyebrow {
@@ -1322,8 +1321,8 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 
 .first-run__lead {
   color: var(--invulhulp-color-text-subtle);
-  margin: 0 auto var(--primitives-space-32);
-  max-inline-size: 40rem;
+  margin: 0 0 var(--primitives-space-32);
+  max-inline-size: 46rem;
 }
 
 .first-run__dropzone {
@@ -1372,7 +1371,9 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .first-run__skip {
+  display: block;
   margin-block-start: var(--primitives-space-24);
+  margin-inline: auto;
   background: none;
   border: none;
   font: inherit;
