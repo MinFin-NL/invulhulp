@@ -1,16 +1,17 @@
 {
   "id": "ppm",
-  "version": "1.0",
-  "urn": "urn:nl:minfin:tr:ppm:1.0",
+  "version": "2.0",
+  "urn": "urn:nl:minfin:tr:ppm:2.0",
   "title": "PPM Projectplan",
   "source": {
-    "instrument": "PPM-projectplan",
+    "instrument": "PPM-Projectplan 2.0",
     "publisher": "Ministerie van Financiën",
-    "reference": "Intern projectmanagement-sjabloon (projectdefinitie, business case, aanpak, organisatie, producten)",
+    "version": "2.0",
+    "reference": "Intern projectmanagement-sjabloon (inleiding & doelstelling, projectresultaat & scope, organisatie & communicatie, projectaanpak, budget, risico's, oplossing, risico- en impactanalyses)",
     "derivation": "original",
-    "note": "Digitalisering van het eigen projectplansjabloon; geen extern origineel."
+    "note": "Digitalisering van het eigen projectplansjabloon (versie 2.0); geen extern origineel. De export 'origineel format' vult het Word-sjabloon zelf in."
   },
-  "aiContext": "Dit is een PPM-projectplan voor het Ministerie van Financiën: het beschrijft de projectdefinitie, business case, aanpak, projectorganisatie en de op te leveren producten. Schrijf in formele projectmanagementtermen.",
+  "aiContext": "Dit is een PPM-projectplan voor het Ministerie van Financiën: het beschrijft aanleiding en doelstelling, projectresultaat en scope, projectorganisatie en communicatie, aanpak en planning, budget, risico's en toleranties, de op te leveren oplossing en de uitgevoerde risico- en impactanalyses. Schrijf in formele projectmanagementtermen.",
   "meta": {
     "homeComponent": "HomePage",
     "exportLabel": "PPM Projectplan",
@@ -20,13 +21,17 @@
     "systemNamePlaceholder": "Bijv. Vervanging declaratiesysteem",
     "homeContent": {
       "notice": "Het projectplan vereist goedkeuring van de opdrachtgever, manager planning resources (business en IT), PSA-architect, informatiebeveiliging (CISO/ISO), privacy officer en controller. Stem de planning af met alle betrokkenen voorafgaand aan indiening bij portfoliomanagement.",
-      "description": "Het PPM Projectplan legt de projectdefinitie, business case, aanpak en organisatie vast. Het is één van de verplichte documenten bij de start van een project in het projectportfolioproces van MinFin en vormt de basis voor sturing door de stuurgroep.",
+      "description": "Het PPM Projectplan (versie 2.0) legt vast waarom het project er is, wat het oplevert, hoe het wordt aangepakt en georganiseerd, wat het kost en welke risico's en analyses erbij horen. Het is één van de verplichte documenten bij de start van een project in het projectportfolioproces van MinFin en vormt de basis voor sturing door de stuurgroep.",
       "steps": [
-        "Projectdefinitie: achtergrond, doelstellingen, scope en afhankelijkheden",
-        "Business case: redenen, overwogen opties, kosten en baten, fasering",
-        "Projectaanpak: gekozen aanpak, PSA en Privacy Impact Assessment",
-        "Organisatie: projectmanagementstructuur en stakeholders",
-        "Projectproductbeschrijving: eindproduct, kwaliteit en acceptatiecriteria"
+        "Voorblad en colofon: projectnaam, versie, auteurs en revisiegegevens",
+        "Inleiding & doelstelling: aanleiding, doelstelling en overwogen opties",
+        "Projectresultaat & scope: resultaat, scope, randvoorwaarden en afhankelijkheden",
+        "Organisatie & communicatie: projectorganisatie, stakeholders, besluitvorming, resources en communicatie",
+        "Projectaanpak: aanpak, fasering, planning en mijlpalen",
+        "Budget: baten en kosten",
+        "Risico's en beheersfactoren: projectrisico's en toleranties",
+        "Omschrijving van de oplossing: eindproduct, maatregelen, impact en exitstrategie",
+        "Risico- en impactanalyses: welke analyses zijn opgesteld, met toelichting"
       ],
       "buttonLabel": "Starten met het projectplan"
     }
@@ -37,128 +42,186 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "ppm_a" },
-    { "type": "subsections", "sectionId": "ppm_b" },
-    { "type": "subsections", "sectionId": "ppm_c" },
-    { "type": "subsections", "sectionId": "ppm_d" },
-    { "type": "subsections", "sectionId": "ppm_e" },
+    { "type": "subsections", "sectionId": "ppm_0" },
+    { "type": "subsections", "sectionId": "ppm_1" },
+    { "type": "subsections", "sectionId": "ppm_2" },
+    { "type": "subsections", "sectionId": "ppm_3" },
+    { "type": "subsections", "sectionId": "ppm_4" },
+    { "type": "subsections", "sectionId": "ppm_5" },
+    { "type": "subsections", "sectionId": "ppm_6" },
+    { "type": "subsections", "sectionId": "ppm_7" },
+    { "type": "subsections", "sectionId": "ppm_8" },
     { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
   ],
   "sections": [
     {
-      "id": "ppm_a",
-      "title": "1. Projectdefinitie",
+      "id": "ppm_0",
+      "title": "Voorblad en colofon",
       "part": "A",
+      "kicker": "Documentgegevens",
       "subsections": [
         {
-          "id": "ppm_a1",
-          "title": "1.1 Achtergrond en doelstellingen",
-          "description": "Beschrijf de aanleiding, doelstellingen en gewenste eindresultaten van het project.",
+          "id": "ppm_0a",
+          "title": "Voorblad en colofon",
+          "description": "De gegevens op het voorblad en in het colofon van het projectplan.",
+          "questions": [
+            {
+              "id": "ppm_0.naam_project",
+              "text": "Naam project",
+              "guidance": "Verschijnt in de titel op het voorblad: 'Projectplan <naam project>'.",
+              "type": "text",
+              "format": "shorttext",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_0.versie",
+              "text": "Versie",
+              "guidance": "Bijv. 0.1 voor een eerste concept, 1.0 voor de vastgestelde versie.",
+              "type": "text",
+              "format": "shorttext",
+              "importance": "optional",
+              "aiFill": false
+            },
+            {
+              "id": "ppm_0.datum",
+              "text": "Datum",
+              "type": "text",
+              "format": "date",
+              "importance": "optional",
+              "aiFill": false
+            },
+            {
+              "id": "ppm_0.status",
+              "text": "Status",
+              "guidance": "Bijv. Concept, Ter besluitvorming of Definitief.",
+              "type": "text",
+              "format": "shorttext",
+              "importance": "optional",
+              "aiFill": false
+            },
+            {
+              "id": "ppm_0.auteurs",
+              "text": "Auteur(s)",
+              "type": "text",
+              "format": "shorttext",
+              "importance": "optional",
+              "aiFill": false
+            },
+            {
+              "id": "ppm_0.bijlagen",
+              "text": "Bijlagen",
+              "guidance": "Noem de documenten die als bijlage bij het projectplan horen.",
+              "type": "text",
+              "importance": "optional",
+              "aiFill": false
+            },
+            {
+              "id": "ppm_0.inlichtingen",
+              "text": "Inlichtingen",
+              "guidance": "Bij wie kan de lezer terecht met vragen over dit projectplan?",
+              "type": "text",
+              "format": "shorttext",
+              "importance": "optional",
+              "aiFill": false
+            },
+            {
+              "id": "ppm_0.revisies",
+              "text": "Revisiegegevens",
+              "guidance": "Houd per versie bij wanneer, door wie en waarom het projectplan is gewijzigd.",
+              "type": "table",
+              "importance": "optional",
+              "aiFill": false,
+              "columns": [
+                { "id": "versie", "label": "Versie" },
+                { "id": "datum", "label": "Datum" },
+                { "id": "status", "label": "Status" },
+                { "id": "wie", "label": "Wie" },
+                { "id": "omschrijving", "label": "Omschrijving" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppm_1",
+      "title": "1. Inleiding & doelstelling",
+      "part": "A",
+      "kicker": "Hoofdstuk 1",
+      "subsections": [
+        {
+          "id": "ppm_1a",
+          "title": "1. Inleiding & doelstelling",
+          "description": "Beschrijf waarom het project er is, wat het moet bereiken en welke opties daarvoor zijn overwogen.",
           "questions": [
             {
               "id": "ppm_a.achtergrond",
-              "text": "Achtergrond",
-              "guidance": "Beschrijf wat de aanleiding is om het project te starten. Welk probleem wordt opgelost? Welke kans wordt benut?",
+              "text": "Aanleiding",
+              "guidance": "Een duidelijke beschrijving van de situatie vóór het project. Het probleem, de behoefte of kans die wordt aangepakt, onderbouwd met feiten. Verwerk het externe en interne belang (bv. urgentie, wettelijke verplichtingen, doelstellingen organisatie).",
               "type": "text",
               "importance": "mandatory"
             },
             {
               "id": "ppm_a.doelstellingen",
-              "text": "Projectdoelstellingen en randvoorwaarden",
-              "guidance": "Beschrijf welke doelstelling dient te worden bereikt en de randvoorwaarden vanuit het perspectief van de stuurgroep (bijv. gewenste einddatum, budgetbegrenzing).",
+              "text": "Doelstelling",
+              "guidance": "Een heldere uiteenzetting van de doelstelling en subdoelstellingen van het project. Bij voorkeur middels de SMART-formulering (Specifiek, Meetbaar, Acceptabel, Realistisch, Tijdgebonden), zodat duidelijk is wanneer het project als geslaagd wordt beschouwd.",
               "type": "text",
               "importance": "mandatory"
             },
             {
-              "id": "ppm_a.eindresultaten",
-              "text": "Gewenste eindresultaten (Milestones)",
-              "guidance": "Geef een overzicht van de belangrijkste producten (milestones) die moeten worden opgeleverd, inclusief implementatie en acceptatie door de beheerorganisatie.",
-              "type": "table",
-              "importance": "mandatory",
-              "columns": [
-                { "id": "milestone", "label": "Milestone / product" },
-                { "id": "datum", "label": "Beoogde opleverdatum" }
-              ]
+              "id": "ppm_b.overwogen_opties",
+              "text": "Overwogen opties en argumentatie voor gekozen optie",
+              "guidance": "Een overzicht van opties met voor- en nadelen. De zogenaamde niets-doen-optie dient altijd te worden meegenomen. Motiveer waarom de uiteindelijke optie de voorkeur heeft gekregen.",
+              "type": "text",
+              "importance": "mandatory"
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "id": "ppm_2",
+      "title": "2. Projectresultaat & scope",
+      "part": "A",
+      "kicker": "Hoofdstuk 2",
+      "subsections": [
         {
-          "id": "ppm_a2",
-          "title": "1.2 Scope, beperkingen en afhankelijkheden",
-          "description": "Geef aan wat binnen en buiten het project valt, en beschrijf eventuele afhankelijkheden.",
+          "id": "ppm_2a",
+          "title": "2. Projectresultaat & scope",
+          "description": "Beschrijf wat het project oplevert, wat binnen en buiten de scope valt, en waar het project van afhankelijk is.",
           "questions": [
             {
+              "id": "ppm_2.projectresultaat",
+              "text": "Projectresultaat",
+              "guidance": "Beschrijving van de resultaten aan het einde van het project.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
               "id": "ppm_a.scope",
-              "text": "Projectscope en afbakening",
-              "guidance": "Maak inzichtelijk wat binnen en buiten de grenzen van het project valt. Besteed aandacht aan het grijze gebied en zorg dat borging en acceptatie door functioneel beheer expliciet is opgenomen.",
+              "text": "Projectscope",
+              "guidance": "Geef duidelijk aan wat wel én niet binnen het project valt. Baken de werkzaamheden af, met scope-in (wat het project zeker oplevert) en scope-out (wat buiten het project blijft).",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_2.randvoorwaarden",
+              "text": "Randvoorwaarden",
+              "guidance": "Zaken waaraan het project moet voldoen om te kunnen slagen (bijv. wetten, ICT-standaarden, beslissingen van management).",
               "type": "text",
               "importance": "mandatory"
             },
             {
               "id": "ppm_a.beperkingen",
               "text": "Beperkingen en aannames",
-              "guidance": "Zijn er aannames aan het licht gekomen die voor het gehele project gelden?",
+              "guidance": "Beschrijving van de beperkingen en aannames die voor het project gelden.",
               "type": "text",
               "importance": "optional"
-            },
-            {
-              "id": "ppm_a.toleranties",
-              "text": "Projecttoleranties (oranje/rood voor product, tijd en geld)",
-              "guidance": "Definieer de tolerantiegrenzen voor product, planning en budget. Wanneer wordt afwijkend gerapporteerd aan de stuurgroep?",
-              "type": "table",
-              "importance": "optional",
-              "columns": [
-                { "id": "aspect", "label": "Aspect", "hint": "product, tijd of geld" },
-                { "id": "oranje", "label": "Oranje (grens)" },
-                { "id": "rood", "label": "Rood (grens)" }
-              ]
             },
             {
               "id": "ppm_a.afhankelijkheden",
-              "text": "Afhankelijkheden van andere projecten of activiteiten",
-              "guidance": "Noem de projecten waarvan dit project afhankelijk is en beschrijf per project wat de afhankelijkheid inhoudt en hoe kritisch deze is.",
-              "type": "text",
-              "importance": "optional"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "ppm_b",
-      "title": "2. Business case op hoofdlijnen",
-      "part": "B",
-      "subsections": [
-        {
-          "id": "ppm_b1",
-          "title": "2.1 Redenen en argumentatie",
-          "description": "Beschrijf de zakelijke rechtvaardiging voor het project.",
-          "questions": [
-            {
-              "id": "ppm_b.redenen",
-              "text": "Redenen om te starten met het project",
-              "guidance": "Beschrijf de aanleiding en de bijdrage aan bedrijfsdoelstellingen. Denk aan wettelijke verplichtingen, politieke toezeggingen, ondersteuning van bedrijfsprocessen en bijdrage aan betrouwbare dienstverlening.",
-              "type": "text",
-              "importance": "mandatory"
-            },
-            {
-              "id": "ppm_b.overwogen_opties",
-              "text": "Overwogen opties en argumentatie voor de gekozen optie",
-              "guidance": "Welke alternatieven zijn overwogen? Waarom is voor de gekozen aanpak gekozen?",
-              "type": "text",
-              "importance": "mandatory"
-            },
-            {
-              "id": "ppm_b.kosten_baten",
-              "text": "Kosten en baten / besparingen",
-              "guidance": "Beschrijf de verwachte baten (financieel en niet-financieel) en de kosten van het project.",
-              "type": "text",
-              "importance": "mandatory"
-            },
-            {
-              "id": "ppm_b.fasering", "allowAttachments": true,
-              "text": "Doorlooptijd en fasering (indicatief)",
-              "guidance": "Geef een indicatieve planning met de belangrijkste fasen en mijlpalen.",
+              "text": "Afhankelijkheden",
+              "guidance": "Overzicht van producten, diensten, projecten, leveranciers of afdelingen waarvan het project afhankelijk is, en hoe deze afhankelijkheden worden gemanaged. Beschrijf ook factoren buiten het project die het resultaat beïnvloeden.",
               "type": "text",
               "importance": "mandatory"
             }
@@ -167,80 +230,56 @@
       ]
     },
     {
-      "id": "ppm_c",
-      "title": "3. Projectaanpak",
-      "part": "C",
+      "id": "ppm_3",
+      "title": "3. Organisatie & communicatie",
+      "part": "A",
+      "kicker": "Hoofdstuk 3",
       "subsections": [
         {
-          "id": "ppm_c1",
-          "title": "3.1 Aanpak en architectuur",
-          "description": "Beschrijf de gekozen projectaanpak en relevante architectuur- en privacyaspecten.",
+          "id": "ppm_3a",
+          "title": "3. Organisatie & communicatie",
+          "description": "Beschrijf hoe het project is georganiseerd, wie erbij betrokken is, hoe besluiten worden genomen en hoe er wordt gecommuniceerd.",
           "questions": [
             {
-              "id": "ppm_c.alternatieven_aanpak",
-              "text": "Overwogen alternatieve wijzen van aanpak",
-              "type": "text",
-              "importance": "optional"
-            },
-            {
-              "id": "ppm_c.gekozen_aanpak",
-              "text": "Beschrijving van de gekozen aanpak",
-              "guidance": "Beschrijf welke aanpak is gekozen voor de uitvoering van het project.",
-              "type": "text",
-              "importance": "mandatory"
-            },
-            {
-              "id": "ppm_c.onderbouwing_aanpak",
-              "text": "Onderbouwing van de gekozen aanpak",
-              "type": "text",
-              "importance": "optional"
-            },
-            {
-              "id": "ppm_c.beheeromgeving",
-              "text": "Toekomstige productie- en beheeromgeving",
-              "guidance": "Beschrijf hoe de toekomstige productie- en beheeromgeving eruitziet na oplevering.",
-              "type": "text",
-              "importance": "optional"
-            },
-            {
-              "id": "ppm_c.psa",
-              "text": "Project Start Architectuur (PSA)",
-              "guidance": "Is een PSA opgesteld of vereist? Verwijs naar het PSA-document of licht toe waarom geen PSA nodig is.",
-              "type": "text",
-              "importance": "mandatory"
-            },
-            {
-              "id": "ppm_c.pia",
-              "text": "Privacy Impact Assessment (PIA / DPIA)",
-              "guidance": "Is een QuickScan en preDPIA uitgevoerd om het basisbeveiligingsniveau vast te stellen en na te gaan of een DPIA noodzakelijk is? Verwijs naar de relevante documenten.",
-              "type": "text",
-              "importance": "mandatory"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "ppm_d",
-      "title": "4. Organisatie",
-      "part": "D",
-      "subsections": [
-        {
-          "id": "ppm_d1",
-          "title": "4.1 Projectorganisatie en stakeholders",
-          "description": "Beschrijf de projectmanagementstructuur en de betrokken stakeholders.",
-          "questions": [
-            {
-              "id": "ppm_d.projectmanagement", "allowAttachments": true,
-              "text": "Projectmanagementteamstructuur",
-              "guidance": "Beschrijf de projectorganisatie: stuurgroep, projectmanager, projectteam en hun rollen.",
+              "id": "ppm_d.projectmanagement",
+              "allowAttachments": true,
+              "text": "Projectorganisatie",
+              "guidance": "Organogram of projectstructuur. Taken en verantwoordelijkheden van de projectorganisatie, met rollen zoals projectleider, teamleden, stuurgroep en (gedelegeerd) opdrachtgever.",
               "type": "text",
               "importance": "mandatory"
             },
             {
               "id": "ppm_d.stakeholders",
-              "text": "Gebruikers en andere stakeholders",
-              "guidance": "Beschrijf welke gebruikers en stakeholders betrokken zijn bij het project en wat hun belangen zijn.",
+              "text": "Stakeholders",
+              "guidance": "Identificatie van de belangrijkste belanghebbenden, met een beschrijving van hun belangen, invloed en betrokkenheid.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_3.besluitvorming",
+              "text": "Besluitvorming",
+              "guidance": "Beschrijving van het besluitvormingsproces (wie beslist waarover?), met een overzicht van escalatieprocedures en governance.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_3.resources",
+              "text": "Resources",
+              "guidance": "Overzicht van benodigde mensen en specialismes, inclusief (globale) tijdsindicaties per rol. Betreft zowel business- als IT-resources en zowel interne als externe resources.",
+              "type": "table",
+              "importance": "mandatory",
+              "notesLabel": "Toelichting",
+              "columns": [
+                { "id": "rol", "label": "Rol / specialisme" },
+                { "id": "soort", "label": "Business of IT", "type": "select", "options": ["Business", "IT"] },
+                { "id": "herkomst", "label": "Intern of extern", "type": "select", "options": ["Intern", "Extern"] },
+                { "id": "tijdsindicatie", "label": "Tijdsindicatie", "hint": "bijv. 16 uur/week gedurende 6 maanden" }
+              ]
+            },
+            {
+              "id": "ppm_3.communicatie",
+              "text": "Communicatie",
+              "guidance": "Communicatieplan: wie informeert wie, hoe, wanneer en waarover? Overzicht van interne en externe kanalen en de frequentie, bv. wekelijkse meetings en rapportages.",
               "type": "text",
               "importance": "mandatory"
             }
@@ -249,42 +288,217 @@
       ]
     },
     {
-      "id": "ppm_e",
-      "title": "5. Projectproductbeschrijving",
-      "part": "D",
+      "id": "ppm_4",
+      "title": "4. Projectaanpak",
+      "part": "A",
+      "kicker": "Hoofdstuk 4",
       "subsections": [
         {
-          "id": "ppm_e1",
-          "title": "5.1 Eindproduct en kwaliteit",
-          "description": "Beschrijf het eindproduct van het project en de kwaliteitseisen.",
+          "id": "ppm_4a",
+          "title": "4. Projectaanpak",
+          "description": "Beschrijf hoe het project wordt uitgevoerd: de aanpak, de fasen, de planning en de mijlpalen.",
+          "questions": [
+            {
+              "id": "ppm_c.gekozen_aanpak",
+              "text": "Beschrijving van de gekozen aanpak",
+              "guidance": "Als vervolg op paragraaf 1.3, die beschrijft wat we gaan doen, beschrijft deze paragraaf hoe we dat gaan doen.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_b.fasering",
+              "allowAttachments": true,
+              "text": "Fasering",
+              "guidance": "Indeling van het project in fasen (bijv. verkenning, ontwerp, realisatie, test, implementatie).",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_4.planning",
+              "allowAttachments": true,
+              "text": "Planning",
+              "guidance": "Gedetailleerde planning met activiteiten en tijdsduur per fase, inclusief afhankelijkheden.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_a.eindresultaten",
+              "text": "Mijlpalen",
+              "guidance": "Concrete mijlpalen die aantonen dat onderdelen van het project klaar zijn, en de belangrijke momenten in de besluitvorming.",
+              "type": "table",
+              "importance": "mandatory",
+              "columns": [
+                { "id": "milestone", "label": "Mijlpaal of besluitmoment" },
+                { "id": "datum", "label": "Beoogde datum" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppm_5",
+      "title": "5. Budget",
+      "part": "A",
+      "kicker": "Hoofdstuk 5",
+      "subsections": [
+        {
+          "id": "ppm_5a",
+          "title": "5. Budget",
+          "description": "Beschrijf de baten en de kosten van het project, en welk budget wordt gevraagd.",
+          "questions": [
+            {
+              "id": "ppm_5.baten",
+              "text": "Baten – kwalitatief & kwantitatief",
+              "guidance": "Kwalitatieve baten: bv. betere klanttevredenheid, minder fouten, veiliger proces. Kwantitatieve baten: bv. kostenbesparing, omzetgroei, tijdwinst, opbrengsten (met cijfers).",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_5.kosten",
+              "text": "Kosten – eenmalig & beheer",
+              "guidance": "Eenmalige projectkosten: bv. inhuur, aanschafkosten, implementatiekosten. Structurele kosten: bv. van beheer, onderhoud, licenties, doorlopende personeelskosten. Interne en externe uren: neem inhuur op als eenmalige projectkosten. Zet het totaal benodigde budget uiteen en welk budget wordt gevraagd van welk type budget (zoals beheer- of projectenbudget).",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppm_6",
+      "title": "6. Risico's en beheersfactoren",
+      "part": "A",
+      "kicker": "Hoofdstuk 6",
+      "subsections": [
+        {
+          "id": "ppm_6a",
+          "title": "6. Risico's en beheersfactoren",
+          "description": "Breng de belangrijkste projectrisico's in kaart en leg vast welke afwijkingen acceptabel zijn.",
+          "questions": [
+            {
+              "id": "ppm_6.risicos",
+              "text": "Projectrisico's en beheersmaatregelen",
+              "guidance": "Overzicht van de belangrijkste projectrisico's (bijv. vertraging, technische problemen, budgetoverschrijding). Per risico: inschatting van kans en impact, en de geplande beheersmaatregelen.",
+              "type": "table",
+              "importance": "mandatory",
+              "notesLabel": "Toelichting",
+              "columns": [
+                { "id": "risico", "label": "Risico" },
+                { "id": "kans", "label": "Kans", "type": "select", "options": ["Laag", "Middel", "Hoog"] },
+                { "id": "impact", "label": "Impact", "type": "select", "options": ["Laag", "Middel", "Hoog"] },
+                { "id": "beheersmaatregel", "label": "Beheersmaatregel" }
+              ]
+            },
+            {
+              "id": "ppm_6.toleranties",
+              "text": "Toleranties",
+              "guidance": "Omschrijving van de maximale afwijkingen in tijd, geld, scope en kwaliteit die acceptabel zijn. Is de afwijking naar verwachting groter dan de afgesproken tolerantie, dan wordt daarover apart gerapporteerd aan de stuurgroep en aan het portfolioboard, aan de hand van een afwijkingsformulier.",
+              "type": "table",
+              "importance": "mandatory",
+              "notesLabel": "Toelichting",
+              "columns": [
+                { "id": "aspect", "label": "Aspect", "type": "select", "options": ["Tijd", "Geld", "Scope", "Kwaliteit"] },
+                { "id": "tolerantie", "label": "Maximale afwijking" }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppm_7",
+      "title": "7. Omschrijving van de oplossing",
+      "part": "A",
+      "kicker": "Hoofdstuk 7",
+      "subsections": [
+        {
+          "id": "ppm_7a",
+          "title": "7. Omschrijving van de oplossing",
+          "description": "Beschrijf het eindproduct, de maatregelen uit de risicoanalyses, de impact van de oplossing en hoe de dienst of het product ooit wordt beëindigd.",
           "questions": [
             {
               "id": "ppm_e.doel_eindproduct",
-              "text": "Doel van het eindproduct",
-              "guidance": "Wat is het beoogde doel van het eindproduct? Welk probleem lost het op?",
+              "text": "Beschrijving eindproduct",
+              "guidance": "Gedetailleerde beschrijving van de op te leveren dienst of het op te leveren product aan de hand van de belangrijkste functionele en technische eisen.",
               "type": "text",
               "importance": "mandatory"
             },
             {
-              "id": "ppm_e.samenstelling",
-              "text": "Samenstelling van het eindproduct",
-              "guidance": "Uit welke componenten bestaat het eindproduct?",
+              "id": "ppm_7.maatregelen",
+              "text": "Vereiste maatregelen risicoanalyses",
+              "guidance": "Overzicht van de maatregelen die voortkomen uit de risicoanalyses (PSA, QIS etc.) en hoe deze in het eindproduct worden doorgevoerd.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_7.impact_gebruikers",
+              "text": "Impact op gebruikers, processen en organisatie",
+              "guidance": "Beschrijving van de veranderingen voor gebruikers, processen en organisatie, bijvoorbeeld door een andere werkwijze, benodigde training of aanpassing van procedures.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_7.impact_techniek",
+              "text": "Impact op technische systemen & aspecten",
+              "guidance": "Beschrijving van de technisch benodigde aanpassingen en de gevolgen voor bestaande systemen.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_c.beheeromgeving",
+              "text": "Impact op de beheerorganisatie",
+              "guidance": "Beschrijving van de beheerorganisatie aan de hand van de te beleggen rollen, taken en verantwoordelijkheden, bijvoorbeeld functioneel beheer, technisch beheer en leveranciersmanagement. Let hierbij op de acceptatie van het eindresultaat door de beheerorganisatie.",
+              "type": "text",
+              "importance": "mandatory"
+            },
+            {
+              "id": "ppm_7.exitstrategie",
+              "text": "Exitstrategie",
+              "guidance": "Plan voor de beëindiging van de dienst of het product: wanneer, hoe, onder welke voorwaarden en met welke terugvalopties.",
+              "type": "text",
+              "importance": "mandatory"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "ppm_8",
+      "title": "8. Risico- en impactanalyses",
+      "part": "A",
+      "kicker": "Hoofdstuk 8",
+      "subsections": [
+        {
+          "id": "ppm_8a",
+          "title": "8. Risico- en impactanalyses",
+          "description": "Geef aan welke ondersteunende analyses tijdens het project wel of niet zijn opgesteld, en wat de conclusie was.",
+          "questions": [
+            {
+              "id": "ppm_8.analyses",
+              "text": "Tabel ondersteunende documenten",
+              "guidance": "Neem per analyse een rij op: PSA, Quick scan, Pre DPIA, DPIA, BIA, AIIA, IHH Toets en Cloudtoets. Geef aan of de analyse wel of niet is opgesteld, wie ervoor verantwoordelijk is en wat de conclusie is.",
+              "type": "table",
+              "importance": "mandatory",
+              "minRows": 8,
+              "columns": [
+                {
+                  "id": "document",
+                  "label": "Document",
+                  "type": "suggest",
+                  "options": ["PSA", "Quick scan", "Pre DPIA", "DPIA", "BIA", "AIIA", "IHH Toets", "Cloudtoets"]
+                },
+                { "id": "wel_niet", "label": "Wel/niet", "type": "select", "options": ["Wel", "Niet"] },
+                { "id": "verantwoordelijke", "label": "Naam verantwoordelijke" },
+                { "id": "conclusie", "label": "Conclusie" }
+              ]
+            },
+            {
+              "id": "ppm_8.toelichting",
+              "text": "Toelichting",
+              "guidance": "Geef waar relevant een aanvullende toelichting per analyse of maatregel.",
               "type": "text",
               "importance": "optional"
-            },
-            {
-              "id": "ppm_e.kwaliteitsverwachtingen",
-              "text": "Kwaliteitsverwachtingen van de klant",
-              "guidance": "Welke kwaliteitseisen worden gesteld aan het eindproduct?",
-              "type": "text",
-              "importance": "mandatory"
-            },
-            {
-              "id": "ppm_e.acceptatiecriteria",
-              "text": "Acceptatiecriteria",
-              "guidance": "Op basis van welke criteria wordt het eindproduct geaccepteerd?",
-              "type": "text",
-              "importance": "mandatory"
             }
           ]
         }

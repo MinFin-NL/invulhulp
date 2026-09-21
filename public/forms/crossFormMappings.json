@@ -214,16 +214,6 @@
   },
   {
     "targetFormId": "ppm",
-    "targetQuestionId": "ppm_b.redenen",
-    "sourceFormId": "intake",
-    "sourceQuestionIds": [
-      "intake_b.aanleiding",
-      "intake_b.doelstelling"
-    ],
-    "synthesisHint": "Herschrijf de aanleiding en doelstelling uit het intakeformulier als zakelijke redenen om het project te starten, inclusief bijdrage aan bedrijfsdoelstellingen."
-  },
-  {
-    "targetFormId": "ppm",
     "targetQuestionId": "ppm_a.afhankelijkheden",
     "sourceFormId": "intake",
     "sourceQuestionIds": [
@@ -251,13 +241,13 @@
   },
   {
     "targetFormId": "ppm",
-    "targetQuestionId": "ppm_b.kosten_baten",
+    "targetQuestionId": "ppm_5.baten",
     "sourceFormId": "aanbiedingsformulier",
     "sourceQuestionIds": [
       "aa_e.kwantitatieve_baten",
       "aa_e.kwalitatieve_baten"
     ],
-    "synthesisHint": "Combineer de kwantitatieve en kwalitatieve baten uit het aanbiedingsformulier tot een kosten-batenanalyse voor het projectplan."
+    "synthesisHint": "Combineer de kwantitatieve en kwalitatieve baten uit het aanbiedingsformulier tot de paragraaf baten van het projectplan: noem eerst de kwalitatieve baten, daarna de kwantitatieve baten met cijfers."
   },
   {
     "targetFormId": "ppm",
@@ -275,7 +265,7 @@
     "sourceQuestionIds": [
       "aa_d.start_einddatum"
     ],
-    "synthesisHint": "Gebruik de start- en einddatum uit het aanbiedingsformulier als basis voor de doorlooptijd en fasering in het projectplan."
+    "synthesisHint": "Gebruik de beoogde start- en einddatum uit het aanbiedingsformulier als kader voor de indeling van het project in fasen (bijv. verkenning, ontwerp, realisatie, test, implementatie)."
   },
   {
     "targetFormId": "psa",
@@ -283,9 +273,9 @@
     "sourceFormId": "ppm",
     "sourceQuestionIds": [
       "ppm_a.achtergrond",
-      "ppm_b.redenen"
+      "ppm_a.doelstellingen"
     ],
-    "synthesisHint": "Combineer de projectachtergrond en redenen uit het projectplan tot een beknopte aanleiding en doelstelling voor de PSA."
+    "synthesisHint": "Combineer de aanleiding en doelstelling uit het projectplan tot een beknopte aanleiding en doelstelling voor de PSA."
   },
   {
     "targetFormId": "psa",
@@ -328,9 +318,9 @@
     "targetQuestionId": "d1.1",
     "sourceFormId": "ppm",
     "sourceQuestionIds": [
-      "ppm_b.redenen"
+      "ppm_a.doelstellingen"
     ],
-    "synthesisHint": "Gebruik de redenen om het project te starten uit het projectplan als aanleiding voor de DPIA, met nadruk op de verwerkingsnoodzaak."
+    "synthesisHint": "Gebruik de doelstelling uit het projectplan als aanleiding voor dit voorstel in de DPIA, met nadruk op de verwerkingsnoodzaak."
   },
   {
     "targetFormId": "dpia",
@@ -1614,7 +1604,7 @@
     "sourceQuestionIds": [
       "intake_b.doelstelling"
     ],
-    "synthesisHint": "Werk de doelstelling uit het intakeformulier uit tot projectdoelstellingen met de bijbehorende randvoorwaarden."
+    "synthesisHint": "Werk de doelstelling uit het intakeformulier uit tot de doelstelling en subdoelstellingen van het project, bij voorkeur SMART geformuleerd, zodat duidelijk is wanneer het project geslaagd is."
   },
   {
     "targetFormId": "ppm",
@@ -2583,5 +2573,72 @@
       "ct_e.uitkomst"
     ],
     "synthesisHint": "Vat de cloudoplossing en de uitkomst van de cloudtoets samen: welk type clouddienst en servicemodel, en of het inschakelen van de clouddienst in beginsel is toegestaan."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_0.naam_project",
+    "sourceFormId": "aanbiedingsformulier",
+    "sourceQuestionIds": [
+      "aa_a.naam_project"
+    ],
+    "synthesisHint": "Dezelfde vraag als in het aanbiedingsformulier — neem de projectnaam ongewijzigd over.",
+    "mode": "copy"
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_a.doelstellingen",
+    "sourceFormId": "aanbiedingsformulier",
+    "sourceQuestionIds": [
+      "aa_b.doelstelling"
+    ],
+    "synthesisHint": "Werk de doelstelling (strategische context) uit het aanbiedingsformulier uit tot de doelstelling en subdoelstellingen van het project, bij voorkeur SMART geformuleerd."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_7.impact_gebruikers",
+    "sourceFormId": "aanbiedingsformulier",
+    "sourceQuestionIds": [
+      "aa_c.impact_gebruikers"
+    ],
+    "synthesisHint": "Werk de verwachte impact op gebruikers, processen en organisatie uit het aanbiedingsformulier uit tot een beschrijving van de veranderingen (werkwijze, training, procedures)."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_7.impact_techniek",
+    "sourceFormId": "aanbiedingsformulier",
+    "sourceQuestionIds": [
+      "aa_c.impact_techniek"
+    ],
+    "synthesisHint": "Werk de verwachte impact op technische systemen uit het aanbiedingsformulier uit tot een beschrijving van de benodigde technische aanpassingen en de gevolgen voor bestaande systemen."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_5.kosten",
+    "sourceFormId": "aanbiedingsformulier",
+    "sourceQuestionIds": [
+      "aa_e.raming_projectkosten",
+      "aa_e.financiering",
+      "aa_e.onderhoudskosten"
+    ],
+    "synthesisHint": "Gebruik de raming van de projectkosten, de gewenste financiering en de jaarlijkse onderhoudskosten uit het aanbiedingsformulier als basis voor de eenmalige en structurele kosten en het gevraagde type budget."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_5.kosten",
+    "sourceFormId": "intake",
+    "sourceQuestionIds": [
+      "intake_e.kosten_raming",
+      "intake_e.budget_type"
+    ],
+    "synthesisHint": "Gebruik de globale kostenraming en het type budget uit het intakeformulier als eerste aanzet voor de kostenparagraaf; maak onderscheid tussen eenmalige en structurele kosten."
+  },
+  {
+    "targetFormId": "ppm",
+    "targetQuestionId": "ppm_4.planning",
+    "sourceFormId": "aanbiedingsformulier",
+    "sourceQuestionIds": [
+      "aa_d.start_einddatum"
+    ],
+    "synthesisHint": "Gebruik de beoogde start- en einddatum uit het aanbiedingsformulier als kader voor de planning per fase."
   }
 ]

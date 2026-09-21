@@ -256,7 +256,7 @@ function tableAnswerChildren(
 // Fit within the printable page width (A4 minus margins), in px.
 const IMAGE_MAX_WIDTH = 520
 
-async function imageDimensions(att: QuestionAttachment, data: ArrayBuffer): Promise<{ width: number; height: number }> {
+export async function imageDimensions(att: QuestionAttachment, data: ArrayBuffer): Promise<{ width: number; height: number }> {
   let { width, height } = att
   if (!width || !height) {
     // Metadata predates dimension capture — decode the bytes instead.

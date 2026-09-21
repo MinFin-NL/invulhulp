@@ -29,7 +29,7 @@ A web application that helps Dutch government employees fill in AI-related compl
 - **Decision gates** — Certain forms (e.g. Prescan DPIA) route users to the full DPIA only when the screening outcome requires it.
 - **Section navigation & progress tracking** — A persistent sidebar shows the full form structure, a progress indicator, and lets you jump to any section; per-form completion percentage is shown in the header and sidebar.
 - **Required vs. supplementary fields** — Questions are colour-coded: blue = required, green = supplementary.
-- **Word and JSON export** — Download a completed form as a styled Word report (with a legacy "original template" export for the Intakeformulier), or import a previously saved JSON file to continue where you left off. Every export names the form definition it came from by URN, so a printed report stays traceable to the exact instrument and version.
+- **Word and JSON export** — Download a completed form as a styled Word report (with an "original template" export for the Intakeformulier and the PPM Projectplan 2.0), or import a previously saved JSON file to continue where you left off. Every export names the form definition it came from by URN, so a printed report stays traceable to the exact instrument and version.
 - **Streaming LLM inference** — AI features stream their output over Server-Sent Events for immediate feedback.
 - **Pluggable LLM backend** — Runs against a locally hosted Ollama instance by default (no data leaves the machine); automatically switches to Azure OpenAI when `AZURE_OPENAI_ENDPOINT` is configured.
 
@@ -122,7 +122,7 @@ For the three **generated** forms (DPIA, Prescan DPIA, IAMA) the URN lives in `s
 |---|---|---|
 | Intakeformulier | `urn:nl:minfin:tr:intake:2.0` | — |
 | Projectaanbiedingsformulier | `urn:nl:minfin:tr:aanbiedingsformulier:2.0` | — |
-| PPM Projectplan | `urn:nl:minfin:tr:ppm:1.0` | — |
+| PPM Projectplan | `urn:nl:minfin:tr:ppm:2.0` | — |
 | PSA | `urn:nl:minfin:tr:psa:1.0` | — |
 | Quickscan BIO2 | `urn:nl:minfin:tr:quickscan:2.0` | — |
 | Prescan DPIA | `urn:nl:minfin:tr:prescandpia:2.0` | — |
@@ -166,7 +166,7 @@ The `derivation` field has four values:
 | Prescan DPIA | Verkennen | Pre-scan DPIA v2.0 (`urn:nl:prescan`) | MinBZK | `generated` |
 | Aanbiedingsformulier | Besluiten | PPM-aanbiedingsformulier (intern sjabloon) | MinFin | `original` |
 | Restrisico-acceptatie | Besluiten | Geen extern origineel — sluitstuk van DPIA/AIIA/IAMA/BIO, naar het gangbare patroon van formele risicoacceptatie | MinFin | `original` |
-| PPM Projectplan | Ontwerpen | PPM-projectplan (intern sjabloon) | MinFin | `original` |
+| PPM Projectplan | Ontwerpen | PPM-Projectplan 2.0 | MinFin | `original` |
 | PSA | Ontwerpen | Project Start Architectuur (intern sjabloon, NORA-lagen) | MinFin | `original` |
 | Datakwaliteit-assessment | Ontwerpen | DAMA-DMBOK2 hfdst. 13 (Data Quality); ISO/IEC 25012, DAMA-NL DDQ | DAMA International | `derived` |
 | Dataset-registratie | Ontwerpen | DAMA-DMBOK2 hfdst. 12 (Metadata Management); DCAT-AP-NL, MIM 1.2, "Datasheets for Datasets" | DAMA International | `derived` |

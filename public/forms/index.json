@@ -50,7 +50,7 @@
     },
     {
       "id": "ppm",
-      "urn": "urn:nl:minfin:tr:ppm:1.0",
+      "urn": "urn:nl:minfin:tr:ppm:2.0",
       "file": "ppm.json",
       "title": "PPM Projectplan",
       "track": "initiatie",

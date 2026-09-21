@@ -318,6 +318,8 @@ const sectionMap = computed((): Record<string, Section> => {
         id: sub.id,
         title: section.title,
         part: section.part,
+        kicker: section.kicker,
+        aiFill: section.aiFill,
         subsections: [sub],
       }
     }

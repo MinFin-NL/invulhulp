@@ -11,7 +11,7 @@ Een koppeling heeft een **modus**:
 
 Een `copy`-koppeling naar een keuzevraag waarvan het bronantwoord geen geldige optie is (of een tabel met andere kolommen) vult niets in — dan toont het paneel alleen het bronantwoord ter informatie.
 
-**Totaal: 270 koppelingen** verdeeld over 58 formulierparen, waarvan 44 in `copy`-modus.
+**Totaal: 276 koppelingen** verdeeld over 58 formulierparen, waarvan 45 in `copy`-modus.
 
 > De per-paar secties hieronder beschrijven de oorspronkelijke koppelingen; de tellingen erin zijn
 > niet allemaal bijgewerkt. De koppelingen van de zeven formulieren die in juli 2026 zijn
@@ -76,25 +76,41 @@ AI-synthese.
 
 ## Intake → PPM Projectplan (5 koppelingen)
 
+Doelvragen volgen het PPM-Projectplan 2.0 (september 2026).
+
 | Bronvraag (Intake) | Doelvraag (PPM Projectplan) |
 |---|---|
-| Omschrijving van het IV-verzoek + Aanleiding | Achtergrond |
-| Aanleiding + Doelstelling | Redenen om te starten met het project |
-| Relatie en/of afhankelijkheid met andere activiteiten of projecten | Afhankelijkheden van andere projecten of activiteiten |
-| Doelstelling | Projectdoelstellingen en randvoorwaarden |
-| Omschrijving van het IV-verzoek + Mogelijke oplossingen | Projectscope en afbakening |
+| Omschrijving van het IV-verzoek + Aanleiding | 1.1 Aanleiding |
+| Doelstelling | 1.2 Doelstelling |
+| Omschrijving van het IV-verzoek + Mogelijke oplossingen | 2.2 Projectscope |
+| Relatie en/of afhankelijkheid met andere activiteiten of projecten | 2.4 Afhankelijkheden |
+| Globale raming van de kosten + Type budget | 5.2 Kosten – eenmalig & beheer |
 
 ---
 
-## Aanbiedingsformulier → PPM Projectplan (5 koppelingen)
+## Aanbiedingsformulier → PPM Projectplan (12 koppelingen)
+
+**Automatisch overgenomen (`copy`)**
 
 | Bronvraag (Aanbiedingsformulier) | Doelvraag (PPM Projectplan) |
 |---|---|
-| Projectbeschrijving algemeen | Achtergrond |
-| Overwogen alternatieven | Overwogen opties en argumentatie voor de gekozen optie |
-| Kwantitatieve baten + Kwalitatieve baten | Kosten en baten / besparingen |
-| Risico's en aandachtspunten | Beperkingen en aannames |
-| Beoogde start- en einddatum | Doorlooptijd en fasering (indicatief) |
+| Naam project | Naam project (voorblad) |
+| Afhankelijkheden | 2.4 Afhankelijkheden |
+
+**Via AI-synthese (`synthesize`)**
+
+| Bronvraag (Aanbiedingsformulier) | Doelvraag (PPM Projectplan) |
+|---|---|
+| Aanleiding | 1.1 Aanleiding |
+| Doelstelling (strategische context) | 1.2 Doelstelling |
+| Mogelijke oplossingen | 1.3 Overwogen opties en argumentatie voor gekozen optie |
+| Risico's | 2.3 Beperkingen en aannames |
+| Beoogde start- / einddatum | 4.2 Fasering |
+| Beoogde start- / einddatum | 4.3 Planning |
+| Kwantitatieve baten + Kwalitatieve baten | 5.1 Baten – kwalitatief & kwantitatief |
+| Raming projectkosten + Financiering + Onderhoudskosten | 5.2 Kosten – eenmalig & beheer |
+| Mogelijke impact op gebruikers, processen en organisatie | 7.3 Impact op gebruikers, processen en organisatie |
+| Mogelijke impact op technische systemen & aspecten | 7.3 Impact op technische systemen & aspecten |
 
 ---
 
@@ -102,10 +118,10 @@ AI-synthese.
 
 | Bronvraag (PPM Projectplan) | Doelvraag (PSA) |
 |---|---|
-| Achtergrond + Redenen om te starten | Aanleiding en doelstelling |
-| Projectscope en afbakening | Projectafbakening |
-| Gebruikers en andere stakeholders | Betrokken organisatieonderdelen |
-| Afhankelijkheden van andere projecten | De relatie met andere projecten |
+| Aanleiding + Doelstelling | Aanleiding en doelstelling |
+| Projectscope | Projectafbakening |
+| Stakeholders | Betrokken organisatieonderdelen |
+| Afhankelijkheden | De relatie met andere projecten |
 
 ---
 
@@ -113,8 +129,8 @@ AI-synthese.
 
 | Bronvraag (PPM Projectplan) | Doelvraag (DPIA) |
 |---|---|
-| Achtergrond | Beknopte omschrijving van het project |
-| Redenen om te starten met het project | Aanleiding voor dit voorstel |
+| Aanleiding | Beknopte omschrijving van het project |
+| Doelstelling | Aanleiding voor dit voorstel |
 
 ---
 

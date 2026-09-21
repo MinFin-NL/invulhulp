@@ -157,6 +157,7 @@ import { ref, computed } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { exportToWord } from '../services/wordExport'
 import { exportToLegacyDocx } from '../services/legacyDocxExport'
+import { exportPpmToTemplateDocx } from '../services/ppmTemplateExport'
 import { importFromJson } from '../services/dataExport'
 import type { FormConfig, Question } from '../models/Assessment'
 import { parseTableAnswer, type TableAnswer } from '../utils/tableAnswer'
@@ -277,11 +278,21 @@ const renderedAnswers = computed(() => {
   return map
 })
 
-// The legacy exporter reproduces the official "Intakeformulier 2.0" template
-// layout exactly; it only applies to the intake form.
-const showLegacyExport = computed(() => props.formConfig.id === 'intake')
+// "Origineel format": the intake export reproduces the official
+// "Intakeformulier 2.0" layout; the PPM export fills the official
+// PPM-Projectplan 2.0 Word template itself. Other forms have no such format.
+const showLegacyExport = computed(() => ['intake', 'ppm'].includes(props.formConfig.id))
 
 function exportLegacy() {
+  if (props.formConfig.id === 'ppm') {
+    exportPpmToTemplateDocx(
+      store.answers,
+      store.activeForm.attachments ?? {},
+      store.sessionId,
+      systemName.value || undefined,
+    )
+    return
+  }
   exportToLegacyDocx(store.answers, props.formConfig, systemName.value || undefined)
 }
 
