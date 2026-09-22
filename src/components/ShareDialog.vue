@@ -1,101 +1,96 @@
 <template>
-  <dialog
-    ref="dialogEl"
-    class="invulhulp-modal share-dialog"
-    :aria-labelledby="titleId"
-    @click="onBackdropClick"
-  >
-    <div class="invulhulp-modal__container">
-      <header class="invulhulp-modal__header">
-        <h3 :id="titleId" class="utrecht-heading-3 invulhulp-modal__title">Dossier delen</h3>
-        <button type="button" class="invulhulp-modal__close" aria-label="Sluiten" @click="close">
-          <span aria-hidden="true">×</span>
-        </button>
-      </header>
+  <ModalWindow ref="win" title="Dossier delen" width="640">
+    <!-- Search -->
+    <nldd-form-field label="Zoek op naam of e-mailadres">
+      <nldd-search-field
+        ref="searchEl"
+        class="share-dialog__search"
+        placeholder="bijv. Jansen of j.jansen@minfin.nl"
+        autocomplete="off"
+        :value="query"
+        @input="query = $event.detail.value; onQueryInput()"
+      />
+    </nldd-form-field>
 
-      <hr class="rvo-hr invulhulp-modal__divider" />
-
-      <div class="invulhulp-modal__body">
-        <!-- Search -->
-        <div class="rvo-form-field">
-          <label class="rvo-form-field__label" :for="searchId">Zoek op naam of e-mailadres</label>
-          <input
-            :id="searchId"
-            ref="searchEl"
-            v-model="query"
-            type="search"
-            class="utrecht-textbox utrecht-textbox--md invulhulp-modal__input"
-            placeholder="bijv. Jansen of j.jansen@minfin.nl"
-            autocomplete="off"
-            @input="onQueryInput"
-          />
+    <nldd-text size="sm" color="inherit" class="share-dialog__hint" v-if="searching">Zoeken…</nldd-text>
+    <ul v-else-if="results.length" class="share-dialog__results">
+      <li v-for="user in results" :key="user.id" class="share-dialog__row">
+        <div class="share-dialog__who">
+          <span class="share-dialog__name">{{ user.name || user.email }}</span>
+          <span v-if="user.name && user.email" class="share-dialog__email">{{ user.email }}</span>
         </div>
+        <nldd-dropdown
+          class="share-dialog__role"
+          size="sm"
+          accessible-label="Rol"
+          @change="pendingRoles[user.id] = $event.detail.value as DossierRole"
+        >
+          <select :value="pendingRoles[user.id]">
+            <option v-for="(label, role) in roleLabels" :key="role" :value="role">{{ label }}</option>
+          </select>
+        </nldd-dropdown>
+        <nldd-button
+          variant="primary"
+          text="Toevoegen"
+          @click="addGrant(user)"
+        />
+      </li>
+    </ul>
+    <nldd-text size="sm" color="inherit" class="share-dialog__hint" v-else-if="query.trim().length >= 2 && searched">
+      Geen gebruikers gevonden.
+    </nldd-text>
 
-        <p v-if="searching" class="rvo-text share-dialog__hint">Zoeken…</p>
-        <ul v-else-if="results.length" class="share-dialog__results">
-          <li v-for="user in results" :key="user.id" class="share-dialog__row">
-            <div class="share-dialog__who">
-              <span class="share-dialog__name">{{ user.name || user.email }}</span>
-              <span v-if="user.name && user.email" class="share-dialog__email">{{ user.email }}</span>
-            </div>
-            <select v-model="pendingRoles[user.id]" class="utrecht-select share-dialog__role" aria-label="Rol">
-              <option v-for="(label, role) in roleLabels" :key="role" :value="role">{{ label }}</option>
-            </select>
-            <button type="button" class="rvo-button rvo-button--primary rvo-button--sm" @click="addGrant(user)">
-              Toevoegen
-            </button>
-          </li>
-        </ul>
-        <p v-else-if="query.trim().length >= 2 && searched" class="rvo-text share-dialog__hint">
-          Geen gebruikers gevonden.
-        </p>
-
-        <!-- Current grants -->
-        <h4 class="utrecht-heading-4 share-dialog__subtitle">Personen met toegang</h4>
-        <p v-if="grants.length === 0" class="rvo-text share-dialog__hint">Nog niet gedeeld.</p>
-        <ul v-else class="share-dialog__results">
-          <li v-for="grant in grants" :key="grant.sub" class="share-dialog__row">
-            <div class="share-dialog__who">
-              <span class="share-dialog__name">
-                {{ grant.name || grant.email || grant.sub }}
-                <span v-if="grant.sub === mySub" class="share-dialog__me">(jij)</span>
-              </span>
-              <span v-if="grant.name && grant.email" class="share-dialog__email">{{ grant.email }}</span>
-            </div>
-            <select
-              class="utrecht-select share-dialog__role"
-              aria-label="Rol"
-              :value="grant.role"
-              :disabled="isLastOwner(grant)"
-              @change="changeRole(grant, ($event.target as HTMLSelectElement).value as DossierRole)"
-            >
-              <option v-for="(label, role) in roleLabels" :key="role" :value="role">{{ label }}</option>
-            </select>
-            <button
-              type="button"
-              class="rvo-button rvo-button--warning-subtle rvo-button--sm"
-              :disabled="isLastOwner(grant)"
-              :title="isLastOwner(grant) ? 'Minimaal één eigenaar vereist' : undefined"
-              @click="revoke(grant)"
-            >
-              Verwijderen
-            </button>
-          </li>
-        </ul>
-        <p v-if="grants.some(isLastOwner)" class="rvo-text share-dialog__hint">
-          Minimaal één eigenaar vereist.
-        </p>
-
-        <div v-if="error" class="rvo-alert rvo-alert--error rvo-alert--padding-sm">
-          <div class="rvo-alert__container">{{ error }}</div>
+    <!-- Current grants -->
+    <nldd-title size="4"><h4 class="share-dialog__subtitle">Personen met toegang</h4></nldd-title>
+    <nldd-text size="sm" color="inherit" class="share-dialog__hint" v-if="grants.length === 0">Nog niet gedeeld.</nldd-text>
+    <ul v-else class="share-dialog__results">
+      <li v-for="grant in grants" :key="grant.sub" class="share-dialog__row">
+        <div class="share-dialog__who">
+          <span class="share-dialog__name">
+            {{ grant.name || grant.email || grant.sub }}
+            <span v-if="grant.sub === mySub" class="share-dialog__me">(jij)</span>
+          </span>
+          <span v-if="grant.name && grant.email" class="share-dialog__email">{{ grant.email }}</span>
         </div>
-      </div>
+        <nldd-dropdown
+          class="share-dialog__role"
+          size="sm"
+          accessible-label="Rol"
+          :disabled="isLastOwner(grant)"
+          @change="changeRole(grant, $event.detail.value as DossierRole)"
+        >
+          <select :value="grant.role">
+            <option v-for="(label, role) in roleLabels" :key="role" :value="role">{{ label }}</option>
+          </select>
+        </nldd-dropdown>
+        <nldd-button
+          variant="secondary"
+          text="Verwijderen"
+          :disabled="isLastOwner(grant)"
+          :title="isLastOwner(grant) ? 'Minimaal één eigenaar vereist' : undefined"
+          @click="revoke(grant)"
+        />
+      </li>
+    </ul>
+    <nldd-text size="sm" color="inherit" class="share-dialog__hint" v-if="grants.some(isLastOwner)">
+      Minimaal één eigenaar vereist.
+    </nldd-text>
 
-      <div class="invulhulp-modal__actions">
-        <button type="button" class="rvo-button rvo-button--secondary" @click="close">Sluiten</button>
-      </div>
-    </div>
-  </dialog>
+    <nldd-banner
+      variant="critical"
+      size="sm"
+      v-if="error"
+      :text="error"
+    />
+
+    <template #footer>
+      <nldd-button
+        variant="secondary"
+        text="Sluiten"
+        @click="close"
+      />
+    </template>
+  </ModalWindow>
 </template>
 
 <script setup lang="ts">
@@ -109,6 +104,7 @@ import {
   type UserSearchResult,
 } from '../services/dossierService'
 import { useAuthStore } from '../stores/authStore'
+import ModalWindow from './ModalWindow.vue'
 
 const props = defineProps<{
   dossierId: string
@@ -127,11 +123,8 @@ const roleLabels: Record<DossierRole, string> = {
 const auth = useAuthStore()
 const mySub = auth.user?.sub
 
-const dialogEl = ref<HTMLDialogElement | null>(null)
-const searchEl = ref<HTMLInputElement | null>(null)
-const uid = Math.random().toString(36).slice(2, 9)
-const titleId = `share-dialog-title-${uid}`
-const searchId = `share-dialog-search-${uid}`
+const win = ref<InstanceType<typeof ModalWindow> | null>(null)
+const searchEl = ref<HTMLElement | null>(null)
 
 const query = ref('')
 const results = ref<UserSearchResult[]>([])
@@ -149,17 +142,13 @@ async function open(currentGrants: Grant[]) {
   results.value = []
   searched.value = false
   error.value = ''
-  dialogEl.value?.showModal()
+  win.value?.show()
   await nextTick()
   searchEl.value?.focus()
 }
 
 function close() {
-  dialogEl.value?.close()
-}
-
-function onBackdropClick(event: MouseEvent) {
-  if (event.target === dialogEl.value) close()
+  win.value?.hide()
 }
 
 function onQueryInput() {
@@ -231,79 +220,13 @@ defineExpose({ open })
 </script>
 
 <style scoped>
-/* Reuses the .invulhulp-modal pattern from ConfirmDialog.vue. */
-
-.invulhulp-modal {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  max-inline-size: min(640px, 92vw);
+.share-dialog__search {
   inline-size: 100%;
-  margin-block-start: 5vh;
-  color: inherit;
-}
-
-.invulhulp-modal::backdrop {
-  background: rgb(0 0 0 / 50%);
-}
-
-.invulhulp-modal__container {
-  background: var(--rvo-color-wit);
-  border-radius: var(--rvo-border-radius-lg);
-  box-shadow: 0 0 1em 0 rgb(0 0 0 / 30%);
-  padding: var(--rvo-space-md);
-  display: flex;
-  flex-direction: column;
-  gap: var(--rvo-space-sm);
-}
-
-.invulhulp-modal__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--rvo-space-sm);
-}
-
-.invulhulp-modal__title {
-  margin: 0;
-  flex: 1;
-  color: var(--rvo-color-lintblauw);
-}
-
-.invulhulp-modal__close {
-  background: none;
-  border: 0;
-  font-size: 1.75rem;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--invulhulp-color-text-muted);
-  padding: 0 var(--rvo-space-3xs);
-}
-
-.invulhulp-modal__divider {
-  margin: 0;
-}
-
-.invulhulp-modal__body {
-  display: flex;
-  flex-direction: column;
-  gap: var(--rvo-space-sm);
-}
-
-.invulhulp-modal__input {
-  inline-size: 100%;
-}
-
-.invulhulp-modal__actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--rvo-space-xs);
-  margin-block-start: var(--rvo-space-2xs);
 }
 
 .share-dialog__subtitle {
-  margin: var(--rvo-space-xs) 0 0;
-  color: var(--rvo-color-lintblauw);
+  margin: var(--primitives-space-8) 0 0;
+  color: var(--semantics-content-accent-color);
 }
 
 .share-dialog__results {
@@ -312,16 +235,16 @@ defineExpose({ open })
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .share-dialog__row {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
-  border: 1px solid var(--rvo-color-grijs-200);
-  border-radius: var(--rvo-border-radius-md);
+  gap: var(--primitives-space-8);
+  padding: var(--primitives-space-4) var(--primitives-space-8);
+  border: 1px solid var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
 }
 
 .share-dialog__who {
@@ -332,19 +255,19 @@ defineExpose({ open })
 }
 
 .share-dialog__name {
-  font-weight: var(--rvo-font-weight-bold);
+  font-weight: var(--primitives-font-weight-body-bold);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .share-dialog__me {
-  font-weight: var(--rvo-font-weight-normal);
+  font-weight: var(--primitives-font-weight-body-regular);
   color: var(--invulhulp-color-text-muted);
 }
 
 .share-dialog__email {
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
   color: var(--invulhulp-color-text-muted);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -352,9 +275,10 @@ defineExpose({ open })
 }
 
 .share-dialog__role {
-  /* .utrecht-select forces inline-size: 100%; left unchecked it eats the whole
-     flex row and collapses .share-dialog__who (flex-basis 0) to zero width,
-     hiding the name/e-mail behind overflow: hidden. Size it to its content. */
+  /* nldd-dropdown stretches to fill its container by default; left unchecked
+     it eats the whole flex row and collapses .share-dialog__who (flex-basis 0)
+     to zero width, hiding the name/e-mail behind overflow: hidden. Size it to
+     its content instead. */
   flex: 0 0 auto;
   inline-size: auto;
   min-inline-size: 8rem;
@@ -362,7 +286,6 @@ defineExpose({ open })
 
 .share-dialog__hint {
   margin: 0;
-  font-size: var(--rvo-font-size-sm);
   color: var(--invulhulp-color-text-muted);
 }
 </style>

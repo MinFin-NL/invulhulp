@@ -10,53 +10,48 @@
 
     <!-- Suggestion panel: visible while streaming, when a suggestion is ready
          or when the AI asks a clarification question -->
-    <div
-      v-if="streamingText || suggestion !== null || pendingClarification !== null"
-      class="rvo-alert rvo-alert--info rvo-alert--padding-sm tiptap-suggestion"
-      :aria-busy="isLoading"
-    >
-      <div class="rvo-alert__container">
+        <nldd-banner
+          variant="accent"
+          size="sm"
+          class="tiptap-suggestion"
+          v-if="streamingText || suggestion !== null || pendingClarification !== null"
+          :aria-busy="isLoading"
+        >
         <div class="tiptap-suggestion__header">
           <span class="tiptap-suggestion__label">{{ pendingClarification !== null ? 'AI-vraag' : 'AI-suggestie' }}</span>
           <span v-if="rationale" class="tiptap-suggestion__rationale">{{ rationale }}</span>
         </div>
-
         <!-- Clarification: the AI needs extra input before it can improve -->
         <template v-if="pendingClarification !== null">
           <p class="tiptap-clarification__question">{{ pendingClarification }}</p>
-          <input
-            v-model="clarificationInput"
-            type="text"
-            class="utrecht-textbox utrecht-textbox--md"
+          <nldd-text-field
             placeholder="Uw antwoord…"
-            aria-label="Antwoord op de vraag van de AI"
+            accessible-label="Antwoord op de vraag van de AI"
+            :value="clarificationInput"
+            @input="clarificationInput = $event.detail.value"
             @keydown.enter.prevent="submitClarification"
           />
-          <div class="tiptap-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
-            <button
-              type="button"
-              class="rvo-button rvo-button--primary rvo-button--size-sm"
+          <div class="tiptap-suggestion__actions invulhulp-row invulhulp-gap--xs">
+            <nldd-button
+              variant="primary"
+              size="sm"
+              text="Verstuur"
               :disabled="!clarificationInput.trim()"
               @click="submitClarification"
-            >
-              Verstuur
-            </button>
-            <button
-              type="button"
-              class="rvo-button rvo-button--secondary rvo-button--size-sm"
+            />
+            <nldd-button
+              variant="secondary"
+              size="sm"
+              text="Annuleer"
               @click="cancelClarification"
-            >
-              Annuleer
-            </button>
+            />
           </div>
         </template>
-
         <!-- Live streaming view -->
         <div v-else-if="isLoading" class="tiptap-diff tiptap-diff--streaming" aria-live="polite">
           <span v-if="streamingText">{{ streamingText }}<span class="tiptap-diff__cursor" aria-hidden="true">▋</span></span>
           <span v-else class="tiptap-diff__empty">Verbinding maken…</span>
         </div>
-
         <!-- Final diff view -->
         <template v-else-if="suggestion !== null">
           <div v-if="noChanges" class="tiptap-diff tiptap-diff__empty">
@@ -69,7 +64,6 @@
               :class="part.added ? 'tiptap-diff__add' : part.removed ? 'tiptap-diff__del' : ''"
             >{{ part.value }}</span>
           </div>
-
           <!-- Optional mermaid diagram accompanying the suggestion -->
           <div
             v-if="diagramSvg"
@@ -78,33 +72,30 @@
             aria-label="Diagram bij de suggestie"
             v-html="diagramSvg"
           ></div>
-
-          <div class="tiptap-suggestion__actions rvo-layout-row rvo-layout-gap--xs">
-            <button
-              type="button"
-              class="rvo-button rvo-button--primary rvo-button--size-sm"
+          <div class="tiptap-suggestion__actions invulhulp-row invulhulp-gap--xs">
+            <nldd-button
+              variant="primary"
+              size="sm"
+              text="Overnemen"
               @click="acceptSuggestion"
-            >
-              Overnemen
-            </button>
-            <button
-              type="button"
-              class="rvo-button rvo-button--secondary rvo-button--size-sm"
+            />
+            <nldd-button
+              variant="secondary"
+              size="sm"
+              text="Afwijzen"
               @click="rejectSuggestion"
-            >
-              Afwijzen
-            </button>
+            />
           </div>
         </template>
-      </div>
-    </div>
+    </nldd-banner>
 
     <!-- Toolbar row: improve button + error -->
     <div class="tiptap-toolbar">
       <template v-if="!store.readOnly">
-        <button
-          type="button"
-          class="rvo-button rvo-button--tertiary rvo-button--size-sm tiptap-mark-btn"
+        <nldd-button
+          variant="neutral-transparent"
+          size="sm"
+          class="tiptap-mark-btn"
           :class="{ 'tiptap-mark-btn--active': editor?.isActive('bold') }"
           :aria-pressed="editor?.isActive('bold') ?? false"
           aria-label="Vetgedrukt (Ctrl+B)"
@@ -112,11 +103,14 @@
           @mousedown.prevent
           @click="editor?.chain().focus().toggleBold().run()"
         >
-          <strong>B</strong>
-        </button>
-        <button
-          type="button"
-          class="rvo-button rvo-button--tertiary rvo-button--size-sm tiptap-mark-btn"
+          <span slot="text">
+<strong>B</strong>
+          </span>
+        </nldd-button>
+        <nldd-button
+          variant="neutral-transparent"
+          size="sm"
+          class="tiptap-mark-btn"
           :class="{ 'tiptap-mark-btn--active': editor?.isActive('italic') }"
           :aria-pressed="editor?.isActive('italic') ?? false"
           aria-label="Cursief (Ctrl+I)"
@@ -124,20 +118,24 @@
           @mousedown.prevent
           @click="editor?.chain().focus().toggleItalic().run()"
         >
-          <em>I</em>
-        </button>
+          <span slot="text">
+<em>I</em>
+          </span>
+        </nldd-button>
       </template>
-      <button
+      <nldd-button
+        variant="neutral-transparent"
+        size="sm"
         v-if="!store.readOnly && suggestion === null && !streamingText && pendingClarification === null"
-        type="button"
         :disabled="isLoading || !hasContent"
-        class="rvo-button rvo-button--tertiary rvo-button--size-sm"
         @click="requestImprovement"
       >
-        <span v-if="isLoading">Bezig…</span>
+        <span slot="text">
+<span v-if="isLoading">Bezig…</span>
         <span v-else>✦ Verbeter tekst</span>
-      </button>
-      <span v-if="error" class="tiptap-toolbar__error rvo-text rvo-text--sm" role="alert">{{ error }}</span>
+        </span>
+      </nldd-button>
+      <span v-if="error" class="tiptap-toolbar__error invulhulp-text--sm" role="alert">{{ error }}</span>
     </div>
   </div>
 </template>
@@ -209,6 +207,13 @@ function buildExtensions(): AnyExtension[] {
         CollaborationCaret.configure({
           provider: props.provider as never,
           user: props.user ?? undefined,
+          // The default builder appends hex-alpha (`${color}70`), which is invalid for
+          // our token colours (colorForUser returns a var()). y-tiptap still logs an
+          // "unsupported color format" warning for non-hex colours; harmless.
+          selectionRender: (user: { color: string }) => ({
+            style: `background-color: color-mix(in srgb, ${user.color} 30%, transparent)`,
+            class: 'ProseMirror-yjs-selection',
+          }),
         }),
       )
     }
@@ -417,35 +422,35 @@ function rejectSuggestion() {
 }
 
 .tiptap-wrapper :deep(.collaboration-carets__label) {
-  border-radius: 3px 3px 3px 0;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: var(--rvo-font-weight-bold, 700);
+  border-radius: var(--primitives-corner-radius-sm) var(--primitives-corner-radius-sm) var(--primitives-corner-radius-sm) 0;
+  color: var(--semantics-categories-accent-filled-content-color);
+  font-size: var(--primitives-font-size-70);
+  font-weight: var(--primitives-font-weight-body-bold);
   left: -1px;
   line-height: normal;
-  padding: 0.05rem 0.3rem;
+  padding: 0 var(--primitives-space-4);
   position: absolute;
   top: -1.3em;
   user-select: none;
   white-space: nowrap;
 }
 
-/* AI-Modus huisstijl (blauw/paars) — bewust buiten het RVO-palet, gelijk aan
+/* AI-Modus huisstijl (blauw/paars) — bewust buiten het NLDD-palet, gelijk aan
    AiModeToggle. Zit als strook vast bovenop het invoerveld. */
 .tiptap-ai-busy {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   margin: 0;
-  padding: var(--rvo-space-2xs) var(--rvo-space-sm);
+  padding: var(--primitives-space-4) var(--primitives-space-12);
   box-sizing: border-box;
   background: linear-gradient(135deg, rgba(15, 45, 92, 0.08), rgba(91, 33, 182, 0.12));
   border: 1px solid rgba(91, 33, 182, 0.4);
   border-block-end: 0;
-  border-radius: var(--rvo-border-radius-sm) var(--rvo-border-radius-sm) 0 0;
+  border-radius: var(--primitives-corner-radius-sm) var(--primitives-corner-radius-sm) 0 0;
   color: #0f2d5c;
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
 }
 
 /* Het veld eronder sluit aan op de strook. */
@@ -492,37 +497,37 @@ function rejectSuggestion() {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .tiptap-suggestion__label {
-  font-size: var(--rvo-font-size-xs);
-  font-weight: var(--rvo-font-weight-bold);
+  font-size: var(--primitives-font-size-80);
+  font-weight: var(--primitives-font-weight-body-bold);
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
 }
 
 .tiptap-suggestion__rationale {
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
   color: var(--invulhulp-color-text-muted);
   font-style: italic;
 }
 
 .tiptap-suggestion__actions {
-  margin-block-start: var(--rvo-space-xs);
+  margin-block-start: var(--primitives-space-8);
 }
 
 .tiptap-diff {
-  font-size: var(--rvo-font-size-sm);
-  line-height: var(--rvo-line-height-md);
-  padding: var(--rvo-space-xs) var(--rvo-space-sm);
-  background: var(--rvo-color-wit);
+  font-size: var(--primitives-font-size-90);
+  line-height: var(--primitives-line-height-snug);
+  padding: var(--primitives-space-8) var(--primitives-space-12);
+  background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm);
+  border-radius: var(--primitives-corner-radius-sm);
   white-space: pre-wrap;
   word-break: break-word;
-  margin-block: var(--rvo-space-xs);
+  margin-block: var(--primitives-space-8);
 }
 
 .tiptap-diff__empty {
@@ -533,19 +538,19 @@ function rejectSuggestion() {
 .tiptap-diff__cursor {
   animation: invulhulp-blink var(--invulhulp-loop-blink) step-end infinite;
   margin-inline-start: 1px;
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
 }
 
 .tiptap-diff__add {
-  background: var(--rvo-color-groen-150);
-  color: var(--rvo-color-groen-750);
+  background: var(--semantics-categories-success-tinted-background-color);
+  color: var(--semantics-categories-success-tinted-content-color);
   border-radius: 2px;
   padding-inline: 1px;
 }
 
 .tiptap-diff__del {
-  background: var(--rvo-color-rood-150);
-  color: var(--rvo-color-rood-750);
+  background: var(--semantics-categories-critical-tinted-background-color);
+  color: var(--semantics-categories-critical-tinted-content-color);
   text-decoration: line-through;
   border-radius: 2px;
   padding-inline: 1px;
@@ -554,16 +559,16 @@ function rejectSuggestion() {
 .tiptap-toolbar {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
+  padding: var(--primitives-space-4) var(--primitives-space-8);
   border: 1px solid var(--invulhulp-color-border-strong);
   border-block-start: 0;
-  border-radius: 0 0 var(--rvo-border-radius-sm) var(--rvo-border-radius-sm);
-  background: var(--rvo-color-grijs-050, #fafafa);
+  border-radius: 0 0 var(--primitives-corner-radius-sm) var(--primitives-corner-radius-sm);
+  background: var(--semantics-surfaces-tinted-background-color);
 }
 
 .tiptap-toolbar__error {
-  color: var(--rvo-color-rood);
+  color: var(--semantics-content-critical-color);
 }
 
 .tiptap-mark-btn {
@@ -572,21 +577,21 @@ function rejectSuggestion() {
 }
 
 .tiptap-mark-btn--active {
-  background: var(--rvo-color-hemelblauw-150, #d9ebf7);
-  border-radius: var(--rvo-border-radius-sm);
+  background: var(--semantics-categories-accent-tinted-background-color);
+  border-radius: var(--primitives-corner-radius-sm);
 }
 
 .tiptap-clarification__question {
-  font-size: var(--rvo-font-size-sm);
-  margin-block: var(--rvo-space-2xs) var(--rvo-space-xs);
+  font-size: var(--primitives-font-size-90);
+  margin-block: var(--primitives-space-4) var(--primitives-space-8);
 }
 
 .tiptap-diagram {
-  background: var(--rvo-color-wit);
+  background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm);
-  padding: var(--rvo-space-xs);
-  margin-block-end: var(--rvo-space-xs);
+  border-radius: var(--primitives-corner-radius-sm);
+  padding: var(--primitives-space-8);
+  margin-block-end: var(--primitives-space-8);
   overflow-x: auto;
 }
 

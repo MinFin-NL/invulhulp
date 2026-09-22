@@ -1,25 +1,25 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm decision-gate">
-    <div class="rvo-layout-column rvo-layout-gap--xl">
+  <div class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad decision-gate">
+    <div class="invulhulp-column invulhulp-gap--xl">
 
       <div>
-        <p class="rvo-text rvo-text--sm decision-gate__kicker">Sectie 3 – Afweging</p>
-        <h1 class="rvo-heading rvo-heading--xl decision-gate__title">Beslissing: inzet AI-systeem</h1>
+        <nldd-text color="inherit" size="sm" class="decision-gate__kicker">Sectie 3 – Afweging</nldd-text>
+        <nldd-title size="1"><h1 class="decision-gate__title">Beslissing: inzet AI-systeem</h1></nldd-title>
       </div>
 
       <!-- Risk level reminder -->
-      <div v-if="store.riskLevel" class="rvo-alert rvo-alert--padding-md" :class="`rvo-alert--${alertType}`">
-        <!-- One element inside the container: rvo-alert lays its children out in a row. -->
-        <div class="rvo-alert__container">
+            <nldd-banner
+              v-if="store.riskLevel"
+              :variant="alertVariant"
+            >
           <div>
             <strong>Risicoclassificatie: {{ riskInfo?.label }}</strong><br />
             {{ riskInfo?.description }}
           </div>
-        </div>
-      </div>
+      </nldd-banner>
 
       <!-- Questions -->
-      <div class="rvo-layout-column rvo-layout-gap--lg">
+      <div class="invulhulp-column invulhulp-gap--lg">
         <QuestionItem
           v-for="question in decisionQuestions"
           :key="question.id"
@@ -30,13 +30,17 @@
       </div>
 
       <!-- Navigation -->
-      <div class="rvo-layout-row rvo-layout-gap--md decision-gate__nav">
-        <button @click="$emit('prev')" class="rvo-button rvo-button--secondary">
-          ← Vorige
-        </button>
-        <button @click="onNext" class="rvo-button rvo-button--primary">
-          {{ goAnswer === 'Ja, het systeem wordt ingezet' ? 'Naar Deel B – Implementatie →' : goAnswer === 'Nee, het systeem wordt niet ingezet' ? 'Naar samenvatting →' : 'Volgende →' }}
-        </button>
+      <div class="invulhulp-row invulhulp-gap--md decision-gate__nav">
+        <nldd-button
+          variant="secondary"
+          text="← Vorige"
+          @click="$emit('prev')"
+        />
+        <nldd-button
+          variant="primary"
+          :text="goAnswer === 'Ja, het systeem wordt ingezet' ? 'Naar Deel B – Implementatie →' : goAnswer === 'Nee, het systeem wordt niet ingezet' ? 'Naar samenvatting →' : 'Volgende →'"
+          @click="onNext"
+        />
       </div>
 
     </div>
@@ -68,11 +72,11 @@ const goAnswer = computed(() => {
   return typeof raw === 'string' ? raw.split('\n---\n')[0] : ''
 })
 
-const alertType = computed(() => {
+const alertVariant = computed(() => {
   switch (store.riskLevel) {
-    case 'onaanvaardbaar': return 'error'
+    case 'onaanvaardbaar': return 'critical'
     case 'hoog': return 'warning'
-    case 'beperkt': return 'info'
+    case 'beperkt': return 'accent'
     default: return 'success'
   }
 })
@@ -89,24 +93,24 @@ function onNext() {
 
 <style scoped>
 .decision-gate {
-  padding-block: var(--rvo-space-2xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-40) var(--primitives-space-48);
 }
 
 .decision-gate__kicker {
   color: var(--invulhulp-color-text-subtle);
-  margin: 0 0 var(--rvo-space-3xs);
+  margin: 0 0 var(--primitives-space-2);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
 
 .decision-gate__title {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   margin: 0;
 }
 
 .decision-gate__nav {
   justify-content: space-between;
   border-block-start: 1px solid var(--invulhulp-color-border);
-  padding-block-start: var(--rvo-space-xl);
+  padding-block-start: var(--primitives-space-32);
 }
 </style>

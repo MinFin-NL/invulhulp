@@ -1,57 +1,53 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm section-view">
-    <div class="rvo-layout-column rvo-layout-gap--xl">
+  <div class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad section-view">
+    <div class="invulhulp-column invulhulp-gap--xl">
 
       <!-- Section header -->
       <header>
         <div class="section-view__kicker-row">
-          <p class="rvo-text rvo-text--sm section-view__kicker">
+          <nldd-text color="inherit" size="sm" class="section-view__kicker">
             {{ kicker }}
-          </p>
+          </nldd-text>
           <!-- Opslagstatus. Antwoorden gaan meteen naar localStorage en
                gedebounced naar de server; zonder deze regel krijgt iemand die
                drie kwartier aan een DPIA werkt nooit te horen dat zijn werk
                ergens staat. Bewust geen live region voor de normale statussen:
                die wisselen bij elke toetsaanslag en zouden een schermlezer
                onophoudelijk onderbreken. De foutmelding hieronder wél. -->
-          <p v-if="saveLabel" class="rvo-text rvo-text--sm section-view__save">
+          <nldd-text color="inherit" size="sm" class="section-view__save" v-if="saveLabel">
             {{ saveLabel }}
-          </p>
+          </nldd-text>
         </div>
-        <h1 class="rvo-heading rvo-heading--xl section-view__title">
+        <nldd-title size="1"><h1 class="section-view__title">
           {{ section.title }}
-        </h1>
+        </h1></nldd-title>
       </header>
 
-      <div
+      <nldd-banner
+        variant="warning"
+        size="sm"
         v-if="saveStatus === 'error'"
-        class="rvo-alert rvo-alert--warning rvo-alert--padding-sm"
         role="alert"
-      >
-        <div class="rvo-alert__container">
-          Opslaan op de server lukt even niet. Je antwoorden staan wel op dit apparaat bewaard —
-          bij de volgende wijziging probeert de app het opnieuw.
-        </div>
-      </div>
+        text="Opslaan op de server lukt even niet. Je antwoorden staan wel op dit apparaat bewaard — bij de volgende wijziging probeert de app het opnieuw."
+      />
 
       <!-- Sections another party fills in: say so, and say that AI Modus keeps
            its hands off, so nobody wonders where an answer came from. -->
-      <div v-if="section.aiFill === false" class="rvo-alert rvo-alert--info rvo-alert--padding-md">
-        <div class="rvo-alert__container">
-          Dit onderdeel wordt door een andere partij ingevuld. AI Modus vult hier niets in — antwoorden komen
-          alleen van de beoordelaar zelf.
-        </div>
-      </div>
+      <nldd-banner
+        variant="accent"
+        v-if="section.aiFill === false"
+        text="Dit onderdeel wordt door een andere partij ingevuld. AI Modus vult hier niets in — antwoorden komen alleen van de beoordelaar zelf."
+      />
 
       <!-- Subsections -->
-      <div v-for="subsection in section.subsections" :key="subsection.id" class="rvo-layout-column rvo-layout-gap--lg">
+      <div v-for="subsection in section.subsections" :key="subsection.id" class="invulhulp-column invulhulp-gap--lg">
         <div>
-          <h2 class="rvo-heading rvo-heading--lg section-view__subsection-title">
+          <nldd-title size="2"><h2 class="section-view__subsection-title">
             {{ subsection.title }}
-          </h2>
-          <p v-if="subsection.description" class="rvo-text rvo-text--sm section-view__subsection-desc">
+          </h2></nldd-title>
+          <nldd-text color="inherit" size="sm" class="section-view__subsection-desc" v-if="subsection.description">
             {{ subsection.description }}
-          </p>
+          </nldd-text>
         </div>
 
         <QuestionItem
@@ -64,21 +60,22 @@
       </div>
 
       <!-- Navigation -->
-      <div class="rvo-layout-row rvo-layout-gap--md section-view__nav">
-        <button
+      <div class="invulhulp-row invulhulp-gap--md section-view__nav">
+        <nldd-button
+          variant="secondary"
+          text="← Vorige"
           v-if="hasPrev"
           @click="$emit('prev')"
-          class="rvo-button rvo-button--secondary"
-        >
-          ← Vorige
-        </button>
+        />
         <div v-else aria-hidden="true"></div>
-        <button
+        <nldd-button
+          variant="primary"
           @click="onNext"
-          class="rvo-button rvo-button--primary"
         >
-          {{ nextLabel }} →
-        </button>
+          <span slot="text">
+{{ nextLabel }} →
+          </span>
+        </nldd-button>
       </div>
 
     </div>
@@ -139,16 +136,16 @@ function onNext() {
 
 <style scoped>
 .section-view {
-  padding-block: var(--rvo-space-2xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-40) var(--primitives-space-48);
 }
 
 .section-view__kicker-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
   flex-wrap: wrap;
-  margin-block-end: var(--rvo-space-3xs);
+  margin-block-end: var(--primitives-space-2);
 }
 
 .section-view__kicker {
@@ -165,13 +162,13 @@ function onNext() {
 }
 
 .section-view__title {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   margin: 0;
 }
 
 .section-view__subsection-title {
-  color: var(--rvo-color-grijs-800);
-  margin: 0 0 var(--rvo-space-2xs);
+  color: var(--semantics-content-color);
+  margin: 0 0 var(--primitives-space-4);
 }
 
 .section-view__subsection-desc {
@@ -184,6 +181,6 @@ function onNext() {
 .section-view__nav {
   justify-content: space-between;
   border-block-start: 1px solid var(--invulhulp-color-border);
-  padding-block-start: var(--rvo-space-xl);
+  padding-block-start: var(--primitives-space-32);
 }
 </style>

@@ -2,43 +2,41 @@
   <section :id="id" class="entity-graph" aria-labelledby="entity-graph-heading">
     <div class="entity-graph__header">
       <div>
-        <h3 id="entity-graph-heading" class="rvo-heading rvo-heading--md entity-graph__title">
+        <nldd-title size="3"><h3 class="entity-graph__title" id="entity-graph-heading">
           Entiteitengrafiek
-        </h3>
-        <p class="rvo-text rvo-text--sm entity-graph__desc">
+        </h3></nldd-title>
+        <nldd-text color="inherit" size="sm" class="entity-graph__desc">
           Verbindingen tussen entiteiten en brondocumenten. Entiteiten die in meerdere documenten voorkomen zijn extra groot weergegeven.
-        </p>
+        </nldd-text>
       </div>
-      <button
-        type="button"
-        class="rvo-button rvo-button--secondary rvo-button--size-sm"
+      <nldd-button
+        variant="secondary"
+        size="sm"
+        text="Sluiten"
         @click="$emit('close')"
-      >
-        Sluiten
-      </button>
+      />
     </div>
 
     <fieldset class="entity-graph__controls">
       <legend class="invulhulp-visually-hidden">Categorieën filteren</legend>
       <label v-for="cat in categories" :key="cat.key" class="entity-graph__filter">
-        <input
-          type="checkbox"
-          class="rvo-checkbox__input"
+        <nldd-checkbox-field
           :checked="visible[cat.key]"
+          :accessible-label="cat.label"
           @change="toggle(cat.key)"
         />
         <span
           class="entity-graph__swatch"
-          :style="{ background: cat.color }"
+          :style="{ background: `var(${cat.color})` }"
           aria-hidden="true"
         />
         {{ cat.label }}
       </label>
     </fieldset>
 
-    <p v-if="!hasAnyEntities" class="entity-graph__empty rvo-text rvo-text--sm">
+    <nldd-text color="inherit" size="sm" class="entity-graph__empty" v-if="!hasAnyEntities">
       Nog geen entiteiten beschikbaar — wacht tot indexering klaar is.
-    </p>
+    </nldd-text>
 
     <div
       v-show="hasAnyEntities"
@@ -66,12 +64,31 @@ defineEmits<{ close: [] }>()
 
 type CategoryKey = 'personen' | 'organisaties' | 'systemen' | 'datasoorten'
 
+// NLDD category colours. The swatches use them as CSS; the vis-network canvas
+// cannot read custom properties, so build() resolves them via tokenColor().
 const categories: { key: CategoryKey; label: string; color: string }[] = [
-  { key: 'personen', label: 'Personen', color: '#2b7de9' },
-  { key: 'organisaties', label: 'Organisaties', color: '#e9802b' },
-  { key: 'systemen', label: 'Systemen', color: '#3aa76d' },
-  { key: 'datasoorten', label: 'Datasoorten', color: '#a04bd1' },
+  { key: 'personen', label: 'Personen', color: '--semantics-categories-hemelblauw-filled-background-color' },
+  { key: 'organisaties', label: 'Organisaties', color: '--semantics-categories-oranje-filled-background-color' },
+  { key: 'systemen', label: 'Systemen', color: '--semantics-categories-groen-filled-background-color' },
+  { key: 'datasoorten', label: 'Datasoorten', color: '--semantics-categories-paars-filled-background-color' },
 ]
+
+/** Resolve a colour token to a concrete rgb() string for the canvas. NLDD
+ *  tokens are light-dark()/oklch(), which vis-network does not parse — so paint
+ *  one pixel with the computed colour and read it back. */
+function tokenColor(token: string): string {
+  const probe = document.createElement('span')
+  probe.style.color = `var(${token})`
+  document.body.appendChild(probe)
+  const css = getComputedStyle(probe).color
+  probe.remove()
+  const ctx = document.createElement('canvas').getContext('2d', { willReadFrequently: true })
+  if (!ctx) return css
+  ctx.fillStyle = css
+  ctx.fillRect(0, 0, 1, 1)
+  const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data
+  return `rgb(${r}, ${g}, ${b})`
+}
 
 const visible = reactive<Record<CategoryKey, boolean>>({
   personen: true,
@@ -98,6 +115,11 @@ function build(): GraphData {
   const edges: GraphData['edges'] = []
   let hasAny = false
 
+  const docColor = tokenColor('--semantics-categories-accent-filled-background-color')
+  const docBorder = tokenColor('--semantics-categories-accent-filled-highlight-border-color')
+  const textColor = tokenColor('--semantics-content-color')
+  const catColor = Object.fromEntries(categories.map(cat => [cat.key, tokenColor(cat.color)])) as Record<CategoryKey, string>
+
   const docs = props.documents.filter(d => !d.indexing && d.ontology && !d.ontology._parse_error)
 
   for (const doc of docs) {
@@ -107,8 +129,8 @@ function build(): GraphData {
       group: 'document',
       size: 26,
       borderWidth: 2,
-      color: { background: '#1d3a5f', border: '#0b1e35', highlight: { background: '#2a4f7c', border: '#0b1e35' } },
-      font: { color: '#1d3a5f', size: 14, face: 'sans-serif' },
+      color: { background: docColor, border: docBorder, highlight: { background: docBorder, border: docBorder } },
+      font: { color: docColor, size: 14, face: 'sans-serif' },
     })
   }
 
@@ -182,7 +204,7 @@ function build(): GraphData {
   }
 
   for (const [root, c] of clusters) {
-    const color = categories.find(cat => cat.key === c.cat)!.color
+    const color = catColor[c.cat]
     const shared = c.docIds.size > 1
     const id = `ent::${c.cat}::${root}`
     nodes.push({
@@ -191,8 +213,8 @@ function build(): GraphData {
       group: c.cat,
       size: shared ? 22 + Math.min(c.docIds.size * 3, 14) : 14,
       borderWidth: shared ? 3 : 1,
-      color: { background: color, border: shared ? '#111' : color, highlight: { background: color, border: '#111' } },
-      font: { color: '#111111', size: shared ? 14 : 12, face: 'sans-serif' },
+      color: { background: color, border: shared ? textColor : color, highlight: { background: color, border: textColor } },
+      font: { color: textColor, size: shared ? 14 : 12, face: 'sans-serif' },
     })
     for (const docId of c.docIds) {
       edges.push({ from: `doc::${docId}`, to: id })
@@ -232,7 +254,7 @@ function render() {
     },
     interaction: { hover: true, tooltipDelay: 150 },
     nodes: { shape: 'dot' },
-    edges: { color: { color: '#bbb', highlight: '#444' }, smooth: false, width: 1 },
+    edges: { color: { color: tokenColor('--semantics-dividers-color'), highlight: tokenColor('--semantics-content-secondary-color') }, smooth: false, width: 1 },
   }
   if (network) {
     network.setData(data as any)
@@ -254,22 +276,22 @@ watch(visible, render, { deep: true })
 
 <style scoped>
 .entity-graph {
-  margin-block-start: var(--rvo-space-lg);
-  padding: var(--rvo-space-md);
+  margin-block-start: var(--primitives-space-24);
+  padding: var(--primitives-space-16);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-md);
-  background: var(--rvo-color-grijs-050, #fafafa);
+  border-radius: var(--primitives-corner-radius-md);
+  background: var(--semantics-surfaces-tinted-background-color);
 }
 
 .entity-graph__header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: var(--rvo-space-md);
-  margin-block-end: var(--rvo-space-sm);
+  gap: var(--primitives-space-16);
+  margin-block-end: var(--primitives-space-12);
 }
 
-.entity-graph__title { margin: 0 0 var(--rvo-space-3xs); }
+.entity-graph__title { margin: 0 0 var(--primitives-space-2); }
 
 .entity-graph__desc {
   margin: 0;
@@ -279,8 +301,8 @@ watch(visible, render, { deep: true })
 .entity-graph__controls {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-sm) var(--rvo-space-md);
-  margin: 0 0 var(--rvo-space-sm);
+  gap: var(--primitives-space-12) var(--primitives-space-16);
+  margin: 0 0 var(--primitives-space-12);
   padding: 0;
   border: 0;
 }
@@ -288,20 +310,10 @@ watch(visible, render, { deep: true })
 .entity-graph__filter {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
-  font-size: var(--rvo-font-size-sm);
+  gap: var(--primitives-space-4);
+  font-size: var(--primitives-font-size-90);
   cursor: pointer;
   user-select: none;
-}
-
-.entity-graph__filter input[type='checkbox'] {
-  appearance: auto;
-  -webkit-appearance: auto;
-  accent-color: #154273;
-  inline-size: 1rem;
-  block-size: 1rem;
-  cursor: pointer;
-  flex-shrink: 0;
 }
 
 .entity-graph__swatch {
@@ -309,20 +321,20 @@ watch(visible, render, { deep: true })
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 1px solid rgb(0 0 0 / 0.2);
+  border: 1px solid var(--semantics-surfaces-base-border-color);
   flex-shrink: 0;
 }
 
 .entity-graph__canvas {
   width: 100%;
   height: 560px;
-  background: var(--rvo-color-wit);
+  background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-md);
+  border-radius: var(--primitives-corner-radius-md);
 }
 
 .entity-graph__empty {
-  margin: var(--rvo-space-md) 0 0 0;
+  margin: var(--primitives-space-16) 0 0 0;
   color: var(--invulhulp-color-text-subtle);
   font-style: italic;
 }

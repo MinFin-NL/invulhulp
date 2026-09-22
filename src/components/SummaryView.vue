@@ -1,145 +1,142 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm summary-view">
-    <div class="rvo-layout-column rvo-layout-gap--xl">
+  <div class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad summary-view">
+    <div class="invulhulp-column invulhulp-gap--xl">
 
       <div class="summary-view__intro">
-        <h1 class="rvo-heading rvo-heading--xl summary-view__title">Samenvatting</h1>
-        <p class="rvo-text summary-view__lead">Overzicht van alle ingevulde antwoorden.</p>
+        <nldd-title size="1"><h1 class="summary-view__title">Samenvatting</h1></nldd-title>
+        <nldd-text color="inherit" class="summary-view__lead">Overzicht van alle ingevulde antwoorden.</nldd-text>
       </div>
 
       <!-- Risk level (forms with riskClassification feature) -->
-      <div
-        v-if="props.formConfig.features.riskClassification && store.riskLevel"
-        class="rvo-alert rvo-alert--padding-md"
-        :class="`rvo-alert--${alertType}`"
-      >
-        <!-- One element inside the container: rvo-alert lays its children out in a row. -->
-        <div class="rvo-alert__container">
+            <nldd-banner
+              v-if="props.formConfig.features.riskClassification && store.riskLevel"
+              :variant="alertVariant"
+            >
           <div>
             <strong>Risicoclassificatie: {{ riskInfo?.label }}</strong><br />
             {{ riskInfo?.description }}
           </div>
-        </div>
-      </div>
+      </nldd-banner>
 
       <!-- Unanswered mandatory -->
-      <div v-if="unansweredMandatory.length > 0" class="rvo-alert rvo-alert--warning rvo-alert--padding-md">
-        <div class="rvo-alert__container">
+      <nldd-banner
+        variant="warning"
+        v-if="unansweredMandatory.length > 0"
+      >
           <div class="summary-view__unanswered-content">
             <strong>Verplichte vragen niet ingevuld ({{ unansweredMandatory.length }})</strong>
-            <p class="rvo-text rvo-text--sm summary-view__unanswered-intro">De volgende verplichte vragen zijn nog niet beantwoord:</p>
+            <nldd-text size="sm" class="summary-view__unanswered-intro">De volgende verplichte vragen zijn nog niet beantwoord:</nldd-text>
             <div v-for="group in unansweredGrouped" :key="group.sectionTitle" class="summary-view__unanswered-group">
-              <p class="rvo-text rvo-text--sm summary-view__unanswered-section">
+              <nldd-text weight="bold" size="sm" class="summary-view__unanswered-section">
                 {{ group.sectionTitle }}
-              </p>
+              </nldd-text>
               <ul class="summary-view__unanswered-list">
-                <li v-for="q in group.questions" :key="q.id" class="rvo-text rvo-text--sm">
+                <li v-for="q in group.questions" :key="q.id" class="invulhulp-text--sm">
                   <em>{{ q.subsectionTitle }}</em> — {{ q.text }}
                 </li>
               </ul>
             </div>
           </div>
-        </div>
-      </div>
+      </nldd-banner>
 
       <!-- Name input -->
-      <div class="rvo-form-field">
-        <label class="rvo-form-field__label" for="summary-system-name">
-          {{ props.formConfig.meta.systemNamePlaceholder ? 'Naam (voor export)' : 'Naam van het AI-systeem (voor export)' }}
-        </label>
-        <input
-          id="summary-system-name"
-          v-model="systemName"
-          type="text"
-          class="utrecht-textbox utrecht-textbox--md"
+      <nldd-form-field
+        :label="props.formConfig.meta.systemNamePlaceholder ? 'Naam (voor export)' : 'Naam van het AI-systeem (voor export)'"
+      >
+        <nldd-text-field
+          input-id="summary-system-name"
+          :value="systemName"
           :placeholder="props.formConfig.meta.systemNamePlaceholder ?? 'Naam van het systeem...'"
+          @input="systemName = $event.detail.value"
         />
-      </div>
+      </nldd-form-field>
 
       <!-- Export buttons -->
-      <div class="rvo-layout-row rvo-layout-gap--md summary-view__exports">
-        <button @click="exportWord" class="rvo-button rvo-button--primary">
-          Download Word rapport
-        </button>
-        <button v-if="showLegacyExport" @click="exportLegacy" class="rvo-button rvo-button--secondary">
-          Download origineel format (Word)
-        </button>
+      <div class="invulhulp-row invulhulp-gap--md summary-view__exports">
+        <nldd-button
+          variant="primary"
+          text="Download Word rapport"
+          @click="exportWord"
+        />
+        <nldd-button
+          variant="secondary"
+          text="Download origineel format (Word)"
+          v-if="showLegacyExport"
+          @click="exportLegacy"
+        />
       </div>
 
       <!-- Import -->
       <div>
-        <p class="rvo-text rvo-text--sm summary-view__import-hint">
+        <nldd-text color="inherit" size="sm" class="summary-view__import-hint">
           Of laad een eerder opgeslagen JSON-bestand om verder te gaan waar u gebleven was:
-        </p>
-        <div class="rvo-layout-row rvo-layout-gap--sm summary-view__import-row">
+        </nldd-text>
+        <div class="invulhulp-row invulhulp-gap--sm summary-view__import-row">
           <input ref="fileInput" type="file" accept=".json" class="invulhulp-visually-hidden" @change="handleImport" />
-          <button @click="fileInput?.click()" class="rvo-button rvo-button--tertiary">
-            JSON importeren
-          </button>
-          <span v-if="importError" class="rvo-text rvo-text--sm summary-view__import-error">{{ importError }}</span>
-          <span v-if="importSuccess" class="rvo-text rvo-text--sm summary-view__import-success">Gegevens hersteld!</span>
+          <nldd-button
+            variant="neutral-transparent"
+            text="JSON importeren"
+            @click="fileInput?.click()"
+          />
+          <span v-if="importError" class="invulhulp-text--sm summary-view__import-error">{{ importError }}</span>
+          <span v-if="importSuccess" class="invulhulp-text--sm summary-view__import-success">Gegevens hersteld!</span>
         </div>
       </div>
 
       <!-- Answers by section -->
-      <div v-for="section in visibleSections" :key="section.id" class="rvo-layout-column rvo-layout-gap--lg">
-        <h2 class="rvo-heading rvo-heading--lg summary-view__section-title">
+      <div v-for="section in visibleSections" :key="section.id" class="invulhulp-column invulhulp-gap--lg">
+        <nldd-title size="2"><h2 class="summary-view__section-title">
           {{ section.title }}
-        </h2>
+        </h2></nldd-title>
         <hr class="invulhulp-divider summary-view__section-divider" />
 
-        <div v-for="subsection in section.subsections" :key="subsection.id" class="rvo-layout-column rvo-layout-gap--md">
-          <h3 class="rvo-heading rvo-heading--md summary-view__subsection-title">{{ subsection.title }}</h3>
+        <div v-for="subsection in section.subsections" :key="subsection.id" class="invulhulp-column invulhulp-gap--md">
+          <nldd-title size="3"><h3 class="summary-view__subsection-title">{{ subsection.title }}</h3></nldd-title>
 
           <article
             v-for="question in subsection.questions"
             :key="question.id"
-            class="rvo-card rvo-card--outline rvo-card--padding--sm summary-view__card"
+            class="invulhulp-card invulhulp-card--padding-sm summary-view__card"
             :class="`summary-view__card--${question.importance}`"
           >
             <div class="summary-view__card-body">
-              <p class="rvo-text rvo-text--sm summary-view__question">
+              <nldd-text weight="bold" color="inherit" size="sm" class="summary-view__question">
                 {{ question.text }}
-              </p>
+              </nldd-text>
 
               <!-- The answer keeps the shape it was written in: paragraphs and
                    lists as markup, checkbox answers as a list, a table answer
                    as an actual table. -->
               <template v-for="answer in [renderedAnswers[question.id]]" :key="question.id">
-                <p
-                  v-if="!answer || answer.kind === 'empty'"
-                  class="rvo-text rvo-text--sm summary-view__answer summary-view__answer--empty"
-                >
+                <nldd-text color="inherit" size="sm" class="summary-view__answer summary-view__answer--empty" v-if="!answer || answer.kind === 'empty'">
                   (niet ingevuld)
-                </p>
+                </nldd-text>
 
-                <ul v-else-if="answer.kind === 'list'" class="rvo-text rvo-text--sm summary-view__answer summary-view__answer-list">
+                <ul v-else-if="answer.kind === 'list'" class="invulhulp-text--sm summary-view__answer summary-view__answer-list">
                   <li v-for="item in answer.items" :key="item">{{ item }}</li>
                 </ul>
 
                 <div v-else-if="answer.kind === 'table'" class="summary-view__answer">
                   <div v-if="answer.table.rows.length > 0" class="summary-view__table-scroll">
-                    <table class="rvo-table summary-view__table">
-                      <thead v-if="answer.columns.length > 0" class="rvo-table-head">
-                        <tr class="rvo-table-row">
-                          <th v-for="col in answer.columns" :key="col" class="rvo-table-header" scope="col">
-                            {{ col }}
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody class="rvo-table-body">
-                        <tr v-for="(row, i) in answer.table.rows" :key="i" class="rvo-table-row">
-                          <td v-for="(cell, j) in row" :key="j" class="rvo-table-cell">{{ cell }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
+                    <nldd-table
+                      class="summary-view__table"
+                      :columns="gridColumns(answer.columns.length || answer.table.rows[0].length)"
+                      :accessible-label="question.text"
+                    >
+                      <nldd-table-row v-if="answer.columns.length > 0" slot="header">
+                        <nldd-text-cell v-for="col in answer.columns" :key="col" size="sm" :text="col" />
+                      </nldd-table-row>
+                      <nldd-table-row v-for="(row, i) in answer.table.rows" :key="i">
+                        <nldd-text-cell v-for="(cell, j) in row" :key="j" size="sm" :text="cell" />
+                      </nldd-table-row>
+                    </nldd-table>
                   </div>
-                  <div v-if="answer.table.notes" class="rvo-text rvo-text--sm summary-view__answer-html" v-html="answer.notesHtml"></div>
+                  <div v-if="answer.table.notes" class="invulhulp-text--sm summary-view__answer-html" v-html="answer.notesHtml"></div>
                 </div>
 
                 <div
                   v-else
-                  class="rvo-text rvo-text--sm summary-view__answer summary-view__answer-html"
+                  class="invulhulp-text--sm summary-view__answer summary-view__answer-html"
                   v-html="answer.html"
                 ></div>
               </template>
@@ -220,11 +217,17 @@ const riskInfo = computed(() =>
   store.riskLevel ? (props.formConfig.riskLevelInfo?.[store.riskLevel] ?? null) : null,
 )
 
-const alertType = computed(() => {
+/** nldd-table lays its columns out with a CSS grid track list; these tables
+ *  have no fixed widths, so every column gets an equal share. */
+function gridColumns(count: number): string {
+  return `repeat(${Math.max(count, 1)}, minmax(0, 1fr))`
+}
+
+const alertVariant = computed(() => {
   switch (store.riskLevel) {
-    case 'onaanvaardbaar': return 'error'
+    case 'onaanvaardbaar': return 'critical'
     case 'hoog': return 'warning'
-    case 'beperkt': return 'info'
+    case 'beperkt': return 'accent'
     default: return 'success'
   }
 })
@@ -338,12 +341,12 @@ async function handleImport(event: Event) {
 
 <style scoped>
 .summary-view {
-  padding-block: var(--rvo-space-2xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-40) var(--primitives-space-48);
 }
 
 .summary-view__title {
-  color: var(--rvo-color-lintblauw);
-  margin: 0 0 var(--rvo-space-xs);
+  color: var(--semantics-content-accent-color);
+  margin: 0 0 var(--primitives-space-8);
 }
 
 .summary-view__lead {
@@ -354,7 +357,7 @@ async function handleImport(event: Event) {
 .summary-view__unanswered-content {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .summary-view__unanswered-intro {
@@ -362,17 +365,16 @@ async function handleImport(event: Event) {
 }
 
 .summary-view__unanswered-group {
-  margin-block-start: var(--rvo-space-2xs);
+  margin-block-start: var(--primitives-space-4);
 }
 
 .summary-view__unanswered-section {
-  margin: var(--rvo-space-2xs) 0;
-  font-weight: var(--rvo-font-weight-semibold);
+  margin: var(--primitives-space-4) 0;
 }
 
 .summary-view__unanswered-list {
-  margin: 0 0 var(--rvo-space-xs);
-  padding-inline-start: var(--rvo-space-md);
+  margin: 0 0 var(--primitives-space-8);
+  padding-inline-start: var(--primitives-space-16);
 }
 
 .summary-view__exports {
@@ -381,7 +383,7 @@ async function handleImport(event: Event) {
 
 .summary-view__import-hint {
   color: var(--invulhulp-color-text-muted);
-  margin: 0 0 var(--rvo-space-xs);
+  margin: 0 0 var(--primitives-space-8);
 }
 
 .summary-view__import-row {
@@ -390,26 +392,26 @@ async function handleImport(event: Event) {
 }
 
 .summary-view__import-error {
-  color: var(--rvo-color-rood);
+  color: var(--semantics-content-critical-color);
 }
 
 .summary-view__import-success {
-  color: var(--rvo-color-groen);
+  color: var(--semantics-content-success-color);
 }
 
 .summary-view__section-title {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
   margin: 0;
 }
 
 .summary-view__section-divider {
-  border-block-end-color: var(--rvo-color-lintblauw);
+  border-block-end-color: var(--semantics-content-accent-color);
   border-block-end-width: 2px;
   margin: 0;
 }
 
 .summary-view__subsection-title {
-  color: var(--rvo-color-grijs-800);
+  color: var(--semantics-content-color);
   margin: 0;
 }
 
@@ -428,29 +430,28 @@ async function handleImport(event: Event) {
 .summary-view__card-body {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .summary-view__question {
-  font-weight: var(--rvo-font-weight-semibold);
   margin: 0;
-  color: var(--rvo-color-grijs-800);
+  color: var(--semantics-content-color);
 }
 
 .summary-view__answer {
   margin: 0;
-  color: var(--rvo-color-grijs-900, var(--rvo-color-grijs-800));
+  color: var(--semantics-content-color);
 }
 
 .summary-view__answer--empty {
-  color: var(--rvo-color-grijs-500);
+  color: var(--semantics-content-secondary-color);
   font-style: italic;
 }
 
 /* Rich answers keep their own block rhythm: paragraphs stay apart, lists keep
    their bullets, so a long answer reads as text instead of one wall. */
 .summary-view__answer-html :deep(p) {
-  margin: 0 0 var(--rvo-space-2xs);
+  margin: 0 0 var(--primitives-space-4);
 }
 
 .summary-view__answer-html :deep(p:last-child) {
@@ -460,8 +461,8 @@ async function handleImport(event: Event) {
 .summary-view__answer-html :deep(ul),
 .summary-view__answer-html :deep(ol),
 .summary-view__answer-list {
-  margin: 0 0 var(--rvo-space-2xs);
-  padding-inline-start: var(--rvo-space-md);
+  margin: 0 0 var(--primitives-space-4);
+  padding-inline-start: var(--primitives-space-16);
 }
 
 .summary-view__answer-html :deep(ul:last-child),
@@ -470,7 +471,7 @@ async function handleImport(event: Event) {
 }
 
 .summary-view__answer-html :deep(li) {
-  margin-block-end: var(--rvo-space-3xs, 4px);
+  margin-block-end: var(--primitives-space-2);
 }
 
 .summary-view__answer-html :deep(li > p) {
@@ -478,8 +479,8 @@ async function handleImport(event: Event) {
 }
 
 .summary-view__answer-html :deep(blockquote) {
-  margin: 0 0 var(--rvo-space-2xs);
-  padding-inline-start: var(--rvo-space-xs);
+  margin: 0 0 var(--primitives-space-4);
+  padding-inline-start: var(--primitives-space-8);
   border-inline-start: 2px solid var(--invulhulp-color-border);
 }
 
@@ -488,25 +489,13 @@ async function handleImport(event: Event) {
 }
 
 .summary-view__table-scroll + .summary-view__answer-html {
-  margin-block-start: var(--rvo-space-2xs);
+  margin-block-start: var(--primitives-space-4);
 }
 
 .summary-view__table {
   width: 100%;
   border-collapse: collapse;
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
 }
 
-.summary-view__table .rvo-table-header,
-.summary-view__table .rvo-table-cell {
-  text-align: start;
-  vertical-align: top;
-  padding: var(--rvo-space-3xs, 4px) var(--rvo-space-2xs);
-  border-block-end: 1px solid var(--invulhulp-color-border);
-}
-
-.summary-view__table .rvo-table-header {
-  background: var(--invulhulp-color-surface, #f0f4f8);
-  font-weight: var(--rvo-font-weight-bold);
-}
 </style>

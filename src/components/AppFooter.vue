@@ -1,19 +1,20 @@
 <template>
   <footer class="invulhulp-footer" role="contentinfo" aria-label="Bèta-melding">
     <div
-      class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm invulhulp-footer__inner"
+      class="invulhulp-measure invulhulp-measure--lg invulhulp-measure--pad invulhulp-footer__inner"
     >
-      <div class="rvo-alert rvo-alert--warning rvo-alert--padding-sm invulhulp-footer__alert">
-        <div class="rvo-alert__container">
-          <p class="rvo-text rvo-text--sm invulhulp-footer__text">
+            <nldd-banner
+              variant="warning"
+              size="sm"
+              class="invulhulp-footer__alert"
+            >
+          <nldd-text size="sm" class="invulhulp-footer__text">
             Dit is een bètaversie van dit hulpmiddel. Vragen of feedback?
-            <a
-              class="rvo-link"
-              href="mailto:innovatiemanagamentfinancien@minfin.nl"
-            >innovatiemanagamentfinancien@minfin.nl</a>
-          </p>
-        </div>
-      </div>
+            <nldd-link
+              href="mailto:innovatiemanagamentfinancien@minfin.nl">
+            innovatiemanagamentfinancien@minfin.nl</nldd-link>
+          </nldd-text>
+      </nldd-banner>
     </div>
   </footer>
 </template>
@@ -30,7 +31,7 @@
 .invulhulp-footer__inner {
   pointer-events: auto;
   padding-block: 3px;
-  padding-inline: var(--rvo-space-md);
+  padding-inline: var(--primitives-space-16);
 }
 
 .invulhulp-footer__alert {

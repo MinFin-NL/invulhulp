@@ -1,33 +1,32 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm form-intro">
-    <div class="rvo-layout-column rvo-layout-gap--xl">
+  <div class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad form-intro">
+    <div class="invulhulp-column invulhulp-gap--xl">
 
       <header>
-        <h1 class="rvo-heading rvo-heading--2xl form-intro__title">{{ formConfig.title }}</h1>
-        <p class="rvo-text rvo-text--lg form-intro__subtitle">
+        <nldd-title size="1"><h1 class="form-intro__title">{{ formConfig.title }}</h1></nldd-title>
+        <nldd-text color="inherit" size="lg" class="form-intro__subtitle">
           Versie {{ formConfig.version }} — Ministerie van Financiën
-        </p>
+        </nldd-text>
       </header>
 
-      <div class="rvo-alert rvo-alert--info rvo-alert--padding-md">
-        <!-- One element inside the container: rvo-alert lays its children out in a row. -->
-        <div class="rvo-alert__container">
+            <nldd-banner
+              variant="accent"
+            >
           <div><strong>Let op:</strong> {{ content.notice }}</div>
-        </div>
-      </div>
+      </nldd-banner>
 
-      <section class="rvo-layout-column rvo-layout-gap--md">
-        <h2 class="rvo-heading rvo-heading--xl form-intro__section-title">Over dit instrument</h2>
-        <p class="rvo-text">{{ content.description }}</p>
-        <p v-if="content.steps.length > 0" class="rvo-text">Dit formulier omvat de volgende onderdelen:</p>
-        <ul v-if="content.steps.length > 0" class="rvo-ul">
+      <section class="invulhulp-column invulhulp-gap--md">
+        <nldd-title size="2"><h2 class="form-intro__section-title">Over dit instrument</h2></nldd-title>
+        <nldd-text>{{ content.description }}</nldd-text>
+        <nldd-text v-if="content.steps.length > 0">Dit formulier omvat de volgende onderdelen:</nldd-text>
+        <ul v-if="content.steps.length > 0" class="">
           <li v-for="step in content.steps" :key="step">{{ step }}</li>
         </ul>
 
         <!-- Stable identifier of this form definition, in the shape the MinBZK
              task-registry uses. Shown so a filled-in form can be referred to
              unambiguously in registers, audits and correspondence. -->
-        <dl v-if="formConfig.urn" class="rvo-data-list form-intro__urn">
+        <dl v-if="formConfig.urn" class="form-intro__urn">
           <dt>Identificatie van dit formulier</dt>
           <dd><code class="form-intro__urn-value">{{ formConfig.urn }}</code></dd>
           <template v-if="formConfig.registryUrn">
@@ -37,24 +36,27 @@
         </dl>
       </section>
 
-      <section class="rvo-layout-column rvo-layout-gap--sm">
-        <h2 class="rvo-heading rvo-heading--xl form-intro__section-title">Kleurcodering vragen</h2>
+      <section class="invulhulp-column invulhulp-gap--sm">
+        <nldd-title size="2"><h2 class="form-intro__section-title">Kleurcodering vragen</h2></nldd-title>
         <ul class="form-intro__legend">
           <li class="form-intro__legend-item">
             <span class="form-intro__legend-swatch form-intro__legend-swatch--mandatory" aria-hidden="true"></span>
-            <span class="rvo-text"><strong>Blauw – verplicht:</strong> moet altijd worden ingevuld</span>
+            <span class=""><strong>Blauw – verplicht:</strong> moet altijd worden ingevuld</span>
           </li>
           <li class="form-intro__legend-item">
             <span class="form-intro__legend-swatch form-intro__legend-swatch--optional" aria-hidden="true"></span>
-            <span class="rvo-text"><strong>Groen – aanvullend:</strong> invullen indien van toepassing</span>
+            <span class=""><strong>Groen – aanvullend:</strong> invullen indien van toepassing</span>
           </li>
         </ul>
       </section>
 
       <div class="form-intro__actions">
-        <button @click="$emit('start')" class="rvo-button rvo-button--primary form-intro__cta">
-          {{ content.buttonLabel }}
-        </button>
+        <nldd-button
+          variant="primary"
+          class="form-intro__cta"
+          :text="content.buttonLabel"
+          @click="$emit('start')"
+        />
 
         <div class="form-intro__ai-mode">
           <AiModeToggle
@@ -72,14 +74,14 @@
             @dismiss="dismissAiModeDone"
             @undo-smoothing="undoSmoothing"
           />
-          <p class="rvo-text rvo-text--sm form-intro__ai-hint">
+          <nldd-text color="inherit" size="sm" class="form-intro__ai-hint">
             <template v-if="readyDocIds.length > 0">
               Vul alle vragen automatisch in op basis van je {{ readyDocIds.length }} brondocument{{ readyDocIds.length === 1 ? '' : 'en' }}.
             </template>
             <template v-else>
               Upload brondocumenten om AI Modus te gebruiken.
             </template>
-          </p>
+          </nldd-text>
         </div>
       </div>
 
@@ -110,12 +112,12 @@ const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModePhase, read
 
 <style scoped>
 .form-intro {
-  padding-block: var(--rvo-space-3xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-48) var(--primitives-space-48);
 }
 
 .form-intro__title {
-  color: var(--rvo-color-lintblauw);
-  margin: 0 0 var(--rvo-space-xs);
+  color: var(--semantics-content-accent-color);
+  margin: 0 0 var(--primitives-space-8);
 }
 
 .form-intro__subtitle {
@@ -124,22 +126,22 @@ const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModePhase, read
 }
 
 .form-intro__section-title {
-  color: var(--rvo-color-lintblauw);
+  color: var(--semantics-content-accent-color);
 }
 
-/* rvo-data-list levert de dt/dd-opmaak; alleen de omlijsting en de
+/* De dt/dd-opmaak is nu van onszelf — NLDD kent geen data-list. Alleen de
    monospace-weergave van de URN zelf zijn van ons. */
 .form-intro__urn {
-  padding: var(--rvo-space-md) var(--rvo-space-lg);
-  background: var(--rvo-color-wit);
+  padding: var(--primitives-space-16) var(--primitives-space-24);
+  background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-md);
+  border-radius: var(--primitives-corner-radius-md);
 }
 
 .form-intro__urn-value {
   font-family: monospace;
-  font-size: var(--rvo-font-size-sm);
-  color: var(--rvo-color-zwart);
+  font-size: var(--primitives-font-size-90);
+  color: var(--semantics-content-color);
   overflow-wrap: anywhere;
 }
 
@@ -148,20 +150,20 @@ const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModePhase, read
   padding: 0;
   margin: 0;
   display: flex;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
   flex-wrap: wrap;
 }
 
 .form-intro__legend-item {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
 }
 
 .form-intro__legend-swatch {
   inline-size: 16px;
   block-size: 16px;
-  border-radius: var(--rvo-border-radius-sm);
+  border-radius: var(--primitives-corner-radius-sm);
   flex-shrink: 0;
 }
 
@@ -176,24 +178,24 @@ const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModePhase, read
 .form-intro__actions {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-lg);
+  gap: var(--primitives-space-24);
 }
 
 .form-intro__cta {
-  font-size: var(--rvo-font-size-lg);
-  padding-block: var(--rvo-space-sm);
-  padding-inline: var(--rvo-space-2xl);
+  font-size: var(--primitives-font-size-200);
+  padding-block: var(--primitives-space-12);
+  padding-inline: var(--primitives-space-40);
   align-self: flex-start;
 }
 
 .form-intro__ai-mode {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
-  padding: var(--rvo-space-md) var(--rvo-space-lg);
+  gap: var(--primitives-space-4);
+  padding: var(--primitives-space-16) var(--primitives-space-24);
   background: linear-gradient(135deg, rgba(15, 45, 92, 0.04), rgba(91, 33, 182, 0.06));
   border: 1px solid rgba(91, 33, 182, 0.2);
-  border-radius: var(--rvo-border-radius-md);
+  border-radius: var(--primitives-corner-radius-md);
   align-self: flex-start;
 }
 

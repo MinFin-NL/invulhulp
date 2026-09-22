@@ -1,121 +1,42 @@
 <template>
-  <dialog
-    ref="dialogEl"
-    class="invulhulp-modal image-lightbox"
-    :aria-labelledby="titleId"
-    @click="onBackdropClick"
-  >
-    <div class="invulhulp-modal__container">
-      <header class="invulhulp-modal__header">
-        <h3 :id="titleId" class="utrecht-heading-3 invulhulp-modal__title">
-          {{ title }}
-        </h3>
-        <button type="button" class="invulhulp-modal__close" aria-label="Sluiten" @click="close">
-          <span aria-hidden="true">×</span>
-        </button>
-      </header>
-
-      <hr class="rvo-hr invulhulp-modal__divider" />
-
-      <div class="invulhulp-modal__body image-lightbox__body">
-        <img v-if="src" class="image-lightbox__image" :src="src" :alt="title" />
-      </div>
-
-      <p v-if="src" class="rvo-text rvo-text--sm image-lightbox__footer">
-        <!-- A diagram lifted from a PDF can be denser than 80vh allows; the raw
-             image opens at its own resolution for the fine print. -->
-        <a class="rvo-link" :href="src" target="_blank" rel="noopener">
-          Open op ware grootte in een nieuw tabblad
-        </a>
-      </p>
+  <ModalWindow ref="win" :title="title" width="1280">
+    <div class="image-lightbox__body">
+      <img v-if="src" class="image-lightbox__image" :src="src" :alt="title" />
     </div>
-  </dialog>
+
+    <nldd-text color="inherit" size="sm" class="image-lightbox__footer" v-if="src">
+      <!-- A diagram lifted from a PDF can be denser than the window allows; the
+           raw image opens at its own resolution for the fine print. -->
+      <nldd-link :href="src" target="_blank" rel="noopener">
+        Open op ware grootte in een nieuw tabblad
+      </nldd-link>
+    </nldd-text>
+  </ModalWindow>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import ModalWindow from './ModalWindow.vue'
 import { imageUrl } from '../services/llmService'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import type { QuestionAttachment } from '../models/Assessment'
 
 const store = useAssessmentStore()
 
-const dialogEl = ref<HTMLDialogElement | null>(null)
+const win = ref<InstanceType<typeof ModalWindow> | null>(null)
 const src = ref('')
 const title = ref('')
-const titleId = `image-lightbox-title-${Math.random().toString(36).slice(2, 9)}`
 
 function open(attachment: QuestionAttachment) {
   src.value = imageUrl(attachment.id, store.sessionId)
   title.value = attachment.caption.trim() || attachment.filename
-  dialogEl.value?.showModal()
-}
-
-function close() {
-  dialogEl.value?.close()
-}
-
-function onBackdropClick(event: MouseEvent) {
-  if (event.target === dialogEl.value) close()
+  win.value?.show()
 }
 
 defineExpose({ open })
 </script>
 
 <style scoped>
-/* Modal shell copied from ConfirmDialog.vue (styles there are scoped). */
-.invulhulp-modal {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  max-inline-size: min(1100px, 94vw);
-  inline-size: 100%;
-  margin-block-start: 4vh;
-  color: inherit;
-}
-
-.invulhulp-modal::backdrop {
-  background: rgb(0 0 0 / 50%);
-}
-
-.invulhulp-modal__container {
-  background: var(--rvo-color-wit);
-  border-radius: var(--rvo-border-radius-lg);
-  box-shadow: 0 0 1em 0 rgb(0 0 0 / 30%);
-  padding: var(--rvo-space-md);
-  display: flex;
-  flex-direction: column;
-  gap: var(--rvo-space-sm);
-}
-
-.invulhulp-modal__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--rvo-space-sm);
-}
-
-.invulhulp-modal__title {
-  margin: 0;
-  flex: 1;
-  color: var(--rvo-color-lintblauw);
-  word-break: break-word;
-}
-
-.invulhulp-modal__close {
-  background: none;
-  border: 0;
-  font-size: 1.75rem;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--invulhulp-color-text-muted);
-  padding: 0 var(--rvo-space-3xs);
-}
-
-.invulhulp-modal__divider {
-  margin: 0;
-}
-
 .image-lightbox__body {
   display: flex;
   justify-content: center;
@@ -123,10 +44,10 @@ defineExpose({ open })
 
 .image-lightbox__image {
   max-inline-size: 100%;
-  /* Leaves room for the header, footer link and the dialog's own margins. */
-  max-block-size: 76vh;
+  /* Leaves room for the title bar, footer link and the window's inset. */
+  max-block-size: 72vh;
   object-fit: contain;
-  background: var(--rvo-color-grijs-100, #f3f3f3);
+  background: var(--semantics-surfaces-tinted-background-color);
 }
 
 .image-lightbox__footer {

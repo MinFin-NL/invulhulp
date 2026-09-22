@@ -20,13 +20,13 @@ async function render(props: Record<string, unknown>) {
 }
 
 describe('FormCard renders', () => {
-  it('a real form as an openable RVO card', async () => {
+  it('a real form as an openable card', async () => {
     const html = await render({
       form: { id: 'intake', title: 'Intakeformulier', shortDescription: 'Registreer een verzoek.', domains: ['project'] },
       status: { status: 'bezig', completed: 3, total: 12 },
       verdict: ALWAYS,
     })
-    expect(html).toContain('rvo-card rvo-card--outline')
+    expect(html).toContain('invulhulp-card')
     expect(html).toContain('Intakeformulier')
     expect(html).toContain('Bezig (3/12)')
     // "Verder" in plaats van "Openen" zodra er antwoorden staan.
@@ -34,8 +34,8 @@ describe('FormCard renders', () => {
     expect(html).not.toContain('disabled')
     // Secundair: de ene primaire actie van de dossierpagina staat in de
     // "volgende stap"-band, niet op elk van de twaalf kaarten.
-    expect(html).toContain('rvo-button--secondary')
-    expect(html).not.toContain('rvo-button--primary')
+    expect(html).toContain('variant="secondary"')
+    expect(html).not.toContain('variant="primary"')
   })
 
   it('an onvolledig form as an amber tag with the open-question count', async () => {
@@ -48,7 +48,7 @@ describe('FormCard renders', () => {
     // in de kleur maar in de tekst.
     expect(html).not.toContain('Afgerond')
     expect(html).toContain('Nog 3 verplichte vragen')
-    expect(html).toContain('rvo-tag--warning')
+    expect(html).toContain('color="warning"')
     expect(html).toContain('Afmaken')
   })
 

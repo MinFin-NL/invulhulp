@@ -2,50 +2,50 @@
   <div class="invulhulp-table-question">
     <!-- Optional grid, still closed: the toelichting below is the whole answer
          until the user asks for a table. -->
-    <p v-if="!gridOpen" class="rvo-text rvo-text--sm invulhulp-table-question__optional-hint">
+    <nldd-text color="inherit" size="sm" class="invulhulp-table-question__optional-hint" v-if="!gridOpen">
       Een tabel is hier optioneel. Beantwoord de vraag in de toelichting hieronder, of voeg een tabel toe.
-    </p>
-    <button
+    </nldd-text>
+    <nldd-button
+      variant="neutral-transparent"
+      class="invulhulp-table-question__toggle-btn"
+      text="+ Tabel toevoegen"
       v-if="!gridOpen && !store.readOnly"
-      type="button"
-      class="rvo-button rvo-button--tertiary rvo-button--sm invulhulp-table-question__toggle-btn"
       @click="openGrid"
-    >
-      + Tabel toevoegen
-    </button>
+    />
 
     <div v-show="gridOpen" class="invulhulp-table-question__viewport">
       <div class="invulhulp-table-question__scroll" ref="scrollEl" @scroll="updateScrollState">
-      <table class="rvo-table invulhulp-table-question__table">
-        <thead class="rvo-table-head">
-          <tr class="rvo-table-row">
-            <th
-              v-for="col in columns"
-              :key="col.id"
-              class="rvo-table-header"
-              :title="col.hint"
-              scope="col"
-            >
-              {{ col.label }}
-            </th>
-            <th class="rvo-table-header invulhulp-table-question__actions-header" scope="col">
-              <span class="rvo-visually-hidden">Acties</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody class="rvo-table-body">
-          <tr v-for="(row, rowIndex) in table.rows" :key="rowIndex" class="rvo-table-row">
-            <td v-for="(col, colIndex) in columns" :key="col.id" class="rvo-table-cell">
+      <nldd-table
+        class="invulhulp-table-question__table"
+        :columns="gridColumns"
+        :accessible-label="question.text"
+      >
+        <nldd-table-row slot="header">
+          <nldd-text-cell
+            v-for="col in columns"
+            :key="col.id"
+            size="sm"
+            :text="col.label"
+            :title="col.hint"
+          />
+          <nldd-cell class="invulhulp-table-question__actions-header">
+            <span class="invulhulp-visually-hidden">Acties</span>
+          </nldd-cell>
+        </nldd-table-row>
+          <nldd-table-row v-for="(row, rowIndex) in table.rows" :key="rowIndex">
+            <nldd-cell v-for="(col, colIndex) in columns" :key="col.id">
               <!-- Dropdown cell (upstream select/radio column) -->
-              <select
+              <!-- nldd-dropdown wraps a native <select>: the options stay
+                   ordinary markup and the component supplies the chrome. -->
+              <nldd-dropdown
                 v-if="col.type === 'select'"
-                class="rvo-select__input invulhulp-table-question__cell-input"
-                :value="row[colIndex] ?? ''"
-                :aria-label="`${col.label}, rij ${rowIndex + 1}`"
-                :title="col.hint"
+                class="invulhulp-table-question__cell-input"
+                size="sm"
+                :accessible-label="`${col.label}, rij ${rowIndex + 1}`"
                 :disabled="store.readOnly"
-                @change="onCellInput(rowIndex, colIndex, $event)"
+                @change="onCellValue(rowIndex, colIndex, $event)"
               >
+              <select :value="row[colIndex] ?? ''" :title="col.hint">
                 <option value="">–</option>
                 <option
                   v-if="row[colIndex] && !colOptions(col).includes(row[colIndex])"
@@ -53,116 +53,107 @@
                 >{{ row[colIndex] }}</option>
                 <option v-for="opt in colOptions(col)" :key="opt" :value="opt">{{ opt }}</option>
               </select>
+              </nldd-dropdown>
 
               <!-- Free-text cell with suggestions (upstream checkbox/multiselect column) -->
-              <template v-else-if="col.type === 'suggest'">
-                <input
-                  type="text"
-                  class="rvo-text-input invulhulp-table-question__cell-input"
-                  :value="row[colIndex] ?? ''"
-                  :list="`dl-${questionId}-${col.id}`"
-                  :aria-label="`${col.label}, rij ${rowIndex + 1}`"
-                  :placeholder="cellPlaceholder(col)"
-                  :disabled="store.readOnly"
-                  @input="onCellInput(rowIndex, colIndex, $event)"
-                />
-                <datalist :id="`dl-${questionId}-${col.id}`">
-                  <option v-for="opt in colOptions(col)" :key="opt" :value="opt" />
-                </datalist>
-              </template>
-
-              <!-- Plain text cell -->
-              <input
-                v-else
-                type="text"
-                class="rvo-text-input invulhulp-table-question__cell-input"
-                :value="row[colIndex] ?? ''"
-                :aria-label="`${col.label}, rij ${rowIndex + 1}`"
+              <!-- allow-custom keeps the old <datalist> behaviour: the options
+                   are suggestions, not a closed list. -->
+              <nldd-combo-box
+                v-else-if="col.type === 'suggest'"
+                class="invulhulp-table-question__cell-input"
+                size="sm"
+                allow-custom
+                :text="row[colIndex] ?? ''"
+                :accessible-label="`${col.label}, rij ${rowIndex + 1}`"
                 :placeholder="cellPlaceholder(col)"
                 :disabled="store.readOnly"
-                @input="onCellInput(rowIndex, colIndex, $event)"
+                @input="onCellValue(rowIndex, colIndex, $event)"
+              >
+                <nldd-menu>
+                  <nldd-menu-item v-for="opt in colOptions(col)" :key="opt" :text="opt" />
+                </nldd-menu>
+              </nldd-combo-box>
+
+              <!-- Plain text cell -->
+              <nldd-text-field
+                v-else
+                class="invulhulp-table-question__cell-input"
+                size="sm"
+                :value="row[colIndex] ?? ''"
+                :accessible-label="`${col.label}, rij ${rowIndex + 1}`"
+                :placeholder="cellPlaceholder(col)"
+                :disabled="store.readOnly"
+                @input="onCellValue(rowIndex, colIndex, $event)"
               />
-            </td>
-            <td class="rvo-table-cell invulhulp-table-question__actions-cell">
-              <button
+            </nldd-cell>
+            <nldd-cell class="invulhulp-table-question__actions-cell">
+              <nldd-button
+                variant="neutral-transparent"
+                class="invulhulp-table-question__remove-btn"
+                text="✕"
                 v-if="!store.readOnly"
-                type="button"
-                class="rvo-button rvo-button--tertiary rvo-button--sm invulhulp-table-question__remove-btn"
                 :aria-label="`Rij ${rowIndex + 1} verwijderen`"
                 title="Rij verwijderen"
                 @click="removeRow(rowIndex)"
-              >
-                ✕
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              />
+            </nldd-cell>
+          </nldd-table-row>
+      </nldd-table>
       </div>
       <!-- Clickable scroll buttons — the explicit affordance. -->
-      <button
+      <nldd-icon-button
         v-show="overflowing && !atStart"
-        type="button"
         class="invulhulp-table-question__scroll-btn invulhulp-table-question__scroll-btn--left"
-        aria-label="Toon vorige kolommen"
+        variant="secondary"
+        size="sm"
+        icon="chevron-left"
+        text="Toon vorige kolommen"
         @click="scrollStep(-1)"
-      >
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
-          <path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7" />
-        </svg>
-      </button>
-      <button
+      />
+      <nldd-icon-button
         v-show="overflowing && !atEnd"
-        type="button"
         class="invulhulp-table-question__scroll-btn invulhulp-table-question__scroll-btn--right"
-        aria-label="Toon volgende kolommen"
+        variant="secondary"
+        size="sm"
+        icon="chevron-right"
+        text="Toon volgende kolommen"
         @click="scrollStep(1)"
-      >
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
-          <path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+      />
     </div>
 
     <p v-if="overflowing && gridOpen" class="invulhulp-table-question__scroll-hint">
-      <span class="invulhulp-table-question__scroll-hint-icon" aria-hidden="true">↔</span>
+      <nldd-icon name="arrow-left-right" size="20" color="inherit" aria-hidden="true" />
       Deze tabel heeft {{ columns.length }} kolommen — scroll of gebruik de pijlen om ze allemaal te zien.
     </p>
 
     <div v-if="gridOpen && !store.readOnly" class="invulhulp-table-question__grid-actions">
-      <button
-        type="button"
-        class="rvo-button rvo-button--tertiary rvo-button--sm invulhulp-table-question__add-btn"
+      <nldd-button
+        variant="neutral-transparent"
+        class="invulhulp-table-question__add-btn"
+        text="+ Rij toevoegen"
         :disabled="table.rows.length >= maxRows"
         @click="addRow"
-      >
-        + Rij toevoegen
-      </button>
+      />
       <!-- Only offered while the grid is still empty: closing it drops the rows,
            and silently discarding typed cells would be a data loss. -->
-      <button
+      <nldd-button
+        variant="neutral-transparent"
+        class="invulhulp-table-question__toggle-btn"
+        text="Tabel weglaten"
         v-if="optionalTable && !hasRowContent"
-        type="button"
-        class="rvo-button rvo-button--tertiary rvo-button--sm invulhulp-table-question__toggle-btn"
         @click="closeGrid"
-      >
-        Tabel weglaten
-      </button>
+      />
     </div>
 
-    <div class="rvo-form-field invulhulp-table-question__notes">
-      <label :for="`${questionId}-notes`" class="rvo-form-field__label invulhulp-table-question__notes-label">
-        {{ notesLabel }}
-      </label>
-      <textarea
-        :id="`${questionId}-notes`"
-        class="rvo-textarea invulhulp-table-question__notes-input"
-        rows="3"
+    <nldd-form-field :label="notesLabel" class="invulhulp-table-question__notes">
+      <nldd-multi-line-text-field
+        class="invulhulp-table-question__notes-input"
+        :rows="3"
         :value="table.notes"
         :disabled="store.readOnly"
-        @input="onNotesInput($event)"
-      ></textarea>
-    </div>
+        @input="onNotesValue($event)"
+      />
+    </nldd-form-field>
   </div>
 </template>
 
@@ -187,9 +178,15 @@ const emit = defineEmits<{
 
 const columns = computed<TableColumn[]>(() => props.question.columns ?? [])
 const minRows = computed(() => Math.max(props.question.minRows ?? 1, 0))
+// nldd-table declares its columns once as a grid track list: the data columns
+// share the width, the trailing actions column is just wide enough for the
+// remove button.
+const gridColumns = computed(
+  () => `repeat(${columns.value.length}, minmax(140px, 1fr)) 3rem`,
+)
+
 const maxRows = computed(() => props.question.maxRows ?? 25)
 const notesLabel = computed(() => props.question.notesLabel ?? 'Toelichting')
-const questionId = computed(() => props.question.id)
 
 // Horizontal-scroll affordance: track whether the grid overflows its viewport
 // and where we are in the scroll, to drive the edge fades + "scroll voor meer"
@@ -321,13 +318,15 @@ function emitValue() {
   emit('update:modelValue', serializeTableAnswer(table))
 }
 
-function onCellInput(rowIndex: number, colIndex: number, event: Event) {
-  table.rows[rowIndex][colIndex] = (event.target as HTMLInputElement).value
+/** The NLDD input components report their value in the event detail; the
+ *  target is the custom element, not the inner <input>. */
+function onCellValue(rowIndex: number, colIndex: number, event: Event) {
+  table.rows[rowIndex][colIndex] = (event as CustomEvent<{ value: string }>).detail.value
   emitValue()
 }
 
-function onNotesInput(event: Event) {
-  table.notes = (event.target as HTMLTextAreaElement).value
+function onNotesValue(event: Event) {
+  table.notes = (event as CustomEvent<{ value: string }>).detail.value
   emitValue()
 }
 
@@ -354,34 +353,15 @@ function removeRow(rowIndex: number) {
   overflow-x: auto;
 }
 
-/* NL Design System secondary-button styling for the edge scroll controls:
-   white surface, hemelblauw border + icon, invert on hover/focus. */
+/* Edge scroll controls: nldd-icon-button supplies the look; this only places
+   them over the table edges. */
 .invulhulp-table-question__scroll-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: 2.25rem;
-  block-size: 2.25rem;
-  padding: 0;
-  color: var(--rvo-color-hemelblauw, #007bc7);
-  background: var(--rvo-color-wit, #fff);
-  border: 1px solid var(--rvo-color-hemelblauw, #007bc7);
-  border-radius: var(--rvo-border-radius-md, 8px);
-  box-shadow: 0 1px 4px rgb(21 66 115 / 0.18);
-  cursor: pointer;
-  transition: background-color var(--invulhulp-duration-instant), color var(--invulhulp-duration-instant);
-}
-.invulhulp-table-question__scroll-btn:hover {
-  background: var(--rvo-color-hemelblauw, #007bc7);
-  color: var(--rvo-color-wit, #fff);
-}
-.invulhulp-table-question__scroll-btn:focus-visible {
-  outline: var(--rvo-color-donkerblauw, #01689b) solid 2px;
-  outline-offset: 2px;
+  border-radius: var(--primitives-corner-radius-md);
+  box-shadow: var(--primitives-box-shadows-level-1);
 }
 .invulhulp-table-question__scroll-btn--left {
   inset-inline-start: 0.25rem;
@@ -395,19 +375,15 @@ function removeRow(rowIndex: number) {
 .invulhulp-table-question__scroll-hint {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-2xs);
-  margin: var(--rvo-space-xs) 0 0;
-  padding: var(--rvo-space-2xs) var(--rvo-space-sm);
-  background: var(--rvo-color-lichtblauw-150, #e5f0f8);
-  border-inline-start: 4px solid var(--rvo-color-hemelblauw, #007bc7);
-  border-radius: var(--rvo-border-radius-sm, 4px);
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold, 600);
-  color: var(--rvo-color-lintblauw, #154273);
-}
-.invulhulp-table-question__scroll-hint-icon {
-  font-size: 1.15rem;
-  line-height: 1;
+  gap: var(--primitives-space-4);
+  margin: var(--primitives-space-8) 0 0;
+  padding: var(--primitives-space-4) var(--primitives-space-12);
+  background: var(--semantics-surfaces-tinted-background-color);
+  border-inline-start: 4px solid var(--semantics-content-accent-color);
+  border-radius: var(--primitives-corner-radius-sm);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  color: var(--semantics-content-accent-color);
 }
 
 .invulhulp-table-question__table {
@@ -423,37 +399,17 @@ function removeRow(rowIndex: number) {
   border-spacing: 0;
 }
 
-/* Give every data column a readable floor; wide tables then overflow-scroll. */
-.invulhulp-table-question__table .rvo-table-header,
-.invulhulp-table-question__table .rvo-table-cell {
-  min-inline-size: 8.5rem;
-}
-.invulhulp-table-question__table .invulhulp-table-question__actions-header,
-.invulhulp-table-question__table .invulhulp-table-question__actions-cell {
-  min-inline-size: 2.75rem;
-}
-
-.invulhulp-table-question__table .rvo-table-header {
-  text-align: start;
-  font-size: var(--rvo-font-size-sm);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
-  background: var(--invulhulp-color-surface, #f0f4f8);
-  border-block-end: 1px solid var(--invulhulp-color-border);
-}
-
-.invulhulp-table-question__table .rvo-table-cell {
-  padding: var(--rvo-space-3xs, 4px) var(--rvo-space-2xs);
-  border-block-end: 1px solid var(--invulhulp-color-border);
-  vertical-align: middle;
-}
+/* Column widths, cell padding and the row rules all come from nldd-table now:
+   the widths from its `columns` track list, the rest from inside its shadow
+   root. Only the horizontal-scroll viewport around it is still ours. */
 
 .invulhulp-table-question__cell-input {
   width: 100%;
   min-width: 0;
-  font-size: var(--rvo-font-size-sm);
-  padding: var(--rvo-space-3xs, 4px) var(--rvo-space-2xs);
+  font-size: var(--primitives-font-size-90);
+  padding: var(--primitives-space-2) var(--primitives-space-4);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm, 4px);
+  border-radius: var(--primitives-corner-radius-sm);
 }
 
 /* Pinned to the right edge of the scroll container so the delete action
@@ -464,34 +420,34 @@ function removeRow(rowIndex: number) {
   white-space: nowrap;
   position: sticky;
   inset-inline-end: 0;
-  background: var(--invulhulp-color-background, #fff);
+  background: var(--invulhulp-color-surface);
 }
 
 .invulhulp-table-question__actions-header {
-  background: var(--invulhulp-color-surface, #f0f4f8);
+  background: var(--invulhulp-color-surface);
 }
 
 .invulhulp-table-question__remove-btn {
-  padding: var(--rvo-space-3xs, 4px) var(--rvo-space-2xs);
+  padding: var(--primitives-space-2) var(--primitives-space-4);
   line-height: 1;
 }
 
 .invulhulp-table-question__remove-btn,
 .invulhulp-table-question__add-btn {
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
 }
 
 .invulhulp-table-question__grid-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   align-items: center;
 }
 
 .invulhulp-table-question__add-btn,
 .invulhulp-table-question__toggle-btn {
-  margin-block-start: var(--rvo-space-2xs);
-  font-size: var(--rvo-font-size-sm);
+  margin-block-start: var(--primitives-space-4);
+  font-size: var(--primitives-font-size-90);
 }
 
 .invulhulp-table-question__optional-hint {
@@ -500,30 +456,22 @@ function removeRow(rowIndex: number) {
 }
 
 .invulhulp-table-question__notes {
-  margin-block-start: var(--rvo-space-sm);
+  margin-block-start: var(--primitives-space-12);
 }
 
 .invulhulp-table-question__notes-label {
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-bold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-bold);
 }
 
 .invulhulp-table-question__notes-input {
   width: 100%;
   font: inherit;
-  font-size: var(--rvo-font-size-sm);
-  padding: var(--rvo-space-2xs) var(--rvo-space-xs);
+  font-size: var(--primitives-font-size-90);
+  padding: var(--primitives-space-4) var(--primitives-space-8);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--rvo-border-radius-sm, 4px);
+  border-radius: var(--primitives-corner-radius-sm);
   resize: vertical;
 }
 
-.rvo-visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
 </style>

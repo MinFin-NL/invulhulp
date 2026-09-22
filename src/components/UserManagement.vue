@@ -1,25 +1,34 @@
 <template>
-  <div class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm user-mgmt">
-    <div class="rvo-layout-column rvo-layout-gap--lg">
+  <div class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad user-mgmt">
+    <div class="invulhulp-column invulhulp-gap--lg">
       <div>
-        <h1 class="utrecht-heading-1 user-mgmt__title">Gebruikersbeheer</h1>
-        <p class="rvo-text user-mgmt__intro">
+        <nldd-title size="1"><h1 class="user-mgmt__title">Gebruikersbeheer</h1></nldd-title>
+        <nldd-text color="inherit" class="user-mgmt__intro">
           Gebruikers worden aangemaakt in Keycloak en loggen in via SSO. Een nieuwe gebruiker
           krijgt een tijdelijk wachtwoord en moet dat bij de eerste keer inloggen wijzigen.
-        </p>
+        </nldd-text>
       </div>
 
-      <div v-if="error" class="rvo-alert rvo-alert--error rvo-alert--padding-md" role="alert">
-        <div class="rvo-alert__container">{{ error }}</div>
-      </div>
+      <nldd-banner
+        variant="critical"
+        v-if="error"
+        role="alert"
+        :text="error"
+      />
 
-      <div v-if="notice" class="rvo-alert rvo-alert--success rvo-alert--padding-md" role="status">
-        <div class="rvo-alert__container">{{ notice }}</div>
-      </div>
+      <nldd-banner
+        variant="success"
+        v-if="notice"
+        role="status"
+        :text="notice"
+      />
 
       <!-- Eénmalig getoond tijdelijk wachtwoord -->
-      <div v-if="tempPassword" class="rvo-alert rvo-alert--warning rvo-alert--padding-md">
-        <div class="rvo-alert__container user-mgmt__temp-pw">
+            <nldd-banner
+              variant="warning"
+              class="user-mgmt__temp-pw"
+              v-if="tempPassword"
+            >
           <div>
             <strong>Tijdelijk wachtwoord voor {{ tempPassword.who }}:</strong>
             <code class="user-mgmt__pw-code">{{ tempPassword.value }}</code><br />
@@ -27,153 +36,165 @@
             eerste login een eigen wachtwoord.
           </div>
           <div class="user-mgmt__temp-pw-actions">
-            <button class="rvo-button rvo-button--secondary rvo-button--size-sm" @click="copyTempPassword">
-              {{ copied ? 'Gekopieerd' : 'Kopieer' }}
-            </button>
-            <button class="rvo-button rvo-button--tertiary rvo-button--size-sm" @click="tempPassword = null">
-              Sluiten
-            </button>
+            <nldd-button
+              variant="secondary"
+              size="sm"
+              :text="copied ? 'Gekopieerd' : 'Kopieer'"
+              @click="copyTempPassword"
+            />
+            <nldd-button
+              variant="neutral-transparent"
+              size="sm"
+              text="Sluiten"
+              @click="tempPassword = null"
+            />
           </div>
-        </div>
-      </div>
+      </nldd-banner>
 
       <!-- Nieuwe gebruiker -->
       <section class="user-mgmt__panel">
-        <h2 class="utrecht-heading-2 user-mgmt__panel-title">Nieuwe gebruiker</h2>
+        <nldd-title size="2"><h2 class="user-mgmt__panel-title">Nieuwe gebruiker</h2></nldd-title>
         <form class="user-mgmt__form" @submit.prevent="createUser">
           <div class="user-mgmt__form-fields">
-            <label class="user-mgmt__field">
-              <span class="rvo-label">Voornaam</span>
-              <input v-model.trim="form.firstName" required class="utrecht-textbox user-mgmt__input" type="text" />
-            </label>
-            <label class="user-mgmt__field">
-              <span class="rvo-label">Achternaam</span>
-              <input v-model.trim="form.lastName" required class="utrecht-textbox user-mgmt__input" type="text" />
-            </label>
-            <label class="user-mgmt__field user-mgmt__field--wide">
-              <span class="rvo-label">E-mailadres (wordt de gebruikersnaam)</span>
-              <input v-model.trim="form.email" required class="utrecht-textbox user-mgmt__input" type="email" />
-            </label>
+            <nldd-form-field label="Voornaam" class="user-mgmt__field">
+              <nldd-text-field
+                required
+                :value="form.firstName"
+                @input="form.firstName = $event.detail.value.trim()"
+              />
+            </nldd-form-field>
+            <nldd-form-field label="Achternaam" class="user-mgmt__field">
+              <nldd-text-field
+                required
+                :value="form.lastName"
+                @input="form.lastName = $event.detail.value.trim()"
+              />
+            </nldd-form-field>
+            <nldd-form-field
+              label="E-mailadres (wordt de gebruikersnaam)"
+              class="user-mgmt__field user-mgmt__field--wide"
+            >
+              <nldd-text-field
+                type="email"
+                required
+                :value="form.email"
+                @input="form.email = $event.detail.value.trim()"
+              />
+            </nldd-form-field>
           </div>
-          <label class="rvo-checkbox rvo-checkbox--not-checked user-mgmt__admin-check">
-            <input v-model="form.isAdmin" class="rvo-checkbox__input" type="checkbox" />
-            Beheerder (mag gebruikers beheren)
-          </label>
-          <fieldset v-if="scopeRoles.length" class="rvo-form-fieldset user-mgmt__roles-fieldset">
-            <legend class="rvo-form-fieldset__legend">Formulierenset</legend>
-            <p class="rvo-form-field__description">
+          <nldd-checkbox-field
+            class="user-mgmt__admin-check"
+            label="Beheerder (mag gebruikers beheren)"
+            :checked="form.isAdmin"
+            @change="form.isAdmin = $event.detail.checked"
+          />
+          <fieldset v-if="scopeRoles.length" class="user-mgmt__roles-fieldset">
+            <legend class="user-mgmt__roles-legend">Formulierenset</legend>
+            <p class="user-mgmt__roles-description">
               Zonder rol ziet de gebruiker alle formulieren. Met een rol alleen de formulieren
               die bij die rol horen.
             </p>
-            <div class="rvo-checkbox__group">
-              <label v-for="role in scopeRoles" :key="role.id" class="rvo-checkbox">
-                <input
-                  v-model="form.scopeRoles"
-                  :value="role.id"
-                  class="rvo-checkbox__input"
-                  type="checkbox"
-                />
-                <span class="rvo-checkbox__label">
-                  {{ role.title }} ({{ role.forms.length }} formulieren)
-                </span>
-              </label>
+            <div class="user-mgmt__roles-options">
+              <nldd-checkbox-field
+                v-for="role in scopeRoles"
+                :key="role.id"
+                :label="`${role.title} (${role.forms.length} formulieren)`"
+                :checked="form.scopeRoles.includes(role.id)"
+                @change="toggleFormScopeRole(role.id, $event.detail.checked)"
+              />
             </div>
           </fieldset>
           <div>
-            <button class="rvo-button rvo-button--primary" type="submit" :disabled="busy">
-              {{ busy ? 'Bezig…' : 'Gebruiker aanmaken' }}
-            </button>
+            <nldd-button
+              type="submit"
+              variant="primary"
+              :text="busy ? 'Bezig…' : 'Gebruiker aanmaken'"
+              :disabled="busy"
+            />
           </div>
         </form>
       </section>
 
       <!-- Bestaande gebruikers -->
       <section class="user-mgmt__panel">
-        <h2 class="utrecht-heading-2 user-mgmt__panel-title">Gebruikers ({{ users.length }})</h2>
-        <p v-if="loading" class="rvo-text">Gebruikers laden…</p>
+        <nldd-title size="2"><h2 class="user-mgmt__panel-title">Gebruikers ({{ users.length }})</h2></nldd-title>
+        <nldd-text v-if="loading">Gebruikers laden…</nldd-text>
         <div v-else class="user-mgmt__table-wrap">
-          <table class="rvo-table user-mgmt__table">
-            <thead class="rvo-table-head">
-              <tr class="rvo-table-row">
-                <th class="rvo-table-header">Naam</th>
-                <th class="rvo-table-header">E-mail</th>
-                <th class="rvo-table-header">Rol</th>
-                <th v-if="scopeRoles.length" class="rvo-table-header">Formulierenset</th>
-                <th class="rvo-table-header">Status</th>
-                <th class="rvo-table-header">Acties</th>
-              </tr>
-            </thead>
-            <tbody class="rvo-table-body">
-              <tr v-for="u in users" :key="u.id" class="rvo-table-row" :class="{ 'user-mgmt__row--disabled': !u.enabled }">
-                <td class="rvo-table-cell">
+          <nldd-table
+            class="user-mgmt__table"
+            :columns="userTableColumns"
+            accessible-label="Gebruikers"
+          >
+            <nldd-table-row slot="header">
+              <nldd-text-cell size="sm" text="Naam" />
+              <nldd-text-cell size="sm" text="E-mail" />
+              <nldd-text-cell size="sm" text="Rol" />
+              <nldd-text-cell v-if="scopeRoles.length" size="sm" text="Formulierenset" />
+              <nldd-text-cell size="sm" text="Status" />
+              <nldd-text-cell size="sm" text="Acties" />
+            </nldd-table-row>
+              <nldd-table-row v-for="u in users" :key="u.id" :class="{ 'user-mgmt__row--disabled': !u.enabled }">
+                <nldd-cell>
                   {{ u.firstName }} {{ u.lastName }}
                   <span v-if="u.isSelf" class="user-mgmt__self">(jij)</span>
-                </td>
-                <td class="rvo-table-cell">{{ u.email ?? u.username }}</td>
-                <td class="rvo-table-cell">
-                  <span v-if="u.isAdmin" class="user-mgmt__badge user-mgmt__badge--admin">Beheerder</span>
-                  <span v-else class="user-mgmt__badge">Gebruiker</span>
-                </td>
-                <td v-if="scopeRoles.length" class="rvo-table-cell">
-                  <div class="rvo-checkbox__group user-mgmt__roles">
-                    <label
+                </nldd-cell>
+                <nldd-text-cell size="sm" :text="u.email ?? u.username" />
+                <nldd-cell>
+                  <nldd-tag v-if="u.isAdmin" size="sm" color="accent" text="Beheerder" />
+                  <nldd-tag v-else size="sm" text="Gebruiker" />
+                </nldd-cell>
+                <nldd-cell v-if="scopeRoles.length" vertical-alignment="top">
+                  <div class="user-mgmt__roles">
+                    <nldd-checkbox-field
                       v-for="role in scopeRoles"
                       :key="role.id"
-                      class="rvo-checkbox user-mgmt__role-check"
-                    >
-                      <input
-                        class="rvo-checkbox__input"
-                        type="checkbox"
-                        :checked="u.scopeRoles.includes(role.id)"
-                        :disabled="busy"
-                        :aria-label="`${role.title} voor ${userLabel(u)}`"
-                        @change="toggleScopeRole(u, role.id)"
-                      />
-                      <span class="rvo-checkbox__label">{{ role.title }}</span>
-                    </label>
+                      class="user-mgmt__role-check"
+                      :label="role.title"
+                      :checked="u.scopeRoles.includes(role.id)"
+                      :disabled="busy"
+                      @change="toggleScopeRole(u, role.id)"
+                    />
                   </div>
                   <span v-if="u.scopeRoles.length === 0" class="user-mgmt__all-forms">
                     Ziet alle formulieren
                   </span>
-                </td>
-                <td class="rvo-table-cell">
-                  <span :class="['user-mgmt__badge', u.enabled ? 'user-mgmt__badge--active' : 'user-mgmt__badge--off']">
-                    {{ u.enabled ? 'Actief' : 'Gedeactiveerd' }}
-                  </span>
-                </td>
-                <td class="rvo-table-cell user-mgmt__actions">
-                  <button
-                    class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+                </nldd-cell>
+                <nldd-cell>
+                  <nldd-tag size="sm" :color="u.enabled ? 'success' : 'neutral'" :text="u.enabled ? 'Actief' : 'Gedeactiveerd'" />
+                </nldd-cell>
+                <nldd-cell class="user-mgmt__actions">
+                  <nldd-button
+                    variant="neutral-transparent"
+                    size="sm"
+                    text="Wachtwoord resetten"
                     :disabled="busy"
                     @click="resetPassword(u)"
-                  >
-                    Wachtwoord resetten
-                  </button>
-                  <button
-                    class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+                  />
+                  <nldd-button
+                    variant="neutral-transparent"
+                    size="sm"
+                    :text="u.isAdmin ? 'Beheerder afnemen' : 'Beheerder maken'"
                     :disabled="busy || u.isSelf"
                     @click="toggleAdmin(u)"
-                  >
-                    {{ u.isAdmin ? 'Beheerder afnemen' : 'Beheerder maken' }}
-                  </button>
-                  <button
-                    class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+                  />
+                  <nldd-button
+                    variant="neutral-transparent"
+                    size="sm"
+                    :text="u.enabled ? 'Deactiveren' : 'Activeren'"
                     :disabled="busy || u.isSelf"
                     @click="toggleEnabled(u)"
-                  >
-                    {{ u.enabled ? 'Deactiveren' : 'Activeren' }}
-                  </button>
-                  <button
-                    class="rvo-button rvo-button--tertiary rvo-button--size-sm user-mgmt__danger"
+                  />
+                  <nldd-button
+                    variant="neutral-transparent"
+                    size="sm"
+                    class="user-mgmt__danger"
+                    text="Verwijderen"
                     :disabled="busy || u.isSelf"
                     @click="askDelete(u)"
-                  >
-                    Verwijderen
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+                  />
+                </nldd-cell>
+              </nldd-table-row>
+          </nldd-table>
         </div>
       </section>
     </div>
@@ -190,10 +211,10 @@
     @confirm="deleteUser"
   >
     <template #danger>
-      <p v-if="impactLoading" class="rvo-text">Bezig met bepalen welke dossiers meegaan…</p>
-      <ul v-else class="rvo-item-list">
-        <li class="rvo-item-list__item">Het account zelf, inclusief inloggegevens en rollen.</li>
-        <li class="rvo-item-list__item">
+      <nldd-text v-if="impactLoading">Bezig met bepalen welke dossiers meegaan…</nldd-text>
+      <ul v-else class="invulhulp-item-list">
+        <li class="invulhulp-item-list__item">Het account zelf, inclusief inloggegevens en rollen.</li>
+        <li class="invulhulp-item-list__item">
           <template v-if="impact?.dossiersToDelete.length">
             {{ impact.dossiersToDelete.length }}
             {{ impact.dossiersToDelete.length === 1 ? 'dossier waarvan deze gebruiker de enige eigenaar is' : 'dossiers waarvan deze gebruiker de enige eigenaar is' }},
@@ -204,7 +225,7 @@
             Geen dossiers: deze gebruiker is nergens de enige eigenaar.
           </template>
         </li>
-        <li v-if="impact?.dossiersToUnshare" class="rvo-item-list__item">
+        <li v-if="impact?.dossiersToUnshare" class="invulhulp-item-list__item">
           {{ impact.dossiersToUnshare }}
           gedeeld{{ impact.dossiersToUnshare === 1 ? ' dossier blijft' : 'e dossiers blijven' }}
           bestaan; alleen de toegang van deze gebruiker vervalt.
@@ -215,7 +236,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import { loadFormRoles, type FormRole } from '../services/formLoader'
 
@@ -236,6 +257,14 @@ interface ManagedUser {
  *  formulierenlijst uit public/forms/index.json. De backend is leidend: een rol
  *  die daar niet in staat kan niet toegekend worden, ook niet als index.json
  *  hem al noemt. */
+// nldd-table needs its columns declared once as a grid track list. The
+// formulierenset column only exists when there are scope roles to show.
+const userTableColumns = computed(() =>
+  scopeRoles.value.length
+    ? 'minmax(140px, 1fr) minmax(180px, 1fr) 120px minmax(160px, 1fr) 130px minmax(220px, auto)'
+    : 'minmax(140px, 1fr) minmax(180px, 1fr) 120px 130px minmax(220px, auto)',
+)
+
 const scopeRoles = ref<FormRole[]>([])
 
 function userLabel(u: ManagedUser): string {
@@ -349,6 +378,15 @@ function toggleAdmin(u: ManagedUser) {
 
 /** Rol aan- of uitzetten. De backend krijgt de volledige gewenste set, zodat er
  *  geen verschil kan ontstaan tussen wat het scherm toont en wat Keycloak weet. */
+/** Scope-rollen op het aanmaakformulier: v-model op een custom element
+ *  werkt niet, dus de array wordt hier zelf bijgehouden. */
+function toggleFormScopeRole(roleId: string, checked: boolean) {
+  const roles = form.value.scopeRoles
+  const at = roles.indexOf(roleId)
+  if (checked && at === -1) roles.push(roleId)
+  else if (!checked && at !== -1) roles.splice(at, 1)
+}
+
 function toggleScopeRole(u: ManagedUser, roleId: string) {
   const wanted = u.scopeRoles.includes(roleId)
     ? u.scopeRoles.filter((r) => r !== roleId)
@@ -404,11 +442,11 @@ async function copyTempPassword() {
 
 <style scoped>
 .user-mgmt {
-  padding-block: var(--rvo-space-2xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-40) var(--primitives-space-48);
 }
 
 .user-mgmt__title {
-  margin-block-end: var(--rvo-space-xs);
+  margin-block-end: var(--primitives-space-8);
 }
 
 .user-mgmt__intro {
@@ -417,33 +455,33 @@ async function copyTempPassword() {
 }
 
 .user-mgmt__panel {
-  background: var(--rvo-color-wit);
-  border: 1px solid var(--rvo-color-lichtblauw-300);
-  border-radius: var(--rvo-border-radius-md);
-  padding: var(--rvo-space-lg);
+  background: var(--semantics-surfaces-base-background-color);
+  border: 1px solid var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
+  padding: var(--primitives-space-24);
 }
 
 .user-mgmt__panel-title {
-  margin-block: 0 var(--rvo-space-md);
-  font-size: var(--rvo-font-size-lg);
+  margin-block: 0 var(--primitives-space-16);
+  font-size: var(--primitives-font-size-200);
 }
 
 .user-mgmt__form {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
 }
 
 .user-mgmt__form-fields {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
 }
 
 .user-mgmt__field {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .user-mgmt__field--wide {
@@ -457,22 +495,11 @@ async function copyTempPassword() {
 .user-mgmt__admin-check {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
 }
 
-/* Zelfde reden als in QuestionItem.vue: het RVO-vinkje komt uit een
-   mask-image die het component-CSS niet meelevert, dus zonder deze regel is een
-   aangevinkt vakje een wit blok. Statische url() — een runtime-binding wordt een
-   wit vlak in de productiebuild. */
-.user-mgmt .rvo-checkbox__input:checked::after {
-  -webkit-mask-image: url('@nl-rvo/assets/icons/functioneel/vinkje.svg');
-  mask-image: url('@nl-rvo/assets/icons/functioneel/vinkje.svg');
-}
-
-/* Zelfde ingreep als in QuestionItem.vue: rvo-form-fieldset brengt een grijze
-   achtergrond en eigen padding mee. Die hoort bij een fieldset die een heel
-   formulier omkadert, niet bij één keuzeveld tussen de andere velden — laat het
-   blok anders als een misplaatst grijs vlak over de volle breedte staan. */
+/* Een kale fieldset: hij is er voor de groepssemantiek (NLDD heeft geen
+   checkbox-groep), niet voor een eigen vlak. */
 .user-mgmt__roles-fieldset {
   background: transparent;
   border: 0;
@@ -481,38 +508,39 @@ async function copyTempPassword() {
   min-inline-size: 0;
 }
 
-/* De legend is standaard 1,25rem/700 — een kop. Hier is het een veldlabel
-   tussen "Voornaam" en "E-mailadres", dus dezelfde tokens als .rvo-label. */
-.user-mgmt__roles-fieldset .rvo-form-fieldset__legend {
+/* De legend is standaard een kop. Hier is het een veldlabel tussen "Voornaam"
+   en "E-mailadres", dus dezelfde maat als een nldd-form-field-label. */
+.user-mgmt__roles-legend {
   padding: 0;
   margin: 0;
-  font-size: var(--rvo-label-font-size);
-  font-weight: var(--rvo-label-font-weight);
-  line-height: var(--rvo-line-height-md);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-medium);
+  line-height: var(--primitives-line-height-snug);
 }
 
-.user-mgmt__roles-fieldset .rvo-form-field__description {
-  margin-block: var(--rvo-space-2xs) var(--rvo-space-xs);
+.user-mgmt__roles-description {
+  margin-block: var(--primitives-space-4) var(--primitives-space-8);
   color: var(--invulhulp-color-text-subtle);
 }
 
-.user-mgmt__roles {
+.user-mgmt__roles,
+.user-mgmt__roles-options {
   display: flex;
   flex-direction: column;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .user-mgmt__role-check {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
   white-space: nowrap;
 }
 
 .user-mgmt__all-forms {
   display: block;
-  margin-block-start: var(--rvo-space-2xs);
-  font-size: var(--rvo-font-size-xs);
+  margin-block-start: var(--primitives-space-4);
+  font-size: var(--primitives-font-size-80);
   color: var(--invulhulp-color-text-subtle);
 }
 
@@ -530,66 +558,44 @@ async function copyTempPassword() {
 
 .user-mgmt__self {
   color: var(--invulhulp-color-text-subtle);
-  font-size: var(--rvo-font-size-sm);
+  font-size: var(--primitives-font-size-90);
 }
 
-.user-mgmt__badge {
-  display: inline-block;
-  padding: 1px 10px;
-  border-radius: 999px;
-  font-size: var(--rvo-font-size-xs);
-  font-weight: var(--rvo-font-weight-semibold);
-  background: var(--rvo-color-lichtblauw-150);
-  color: var(--rvo-color-lintblauw);
-  white-space: nowrap;
-}
 
-.user-mgmt__badge--admin {
-  background: var(--rvo-color-lintblauw);
-  color: var(--rvo-color-wit);
-}
 
-.user-mgmt__badge--active {
-  background: var(--rvo-color-groen-150, #e1eddb);
-  color: var(--rvo-color-groen, #39870c);
-}
 
-.user-mgmt__badge--off {
-  background: var(--rvo-color-grijs-200, #e6e6e6);
-  color: var(--rvo-color-grijs-700, #696969);
-}
 
 .user-mgmt__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
 }
 
 .user-mgmt__danger {
-  color: var(--rvo-color-rood, #d52b1e) !important;
+  color: var(--semantics-content-critical-color) !important;
 }
 
 .user-mgmt__temp-pw {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
   flex-wrap: wrap;
 }
 
 .user-mgmt__temp-pw-actions {
   display: inline-flex;
-  gap: var(--rvo-space-xs);
+  gap: var(--primitives-space-8);
   flex-shrink: 0;
 }
 
 .user-mgmt__pw-code {
   display: inline-block;
-  margin-inline-start: var(--rvo-space-xs);
-  padding: 1px 8px;
-  background: rgb(0 0 0 / 0.06);
-  border-radius: var(--rvo-border-radius-sm);
-  font-weight: var(--rvo-font-weight-bold);
+  margin-inline-start: var(--primitives-space-8);
+  padding: 0 var(--primitives-space-8);
+  background: var(--semantics-surfaces-tinted-background-color);
+  border-radius: var(--primitives-corner-radius-sm);
+  font-weight: var(--primitives-font-weight-body-bold);
   user-select: all;
 }
 </style>

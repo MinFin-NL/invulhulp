@@ -9,92 +9,89 @@
          lijken. -->
     <article
       v-if="form.placeholder"
-      class="rvo-card rvo-card--outline rvo-card--padding--md form-card form-card--placeholder"
+      class="invulhulp-card form-card form-card--placeholder"
     >
       <div class="form-card__body">
-        <h3 class="rvo-heading rvo-heading--md form-card__title">{{ form.title }}</h3>
+        <nldd-title size="5"><h3 class="form-card__title">{{ form.title }}</h3></nldd-title>
         <ul v-if="form.domains?.length" class="form-card__domains">
           <li v-for="domain in form.domains" :key="domain" class="form-card__domain">
             {{ domainLabel(domain) }}
           </li>
         </ul>
-        <p class="rvo-text rvo-text--sm form-card__desc">{{ form.shortDescription }}</p>
+        <nldd-text line-height="snug" color="inherit" size="sm" class="form-card__desc">{{ form.shortDescription }}</nldd-text>
       </div>
       <div class="form-card__actions">
-        <span
-          class="rvo-tag rvo-tag--pill form-card__status"
-          :class="{ 'rvo-tag--warning': form.placeholder === 'onzeker' }"
-        >
-          {{ PLACEHOLDER_LABELS[form.placeholder] }}
-        </span>
-        <button
-          type="button"
-          class="rvo-button rvo-button--secondary rvo-button--size-sm form-card__btn"
+        <nldd-tag
+          class="form-card__status"
+          size="sm"
+          :color="form.placeholder === 'onzeker' ? 'warning' : 'neutral'"
+          :text="PLACEHOLDER_LABELS[form.placeholder]"
+        />
+        <nldd-button
+          variant="secondary"
+          size="sm"
+          class="form-card__btn"
+          text="Nog niet beschikbaar"
           disabled
-        >
-          Nog niet beschikbaar
-        </button>
+        />
       </div>
     </article>
 
     <article
       v-else
-      class="rvo-card rvo-card--outline rvo-card--padding--md form-card"
+      class="invulhulp-card form-card"
       :class="{
         'form-card--ai-mode': aiActive,
         'form-card--paired': paired,
       }"
     >
       <div class="form-card__body">
-        <h3 class="rvo-heading rvo-heading--md form-card__title">{{ form.title }}</h3>
+        <nldd-title size="5"><h3 class="form-card__title">{{ form.title }}</h3></nldd-title>
         <ul v-if="form.domains?.length" class="form-card__domains">
           <li v-for="domain in form.domains" :key="domain" class="form-card__domain">
             {{ domainLabel(domain) }}
           </li>
         </ul>
-        <p class="rvo-text rvo-text--sm form-card__desc">{{ form.shortDescription }}</p>
+        <nldd-text line-height="snug" color="inherit" size="sm" class="form-card__desc">{{ form.shortDescription }}</nldd-text>
       </div>
       <div class="form-card__actions">
         <!-- The beslishulp verdict, echoed on the card it belongs to. -->
-        <span
+        <nldd-tag
           v-if="beslishulpVerdict"
-          class="rvo-tag rvo-tag--pill form-card__status form-card__verdict"
-          :class="`form-card__verdict--${beslishulpVerdict.tone}`"
-        >
-          {{ beslishulpVerdict.label }}
-        </span>
+          class="form-card__status form-card__verdict"
+          size="sm"
+          :color="verdictColor(beslishulpVerdict.tone)"
+          :text="beslishulpVerdict.label"
+        />
         <!-- Why this form is here at all, per the toepassingsscan. The reason is
              hidden text rather than only a `title`, which a keyboard or screen
              reader never reaches. -->
-        <span
+        <nldd-tag
           v-if="verdict.status === 'verplicht' || verdict.status === 'mogelijk'"
-          class="rvo-tag rvo-tag--pill form-card__status"
-          :class="{ 'rvo-tag--warning': verdict.status === 'mogelijk' }"
-          :title="verdict.reason"
+          class="form-card__status"
+          size="sm"
+          :color="verdict.status === 'mogelijk' ? 'warning' : 'neutral'"
         >
           {{ applicabilityLabel(verdict.status) }}
           <span class="invulhulp-visually-hidden">: {{ verdict.reason }}</span>
-        </span>
-        <span
+        </nldd-tag>
+        <nldd-tag
           v-if="status"
-          class="rvo-tag rvo-tag--pill form-card__status"
-          :class="{
-            'rvo-tag--info': status.status === 'bezig',
-            'rvo-tag--warning': status.status === 'onvolledig',
-            'rvo-tag--success': status.status === 'afgerond',
-          }"
-        >
-          {{ statusLabel(status) }}
-        </span>
+          class="form-card__status"
+          size="sm"
+          :color="statusColor(status.status)"
+          :text="statusLabel(status)"
+        />
         <!-- Secundair, bewust. Een fasetijdlijn met twaalf primaire knoppen
              wijst nergens heen; de ene primaire actie van de dossierpagina
              staat bovenaan in de "volgende stap"-band. -->
-        <button
-          class="rvo-button rvo-button--secondary rvo-button--size-sm form-card__btn"
+        <nldd-button
+          variant="secondary"
+          size="sm"
+          class="form-card__btn"
+          :text="openLabel"
           @click="emit('open', form.id)"
-        >
-          {{ openLabel }}
-        </button>
+        />
         <AiModeToggle
           v-if="canEdit"
           :form-id="form.id"
@@ -187,6 +184,26 @@ function domainLabel(domain: string): string {
   return DOMAIN_LABELS[domain] ?? domain
 }
 
+/** Beslishulp tone / voortgangsstatus -> nldd-tag kleurnaam. Deze kaart
+ *  introduceert geen eigen kleuren: alles komt uit de semantische set. */
+function verdictColor(tone: string): string {
+  switch (tone) {
+    case 'success': return 'success'
+    case 'warning': return 'warning'
+    case 'error': return 'critical'
+    default: return 'accent'
+  }
+}
+
+function statusColor(status: string): string {
+  switch (status) {
+    case 'bezig': return 'accent'
+    case 'onvolledig': return 'warning'
+    case 'afgerond': return 'success'
+    default: return 'neutral'
+  }
+}
+
 function statusLabel(p: FormProgress): string {
   if (p.status === 'afgerond') return 'Afgerond'
   // Doorgeklikt maar niet ingevuld: zeg hoeveel verplichte vragen nog open
@@ -222,7 +239,7 @@ const openLabel = computed(() => {
 }
 
 .form-card:hover {
-  box-shadow: 0 2px 8px rgb(21 66 115 / 0.12);
+  box-shadow: var(--primitives-box-shadows-level-2);
 }
 
 /* Fused to the beslishulp tile: no rounding or hairline on the joined edge, so
@@ -230,11 +247,11 @@ const openLabel = computed(() => {
 .form-card--paired {
   border-start-start-radius: 0;
   border-end-start-radius: 0;
-  border-inline-start-color: var(--rvo-color-lintblauw);
+  border-inline-start-color: var(--semantics-content-accent-color);
 }
 
 .form-slot--paired:hover .form-card--paired {
-  box-shadow: 0 2px 8px rgb(21 66 115 / 0.12);
+  box-shadow: var(--primitives-box-shadows-level-2);
 }
 
 /* Aangekondigd maar nog niet gebouwd: gedempt en met een streepjesrand, zodat
@@ -242,8 +259,8 @@ const openLabel = computed(() => {
    `disabled` — de status staat als tekst op de kaart, niet alleen in de kleur. */
 .form-card--placeholder {
   border-style: dashed;
-  border-color: var(--rvo-color-grijs-400);
-  background: var(--rvo-color-grijs-100);
+  border-color: var(--semantics-content-secondary-color);
+  background: var(--semantics-surfaces-tinted-background-color);
   box-shadow: none;
 }
 
@@ -252,27 +269,19 @@ const openLabel = computed(() => {
 }
 
 .form-card--placeholder .form-card__title {
-  color: var(--rvo-color-grijs-700);
+  color: var(--semantics-content-secondary-color);
 }
 
 .form-card--placeholder .form-card__btn[disabled] {
   cursor: not-allowed;
 }
 
-.form-card__verdict {
-  border: 1px solid transparent;
-}
-
-.form-card__verdict--success { background: #e6f6ec; color: #1d6b3a; border-color: #b7e4c7; }
-.form-card__verdict--info    { background: var(--rvo-color-lichtblauw-150); color: var(--rvo-color-lintblauw); border-color: var(--rvo-color-lichtblauw-300); }
-.form-card__verdict--warning { background: #fdf3e0; color: #8a5a00; border-color: #f0d49b; }
-.form-card__verdict--error   { background: #fdecea; color: #8f2436; border-color: #f5c2bd; }
 
 /* AI Mode active: animated gradient border + pulsing glow */
 .form-card--ai-mode {
   border: 2px solid transparent;
   background-image:
-    linear-gradient(var(--rvo-color-wit), var(--rvo-color-wit)),
+    linear-gradient(var(--semantics-surfaces-base-background-color), var(--semantics-surfaces-base-background-color)),
     linear-gradient(135deg, #0f2d5c, #5b21b6, #0ea5e9, #5b21b6, #0f2d5c);
   background-origin: border-box;
   background-clip: padding-box, border-box;
@@ -301,14 +310,14 @@ const openLabel = computed(() => {
 }
 
 .form-card__body {
-  margin-block-end: var(--rvo-space-md);
+  margin-block-end: var(--primitives-space-16);
 }
 
 /* Dutch compound nouns ("Toegankelijkheidsverklaring") are wider than the
    210px card, so hyphenate and hard-break rather than overflow the border. */
 .form-card__title {
-  color: var(--rvo-color-lintblauw);
-  margin: 0 0 var(--rvo-space-xs);
+  color: var(--semantics-content-accent-color);
+  margin: 0 0 var(--primitives-space-8);
   overflow-wrap: break-word;
   hyphens: auto;
 }
@@ -318,25 +327,24 @@ const openLabel = computed(() => {
 .form-card__domains {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--rvo-space-2xs);
+  gap: var(--primitives-space-4);
   list-style: none;
   padding: 0;
-  margin: 0 0 var(--rvo-space-xs);
+  margin: 0 0 var(--primitives-space-8);
 }
 
 .form-card__domain {
-  font-size: var(--rvo-font-size-2xs, 0.75rem);
+  font-size: var(--primitives-font-size-70);
   line-height: 1.4;
   color: var(--invulhulp-color-text-subtle);
-  background: var(--rvo-color-lichtblauw-150);
-  border-radius: var(--rvo-border-radius-md, 4px);
-  padding: 0 var(--rvo-space-2xs);
+  background: var(--semantics-surfaces-tinted-background-color);
+  border-radius: var(--primitives-corner-radius-md);
+  padding: 0 var(--primitives-space-4);
   white-space: nowrap;
 }
 
 .form-card__desc {
   color: var(--invulhulp-color-text-subtle);
-  line-height: var(--rvo-line-height-md);
   overflow-wrap: break-word;
   hyphens: auto;
 }
@@ -345,11 +353,7 @@ const openLabel = computed(() => {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--rvo-space-xs);
-}
-
-.form-card__status {
-  font-size: var(--rvo-font-size-2xs);
+  gap: var(--primitives-space-8);
 }
 
 .form-card__btn {

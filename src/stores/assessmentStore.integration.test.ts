@@ -165,3 +165,50 @@ describe('assessmentStore ↔ DossierDoc integration', () => {
     expect(s.dossiers[did].updatedAt).toBeTypeOf('number')
   })
 })
+
+/**
+ * De volgorde van het dossieroverzicht. nldd-list levert het verslepen en de
+ * toetsenbordbediening, maar geeft indices van de *zichtbare* lijst door —
+ * en dossierOrder mag id's bevatten waar geen dossier bij hoort.
+ */
+describe('moveDossier', () => {
+  beforeEach(() => setActivePinia(createPinia()))
+
+  function threeDossiers() {
+    const s = useAssessmentStore()
+    const a = s.createDossier('A')
+    const b = s.createDossier('B')
+    const c = s.createDossier('C')
+    return { s, a, b, c }
+  }
+
+  it('verplaatst een dossier naar achteren', () => {
+    const { s, a, b, c } = threeDossiers()
+    s.moveDossier(0, 2)
+    expect(s.dossierList.map((d) => d.id)).toEqual([b, c, a])
+  })
+
+  it('verplaatst een dossier naar voren', () => {
+    const { s, a, b, c } = threeDossiers()
+    s.moveDossier(2, 0)
+    expect(s.dossierList.map((d) => d.id)).toEqual([c, a, b])
+  })
+
+  it('laat de volgorde met rust bij een index buiten de lijst', () => {
+    const { s, a, b, c } = threeDossiers()
+    s.moveDossier(0, 3)
+    s.moveDossier(-1, 0)
+    s.moveDossier(1, 1)
+    expect(s.dossierList.map((d) => d.id)).toEqual([a, b, c])
+  })
+
+  it('rekent met de zichtbare lijst, niet met dossierOrder', () => {
+    const { s, a, b, c } = threeDossiers()
+    // Een id zonder dossierrecord: het rendert nergens, dus de indices die de
+    // lijst doorgeeft tellen er niet mee — en het verdwijnt bij de eerste zet.
+    s.dossierOrder.splice(1, 0, 'weesje')
+    s.moveDossier(0, 2)
+    expect(s.dossierList.map((d) => d.id)).toEqual([b, c, a])
+    expect(s.dossierOrder).toEqual([b, c, a])
+  })
+})

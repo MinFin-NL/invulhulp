@@ -5,7 +5,7 @@
     <!-- AI Mode banner: prominent, sticky indicator while AI fills this form -->
     <Transition name="ai-banner">
       <div v-if="isAiActive" ref="bannerEl" class="ai-banner" role="status" aria-live="polite">
-        <div class="rvo-max-width-layout rvo-max-width-layout--lg rvo-max-width-layout-inline-padding--sm ai-banner__inner">
+        <div class="invulhulp-measure invulhulp-measure--lg invulhulp-measure--pad ai-banner__inner">
           <span class="ai-banner__spinner" aria-hidden="true">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 2 22.5 22" width="22" height="22" aria-hidden="true">
               <path d="m 10.55,20.49 0.6,1.81 0.6,-1.81 c 1.04,-3.11 3.48,-5.55 6.59,-6.59 l 1.81,-0.6 -1.81,-0.6 C 15.23,11.66 12.79,9.22 11.75,6.11 L 11.15,4.3 10.55,6.11 C 9.51,9.22 7.07,11.66 3.96,12.7 l -1.81,0.6 1.81,0.6 c 3.11,1.04 5.55,3.48 6.59,6.59" fill="#fff"/>
@@ -51,7 +51,7 @@
     </main>
 
     <div v-else-if="isLoading" class="assessment-shell__loading">
-      <p class="rvo-text assessment-shell__loading-text">Formulier laden...</p>
+      <nldd-text color="inherit" class="assessment-shell__loading-text">Formulier laden...</nldd-text>
     </div>
 
     <div v-else-if="formConfig" class="assessment-shell__layout">
@@ -67,23 +67,24 @@
       <main class="assessment-shell__main">
 
         <!-- Answers taken over verbatim from an earlier form on opening -->
-        <div
+        <nldd-banner
+          variant="accent"
+          size="sm"
+          class="assessment-shell__prefill"
           v-if="prefill"
-          class="rvo-alert rvo-alert--info rvo-alert--padding-sm assessment-shell__prefill"
           role="status"
         >
-          <div class="rvo-alert__container">
+          <div class="assessment-shell__prefill-row">
             <span>{{ prefillMessage }}</span>
-            <button
-              type="button"
-              class="rvo-button rvo-button--tertiary rvo-button--size-sm"
+            <nldd-button
+              variant="neutral-transparent"
+              size="sm"
+              text="Sluiten"
               aria-label="Melding over overgenomen antwoorden sluiten"
               @click="prefill = null"
-            >
-              Sluiten
-            </button>
+            />
           </div>
-        </div>
+        </nldd-banner>
 
         <!-- Home -->
         <FormIntro
@@ -95,24 +96,28 @@
         <!-- AIIA-only: Forbidden onaanvaardbaar risk stop screen -->
         <div
           v-else-if="formConfig.features.riskClassification && store.riskLevel === 'onaanvaardbaar' && store.currentView !== 'risk'"
-          class="rvo-max-width-layout rvo-max-width-layout--md rvo-max-width-layout-inline-padding--sm assessment-shell__forbidden"
+          class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad assessment-shell__forbidden"
         >
-          <div class="rvo-layout-column rvo-layout-gap--xl">
-            <div class="rvo-alert rvo-alert--error rvo-alert--padding-md">
-              <div class="rvo-alert__container">
+          <div class="invulhulp-column invulhulp-gap--xl">
+                        <nldd-banner
+                          variant="critical"
+                        >
                 <strong>Dit AI-systeem is verboden</strong><br />
                 Op basis van de risicoclassificatie valt dit systeem in de categorie
                 <em>onaanvaardbaar risico</em> onder de EU AI-verordening (Art. 5).
                 Het systeem mag niet worden ingezet.
-              </div>
-            </div>
-            <div class="rvo-layout-row rvo-layout-gap--md">
-              <button @click="store.setCurrentView('risk')" class="rvo-button rvo-button--secondary">
-                Risicoclassificatie herzien
-              </button>
-              <button @click="store.setCurrentView('summary')" class="rvo-button rvo-button--primary">
-                Samenvatting bekijken
-              </button>
+            </nldd-banner>
+            <div class="invulhulp-row invulhulp-gap--md">
+              <nldd-button
+                variant="secondary"
+                text="Risicoclassificatie herzien"
+                @click="store.setCurrentView('risk')"
+              />
+              <nldd-button
+                variant="primary"
+                text="Samenvatting bekijken"
+                @click="store.setCurrentView('summary')"
+              />
             </div>
           </div>
         </div>
@@ -163,6 +168,7 @@ import { computeNavOrder } from '../utils/formProgress'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAuthStore } from '../stores/authStore'
 import { useAiMode } from '../composables/useAiMode'
+import { useAppHistory } from '../composables/useAppHistory'
 import type { FormConfig, NavStepSubsections, NavStepSpecialView, Section } from '../models/Assessment'
 import AppHeader from './AppHeader.vue'
 import AppFooter from './AppFooter.vue'
@@ -179,6 +185,9 @@ import UserManagement from './UserManagement.vue'
 const store = useAssessmentStore()
 const auth = useAuthStore()
 const { aiModeActive, aiModeProgress, aiModePhase, cancelAiMode } = useAiMode()
+// Koppel de navigatiestatus aan de browserhistory: "vorige" gaat één scherm
+// terug in de app in plaats van de applicatie te verlaten.
+useAppHistory()
 const formConfig = ref<FormConfig | null>(null)
 const prefill = ref<PrefillSummary | null>(null)
 
@@ -425,28 +434,28 @@ function onDecisionNext(go: boolean) {
 }
 
 .assessment-shell__prefill {
-  margin: var(--rvo-space-md) var(--rvo-space-lg) 0;
+  margin: var(--primitives-space-16) var(--primitives-space-24) 0;
 }
 
-.assessment-shell__prefill .rvo-alert__container {
+.assessment-shell__prefill-row {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-md);
+  gap: var(--primitives-space-16);
   flex-wrap: wrap;
 }
 
-.assessment-shell__prefill .rvo-alert__container > span {
+.assessment-shell__prefill-row > span {
   flex: 1 1 20rem;
 }
 
 .assessment-shell__main {
   flex: 1;
   overflow-y: auto;
-  padding-block-end: var(--rvo-space-3xl);
+  padding-block-end: var(--primitives-space-48);
 }
 
 .assessment-shell__forbidden {
-  padding-block: var(--rvo-space-3xl) var(--rvo-space-3xl);
+  padding-block: var(--primitives-space-48) var(--primitives-space-48);
 }
 
 /* ── AI Mode banner ──────────────────────────────────────────────────────── */
@@ -467,8 +476,8 @@ function onDecisionNext(go: boolean) {
 .ai-banner__inner {
   display: flex;
   align-items: center;
-  gap: var(--rvo-space-sm);
-  padding-block: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
+  padding-block: var(--primitives-space-12);
 }
 
 .ai-banner__spinner {
@@ -481,20 +490,20 @@ function onDecisionNext(go: boolean) {
 .ai-banner__body {
   display: flex;
   align-items: baseline;
-  gap: var(--rvo-space-sm);
+  gap: var(--primitives-space-12);
   flex-wrap: wrap;
   min-inline-size: 0;
 }
 
 .ai-banner__title {
-  font-weight: var(--rvo-font-weight-bold);
-  font-size: var(--rvo-font-size-md);
+  font-weight: var(--primitives-font-weight-body-bold);
+  font-size: var(--primitives-font-size-100);
   letter-spacing: 0.01em;
 }
 
 .ai-banner__count {
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-semibold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-semi-bold);
   padding: 1px 8px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.2);
@@ -520,13 +529,13 @@ function onDecisionNext(go: boolean) {
 .ai-banner__stop {
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.95);
-  color: var(--rvo-color-rood, #d52b1e);
+  color: var(--semantics-content-critical-color);
   border: 0;
   border-radius: 999px;
-  padding: var(--rvo-space-2xs) var(--rvo-space-md);
+  padding: var(--primitives-space-4) var(--primitives-space-16);
   font: inherit;
-  font-size: var(--rvo-font-size-sm);
-  font-weight: var(--rvo-font-weight-bold);
+  font-size: var(--primitives-font-size-90);
+  font-weight: var(--primitives-font-weight-body-bold);
   cursor: pointer;
   transition: box-shadow var(--invulhulp-duration-fast), transform var(--invulhulp-duration-instant);
 }

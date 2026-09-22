@@ -490,6 +490,24 @@ export const useAssessmentStore = defineStore('assessment', {
       this.screen = 'dossierList'
     },
 
+    /** Verplaats een dossier in het overzicht. De indices zijn die van
+     *  `dossierList` — de zichtbare lijst — niet van `dossierOrder`: die kan
+     *  id's bevatten waar geen dossier (meer) bij hoort. Het opnieuw schrijven
+     *  van `dossierOrder` ruimt die meteen op.
+     *
+     *  De volgorde is een weergavevoorkeur en blijft lokaal: hij gaat mee in
+     *  de gepersisteerde Pinia-state, niet naar de server. Een gedeeld dossier
+     *  staat bij een collega dus op diens eigen plek. */
+    moveDossier(fromIndex: number, toIndex: number) {
+      const ids = this.dossierList.map((d) => d.id)
+      if (fromIndex === toIndex) return
+      if (fromIndex < 0 || fromIndex >= ids.length) return
+      if (toIndex < 0 || toIndex >= ids.length) return
+      const [id] = ids.splice(fromIndex, 1)
+      ids.splice(toIndex, 0, id)
+      this.dossierOrder = ids
+    },
+
     /** Open a dossier's detail page from the overview. Always lands on the
      *  detail page, never on a stale open form. */
     openDossier(id: DossierId) {

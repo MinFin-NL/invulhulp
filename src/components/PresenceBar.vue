@@ -1,12 +1,17 @@
 <template>
-  <div v-if="others.length" class="presence-bar" :aria-label="`${others.length} andere bewerker(s) aanwezig`">
-    <span
-      v-for="u in others"
-      :key="u.clientId"
-      class="presence-avatar"
-      :style="{ backgroundColor: u.color }"
-      :title="`${u.name || 'Onbekende gebruiker'} bewerkt dit dossier`"
-    >{{ initials(u.name) }}</span>
+  <div v-if="others.length" class="presence-bar">
+    <!-- color="inherit" fills each avatar from --context-content-color and picks the
+         contrasting text colour itself; the group draws the overlap rings. -->
+    <nldd-avatar-group size="28" accessible-label="Andere bewerkers">
+      <nldd-avatar
+        v-for="u in others"
+        :key="u.clientId"
+        color="inherit"
+        :style="{ '--context-content-color': u.color }"
+        :name="u.name || 'Onbekende gebruiker'"
+        :initials="initials(u.name)"
+      />
+    </nldd-avatar-group>
     <span class="presence-label">bewerkt dit dossier</span>
   </div>
 </template>
@@ -37,32 +42,13 @@ function initials(name: string): string {
 .presence-bar {
   display: inline-flex;
   align-items: center;
-  gap: var(--rvo-space-2xs, 0.25rem);
-}
-
-.presence-avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: 1.75rem;
-  block-size: 1.75rem;
-  border-radius: 50%;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: var(--rvo-font-weight-bold, 700);
-  border: 2px solid var(--rvo-color-wit, #fff);
-  margin-inline-start: -0.5rem;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1);
-}
-
-.presence-avatar:first-child {
-  margin-inline-start: 0;
+  gap: var(--primitives-space-4);
 }
 
 .presence-label {
-  margin-inline-start: var(--rvo-space-xs, 0.5rem);
-  font-size: var(--rvo-font-size-sm, 0.875rem);
-  color: var(--invulhulp-color-text-muted, #6b7280);
+  margin-inline-start: var(--primitives-space-8);
+  font-size: var(--primitives-font-size-90);
+  color: var(--invulhulp-color-text-muted);
   font-style: italic;
 }
 </style>
