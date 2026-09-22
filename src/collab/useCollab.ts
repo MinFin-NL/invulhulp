@@ -1,7 +1,7 @@
 import { computed, ref, watch, onUnmounted, type Ref } from 'vue'
 import type * as Y from 'yjs'
 import { useAssessmentStore } from '../stores/assessmentStore'
-import { getProvider, onProviderReady, getLocalUser } from './dossierTransport'
+import { getProvider, onProviderReady, getLocalUser, NEUTRAL_USER_COLOR } from './dossierTransport'
 
 /** Everything a collaborative Tiptap editor needs for one rich-text answer:
  *  the shared fragment to bind to, the live provider (reactive — appears once
@@ -30,7 +30,7 @@ export function useCollab(questionId: Ref<string>) {
   onUnmounted(() => unsub?.())
 
   const lu = getLocalUser()
-  const user = lu ? { name: lu.name, color: lu.color } : { name: 'Gebruiker', color: '#888888' }
+  const user = lu ? { name: lu.name, color: lu.color } : { name: 'Gebruiker', color: NEUTRAL_USER_COLOR }
 
   return { fragment, provider, user }
 }

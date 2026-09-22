@@ -1,71 +1,46 @@
 <template>
-  <dialog
-    ref="dialogEl"
-    class="invulhulp-modal doc-viewer"
-    :aria-labelledby="titleId"
-    @click="onBackdropClick"
-  >
-    <div class="invulhulp-modal__container">
-      <header class="invulhulp-modal__header">
-        <nldd-title size="3"><h3 :id="titleId" class="invulhulp-modal__title">
-          {{ source?.docName ?? 'Brondocument' }}
-        </h3></nldd-title>
-        <button
-          type="button"
-          class="invulhulp-modal__close"
-          aria-label="Sluiten"
-          @click="close"
-        >
-          <span aria-hidden="true">×</span>
-        </button>
-      </header>
+  <ModalWindow ref="win" :title="source?.docName ?? 'Brondocument'" width="720">
+    <nldd-text color="inherit" class="doc-viewer__missing" v-if="!documentContent">
+      Dit document is niet meer beschikbaar. Hieronder staat het bewaarde fragment.
+    </nldd-text>
 
-      <nldd-divider class="invulhulp-modal__divider" />
-
-      <div class="invulhulp-modal__body doc-viewer__body">
-        <nldd-text color="inherit" class="doc-viewer__missing" v-if="!documentContent">
-          Dit document is niet meer beschikbaar. Hieronder staat het bewaarde fragment.
-        </nldd-text>
-
-        <div class="doc-viewer__text">
-          <template v-if="documentContent && chunkPos !== null">
-            <span>{{ documentContent.slice(0, chunkPos.start) }}</span>
-            <span ref="chunkEl" class="doc-viewer__chunk">
-              <span
-                v-for="(seg, i) in chunkSegments"
-                :key="i"
-                :class="{ 'doc-viewer__mark': seg.marked }"
-              >{{ seg.text }}</span>
-            </span>
-            <span>{{ documentContent.slice(chunkPos.end) }}</span>
-          </template>
-          <!-- Fallback: chunk not located in (or document missing from) the store -->
-          <span v-else ref="chunkEl" class="doc-viewer__chunk">
-            <span
-              v-for="(seg, i) in chunkSegments"
-              :key="i"
-              :class="{ 'doc-viewer__mark': seg.marked }"
-            >{{ seg.text }}</span>
-          </span>
-        </div>
-      </div>
+    <div class="doc-viewer__text">
+      <template v-if="documentContent && chunkPos !== null">
+        <span>{{ documentContent.slice(0, chunkPos.start) }}</span>
+        <span ref="chunkEl" class="doc-viewer__chunk">
+          <span
+            v-for="(seg, i) in chunkSegments"
+            :key="i"
+            :class="{ 'doc-viewer__mark': seg.marked }"
+          >{{ seg.text }}</span>
+        </span>
+        <span>{{ documentContent.slice(chunkPos.end) }}</span>
+      </template>
+      <!-- Fallback: chunk not located in (or document missing from) the store -->
+      <span v-else ref="chunkEl" class="doc-viewer__chunk">
+        <span
+          v-for="(seg, i) in chunkSegments"
+          :key="i"
+          :class="{ 'doc-viewer__mark': seg.marked }"
+        >{{ seg.text }}</span>
+      </span>
     </div>
-  </dialog>
+  </ModalWindow>
 </template>
 
 <script setup lang="ts">
 import { computed, nextTick, ref } from 'vue'
+import ModalWindow from './ModalWindow.vue'
 import type { AnswerSource } from '../models/Assessment'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { matchAnswerToChunk, segmentText, type TextSegment } from '../utils/sourceMatching'
 
 const store = useAssessmentStore()
 
-const dialogEl = ref<HTMLDialogElement | null>(null)
+const win = ref<InstanceType<typeof ModalWindow> | null>(null)
 const chunkEl = ref<HTMLElement | null>(null)
 const source = ref<AnswerSource | null>(null)
 const answerText = ref('')
-const titleId = `doc-viewer-title-${Math.random().toString(36).slice(2, 9)}`
 
 const documentContent = computed((): string | null => {
   if (!source.value) return null
@@ -106,81 +81,15 @@ const chunkSegments = computed((): TextSegment[] => {
 async function open(src: AnswerSource, answer: string) {
   source.value = src
   answerText.value = answer
-  dialogEl.value?.showModal()
+  win.value?.show()
   await nextTick()
   chunkEl.value?.scrollIntoView({ block: 'center' })
-}
-
-function close() {
-  dialogEl.value?.close()
-}
-
-function onBackdropClick(event: MouseEvent) {
-  if (event.target === dialogEl.value) close()
 }
 
 defineExpose({ open })
 </script>
 
 <style scoped>
-/* Modal shell copied from ConfirmDialog.vue (styles there are scoped). */
-.invulhulp-modal {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  max-inline-size: min(720px, 92vw);
-  inline-size: 100%;
-  margin-block-start: 5vh;
-  color: inherit;
-}
-
-.invulhulp-modal::backdrop {
-  background: rgb(0 0 0 / 50%);
-}
-
-.invulhulp-modal__container {
-  background: var(--semantics-surfaces-base-background-color);
-  border-radius: var(--primitives-corner-radius-lg);
-  box-shadow: 0 0 1em 0 rgb(0 0 0 / 30%);
-  padding: var(--primitives-space-16);
-  display: flex;
-  flex-direction: column;
-  gap: var(--primitives-space-12);
-}
-
-.invulhulp-modal__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--primitives-space-12);
-}
-
-.invulhulp-modal__title {
-  margin: 0;
-  flex: 1;
-  color: var(--semantics-content-accent-color);
-  word-break: break-word;
-}
-
-.invulhulp-modal__close {
-  background: none;
-  border: 0;
-  font-size: 1.75rem;
-  line-height: 1;
-  cursor: pointer;
-  color: var(--invulhulp-color-text-muted);
-  padding: 0 var(--primitives-space-2);
-}
-
-.invulhulp-modal__divider {
-  margin: 0;
-}
-
-.doc-viewer__body {
-  max-block-size: 70vh;
-  overflow-y: auto;
-}
-
 .doc-viewer__missing {
   margin: 0;
   font-style: italic;
@@ -197,10 +106,10 @@ defineExpose({ open })
 
 .doc-viewer__chunk {
   display: inline;
-  background: var(--semantics-surfaces-tinted-background-color, var(--semantics-surfaces-tinted-background-color));
-  box-shadow: 0 0 0 2px var(--semantics-surfaces-tinted-background-color, var(--semantics-surfaces-tinted-background-color));
+  background: var(--semantics-surfaces-tinted-background-color);
+  box-shadow: 0 0 0 2px var(--semantics-surfaces-tinted-background-color);
   border-radius: 2px;
-  color: var(--semantics-content-color, inherit);
+  color: var(--semantics-content-color);
 }
 
 .doc-viewer__mark {

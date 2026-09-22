@@ -579,7 +579,7 @@ onBeforeUnmount(() => {
 
 .dossier-card:hover {
   border-color: var(--semantics-content-accent-color);
-  box-shadow: 0 2px 8px rgb(21 66 115 / 0.12);
+  box-shadow: var(--primitives-box-shadows-level-2);
 }
 
 /* De kaart die je vasthebt: gedempt én met een duidelijke rand. Niet alleen
@@ -588,7 +588,7 @@ onBeforeUnmount(() => {
 .dossier-grid__item--dragging .dossier-card {
   opacity: 0.65;
   border-color: var(--semantics-content-accent-color);
-  box-shadow: 0 4px 14px rgb(21 66 115 / 0.2);
+  box-shadow: var(--primitives-box-shadows-level-3);
 }
 
 .dossier-grid__item--moving .dossier-card {
@@ -742,7 +742,7 @@ onBeforeUnmount(() => {
   background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--semantics-content-accent-color);
   border-radius: var(--primitives-corner-radius-md);
-  box-shadow: 0 4px 14px rgb(21 66 115 / 0.2);
+  box-shadow: var(--primitives-box-shadows-level-3);
 }
 
 /* WCAG 2.3.3: de kaarten verspringen bij een verplaatsing. Wie beweging heeft

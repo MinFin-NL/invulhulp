@@ -440,7 +440,7 @@ async function handleImport(event: Event) {
 
 .summary-view__answer {
   margin: 0;
-  color: var(--semantics-content-color, var(--semantics-content-color));
+  color: var(--semantics-content-color);
 }
 
 .summary-view__answer--empty {
@@ -471,7 +471,7 @@ async function handleImport(event: Event) {
 }
 
 .summary-view__answer-html :deep(li) {
-  margin-block-end: var(--primitives-space-2, 4px);
+  margin-block-end: var(--primitives-space-2);
 }
 
 .summary-view__answer-html :deep(li > p) {

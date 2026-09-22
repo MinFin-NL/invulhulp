@@ -101,32 +101,28 @@
       </nldd-table>
       </div>
       <!-- Clickable scroll buttons — the explicit affordance. -->
-      <button
+      <nldd-icon-button
         v-show="overflowing && !atStart"
-        type="button"
         class="invulhulp-table-question__scroll-btn invulhulp-table-question__scroll-btn--left"
-        aria-label="Toon vorige kolommen"
+        variant="secondary"
+        size="sm"
+        icon="chevron-left"
+        text="Toon vorige kolommen"
         @click="scrollStep(-1)"
-      >
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
-          <path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7" />
-        </svg>
-      </button>
-      <button
+      />
+      <nldd-icon-button
         v-show="overflowing && !atEnd"
-        type="button"
         class="invulhulp-table-question__scroll-btn invulhulp-table-question__scroll-btn--right"
-        aria-label="Toon volgende kolommen"
+        variant="secondary"
+        size="sm"
+        icon="chevron-right"
+        text="Toon volgende kolommen"
         @click="scrollStep(1)"
-      >
-        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
-          <path fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-        </svg>
-      </button>
+      />
     </div>
 
     <p v-if="overflowing && gridOpen" class="invulhulp-table-question__scroll-hint">
-      <span class="invulhulp-table-question__scroll-hint-icon" aria-hidden="true">↔</span>
+      <nldd-icon name="arrow-left-right" size="20" color="inherit" aria-hidden="true" />
       Deze tabel heeft {{ columns.length }} kolommen — scroll of gebruik de pijlen om ze allemaal te zien.
     </p>
 
@@ -357,34 +353,15 @@ function removeRow(rowIndex: number) {
   overflow-x: auto;
 }
 
-/* NL Design System secondary-button styling for the edge scroll controls:
-   white surface, hemelblauw border + icon, invert on hover/focus. */
+/* Edge scroll controls: nldd-icon-button supplies the look; this only places
+   them over the table edges. */
 .invulhulp-table-question__scroll-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
   z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: 2.25rem;
-  block-size: 2.25rem;
-  padding: 0;
-  color: var(--semantics-content-accent-color, #007bc7);
-  background: var(--semantics-surfaces-base-background-color, #fff);
-  border: 1px solid var(--semantics-content-accent-color, #007bc7);
-  border-radius: var(--primitives-corner-radius-md, 8px);
-  box-shadow: 0 1px 4px rgb(21 66 115 / 0.18);
-  cursor: pointer;
-  transition: background-color var(--invulhulp-duration-instant), color var(--invulhulp-duration-instant);
-}
-.invulhulp-table-question__scroll-btn:hover {
-  background: var(--semantics-content-accent-color, #007bc7);
-  color: var(--semantics-surfaces-base-background-color, #fff);
-}
-.invulhulp-table-question__scroll-btn:focus-visible {
-  outline: var(--semantics-content-accent-color, #01689b) solid 2px;
-  outline-offset: 2px;
+  border-radius: var(--primitives-corner-radius-md);
+  box-shadow: var(--primitives-box-shadows-level-1);
 }
 .invulhulp-table-question__scroll-btn--left {
   inset-inline-start: 0.25rem;
@@ -401,16 +378,12 @@ function removeRow(rowIndex: number) {
   gap: var(--primitives-space-4);
   margin: var(--primitives-space-8) 0 0;
   padding: var(--primitives-space-4) var(--primitives-space-12);
-  background: var(--semantics-surfaces-tinted-background-color, #e5f0f8);
-  border-inline-start: 4px solid var(--semantics-content-accent-color, #007bc7);
-  border-radius: var(--primitives-corner-radius-sm, 4px);
+  background: var(--semantics-surfaces-tinted-background-color);
+  border-inline-start: 4px solid var(--semantics-content-accent-color);
+  border-radius: var(--primitives-corner-radius-sm);
   font-size: var(--primitives-font-size-90);
-  font-weight: var(--primitives-font-weight-body-semi-bold, 600);
-  color: var(--semantics-content-accent-color, #154273);
-}
-.invulhulp-table-question__scroll-hint-icon {
-  font-size: 1.15rem;
-  line-height: 1;
+  font-weight: var(--primitives-font-weight-body-semi-bold);
+  color: var(--semantics-content-accent-color);
 }
 
 .invulhulp-table-question__table {
@@ -434,9 +407,9 @@ function removeRow(rowIndex: number) {
   width: 100%;
   min-width: 0;
   font-size: var(--primitives-font-size-90);
-  padding: var(--primitives-space-2, 4px) var(--primitives-space-4);
+  padding: var(--primitives-space-2) var(--primitives-space-4);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--primitives-corner-radius-sm, 4px);
+  border-radius: var(--primitives-corner-radius-sm);
 }
 
 /* Pinned to the right edge of the scroll container so the delete action
@@ -447,15 +420,15 @@ function removeRow(rowIndex: number) {
   white-space: nowrap;
   position: sticky;
   inset-inline-end: 0;
-  background: var(--invulhulp-color-background, #fff);
+  background: var(--invulhulp-color-surface);
 }
 
 .invulhulp-table-question__actions-header {
-  background: var(--invulhulp-color-surface, #f0f4f8);
+  background: var(--invulhulp-color-surface);
 }
 
 .invulhulp-table-question__remove-btn {
-  padding: var(--primitives-space-2, 4px) var(--primitives-space-4);
+  padding: var(--primitives-space-2) var(--primitives-space-4);
   line-height: 1;
 }
 
@@ -497,7 +470,7 @@ function removeRow(rowIndex: number) {
   font-size: var(--primitives-font-size-90);
   padding: var(--primitives-space-4) var(--primitives-space-8);
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--primitives-corner-radius-sm, 4px);
+  border-radius: var(--primitives-corner-radius-sm);
   resize: vertical;
 }
 

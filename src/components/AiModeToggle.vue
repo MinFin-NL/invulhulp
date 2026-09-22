@@ -42,15 +42,13 @@
           Gladstrijken ongedaan maken
         </button>
       </span>
-      <button
-        type="button"
-        class="ai-mode-done__close"
-        aria-label="Sluiten"
-        title="Sluiten"
+      <nldd-icon-button
+        variant="neutral-transparent"
+        size="xs"
+        icon="close"
+        text="Sluiten"
         @click="$emit('dismiss', formId)"
-      >
-        ×
-      </button>
+      />
     </div>
 
     <!-- Active / scanning state -->
@@ -241,7 +239,7 @@ defineEmits<{
   padding: var(--primitives-space-4) var(--primitives-space-8) var(--primitives-space-4) var(--primitives-space-12);
   background: linear-gradient(135deg, rgba(14, 165, 233, 0.08), rgba(15, 45, 92, 0.1));
   border: 1px solid rgba(14, 165, 233, 0.45);
-  border-radius: var(--primitives-corner-radius-md, 8px);
+  border-radius: var(--primitives-corner-radius-md);
   font-size: var(--primitives-font-size-90);
   width: 100%;
   box-sizing: border-box;
@@ -271,7 +269,7 @@ defineEmits<{
 .ai-mode-done__skipped {
   font-weight: var(--primitives-font-weight-body-regular);
   font-size: var(--primitives-font-size-80);
-  color: var(--invulhulp-color-text-subtle, #6b7280);
+  color: var(--invulhulp-color-text-subtle);
 }
 
 .ai-mode-done__undo {
@@ -289,33 +287,8 @@ defineEmits<{
   color: #5b21b6;
 }
 
-.ai-mode-done__close {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  inline-size: 22px;
-  block-size: 22px;
-  padding: 0;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--invulhulp-color-text-subtle, #6b7280);
-  font-size: 18px;
-  line-height: 1;
-  cursor: pointer;
-  transition: background var(--invulhulp-duration-fast), color var(--invulhulp-duration-fast);
-}
 
-.ai-mode-done__close:hover {
-  background: rgba(15, 45, 92, 0.1);
-  color: #0f2d5c;
-}
 
-.ai-mode-done__close:focus-visible {
-  outline: 2px solid #0ea5e9;
-  outline-offset: 1px;
-}
 
 /* ── Empty-result state ──────────────────────────────────────────────────── */
 
@@ -325,9 +298,9 @@ defineEmits<{
   align-items: center;
   gap: var(--primitives-space-8);
   padding: var(--primitives-space-8) var(--primitives-space-12);
-  background: #fdf6ec;
-  border: 1px solid #e0b561;
-  border-radius: var(--primitives-corner-radius-md, 8px);
+  background: var(--semantics-categories-warning-tinted-background-color);
+  border: 1px solid var(--semantics-categories-warning-filled-highlight-border-color);
+  border-radius: var(--primitives-corner-radius-md);
   font-size: var(--primitives-font-size-90);
   width: 100%;
   box-sizing: border-box;
@@ -336,7 +309,7 @@ defineEmits<{
 .ai-mode-empty__icon {
   display: inline-flex;
   align-items: center;
-  color: #b8860b;
+  color: var(--semantics-content-warning-color);
   flex-shrink: 0;
 }
 
@@ -350,11 +323,11 @@ defineEmits<{
 
 .ai-mode-empty__title {
   font-weight: var(--primitives-font-weight-body-semi-bold);
-  color: #7a5b06;
+  color: var(--semantics-categories-warning-tinted-content-color);
 }
 
 .ai-mode-empty__hint {
-  color: #8a6d3b;
+  color: var(--semantics-categories-warning-tinted-content-color);
   font-size: var(--primitives-font-size-80);
 }
 

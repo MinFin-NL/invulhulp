@@ -357,7 +357,7 @@ function onCheckboxToggle(option: string) {
   border: 1px solid var(--invulhulp-color-border);
   border-inline-start: 4px solid transparent;
   border-radius: var(--primitives-corner-radius-md);
-  box-shadow: 0 1px 2px rgb(21 66 115 / 0.04);
+  box-shadow: var(--primitives-box-shadows-level-1);
 }
 .invulhulp-question--mandatory {
   border-inline-start-color: var(--invulhulp-color-mandatory);
@@ -439,17 +439,17 @@ function onCheckboxToggle(option: string) {
   gap: var(--primitives-space-4);
   margin: var(--primitives-space-8) 0 0;
   padding: var(--primitives-space-4) var(--primitives-space-8);
-  background: #fdf6ec;
-  border-inline-start: 3px solid #e0b561;
-  border-radius: var(--primitives-corner-radius-sm, 4px);
+  background: var(--semantics-categories-warning-tinted-background-color);
+  border-inline-start: 3px solid var(--semantics-categories-warning-filled-highlight-border-color);
+  border-radius: var(--primitives-corner-radius-sm);
   font-size: var(--primitives-font-size-90);
-  color: #8a6d3b;
+  color: var(--semantics-categories-warning-tinted-content-color);
 }
 
 .invulhulp-question__ai-empty-icon {
   display: inline-flex;
   align-items: center;
-  color: #b8860b;
+  color: var(--semantics-content-warning-color);
   flex-shrink: 0;
 }
 
@@ -461,11 +461,11 @@ function onCheckboxToggle(option: string) {
   flex-wrap: wrap;
   margin: var(--primitives-space-8) 0 0;
   padding: var(--primitives-space-4) var(--primitives-space-8);
-  background: var(--semantics-surfaces-tinted-background-color, #f3f5f6);
-  border-inline-start: 3px solid var(--semantics-content-secondary-color, #a1a7ad);
-  border-radius: var(--primitives-corner-radius-sm, 4px);
+  background: var(--semantics-surfaces-tinted-background-color);
+  border-inline-start: 3px solid var(--semantics-content-secondary-color);
+  border-radius: var(--primitives-corner-radius-sm);
   font-size: var(--primitives-font-size-90);
-  color: var(--semantics-content-secondary-color, #4f5457);
+  color: var(--semantics-content-secondary-color);
 }
 
 .invulhulp-question__ai-smoothed-text {

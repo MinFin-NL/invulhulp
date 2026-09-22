@@ -207,6 +207,13 @@ function buildExtensions(): AnyExtension[] {
         CollaborationCaret.configure({
           provider: props.provider as never,
           user: props.user ?? undefined,
+          // The default builder appends hex-alpha (`${color}70`), which is invalid for
+          // our token colours (colorForUser returns a var()). y-tiptap still logs an
+          // "unsupported color format" warning for non-hex colours; harmless.
+          selectionRender: (user: { color: string }) => ({
+            style: `background-color: color-mix(in srgb, ${user.color} 30%, transparent)`,
+            class: 'ProseMirror-yjs-selection',
+          }),
         }),
       )
     }
@@ -415,13 +422,13 @@ function rejectSuggestion() {
 }
 
 .tiptap-wrapper :deep(.collaboration-carets__label) {
-  border-radius: 3px 3px 3px 0;
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: var(--primitives-font-weight-body-bold, 700);
+  border-radius: var(--primitives-corner-radius-sm) var(--primitives-corner-radius-sm) var(--primitives-corner-radius-sm) 0;
+  color: var(--semantics-categories-accent-filled-content-color);
+  font-size: var(--primitives-font-size-70);
+  font-weight: var(--primitives-font-weight-body-bold);
   left: -1px;
   line-height: normal;
-  padding: 0.05rem 0.3rem;
+  padding: 0 var(--primitives-space-4);
   position: absolute;
   top: -1.3em;
   user-select: none;
@@ -557,7 +564,7 @@ function rejectSuggestion() {
   border: 1px solid var(--invulhulp-color-border-strong);
   border-block-start: 0;
   border-radius: 0 0 var(--primitives-corner-radius-sm) var(--primitives-corner-radius-sm);
-  background: var(--semantics-surfaces-tinted-background-color, #fafafa);
+  background: var(--semantics-surfaces-tinted-background-color);
 }
 
 .tiptap-toolbar__error {
@@ -570,7 +577,7 @@ function rejectSuggestion() {
 }
 
 .tiptap-mark-btn--active {
-  background: var(--semantics-categories-accent-tinted-background-color, #d9ebf7);
+  background: var(--semantics-categories-accent-tinted-background-color);
   border-radius: var(--primitives-corner-radius-sm);
 }
 

@@ -1223,8 +1223,8 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 .portal-page {
   /* Shared by the phase rail and the timeline spine. lichtblauw-300 is
      invisible against the lichtblauw-150 page background — tint the page's own
-     lintblauw down instead, as the card shadows do. */
-  --track-line: rgb(21 66 115 / 0.22);
+     accent down instead. */
+  --track-line: color-mix(in srgb, var(--semantics-content-accent-color) 22%, transparent);
   padding: var(--primitives-space-48) 0 var(--primitives-space-64);
   background: var(--semantics-surfaces-tinted-background-color);
   min-height: 100%;
@@ -1284,7 +1284,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--semantics-dividers-color);
   border-radius: var(--primitives-corner-radius-md);
-  box-shadow: 0 1px 3px rgb(21 66 115 / 0.06), 0 4px 12px rgb(21 66 115 / 0.04);
+  box-shadow: var(--primitives-box-shadows-level-1);
 }
 
 .portal-card::before {
@@ -1555,7 +1555,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--invulhulp-color-border);
   border-radius: var(--primitives-corner-radius-sm);
-  box-shadow: 0 4px 12px rgb(21 66 115 / 0.12);
+  box-shadow: var(--primitives-box-shadows-level-2);
   padding: var(--primitives-space-8) var(--primitives-space-12);
   min-inline-size: 280px;
   max-inline-size: 380px;
@@ -1677,7 +1677,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--semantics-dividers-color);
   border-radius: var(--primitives-corner-radius-md);
-  box-shadow: 0 1px 3px rgb(21 66 115 / 0.06), 0 4px 12px rgb(21 66 115 / 0.04);
+  box-shadow: var(--primitives-box-shadows-level-1);
   /* Six phases don't fit a phone; scroll the rail rather than the page. */
   overflow-x: auto;
 }
@@ -1808,7 +1808,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .phase-rail__label {
-  font-size: var(--primitives-font-size-70, 0.75rem);
+  font-size: var(--primitives-font-size-70);
   line-height: 1.3;
   font-weight: var(--primitives-font-weight-body-semi-bold);
   color: var(--semantics-content-accent-color);
@@ -1817,7 +1817,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 }
 
 .phase-rail__count {
-  font-size: var(--primitives-font-size-70, 0.75rem);
+  font-size: var(--primitives-font-size-70);
   color: var(--invulhulp-color-text-subtle);
 }
 
@@ -1910,7 +1910,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 
 .track-eyebrow {
   margin: 0 0 var(--primitives-space-2);
-  font-size: var(--primitives-font-size-70, 0.75rem);
+  font-size: var(--primitives-font-size-70);
   font-weight: var(--primitives-font-weight-body-semi-bold);
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -1955,7 +1955,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   margin: 0;
   padding: var(--primitives-space-16);
   border: 1px dashed var(--semantics-content-secondary-color);
-  border-radius: var(--primitives-corner-radius-md, 4px);
+  border-radius: var(--primitives-corner-radius-md);
 }
 
 .card-row {

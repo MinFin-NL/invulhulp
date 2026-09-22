@@ -82,12 +82,24 @@ const aiBusyCbs = new Map<string, Set<(peers: AiBusyPeer[]) => void>>()
 const aiBusyRoster = new Map<string, AiBusyPeer[]>()
 const localAiBusy = new Map<string, { formId: string; questionId: string } | null>()
 
-/** A stable, readable colour from a user id — same person, same colour. */
+// NLDD categories whose `filled` pair has light content in light mode (and
+// dark in dark mode), so one text token — accent-filled-content — reads on all.
+const USER_CATEGORIES = [
+  'lintblauw', 'paars', 'donkergroen', 'robijnrood', 'hemelblauw', 'bruin',
+  'violet', 'mosgroen', 'donkerblauw', 'groen', 'donkerbruin',
+]
+
+/** A stable, readable colour from a user id — same person, same colour. It is
+ *  a CSS custom-property reference, so it follows the colour scheme; consumers
+ *  must use it as a whole value (no hex-alpha suffixes — use color-mix). */
 export function colorForUser(sub: string): string {
   let h = 0
-  for (let i = 0; i < sub.length; i++) h = (h * 31 + sub.charCodeAt(i)) % 360
-  return `hsl(${h}, 65%, 45%)`
+  for (let i = 0; i < sub.length; i++) h = (h * 31 + sub.charCodeAt(i)) % USER_CATEGORIES.length
+  return `var(--semantics-categories-${USER_CATEGORIES[h]}-filled-background-color)`
 }
+
+/** Fallback for a peer that broadcast no colour. */
+export const NEUTRAL_USER_COLOR = 'var(--semantics-categories-neutral-filled-background-color)'
 
 /** Set the local user broadcast to collaborators. Call once after login. */
 export function setLocalUser(user: { sub: string; name: string }): void {
@@ -170,7 +182,7 @@ function wireAwareness(dossierId: string, provider: Provider): void {
           clientId,
           sub: u.sub,
           name: u.name ?? '',
-          color: u.color ?? '#888',
+          color: u.color ?? NEUTRAL_USER_COLOR,
           isSelf: clientId === self,
         })
       }

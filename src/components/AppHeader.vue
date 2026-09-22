@@ -2,9 +2,14 @@
   <header ref="headerEl" class="invulhulp-header">
     <!-- Rijkslogo, woordmerk, hoofd- en utility-navigatie komen uit NLDD. De
          globale menubalk klapt onder lg zelf in achter de menuknop. -->
+    <!-- Logo, woordmerk en "FinDocs" leiden terug naar het overzicht van het
+         open dossier (of naar de dossierlijst als er geen open is). Het zijn
+         gewone hash-links: useAppHistory zet de popstate om in de store. -->
     <nldd-top-navigation-bar
       logo-title="Ministerie van Financiën"
       website-title="FinDocs"
+      :logo-href="homeHref"
+      :website-href="homeHref"
     >
       <nldd-menu-bar slot="global" accessible-label="Hoofdnavigatie">
         <nldd-menu-bar-item
@@ -50,38 +55,28 @@
       </nldd-menu-bar>
     </nldd-top-navigation-bar>
 
-    <!-- Breadcrumb: dossier › fase › formulier -->
+    <!-- Breadcrumb: dossier › fase › formulier. The dossier crumb is a real
+         hash link: useAppHistory maps the resulting popstate back onto the
+         store, and it opens in a new tab like any link. -->
     <div v-if="showBreadcrumb" class="invulhulp-header__breadcrumb-bar">
-      <nav class="invulhulp-header__breadcrumb" aria-label="Kruimelpad">
-        <button
-          v-if="store.activeFormId !== null"
-          type="button"
-          class="invulhulp-header__crumb invulhulp-header__crumb--link"
-          @click="store.goToPortal()"
+      <nldd-breadcrumbs class="invulhulp-header__breadcrumb">
+        <nldd-breadcrumbs-item
+          :href="store.activeFormId !== null ? dossierHref : undefined"
+          :current="store.activeFormId === null"
         >
-          <nldd-icon name="folder" size="20" color="inherit" />
-          {{ store.activeDossier.name }}
-        </button>
-        <span v-else class="invulhulp-header__crumb invulhulp-header__crumb--current" aria-current="page">
-          <nldd-icon name="folder" size="20" color="inherit" />
-          {{ store.activeDossier.name }}
-        </span>
+          <!-- No whitespace between icon and name: it would be underlined as part of the link. -->
+          <nldd-icon class="invulhulp-header__crumb-icon" name="folder" size="20" color="inherit" />{{ store.activeDossier.name }}
+        </nldd-breadcrumbs-item>
         <!-- Lifecycle phase of the open form. Not a link: there is no
              per-phase destination, the phase only exists as a grouping. -->
-        <template v-if="activePhaseLabel">
-          <span class="invulhulp-header__crumb-sep invulhulp-header__crumb-sep--phase" aria-hidden="true">›</span>
-          <span class="invulhulp-header__crumb invulhulp-header__crumb--phase">
-            {{ activePhaseLabel }}
-          </span>
-        </template>
-        <template v-if="activeFormTitle">
-          <span class="invulhulp-header__crumb-sep" aria-hidden="true">›</span>
-          <span class="invulhulp-header__crumb invulhulp-header__crumb--current" aria-current="page">
-            {{ activeFormTitle }}
-          </span>
-        </template>
-        <PresenceBar :dossier-id="store.activeDossierId" class="invulhulp-header__presence" />
-      </nav>
+        <nldd-breadcrumbs-item
+          v-if="activePhaseLabel"
+          class="invulhulp-header__crumb--phase"
+          :text="activePhaseLabel"
+        />
+        <nldd-breadcrumbs-item v-if="activeFormTitle" current :text="activeFormTitle" />
+      </nldd-breadcrumbs>
+      <PresenceBar :dossier-id="store.activeDossierId" class="invulhulp-header__presence" />
     </div>
   </header>
 
@@ -102,6 +97,7 @@ import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAuthStore } from '../stores/authStore'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
 import { trackIdFor, trackLabel } from '../utils/tracks'
+import { serialize } from '../composables/useAppHistory'
 import ConfirmDialog from './ConfirmDialog.vue'
 import PresenceBar from './PresenceBar.vue'
 
@@ -158,6 +154,20 @@ const showBreadcrumb = computed(
   () => store.screen === 'dossier' && !auth.userManagementOpen && store.activeDossier.name !== '',
 )
 
+const dossierHref = computed(() =>
+  serialize({
+    admin: false,
+    screen: 'dossier',
+    dossierId: store.activeDossierId,
+    formId: null,
+    view: null,
+  }),
+)
+
+const homeHref = computed(() =>
+  store.screen === 'dossier' && store.activeDossierId ? dossierHref.value : '#/dossiers',
+)
+
 const activeFormTitle = computed(() => {
   if (store.activeFormId === null) return null
   return availableForms.value.find((f) => f.id === store.activeFormId)?.title ?? null
@@ -196,7 +206,7 @@ function openResetDialog() {
   background-color: var(--semantics-surfaces-base-background-color);
   /* Stays put: the form sidebar sticks to the header's underside via
      --invulhulp-header-height, which only lines up if the header itself never
-     leaves. Above the AI banner (z-index 20); native <dialog> modals render in
+     leaves. Above the AI banner (z-index 20); NLDD modals (native <dialog> inside) render in
      the top layer and are unaffected by this. */
   position: sticky;
   top: 0;
@@ -207,9 +217,15 @@ function openResetDialog() {
 /* The nav bar caps its own content to the page-section width; the breadcrumb
    row below it has to line up with that same measure. */
 .invulhulp-header__breadcrumb-bar {
-  max-inline-size: var(--semantics-page-sections-body-max-width, 80rem);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--primitives-space-8);
+  max-inline-size: var(--semantics-page-sections-body-max-width);
   margin-inline: auto;
   padding-inline: var(--semantics-page-sections-md-margin-inline, var(--primitives-space-16));
+  padding-block: var(--primitives-space-8);
+  border-block-start: var(--semantics-dividers-thickness) solid var(--semantics-dividers-color);
 }
 
 /* Push the "who's here" avatars to the trailing edge of the breadcrumb row. */
@@ -217,66 +233,15 @@ function openResetDialog() {
   margin-inline-start: auto;
 }
 
-.invulhulp-header__breadcrumb {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--primitives-space-4);
-  border-block-start: 1px solid var(--semantics-dividers-color);
-  padding-block: var(--primitives-space-8);
+.invulhulp-header__crumb-icon {
+  vertical-align: text-bottom;
+  margin-inline-end: var(--primitives-space-4);
 }
 
-.invulhulp-header__crumb {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--primitives-space-8);
-  font-size: var(--primitives-font-size-90);
-  font-weight: var(--primitives-font-weight-body-semi-bold);
-  white-space: nowrap;
-  padding: var(--primitives-space-2) var(--primitives-space-8);
-  border-radius: var(--primitives-corner-radius-md, 4px);
-}
-
-.invulhulp-header__crumb--current {
-  color: var(--semantics-content-color);
-}
-
-.invulhulp-header__crumb--link {
-  border: 0;
-  background: transparent;
-  color: var(--invulhulp-color-text-subtle);
-  font: inherit;
-  font-size: var(--primitives-font-size-90);
-  font-weight: var(--primitives-font-weight-body-semi-bold);
-  cursor: pointer;
-  transition: background var(--invulhulp-duration-fast), color var(--invulhulp-duration-fast);
-}
-
-.invulhulp-header__crumb--link:hover {
-  background: var(--semantics-surfaces-tinted-background-color);
-  color: var(--semantics-content-accent-color);
-}
-
-.invulhulp-header__crumb--link:focus-visible {
-  outline: var(--semantics-focus-ring-outline);
-  outline-offset: var(--semantics-focus-ring-outline-offset);
-}
-
-.invulhulp-header__crumb-sep {
-  color: var(--invulhulp-color-text-subtle);
-  user-select: none;
-}
-
-/* The phase is context, not a destination — quieter than the two crumbs it
-   sits between, and the first thing to go when the row gets tight. */
-.invulhulp-header__crumb--phase {
-  color: var(--invulhulp-color-text-subtle);
-  font-weight: var(--primitives-font-weight-body-regular);
-}
-
+/* The phase is context, not a destination — and the first thing to go when
+   the row gets tight. */
 @media (max-width: 640px) {
-  .invulhulp-header__crumb--phase,
-  .invulhulp-header__crumb-sep--phase {
+  .invulhulp-header__crumb--phase {
     display: none;
   }
 }

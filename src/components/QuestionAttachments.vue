@@ -220,7 +220,7 @@ function onPaste(event: ClipboardEvent) {
   border: 0;
   background: none;
   cursor: zoom-in;
-  border-radius: var(--primitives-corner-radius-sm, 4px);
+  border-radius: var(--primitives-corner-radius-sm);
 }
 
 .question-attachments__zoom:hover .question-attachments__thumb {
@@ -232,8 +232,8 @@ function onPaste(event: ClipboardEvent) {
   max-block-size: 160px;
   object-fit: contain;
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--primitives-corner-radius-sm, 4px);
-  background: var(--semantics-surfaces-tinted-background-color, #f3f3f3);
+  border-radius: var(--primitives-corner-radius-sm);
+  background: var(--semantics-surfaces-tinted-background-color);
 }
 
 .question-attachments__thumb--missing {
@@ -244,7 +244,7 @@ function onPaste(event: ClipboardEvent) {
   block-size: 80px;
   font-size: var(--primitives-font-size-90);
   font-style: italic;
-  color: var(--semantics-content-secondary-color, #999);
+  color: var(--semantics-content-secondary-color);
 }
 
 .question-attachments__delete {
@@ -258,9 +258,9 @@ function onPaste(event: ClipboardEvent) {
   block-size: 24px;
   padding: 0;
   border: 1px solid var(--invulhulp-color-border);
-  border-radius: var(--primitives-corner-radius-sm, 4px);
+  border-radius: var(--primitives-corner-radius-sm);
   background: var(--semantics-surfaces-base-background-color);
-  color: var(--semantics-content-secondary-color, #555);
+  color: var(--semantics-content-secondary-color);
   cursor: pointer;
 }
 
@@ -278,7 +278,7 @@ function onPaste(event: ClipboardEvent) {
   color: var(--invulhulp-color-text-subtle);
   padding: var(--primitives-space-2);
   border: 1px solid transparent;
-  border-radius: var(--primitives-corner-radius-sm, 4px);
+  border-radius: var(--primitives-corner-radius-sm);
   background: transparent;
   resize: none;
   overflow: hidden;

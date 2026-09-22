@@ -8,12 +8,19 @@ import { describe, it, expect, afterEach, beforeAll } from 'vitest'
 import { createApp, nextTick } from 'vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 
-// jsdom implementeert <dialog> zonder showModal/close — de modal-mechanica is
-// hier niet wat we testen, alleen de gate erbinnen.
+// nldd-modal-dialog is niet geregistreerd in jsdom — de modal-mechanica is hier
+// niet wat we testen, alleen de gate erbinnen. De stub volgt de echte API:
+// show()/hide(), en `close` op de host zodra hij dicht is (ook na Esc).
 beforeAll(() => {
-  const proto = window.HTMLDialogElement.prototype
-  proto.showModal = function () { this.setAttribute('open', '') }
-  proto.close = function () { this.removeAttribute('open') }
+  if (!customElements.get('nldd-modal-dialog')) {
+    customElements.define('nldd-modal-dialog', class extends HTMLElement {
+      show() { this.setAttribute('open', '') }
+      hide() {
+        this.removeAttribute('open')
+        this.dispatchEvent(new CustomEvent('close', { bubbles: true, composed: true }))
+      }
+    })
+  }
 })
 
 const mounted: (() => void)[] = []
@@ -34,15 +41,27 @@ afterEach(() => {
   while (mounted.length) mounted.pop()!()
 })
 
+// The fields and buttons are NLDD custom elements. A value arrives as
+// `$event.detail.value`. nldd-button is stubbed with a `disabled` property, as
+// in the browser (where the real element is upgraded before mount), so Vue sets
+// the property rather than a `disabled="false"` attribute.
+beforeAll(() => {
+  if (!customElements.get('nldd-button')) {
+    customElements.define('nldd-button', class extends HTMLElement { disabled = false })
+  }
+})
+
 async function type(host: HTMLElement, value: string) {
-  const input = host.querySelector<HTMLInputElement>('input[type="text"]')!
-  input.value = value
-  input.dispatchEvent(new Event('input'))
+  const field = host.querySelector('nldd-banner nldd-text-field')!
+  field.dispatchEvent(new CustomEvent('input', { detail: { value } }))
   await nextTick()
 }
 
 const confirmButton = (host: HTMLElement) =>
-  host.querySelector<HTMLButtonElement>('button[type="submit"]')!
+  host.querySelector<HTMLElement & { disabled: boolean }>('nldd-button[slot="actions"]')!
+
+const modal = (host: HTMLElement) =>
+  host.querySelector<HTMLElement & { hide(): void }>('nldd-modal-dialog')!
 
 describe('ConfirmDialog met confirmPhrase', () => {
   it('houdt bevestigen geblokkeerd tot de naam exact is overgetypt', async () => {
@@ -90,7 +109,7 @@ describe('ConfirmDialog met confirmPhrase', () => {
     await type(host, 'Project Alfa')
     expect(confirmButton(host).disabled).toBe(false)
 
-    host.querySelector<HTMLDialogElement>('dialog')!.close()
+    modal(host).hide()
     await vm.open()
     expect(confirmButton(host).disabled).toBe(true)
   })
@@ -100,7 +119,25 @@ describe('ConfirmDialog met confirmPhrase', () => {
     const { host, vm } = mount({ title: 'Doorgaan?', onConfirm: () => confirmed++ })
     await vm.open()
     expect(confirmButton(host).disabled).toBe(false)
-    host.querySelector('form')!.dispatchEvent(new Event('submit'))
+    confirmButton(host).click()
     expect(confirmed).toBe(1)
+  })
+
+  it('meldt Esc/backdrop als annuleren, maar een bevestiging niet', async () => {
+    let confirmed = 0
+    let cancelled = 0
+    const { host, vm } = mount({
+      title: 'Doorgaan?',
+      onConfirm: () => confirmed++,
+      onCancel: () => cancelled++,
+    })
+    await vm.open()
+    modal(host).hide() // zoals Esc of een klik op de backdrop
+    expect(cancelled).toBe(1)
+
+    await vm.open()
+    confirmButton(host).click()
+    expect(confirmed).toBe(1)
+    expect(cancelled).toBe(1)
   })
 })

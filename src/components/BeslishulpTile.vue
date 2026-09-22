@@ -67,8 +67,8 @@ const completedOn = computed(() =>
   justify-content: space-between;
   gap: var(--primitives-space-16);
   padding: var(--primitives-space-16);
-  color: var(--semantics-surfaces-base-background-color);
-  background: linear-gradient(150deg, var(--semantics-content-accent-color) 0%, #1c3966 55%, #26497e 100%);
+  color: var(--semantics-categories-accent-filled-content-color);
+  background: var(--semantics-categories-accent-filled-background-color);
   /* Fused to the EU AI Act card: square inner corners, no seam between them. */
   border: 1px solid var(--semantics-content-accent-color);
   border-start-start-radius: var(--primitives-corner-radius-md);
@@ -85,7 +85,7 @@ const completedOn = computed(() =>
   inset-block: var(--primitives-space-12);
   inset-inline-end: 0;
   inline-size: 1px;
-  background: rgb(255 255 255 / 0.25);
+  background: color-mix(in srgb, var(--semantics-categories-accent-filled-content-color) 25%, transparent);
 }
 
 .beslishulp-tile__body {
@@ -101,11 +101,11 @@ const completedOn = computed(() =>
 
 .beslishulp-tile__kicker {
   margin: 0;
-  font-size: var(--primitives-font-size-70, 0.75rem);
+  font-size: var(--primitives-font-size-70);
   font-weight: var(--primitives-font-weight-body-semi-bold);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: rgb(255 255 255 / 0.7);
+  color: var(--semantics-categories-accent-filled-content-secondary-color);
 }
 
 .beslishulp-tile__title {
@@ -113,14 +113,14 @@ const completedOn = computed(() =>
   font-size: var(--primitives-font-size-100);
   font-weight: var(--primitives-font-weight-body-bold);
   line-height: 1.2;
-  color: var(--semantics-surfaces-base-background-color);
+  color: var(--semantics-categories-accent-filled-content-color);
 }
 
 .beslishulp-tile__desc {
   margin: var(--primitives-space-4) 0 0;
-  font-size: var(--primitives-font-size-70, 0.75rem);
+  font-size: var(--primitives-font-size-70);
   line-height: var(--primitives-line-height-snug);
-  color: rgb(255 255 255 / 0.75);
+  color: var(--semantics-categories-accent-filled-content-secondary-color);
 }
 
 .beslishulp-tile__verdict {
@@ -128,19 +128,19 @@ const completedOn = computed(() =>
   /* Role lists get long ("aanbieder + gebruiksverantwoordelijke") and the tile is
      narrow by design — wrap inside the box rather than spilling over the card. */
   overflow-wrap: anywhere;
-  font-size: var(--primitives-font-size-70, 0.75rem);
+  font-size: var(--primitives-font-size-70);
   font-weight: var(--primitives-font-weight-body-semi-bold);
   line-height: var(--primitives-line-height-snug);
   padding: var(--primitives-space-2) var(--primitives-space-4);
   border-radius: var(--primitives-corner-radius-sm);
-  background: rgb(255 255 255 / 0.14);
+  background: color-mix(in srgb, var(--semantics-categories-accent-filled-content-color) 14%, transparent);
   border-inline-start: 3px solid var(--tile-accent);
 }
 
 .beslishulp-tile__meta {
   margin: var(--primitives-space-4) 0 0;
-  font-size: var(--primitives-font-size-70, 0.75rem);
-  color: rgb(255 255 255 / 0.6);
+  font-size: var(--primitives-font-size-70);
+  color: var(--semantics-categories-accent-filled-content-secondary-color);
 }
 
 .beslishulp-tile__actions {
@@ -168,24 +168,24 @@ const completedOn = computed(() =>
 
 .beslishulp-tile__btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 3px 10px rgb(0 0 0 / 0.25);
+  box-shadow: var(--primitives-box-shadows-level-2);
 }
 
 .beslishulp-tile__credit {
   margin: 0;
-  font-size: 0.6875rem;
-  color: rgb(255 255 255 / 0.55);
+  font-size: var(--primitives-font-size-70);
+  color: var(--semantics-categories-accent-filled-content-secondary-color);
 }
 
 /* Verdict accent — the only thing that varies once a run exists. */
 .beslishulp-tile--neutral { --tile-accent: var(--semantics-dividers-color); }
-.beslishulp-tile--success { --tile-accent: #5fd08a; }
-.beslishulp-tile--info    { --tile-accent: #7dd3fc; }
-.beslishulp-tile--warning { --tile-accent: #f5c26b; }
-.beslishulp-tile--error   { --tile-accent: #f28b82; }
+.beslishulp-tile--success { --tile-accent: var(--primitives-color-success-300); }
+.beslishulp-tile--info    { --tile-accent: var(--primitives-color-lichtblauw-300); }
+.beslishulp-tile--warning { --tile-accent: var(--primitives-color-warning-300); }
+.beslishulp-tile--error   { --tile-accent: var(--primitives-color-critical-300); }
 
 .beslishulp-tile--error {
-  background: linear-gradient(150deg, #5c1420 0%, #7a1c2b 55%, #8f2436 100%);
-  border-color: #7a1c2b;
+  background: var(--semantics-categories-critical-filled-background-color);
+  border-color: var(--semantics-categories-critical-filled-background-color);
 }
 </style>

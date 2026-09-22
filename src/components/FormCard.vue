@@ -239,7 +239,7 @@ const openLabel = computed(() => {
 }
 
 .form-card:hover {
-  box-shadow: 0 2px 8px rgb(21 66 115 / 0.12);
+  box-shadow: var(--primitives-box-shadows-level-2);
 }
 
 /* Fused to the beslishulp tile: no rounding or hairline on the joined edge, so
@@ -251,7 +251,7 @@ const openLabel = computed(() => {
 }
 
 .form-slot--paired:hover .form-card--paired {
-  box-shadow: 0 2px 8px rgb(21 66 115 / 0.12);
+  box-shadow: var(--primitives-box-shadows-level-2);
 }
 
 /* Aangekondigd maar nog niet gebouwd: gedempt en met een streepjesrand, zodat
@@ -334,11 +334,11 @@ const openLabel = computed(() => {
 }
 
 .form-card__domain {
-  font-size: var(--primitives-font-size-70, 0.75rem);
+  font-size: var(--primitives-font-size-70);
   line-height: 1.4;
   color: var(--invulhulp-color-text-subtle);
   background: var(--semantics-surfaces-tinted-background-color);
-  border-radius: var(--primitives-corner-radius-md, 4px);
+  border-radius: var(--primitives-corner-radius-md);
   padding: 0 var(--primitives-space-4);
   white-space: nowrap;
 }

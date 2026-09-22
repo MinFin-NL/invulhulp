@@ -140,8 +140,8 @@
                 </nldd-cell>
                 <nldd-text-cell size="sm" :text="u.email ?? u.username" />
                 <nldd-cell>
-                  <span v-if="u.isAdmin" class="user-mgmt__badge user-mgmt__badge--admin">Beheerder</span>
-                  <span v-else class="user-mgmt__badge">Gebruiker</span>
+                  <nldd-tag v-if="u.isAdmin" size="sm" color="accent" text="Beheerder" />
+                  <nldd-tag v-else size="sm" text="Gebruiker" />
                 </nldd-cell>
                 <nldd-cell v-if="scopeRoles.length" vertical-alignment="top">
                   <div class="user-mgmt__roles">
@@ -160,9 +160,7 @@
                   </span>
                 </nldd-cell>
                 <nldd-cell>
-                  <span :class="['user-mgmt__badge', u.enabled ? 'user-mgmt__badge--active' : 'user-mgmt__badge--off']">
-                    {{ u.enabled ? 'Actief' : 'Gedeactiveerd' }}
-                  </span>
+                  <nldd-tag size="sm" :color="u.enabled ? 'success' : 'neutral'" :text="u.enabled ? 'Actief' : 'Gedeactiveerd'" />
                 </nldd-cell>
                 <nldd-cell class="user-mgmt__actions">
                   <nldd-button
@@ -563,31 +561,9 @@ async function copyTempPassword() {
   font-size: var(--primitives-font-size-90);
 }
 
-.user-mgmt__badge {
-  display: inline-block;
-  padding: 1px 10px;
-  border-radius: 999px;
-  font-size: var(--primitives-font-size-80);
-  font-weight: var(--primitives-font-weight-body-semi-bold);
-  background: var(--semantics-surfaces-tinted-background-color);
-  color: var(--semantics-content-accent-color);
-  white-space: nowrap;
-}
 
-.user-mgmt__badge--admin {
-  background: var(--semantics-content-accent-color);
-  color: var(--semantics-surfaces-base-background-color);
-}
 
-.user-mgmt__badge--active {
-  background: var(--semantics-categories-success-tinted-background-color, #e1eddb);
-  color: var(--semantics-content-success-color, #39870c);
-}
 
-.user-mgmt__badge--off {
-  background: var(--semantics-dividers-color, #e6e6e6);
-  color: var(--semantics-content-secondary-color, #696969);
-}
 
 .user-mgmt__actions {
   display: flex;
@@ -596,7 +572,7 @@ async function copyTempPassword() {
 }
 
 .user-mgmt__danger {
-  color: var(--semantics-content-critical-color, #d52b1e) !important;
+  color: var(--semantics-content-critical-color) !important;
 }
 
 .user-mgmt__temp-pw {
@@ -616,8 +592,8 @@ async function copyTempPassword() {
 .user-mgmt__pw-code {
   display: inline-block;
   margin-inline-start: var(--primitives-space-8);
-  padding: 1px 8px;
-  background: rgb(0 0 0 / 0.06);
+  padding: 0 var(--primitives-space-8);
+  background: var(--semantics-surfaces-tinted-background-color);
   border-radius: var(--primitives-corner-radius-sm);
   font-weight: var(--primitives-font-weight-body-bold);
   user-select: all;

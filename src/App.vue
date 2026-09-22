@@ -281,13 +281,13 @@ onMounted(async () => {
   border: 1px solid var(--semantics-dividers-color);
   border-radius: var(--primitives-corner-radius-md);
   padding: var(--primitives-space-32) var(--primitives-space-24);
-  box-shadow: 0 1px 3px rgb(21 66 115 / 0.06), 0 10px 24px rgb(21 66 115 / 0.08);
+  box-shadow: var(--primitives-box-shadows-level-2);
   transition: transform var(--invulhulp-duration-fast), box-shadow var(--invulhulp-duration-fast);
 }
 
 .findocs-feature:hover {
   transform: translateY(-3px);
-  box-shadow: 0 2px 6px rgb(21 66 115 / 0.1), 0 14px 30px rgb(21 66 115 / 0.12);
+  box-shadow: var(--primitives-box-shadows-level-3);
 }
 
 .findocs-feature__icon {

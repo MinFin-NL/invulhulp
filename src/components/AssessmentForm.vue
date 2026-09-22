@@ -529,7 +529,7 @@ function onDecisionNext(go: boolean) {
 .ai-banner__stop {
   flex-shrink: 0;
   background: rgba(255, 255, 255, 0.95);
-  color: var(--semantics-content-critical-color, #d52b1e);
+  color: var(--semantics-content-critical-color);
   border: 0;
   border-radius: 999px;
   padding: var(--primitives-space-4) var(--primitives-space-16);

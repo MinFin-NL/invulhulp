@@ -298,7 +298,7 @@ function navigate(id: string) {
   background: var(--semantics-surfaces-tinted-background-color);
 }
 .invulhulp-nav__link--active {
-  background: rgb(21 66 115 / 0.12);
+  background: var(--semantics-categories-accent-tinted-background-color);
   font-weight: var(--primitives-font-weight-body-semi-bold);
 }
 .invulhulp-nav__link--summary {

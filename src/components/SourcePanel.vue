@@ -115,7 +115,7 @@ function fragmentLabel(source: AnswerSource): string {
 .source-panel__stale {
   margin: var(--primitives-space-4) 0;
   font-size: var(--primitives-font-size-90);
-  color: var(--semantics-content-secondary-color, #4f5457);
+  color: var(--semantics-content-secondary-color);
 }
 
 .source-panel__warning {
@@ -211,7 +211,7 @@ function fragmentLabel(source: AnswerSource): string {
 
 .source-panel__mark {
   background: var(--semantics-categories-warning-tinted-background-color);
-  color: var(--semantics-content-color, inherit);
+  color: var(--semantics-content-color);
   border-radius: 2px;
   box-shadow: 0 0 0 2px var(--semantics-categories-warning-tinted-background-color);
 }

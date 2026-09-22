@@ -97,7 +97,7 @@ body {
   margin: 0;
   background-color: var(--invulhulp-color-page-bg);
   color: var(--invulhulp-color-text);
-  font-family: var(--primitives-font-family-body, system-ui, sans-serif);
+  font-family: var(--primitives-font-family-body);
   font-size: var(--primitives-font-size-90);
   line-height: var(--primitives-line-height-snug);
 }
@@ -135,7 +135,7 @@ body {
    on the same card tokens so the two kinds sit side by side without drifting. */
 .invulhulp-card {
   background: var(--components-card-background-color, var(--semantics-surfaces-base-background-color));
-  border: var(--semantics-surfaces-border-width, 1px) solid var(--invulhulp-color-border);
+  border: var(--semantics-surfaces-border-width) solid var(--invulhulp-color-border);
   border-radius: var(--components-card-corner-radius, var(--primitives-corner-radius-md));
   padding: var(--primitives-space-16);
   box-sizing: border-box;
@@ -246,7 +246,7 @@ body {
 }
 
 .invulhulp-measure--md { max-inline-size: 64rem; }
-.invulhulp-measure--lg { max-inline-size: var(--semantics-page-sections-body-max-width, 80rem); }
+.invulhulp-measure--lg { max-inline-size: var(--semantics-page-sections-body-max-width); }
 
 .invulhulp-measure--pad {
   padding-inline: var(--semantics-page-sections-md-margin-inline, var(--primitives-space-16));
@@ -284,7 +284,7 @@ body {
   font: inherit;
   color: var(--semantics-links-color);
   text-decoration: underline;
-  cursor: var(--semantics-controls-link-cursor, pointer);
+  cursor: var(--semantics-controls-link-cursor);
 }
 
 .invulhulp-linkbutton:hover {
@@ -302,7 +302,7 @@ body {
 
 .invulhulp-divider {
   border: 0;
-  border-block-end: var(--semantics-dividers-thickness, 1px) solid
+  border-block-end: var(--semantics-dividers-thickness) solid
     var(--invulhulp-color-border);
   margin-block: var(--primitives-space-16) 0;
 }
@@ -321,7 +321,7 @@ body {
 .tiptap-editor {
   inline-size: 100%;
   box-sizing: border-box;
-  border: var(--semantics-input-fields-border-width, 1px) solid
+  border: var(--semantics-input-fields-border-width) solid
     var(--semantics-input-fields-border-color);
   border-radius: var(--primitives-corner-radius-sm)
     var(--primitives-corner-radius-sm) 0 0;

@@ -16,14 +16,14 @@
       <div v-if="(ontology.onderwerpen?.length ?? 0) > 0" class="ontology-row">
         <span class="ontology-label">Onderwerpen</span>
         <div class="ontology-chips">
-          <span v-for="t in ontology.onderwerpen" :key="t" class="ontology-chip">{{ t }}</span>
+          <nldd-tag v-for="t in ontology.onderwerpen" :key="t" size="sm" color="accent" :text="t" />
         </div>
       </div>
 
       <div v-for="(group, key) in entityGroups" :key="key" class="ontology-row">
         <span class="ontology-label">{{ group.label }}</span>
         <div class="ontology-chips">
-          <span v-for="e in group.items" :key="e" class="ontology-chip ontology-chip--ent">{{ e }}</span>
+          <nldd-tag v-for="e in group.items" :key="e" size="sm" color="success" :text="e" />
         </div>
       </div>
 
@@ -160,21 +160,7 @@ const hasContent = computed(() => {
   gap: var(--primitives-space-2) var(--primitives-space-4);
 }
 
-.ontology-chip {
-  background: var(--semantics-categories-accent-tinted-background-color);
-  border: 1px solid var(--semantics-categories-accent-tinted-highlight-border-color);
-  color: var(--semantics-content-accent-color);
-  border-radius: 999px;
-  padding: 2px 9px;
-  font-size: var(--primitives-font-size-80);
-  line-height: 1.4;
-}
 
-.ontology-chip--ent {
-  background: var(--semantics-categories-success-tinted-background-color);
-  border-color: var(--semantics-categories-success-tinted-highlight-border-color);
-  color: var(--semantics-categories-success-tinted-content-color);
-}
 
 .ontology-list {
   margin: 0;
