@@ -980,6 +980,15 @@ async function onDrop(e: DragEvent) {
   await ingestFiles(Array.from(e.dataTransfer?.files ?? []))
 }
 
+/** Waarom een upload strandde, in één zin. Een `TypeError` uit `fetch` betekent
+ *  dat het verzoek de server niet haalde — dat is iets anders dan een bestand
+ *  dat niet te lezen is, en de gebruiker moet het verschil zien. */
+function uploadFailureReason(err: unknown): string {
+  if (err instanceof TypeError) return 'de server is niet bereikbaar. Draait de backend?'
+  const message = err instanceof Error ? err.message.trim() : String(err).trim()
+  return message || 'onbekende oorzaak.'
+}
+
 async function ingestFiles(files: File[]) {
   if (files.length === 0) return
 
@@ -1047,7 +1056,9 @@ async function ingestFiles(files: File[]) {
           `${file.name}: dit is een gescande PDF (alleen afbeeldingen) — er kon geen tekst uit worden gehaald. Upload een tekst-PDF of het originele Word-bestand.`,
         )
       } else {
-        errors.push(`${file.name}: kon bestand niet inlezen.`)
+        // De oorzaak zit vaak niet in het bestand maar in de server (backend
+        // plat, indexering mislukt); die reden hoort zichtbaar te zijn.
+        errors.push(`${file.name}: kon bestand niet inlezen — ${uploadFailureReason(err)}`)
       }
     }
   }
