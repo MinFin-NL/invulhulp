@@ -800,7 +800,14 @@ export const useAssessmentStore = defineStore('assessment', {
         const stored = dossier.documents.find((d) => d.id === doc.id)
         if (stored) {
           stored.indexing = false
-          stored.indexError = e instanceof Error ? e.message : String(e)
+          // Een TypeError komt uit fetch zelf: het verzoek haalde de server
+          // niet. "Failed to fetch" zegt de gebruiker niets, de reden wel.
+          stored.indexError =
+            e instanceof TypeError
+              ? 'server niet bereikbaar'
+              : e instanceof Error
+                ? e.message
+                : String(e)
         }
       }
       return doc

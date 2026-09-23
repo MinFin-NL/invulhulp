@@ -78,22 +78,33 @@
       />
     </div>
 
-    <!-- Idle state -->
-    <button
-      v-else
-      type="button"
-      class="ai-mode-btn"
-      :disabled="!hasDocuments"
-      :title="hasDocuments ? 'Vul dit formulier automatisch in met AI op basis van je brondocumenten' : 'Upload eerst brondocumenten'"
-      @click="$emit('activate', formId)"
-    >
-      <span class="ai-mode-btn__icon" aria-hidden="true">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 2 22.5 22" width="16" height="16" aria-hidden="true">
-          <path d="m 10.55,20.49 0.6,1.81 0.6,-1.81 c 1.04,-3.11 3.48,-5.55 6.59,-6.59 l 1.81,-0.6 -1.81,-0.6 C 15.23,11.66 12.79,9.22 11.75,6.11 L 11.15,4.3 10.55,6.11 C 9.51,9.22 7.07,11.66 3.96,12.7 l -1.81,0.6 1.81,0.6 c 3.11,1.04 5.55,3.48 6.59,6.59" fill="white"/>
-        </svg>
+    <!-- Idle state. Een echte nldd-button: vorm, maat, focusring en
+         disabled-gedrag komen uit het systeem, het AI-verloop ligt als
+         achtergrond op de host (de binnenste knop staat transparant). -->
+    <div v-else class="ai-mode-idle">
+      <nldd-button
+        variant="primary"
+        size="sm"
+        class="ai-mode-btn"
+        text="AI Modus"
+        accessible-label="AI Modus: vul dit formulier automatisch in met AI op basis van je brondocumenten"
+        :disabled="!hasDocuments"
+        @click="$emit('activate', formId)"
+      >
+        <span slot="start-icon" class="ai-mode-btn__icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 2 22.5 22" width="16" height="16" aria-hidden="true">
+            <path d="m 10.55,20.49 0.6,1.81 0.6,-1.81 c 1.04,-3.11 3.48,-5.55 6.59,-6.59 l 1.81,-0.6 -1.81,-0.6 C 15.23,11.66 12.79,9.22 11.75,6.11 L 11.15,4.3 10.55,6.11 C 9.51,9.22 7.07,11.66 3.96,12.7 l -1.81,0.6 1.81,0.6 c 3.11,1.04 5.55,3.48 6.59,6.59" fill="currentColor"/>
+          </svg>
+        </span>
+      </nldd-button>
+      <!-- Waarom de knop uit staat, als zichtbare tekst. Stond eerder alleen in
+           een `title`: onbereikbaar met toetsenbord, schermlezer en touch — en
+           een uitgeschakelde knop krijgt geen focus, dus verborgen tekst zou
+           hier evenmin werken. -->
+      <span v-if="!hasDocuments" class="ai-mode-hint invulhulp-text--xs">
+        Upload eerst brondocumenten
       </span>
-      AI Modus
-    </button>
+    </div>
   </div>
 </template>
 
@@ -135,37 +146,43 @@ defineEmits<{
 
 /* ── Idle button ─────────────────────────────────────────────────────────── */
 
-.ai-mode-btn {
-  display: inline-flex;
-  align-items: center;
+.ai-mode-idle {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   gap: var(--primitives-space-4);
-  padding: var(--primitives-space-4) var(--primitives-space-12);
-  background: linear-gradient(135deg, #0f2d5c 0%, #5b21b6 50%, #0ea5e9 100%);
+}
+
+/* De AI-Modus-huisstijl op een systeemknop. `--_background-color` is de enige
+   knop waaraan het verloop kan hangen: de binnenste `.button` zet
+   `background-color: var(--_background-color)`, en een `background-color`
+   neemt geen gradiënt. Dus zetten we die op `transparent` en leggen we het
+   verloop op de host, die er precies achter ligt. Vorm, hoogte, letterbeeld,
+   focusring en disabled-opaciteit blijven zo van NLDD — alleen de kleur is van
+   ons, en dat is precies de afgesproken uitzondering. */
+.ai-mode-btn {
+  --_background-color: transparent;
+  --_is-hovered-background-color: transparent;
+  --_is-active-background-color: transparent;
+  --_highlight-border-color: transparent;
+  --_is-hovered-highlight-border-color: transparent;
+  --_is-active-highlight-border-color: transparent;
+
+  background-image: linear-gradient(135deg, #0f2d5c 0%, #5b21b6 50%, #0ea5e9 100%);
   background-size: 200% 100%;
-  color: #fff;
-  border: 0;
-  border-radius: 999px;
-  font: inherit;
-  font-size: var(--primitives-font-size-90);
-  font-weight: var(--primitives-font-weight-body-semi-bold);
-  cursor: pointer;
-  letter-spacing: 0.01em;
+  /* Dezelfde ronding als de knop erboven: het token van de maat die we zetten
+     (`size="sm"`), niet een eigen waarde. */
+  border-radius: var(--semantics-controls-sm-corner-radius);
   transition: box-shadow var(--invulhulp-duration-normal), background-position var(--invulhulp-duration-deliberate) var(--invulhulp-ease);
 }
 
-.ai-mode-btn:hover:not(:disabled) {
+.ai-mode-btn:hover:not([disabled]) {
   background-position: 100% 0;
   box-shadow: 0 0 14px 4px rgba(91, 33, 182, 0.5);
 }
 
-.ai-mode-btn:focus-visible {
-  outline: 2px solid #0ea5e9;
-  outline-offset: 2px;
-}
-
-.ai-mode-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
+.ai-mode-hint {
+  color: var(--invulhulp-color-text-subtle);
 }
 
 .ai-mode-btn__icon {

@@ -43,9 +43,19 @@ function postJson(url: string, body: unknown, signal?: AbortSignal): Promise<Res
   })
 }
 
+/** De `detail` uit het FastAPI-antwoord, of — als er geen JSON terugkomt — een
+ *  melding die zegt wát er mis is. Een onbereikbare backend komt via de
+ *  dev-proxy of nginx terug als een 502/503/504 met een HTML-foutpagina; die
+ *  mag niet als "Onbekende fout" eindigen, want dan zoekt de gebruiker in het
+ *  bestand naar een probleem dat in de server zit. */
 async function readErrorDetail(response: Response): Promise<string> {
-  const err = await response.json().catch(() => ({ detail: 'Onbekende fout' }))
-  return (err as { detail?: string }).detail ?? `HTTP ${response.status}`
+  const err = await response.json().catch(() => null)
+  const detail = (err as { detail?: string } | null)?.detail
+  if (detail) return detail
+  if (response.status >= 502 && response.status <= 504) {
+    return `de server is niet bereikbaar (HTTP ${response.status}) — draait de backend?`
+  }
+  return `de server gaf HTTP ${response.status}`
 }
 
 async function postJsonOrThrow<T>(url: string, body: unknown): Promise<T> {
