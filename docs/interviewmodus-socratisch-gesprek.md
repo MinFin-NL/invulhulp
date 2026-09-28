@@ -1,10 +1,10 @@
 # Interviewmodus: een gesprekspartner in plaats van een invulveld
 
-> **Status:** ontwerp — geen commitment. Bouwt voort op
+> **Status:** ontwerp, zonder toezeggingen. Bouwt voort op
 > `docs/systeemprofiel-feitenbasis.md` (de feiten die een gesprek vult) en op
 > `docs/normenkader-dekkingsanalyse.md` §4 (waarom de ethiek niet in een formulier past).
-> §1–3 zijn de motivering, §4–8 het ontwerp, §9 de risico's — dat is de belangrijkste
-> sectie —, §10 de evaluatie, §11 de fasering.
+> §1–3 zijn de motivering, §4–8 het ontwerp, §9 de risico's (de belangrijkste
+> sectie), §10 de evaluatie, §11 de fasering.
 
 ## 1. Het idee
 
@@ -27,9 +27,9 @@ straks:  mens praat  →  feiten  →  formulieren renderen zichzelf  →  mens 
 De invulhulp keert daarmee om: hij houdt op een stapel vragenlijsten te zijn en wordt een
 gesprek met een dossier als bijproduct.
 
-## 3. Waarom een gesprek hier beter is dan een formulier — vier specifieke redenen
+## 3. Waarom een gesprek hier beter is dan een formulier
 
-Niet "AI is fijn", maar vier dingen die een formulier structureel niet kan.
+Er zijn vier dingen die een formulier structureel niet kan.
 
 **3.1 Doorvragen is waar de inhoud zit.** `kern.betrokkenen` vraagt: *"Wie van hen kan er
 niet voor kiezen, en zitten daar kwetsbare groepen bij?"* In een tekstvak levert dat één
@@ -37,7 +37,7 @@ regel op. Een interviewer die "ondernemers" hoort, vraagt door: *en ondernemers 
 DigiD-machtiging? en wie doet dit namens iemand anders?* Een formulier kan alleen vertakken
 op de *waarde* van een keuzeoptie, nooit op de *betekenis* van een vrij antwoord.
 
-**3.2 De consistentiecheck — het enige dat 930 vragen structureel niet kunnen.** Vragen
+**3.2 De consistentiecheck, die 930 vragen structureel niet kunnen doen.** Vragen
 staan los van elkaar; niemand legt antwoord 12 naast antwoord 407. Een interviewer wel:
 
 > *U zei dat het systeem geen besluit over personen neemt, maar ook dat het aanvragen
@@ -54,14 +54,14 @@ nog in gewone taal voor te leggen.
 Een tekstvak met *"welke publieke waarden worden geraakt"* nodigt uit tot een
 compliance-klinkend non-antwoord. Deliberatie heeft een tegenover nodig. Het gesprek is
 *geen* vervanging van de ontbrekende tegenpartij met bevoegdheid uit
-`normenkader-dekkingsanalyse.md` §4 — een model tekent niets en accepteert geen restrisico —
+`normenkader-dekkingsanalyse.md` §4 (een model tekent niets en accepteert geen restrisico),
 maar het is het verschil tussen een vraag die gesteld wordt en een vraag die beantwoord
 wordt.
 
 **3.4 Het lost de koude start beter op dan de huidige truc.** AI-Modus weigert zonder
 documenten, en dat is de juiste standaard. `src/services/kernvragenSource.ts` bestaat om die
 impasse te breken: de kernvragen worden als transcript geïndexeerd zodat er iets te
-citeren valt. Een interview is dezelfde truc, beter uitgevoerd — het produceert dat
+citeren valt. Een interview is dezelfde truc, beter uitgevoerd: het produceert dat
 brondocument pratend, in de eigen woorden van de invuller, en daarmee meteen het materiaal
 voor de systeemverklaring uit `normenkader-dekkingsanalyse.md` §4.
 
@@ -69,14 +69,14 @@ voor de systeemverklaring uit `normenkader-dekkingsanalyse.md` §4.
 
 Dit is geen greenfield-feature. `/api/improve` doet dit al één beurt lang:
 
-- `backend/main.py` — de improve-prompt mag `<verduidelijking>jouw vraag</verduidelijking>`
+- `backend/main.py`: de improve-prompt mag `<verduidelijking>jouw vraag</verduidelijking>`
   teruggeven in plaats van een suggestie;
 - `_sse_stream(..., allow_clarification=True)` vangt die tag af en zendt een SSE-event
   `clarification` in plaats van `done`;
 - `src/components/TiptapEditor.vue` rendert de vraag, neemt het antwoord aan en herstart de
   aanroep met `clarification_question` + `clarification_answer`;
-- en er staat een expliciete rem op: `allow_clarification=not req.clarification_answer.strip()`
-  — *"Never re-ask after a clarification round, to avoid loops."*
+- en er staat een expliciete rem op: `allow_clarification=not req.clarification_answer.strip()`,
+  met als commentaar *"Never re-ask after a clarification round, to avoid loops."*
 
 Een interview is exact die lus, bewust aangezet en van een budget voorzien. Het patroon, het
 SSE-contract, de XML-uitvoerconventie en zelfs de UI-vorm bestaan dus al; wat ontbreekt is
@@ -97,14 +97,14 @@ het antwoord bestond nog niet toen het formulier werd geschreven.
 
 Fase 1 (§11) bouwt alleen het startgesprek.
 
-## 6. Wat maakt het socratisch — de zettenset
+## 6. Wat het socratisch maakt: de zettenset
 
 Zonder expliciete zettenset wordt dit een chatbot die formulieren voorleest. De interviewer
 mag:
 
 1. **Doorvragen op abstractie.** "Burgers" → *welke burgers, en wie van hen kan niet weg?*
 2. **Een tegenvoorbeeld leggen.** *Wat gebeurt er bij iemand die geen DigiD heeft?*
-3. **Twee eerdere antwoorden naast elkaar leggen** (§3.2) — de sterkste zet, en de enige die
+3. **Twee eerdere antwoorden naast elkaar leggen** (§3.2): de sterkste zet, en de enige die
    deterministisch getriggerd kan worden.
 4. **De negatieve vraag stellen.** *Wat gaat er mis, wie merkt het als eerste, en hoe komt
    die erachter?*
@@ -114,8 +114,8 @@ mag:
 
 En expliciet niet:
 
-- **Nooit een inhoudelijk antwoord voorstellen op een feitvraag.** Zie §9.1 — dit is de
-  hoofdregel, niet een nuance.
+- **Nooit een inhoudelijk antwoord voorstellen op een feitvraag.** Zie §9.1; dit is de
+  hoofdregel.
 - Geen juridisch oordeel ("dit is een hoog-risico AI-systeem"). Dat doet de beslishulp, een
   instrument met een herleidbare uitkomst.
 - Niet moraliseren. De interviewer legt spanningen voor, hij beoordeelt ze niet.
@@ -124,7 +124,7 @@ En expliciet niet:
 
 ### 7.1 Server blijft staatloos
 
-`LLMBackend.chat(system, user)` in `backend/llm.py` kent geen berichtgeschiedenis — Azure en
+`LLMBackend.chat(system, user)` in `backend/llm.py` kent geen berichtgeschiedenis, en Azure en
 Ollama delen die ene signatuur. Twee opties: de interface uitbreiden met berichten, of het
 transcript per beurt in het user-bericht vouwen.
 
@@ -195,7 +195,7 @@ dezelfde waarschuwing. Het is meer tekst, geen hardere tekst.
 ### 7.5 UI
 
 Nieuw scherm naast `KernvragenView.vue`, niet ervoor in de plaats (§9.5). NLDD-conform: de
-bestaande verduidelijkings-UI in `TiptapEditor.vue` is het visuele precedent — geen
+bestaande verduidelijkings-UI in `TiptapEditor.vue` is het visuele precedent: geen
 zelfgebouwde chatbubbels, wel `nldd-card` per beurt, `nldd-text-field` voor het antwoord,
 `nldd-button` met `text=`-attribuut, en het voorstellenpaneel als `nldd-banner` met
 bevestigknop. De hele beurtenlijst moet met het toetsenbord te doorlopen zijn en elke nieuwe
@@ -208,7 +208,7 @@ Niet door het model een formulier te laten invullen. Per bevestigd feit geldt:
 
 1. Het model doet een **voorstel** met een **letterlijk citaat** uit de uitspraak van de
    invuller.
-2. `_grounded()` in `backend/main.py` toetst dat citaat tegen het transcript — dezelfde
+2. `_grounded()` in `backend/main.py` toetst dat citaat tegen het transcript, met dezelfde
    deterministische controle die AI-Modus tegen bronhallucinatie beschermt, nu met het
    transcript als bron.
 3. De invuller **bevestigt** het voorstel op een echte, niet-gegenereerde control (een
@@ -222,7 +222,7 @@ Stap 3 is niet-onderhandelbaar voor de feiten die toepasselijkheid bepalen
 
 ## 9. Risico's
 
-### 9.1 Sturende vragen — het hoofdrisico
+### 9.1 Sturende vragen: het hoofdrisico
 
 Een interviewer die een antwoord voorstelt, krijgt zijn eigen antwoord terug. *"Dus er zitten
 geen persoonsgegevens in?"* levert "klopt" op van een projectleider die het niet zeker weet.
@@ -231,12 +231,12 @@ wettelijke verplichtingen in beeld komen. Een sturende vraag kan een DPIA laten 
 
 Drie remmen, cumulatief:
 
-1. **De interviewer mag nooit een inhoudelijk antwoord voorstellen op een feitvraag** — hij
+1. **De interviewer mag nooit een inhoudelijk antwoord voorstellen op een feitvraag.** Hij
    vraagt, spiegelt en vraagt door. Harde promptregel, en toetsbaar in de eval (§10).
 2. **Toepasselijkheidsfeiten worden nooit door het gesprek gezet**, alleen *gerouteerd*: het
    gesprek brengt de invuller bij de keuzevraag, de invuller kiest zelf. `deriveKenmerken`
    blijft de enige weg van antwoord naar kenmerk.
-3. **"Weet ik niet" blijft een volwaardig antwoord.** `onbekend` is geen `false` — dat is de
+3. **"Weet ik niet" blijft een volwaardig antwoord.** `onbekend` is geen `false`; dat is de
    bestaande regel in `src/utils/toepasselijkheid.ts`, en een gesprek dat mensen naar een
    ja/nee praat ondermijnt precies die eigenschap.
 
@@ -252,7 +252,7 @@ uitspraak. Voor de systeemverklaring geldt hetzelfde: publiceer wat de mens zei.
 De bestaande code kiest de veilige kant (nooit opnieuw vragen). Een interview kan dat niet,
 dus heeft het een expliciet budget: maximaal *n* beurten per feit, een totaalbudget, en een
 altijd zichtbare uitgang. Het gesprek moet op elk moment af te breken en later te hervatten
-zijn, en een half gesprek moet een geldig, incompleet profiel opleveren — niet een
+zijn, en een half gesprek moet een geldig, incompleet profiel opleveren en geen
 foutmelding. Vraagmoeheid is een echt risico: een gesprek dat langer duurt dan het formulier
 is een slechter formulier.
 
@@ -274,7 +274,7 @@ het gesprek niet blijkt te werken.
 
 ### 9.6 Vertrouwelijkheid
 
-Een gesprek lokt meer uit dan een formulier — dat is het punt, en het betekent dat er
+Een gesprek lokt meer uit dan een formulier. Daar is het om te doen, en het betekent dat er
 gevoeliger materiaal in het transcript belandt dan de invuller in een tekstvak zou zetten
 ("we weten eigenlijk niet of dit mag"). Het transcript is dossierinhoud en valt onder de
 bestaande deelrechten (`docs/rollen-en-rechten-advies.md`), maar de invuller moet **vóór** het
@@ -285,13 +285,13 @@ dan de invulhulp tot nu toe naar buiten stuurde.
 ## 10. Evalueren
 
 Een interview is moeilijker te evalueren dan een extractie: er is geen enkel juist antwoord.
-`eval_prompts.py` kan wel worden uitgebreid met **persona's** — een verzonnen project met een
-vastgelegd gouden profiel — waarbij een tweede model de invuller speelt en het gesprek
+`eval_prompts.py` kan wel worden uitgebreid met **persona's**: een verzonnen project met een
+vastgelegd gouden profiel, waarbij een tweede model de invuller speelt en het gesprek
 automatisch wordt gevoerd. Meet dan drie dingen, in deze volgorde van belang:
 
 1. **Geen sturing.** Hoe vaak stelt de interviewer een inhoudelijk antwoord voor op een
    feitvraag? Doelwaarde nul; dit is een blokkerende meting, geen kwaliteitsmeting.
-2. **Convergentie.** Komt het bevestigde profiel overeen met het gouden profiel — en let
+2. **Convergentie.** Komt het bevestigde profiel overeen met het gouden profiel? Let
    vooral op vals-negatieven op de toepasselijkheidsfeiten (een gemiste
    `persoonsgegevens: ja` is veel erger dan een gemiste vrije tekst).
 3. **Beurten tot afronding.** Ter vergelijking met de tijd die het formulier kost.

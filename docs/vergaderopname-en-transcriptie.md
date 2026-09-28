@@ -10,7 +10,7 @@ LanceDB-index.
 **Doel:** veel van de kennis die nodig is om een DPIA, AIIA of BIO-toets in te
 vullen zit in overleggen, niet in documenten. Een gebruiker moet een vergadering
 kunnen opnemen (of achteraf een audiobestand uploaden), waarna het transcript
-automatisch als brondocument beschikbaar is — zodat AI Modus, grounding en
+automatisch als brondocument beschikbaar is, zodat AI Modus, grounding en
 bronvermelding er zonder extra werk mee omgaan.
 
 **Non-goals (v1):**
@@ -20,7 +20,7 @@ bronvermelding er zonder extra werk mee omgaan.
   wel in het datamodel zodat het later kan.
 - **Geen live/streaming transcriptie** tijdens de vergadering. Alleen na afloop.
 - **Geen automatische AI-samenvatting** (besluiten, actiepunten). Logische
-  vervolgstap — zie fase 3 — maar niet nodig om het transcript bruikbaar te maken.
+  vervolgstap (zie fase 3), maar niet nodig om het transcript bruikbaar te maken.
 - **Geen aparte "vergaderingen"-entiteit** in het dossiermodel. Een transcript
   *is* een brondocument; dat scheelt een parallelle levenscyclus.
 
@@ -65,11 +65,11 @@ elkaar gekoppeld blijven zonder extra index.
 
 ### `backend/mediastore.py` (nieuw)
 
-Volgt `imagestore.py` op de voet — dat is bewust, want dat module lost de lastige
+Volgt `imagestore.py` op de voet. Dat is bewust, want die module lost de lastige
 dingen al op (atomic writes op de Azure Files SMB-mount, padtraversal via `_safe`
 uit `docstore`, sidecar-metadata naast de bytes).
 
-- `MEDIA_PATH` (default `./data/media`, prod `/data/media` — **hetzelfde volume**
+- `MEDIA_PATH` (default `./data/media`, prod `/data/media`: **hetzelfde volume**
   als `DOCS_PATH` en `IMAGES_PATH`)
 - `save_recording(user_sub, session_id, filename, mime, data, title) -> meta`
 - `load_recording(sub, id) -> (bytes, meta) | None`
@@ -97,7 +97,7 @@ wordt.
 
 ### `backend/transcribe.py` (nieuw)
 
-Naar het model van `llm.py:209` — één backend per proces, gekozen op env vars,
+Naar het model van `llm.py:209`: één backend per proces, gekozen op env vars,
 de rest van de code weet niet welke.
 
 ```python
@@ -123,7 +123,7 @@ def create_transcribe_backend() -> TranscribeBackend | None:
   `llm.py` (`client.audio.transcriptions.create(model=deployment, file=…,
   response_format="verbose_json")`). Aparte env vars, want het audio-deployment is
   zelden hetzelfde als het chat-deployment.
-- **`LocalWhisperBackend`** gebruikt `faster-whisper` (CTranslate2 — geen torch).
+- **`LocalWhisperBackend`** gebruikt `faster-whisper` (CTranslate2, geen torch).
   `WhisperModel(...).transcribe(path, language="nl", vad_filter=True)` is
   CPU-blokkerend en moet in `asyncio.to_thread`.
 - `None` betekent: feature uit. De endpoints geven dan **503 met een Nederlandse
@@ -134,7 +134,7 @@ def create_transcribe_backend() -> TranscribeBackend | None:
 
 Authenticatie is al globaal geregeld (`app = FastAPI(dependencies=[Depends(auth.require_user)])`);
 wat je toevoegt is **autorisatie** via `dossiers.resolve_session_access`, die de
-`user_sub` van de dossier-eigenaar teruggeeft — zodat een editor in een gedeeld
+`user_sub` van de dossier-eigenaar teruggeeft, zodat een editor in een gedeeld
 dossier in de map van de eigenaar schrijft.
 
 | Route | Minimale rol | Opmerking |
@@ -173,14 +173,14 @@ buiten.
 
    Die lege regels zijn functioneel: `rag.chunk_document` splitst op `\n\s*\n` met
    `CHUNK_TARGET_CHARS = 1600`. Zonder alinea-grenzen krijg je één blok tekst dat
-   op tekenposities wordt geknipt en midden in zinnen breekt — slecht voor
+   op tekenposities wordt geknipt en midden in zinnen breekt, wat slecht is voor
    grounding.
 4. `await _index_and_store(user_sub, session_id, doc_id=recording_id,
    name=f"{title} (transcript).txt", content=text,
    chunks=rag.chunk_document(text), uploaded_at=…)`
 5. `mediastore.update_meta(status="done", doc_id=…, transcript=…, segments=…)`;
    bij een exception `status="error", error=str(e)`. De taak mag nooit stil
-   sterven — dan blijft de frontend eeuwig pollen.
+   sterven, anders blijft de frontend eeuwig pollen.
 
 ### Opruimen
 
@@ -197,8 +197,8 @@ audio (de grootste blobs in het systeem) op het volume:
 Spiegelt de image-functies in `llmService.ts:300-366`:
 `uploadRecording(blob, sessionId, title, durationS)`, `fetchRecording(id, sessionId)`,
 `listRecordings(sessionId)`, `recordingAudioUrl(id, sessionId)`,
-`deleteRecording(id, sessionId)`. FormData zonder expliciete `Content-Type` —
-bestaande conventie, zodat de browser de multipart-boundary zet.
+`deleteRecording(id, sessionId)`. FormData zonder expliciete `Content-Type`
+(bestaande conventie), zodat de browser de multipart-boundary zet.
 
 ### `src/composables/useMeetingRecorder.ts` (nieuw)
 
@@ -229,7 +229,7 @@ De markup kopieert het brondocumenten-paneel:
   `<nldd-button variant="destructive" text="Opname stoppen">`, en voor het
   uploaden een `<nldd-button variant="secondary" size="sm">` die een verborgen
   `<input type="file" accept="audio/*" class="invulhulp-visually-hidden">`
-  aanklikt — een `<label>` eromheen werkt niet, want de echte knop zit in de
+  aanklikt; een `<label>` eromheen werkt niet, want de echte knop zit in de
   shadow root (zie de upload-knop in `DossierDetail.vue`)
 - status: `<nldd-banner variant="accent|success|critical" size="sm">` binnen
   `<div role="status" aria-live="polite">`
@@ -241,7 +241,7 @@ De markup kopieert het brondocumenten-paneel:
 - de opnametijd is **zichtbare tekst** ("Opname loopt — 04:12"), nooit alleen een
   rood bolletje; informatie mag niet uitsluitend via kleur
 - `aria-live="polite"` + `aria-atomic="true"` op de timerregel, maar niet op elke
-  seconde-update — kondig per 30 s aan, anders ratelt de screenreader
+  seconde-update. Kondig per 30 s aan, anders ratelt de screenreader
 - Nederlandse `aria-label`s, echte `<button>`-elementen (dus toetsenbord werkt),
   zichtbare focus
 - alleen design tokens: `var(--primitives-space-*)`, `var(--semantics-content-*)`;
@@ -260,12 +260,12 @@ optimistische patroon:
 3. pollen op `fetchRecording` (2 s, backoff naar 5 s, timeout ~30 min) tot `done`
    of `error`
 4. bij `done`: `content`, `chunkCount`, `ontology` invullen; bij `error`: de
-   placeholder verwijderen en `indexError` tonen — precies zoals de
+   placeholder verwijderen en `indexError` tonen, precies zoals de
    mislukte-PDF-route dat doet, zodat er nooit een spookdocument achterblijft
 
 `removeDocument` uitbreiden: bij `kind === 'transcript'` ook `deleteRecording`
 aanroepen. `SourceDocument` in `src/models/Assessment.ts` krijgt optionele velden
-`kind?: 'document' | 'transcript'`, `durationS?`, `recordedAt?` — optioneel, zodat
+`kind?: 'document' | 'transcript'`, `durationS?`, `recordedAt?`, allemaal optioneel, zodat
 bestaande localStorage-state geldig blijft.
 
 **Niet nodig:** `documents` zit niet in de payload van `schedulePush` en niet in
@@ -278,7 +278,7 @@ de opnames niet.
 Deze vier kosten anders gegarandeerd een debugsessie:
 
 1. **`nginx.conf:38` heeft `client_max_body_size 30m`.** Elke opname van meer dan
-   een paar minuten sneuvelt daarop met een 413 uit nginx — geen JSON, dus de
+   een paar minuten sneuvelt daarop met een 413 uit nginx. Dat is geen JSON, dus de
    frontend toont een nietszeggende fout. Verhogen naar ~`250m`. De vite dev-proxy
    verbergt dit volledig, dus lokaal merk je er niets van.
 2. **`Dockerfile.backend` (`python:3.13-slim`) installeert geen apt-packages.**
@@ -309,7 +309,7 @@ identificerend. Voor productiegebruik minimaal:
 - **Bewaartermijn**: overweeg de audio te wissen zodra het transcript er is
   (`DELETE_AUDIO_AFTER_TRANSCRIBE=true`); het transcript blijft. Dat verkleint de
   blootstelling aanzienlijk en scheelt opslag.
-- **Verwerkingslocatie**: de Azure-backend stuurt de opname naar Azure — alleen
+- **Verwerkingslocatie**: de Azure-backend stuurt de opname naar Azure. Alleen
   aanzetten in een tenant met de juiste verwerkersovereenkomst. De lokale
   whisper-backend houdt alles binnen de container. Dat is precies waarom de
   transcriptielaag pluggable is en niet hardgecodeerd op Azure.
@@ -334,14 +334,14 @@ identificerend. Voor productiegebruik minimaal:
 3. **RAG-koppeling**: draai AI Modus op een vraag waarvan het antwoord *alleen* in
    de opname zat. Verwacht: ingevuld antwoord en een `SourcePanel`-fragment met
    documentnaam "… (transcript).txt".
-4. **Bestandsupload**: upload een bestaande `.m4a` of `.mp3` — zelfde resultaat.
+4. **Bestandsupload**: upload een bestaande `.m4a` of `.mp3`, met hetzelfde resultaat.
 5. **Terugluisteren**: het `<audio>`-element in de opnamelijst speelt af (test
    daarmee meteen de query-param-autorisatie op `/audio`).
 6. **Grote body**: test via de nginx-container, **niet** via de vite dev-proxy, met
    een opname > 30 MB. Moet slagen na het verhogen van `client_max_body_size`.
 7. **Opruimen**: dossier verwijderen → `data/media/<sub>/` bevat niets meer van die
    sessie en `rag.get_indexed_doc_ids` kent het transcript-document niet meer.
-8. **Build**: `npm run build` (vue-tsc) én `npm run preview` — icoon- en
+8. **Build**: `npm run build` (vue-tsc) én `npm run preview`; icoon- en
    maskregressies zie je alleen in de productiebuild.
 9. **Toegankelijkheid**: tabben door het paneel met zichtbare focus, axe-scan
    zonder violations, tekstcontrast ≥ 4,5:1.

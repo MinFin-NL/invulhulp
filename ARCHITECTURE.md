@@ -18,7 +18,7 @@ mentions a limitation, the limitation is deliberate for now.
  │   ├─ assessmentStore (Pinia) ◄─► DossierDoc (Y.Doc)  │
  │   │        │ debounced PUT          │ y-websocket    │
  │   ├─ llmService (fetch + SSE)       │                │
- │   └─ exports (docx / JSON)          │                │
+ │   └─ exports (docx) + JSON import   │                │
  │                                                      │
  │ static: /forms/*.json, /beslishulp/ai-verordening.json│
  └────────┬─────────────────────────────┬───────────────┘
@@ -62,7 +62,7 @@ questions sent to it one prompt at a time.
 | `src/stores/assessmentStore.ts` | Dossiers, form state, answers, persistence, collab mirror |
 | `src/stores/authStore.ts` | Current user, roles, login/logout |
 | `src/models/Assessment.ts` | Types for forms, questions and answers (the form schema in TypeScript) |
-| `src/services/` | Backend clients (`llmService`, `dossierService`), loaders (`formLoader`, `beslishulpLoader`), exports (`wordExport`, `legacyDocxExport`, `dataExport`) |
+| `src/services/` | Backend clients (`llmService`, `dossierService`), loaders (`formLoader`, `beslishulpLoader`), exports (`wordExport`, `legacyDocxExport`, `ppmTemplateExport`), JSON import (`dataExport`) |
 | `src/collab/` | Real-time collaboration: Y.Doc codec, `DossierDoc`, WebSocket transport, presence |
 | `src/composables/` | Shared stateful logic: AI Modus, form progress, cross-form prefill |
 | `src/utils/` | Pure, tested logic: beslishulp engine, toepassingsscan, tracks, URNs, answer HTML, source matching |
@@ -151,7 +151,9 @@ system. It holds:
 Persistence has three layers:
 
 1. **Pinia persisted state (localStorage).** An offline cache that makes
-   startup instant.
+   startup instant. It belongs to one account: `adoptUser` wipes it when a
+   different account logs in, and `logout` flushes pending pushes and then
+   clears it (`clearLocalData`), IndexedDB copies included.
 2. **Server dossier store.** `schedulePush` sends the whole dossier with a
    debounced `PUT /api/dossiers/:id`, and the latest write wins.
    `loadFromServer` pulls the list at startup. The server copy is the durable
@@ -215,16 +217,19 @@ Exports are generated entirely on the client:
 
 - `wordExport.ts`: a styled `.docx` report, including images
 - `legacyDocxExport.ts`: the exact layout of the Intakeformulier 2.0 template
-- `dataExport.ts`: JSON export and import (`version: '1'`, carries `formUrn`)
+- `ppmTemplateExport.ts`: fills the official PPM Projectplan 2.0 `.docx`
+- `dataExport.ts`: import only, for JSON files saved by older versions
+  (`version: '1'`, carries `formUrn`). The JSON and Markdown exports were
+  removed.
 
 ### Styling
 
-`main.css` defines the project aliases (`--invulhulp-*`) on `:root`. The
-components currently use the RVO / Utrecht CSS component library
-(`@nl-rvo/component-library-css`, `rvo-*` / `utrecht-*` classes and
-`@nl-rvo/assets` icons). `CLAUDE.md` names the NLDD web-component design system
-(`<nldd-*>`) as the target for UI work. The two should be reconciled before
-this section is treated as final.
+The UI is built on the NLDD design system (`@nldd/design-system`, MinBZK):
+Lit web components (`<nldd-*>`) that render in a shadow root, so a Vue
+component's scoped CSS does not reach inside them. They are styled through
+their attributes and design tokens. `main.css` defines the project aliases
+(`--invulhulp-*`) on `:root`, and `vite.config.ts` tells the Vue compiler that
+`nldd-*` tags are custom elements. `CLAUDE.md` has the checklist for UI work.
 
 ## Backend
 
@@ -235,7 +240,11 @@ this section is treated as final.
 1. `FastAPI(dependencies=[Depends(auth.require_user)])`: every route requires a
    session, except `/api/auth/*`.
 2. `SessionMiddleware`: a signed, HttpOnly cookie holds the OIDC flow state and
-   the user identity. The browser never sees a token.
+   the user identity. The browser never sees a token. The cookie lasts
+   `SESSION_MAX_AGE` (12 hours), and `auth.session_user` re-reads the account
+   from Keycloak every `SESSION_REVALIDATE_SECONDS` (5 minutes): a deleted or
+   disabled account is logged out, and changed roles take effect. If Keycloak
+   can't be reached the session is kept and checked again later.
 3. `CORSMiddleware`.
 4. Routers: `auth`, `admin_users`, `dossiers`, `users`, `collab`. The LLM,
    document and image routes are defined directly in `main.py`.
@@ -260,9 +269,13 @@ The endpoints for documents, images and RAG are keyed by `session_id`.
 `dossiers.resolve_session_access(request, session_id, minimum_role)` connects
 that key to grants: it finds the dossier that owns the session, checks the
 caller's role, and returns the storage `sub` to read or write under. Any new
-endpoint keyed by `session_id` must go through it. The collab WebSocket makes
-the same check (editor or higher) against the session cookie. Viewers read
-through the REST snapshot instead.
+endpoint keyed by `session_id` must go through it, which only works because a
+`sessionId` is fixed when the dossier is created and belongs to one dossier
+(`put_dossier` refuses a claimed one with 409). For the same reason, vector
+store deletes always filter on `session_id` as well as `doc_id`. The collab
+WebSocket makes the same check (editor or higher) against the session cookie,
+repeats it every 30 seconds, and closes the socket when access is gone.
+Viewers read through the REST snapshot instead.
 
 ### LLM pipeline
 

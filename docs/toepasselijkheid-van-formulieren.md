@@ -1,6 +1,6 @@
 # Toepasselijkheid van formulieren: wanneer geldt een formulier niet?
 
-**Status: stap 2 en 3 van §5.8 zijn gebouwd** — zie §7 voor wat er staat, welke open punten
+**Status: stap 2 en 3 van §5.8 zijn gebouwd.** Zie §7 voor wat er staat, welke open punten
 daarbij zijn beslist en wat er nog niet is. Dit document legt daarnaast de oorspronkelijke
 vraag, analyse en opties vast. De aanleiding is de toegankelijkheidsverklaring, maar de vraag
 is algemener. §1–4 zijn de oorspronkelijke analyse op basis van dat ene formulier; **§5 is de
@@ -14,22 +14,22 @@ vrijwel elk IV-verzoek relevant is, maar dat houdt op bij de
 **toegankelijkheidsverklaring** (`toegankelijkheid.json`, spoor `ingebruikname`): een
 koppelvlak, een datapipeline of een stuk backoffice-software zonder gebruikersinterface valt
 er domweg niet onder. Een formulier dat zichtbaar leeg blijft omdat het niet van toepassing
-is, is niet te onderscheiden van een formulier dat vergeten is — en dat is precies het
+is, is niet te onderscheiden van een formulier dat vergeten is, en dat is precies het
 verschil dat een dossier zou moeten vastleggen.
 
 ## 2. Het juridische criterium is níet "publiek toegankelijk"
 
-De intuïtieve regel — "alleen bij publieke websites" — is te smal. Het **Tijdelijk besluit
+De intuïtieve regel ("alleen bij publieke websites") is te smal. Het **Tijdelijk besluit
 digitale toegankelijkheid overheid** (uitvoering van Richtlijn (EU) 2016/2102) geldt voor
 *websites en mobiele applicaties van overheidsinstanties*, en dat omvat **intranet en
 extranet**. Een besloten webapplicatie achter een login valt eronder: een medewerker met een
 schermlezer heeft dezelfde aanspraak als een burger. De overgangsuitzondering voor
 intranet/extranet zag alleen op content die vóór 23 september 2019 was gepubliceerd, tot aan
-een ingrijpende herziening — voor alles wat nu gebouwd wordt is die uitzondering dus dood.
+een ingrijpende herziening. Voor alles wat nu gebouwd wordt geldt die uitzondering dus niet meer.
 
 Het onderscheidende criterium is **wel of geen (web)gebruikersinterface**, niet publiek of
 intern. Publiek versus intern bepaalt alleen *waar* de verklaring wordt gepubliceerd
-(centraal register versus het intranet zelf) en hoe zwaar remediatie weegt — niet óf het
+(centraal register versus het intranet zelf) en hoe zwaar remediatie weegt, en niet óf het
 formulier van toepassing is.
 
 Buiten bereik vallen in de praktijk:
@@ -40,7 +40,7 @@ Buiten bereik vallen in de praktijk:
 - infrastructuur- en hardwaretrajecten
 
 Daarnaast kent het besluit inhoudelijke uitzonderingen (archieven, kaarten, content van
-derden) — die zitten al ín het formulier bij `tv_a.uitzonderingen` en zijn een andere laag
+derden): die zitten al ín het formulier bij `tv_a.uitzonderingen` en zijn een andere laag
 dan de vraag hier.
 
 Twee dingen die makkelijk misgaan bij het formuleren van een triggervraag:
@@ -56,18 +56,18 @@ Twee dingen die makkelijk misgaan bij het formuleren van een triggervraag:
 
 ## 3. Opties
 
-### Optie A — gate-sectie ín het formulier
+### Optie A: gate-sectie ín het formulier
 
 Een `Deel 0: Van toepassing?` bovenaan `toegankelijkheid.json`: één radio plus een verplichte
 motivatie bij "nee".
 
 - **Voor:** geen enkele codewijziging; werkt ook als het dossier geen intake heeft; legt de
   negatieve beslissing mét reden vast ("niet van toepassing, want koppelvlak zonder
-  gebruikersinterface") — dat is zelf een auditwaardig product.
+  gebruikersinterface"), en dat is zelf een auditwaardig product.
 - **Tegen:** per formulier opnieuw uitgevonden; het formulier blijft in de lijst staan alsof
   het openstaat, dus het lost het "leeg of vergeten"-probleem in het overzicht niet op.
 
-### Optie B — één scopevraag in de intake
+### Optie B: één scopevraag in de intake
 
 Een herbruikbare vraag (bijv. `intake_b.opleverproduct`, type `checkbox`): *"Wat levert dit
 project op?"* met opties als publieke website · besloten webapplicatie (login) · mobiele app ·
@@ -78,10 +78,10 @@ De eerste vier ⇒ toegankelijkheid van toepassing.
 
 - **Voor:** één vraag die meer dan één formulier kan gaten; sluit aan op het bestaande
   `crossFormMappings`-idee dat antwoorden hergebruikt worden.
-- **Tegen:** doet op zichzelf nog niets zichtbaars — heeft optie C nodig om effect te hebben,
+- **Tegen:** doet op zichzelf nog niets zichtbaars; heeft optie C nodig om effect te hebben,
   of blijft een signaal dat alleen de invuller zelf leest.
 
-### Optie C — `applicability` in `index.json` + drie buckets in het overzicht
+### Optie C: `applicability` in `index.json` + drie buckets in het overzicht
 
 Een veld per formulier in `public/forms/index.json`, bijvoorbeeld:
 
@@ -108,14 +108,14 @@ toepassing* (ingeklapt, met reden), naast de bestaande spoorindeling.
 **A + B nu, C zodra er een derde formulier is dat het nodig heeft.** Toegankelijkheid is het
 eerste formulier met een echte toepasselijkheidsvraag; `algoritmeregister` en
 `verwerkingsregister` zijn de waarschijnlijke volgende kandidaten. Zolang het bij één regel
-blijft, is de gate-sectie goedkoper en robuuster dan een generieke motor — en optie B kost
+blijft, is de gate-sectie goedkoper en robuuster dan een generieke motor, en optie B kost
 één intakevraag die later ongewijzigd de input van optie C is.
 
 Openstaande punten voor het besluit:
 
 - Moet "niet van toepassing" het formulier verbergen, of doorstrepen mét zichtbare motivatie?
-  (Voorkeur: het tweede — verbergen maakt de beslissing onvindbaar.)
-- Wat gebeurt er bij een dossier zonder ingevulde intake — alles tonen, of alles als
+  (Voorkeur: het tweede, want verbergen maakt de beslissing onvindbaar.)
+- Wat gebeurt er bij een dossier zonder ingevulde intake: alles tonen, of alles als
   "mogelijk relevant"?
 - Wordt de toepasselijkheidsbeslissing meegenomen in de PDF-export van het dossier?
 
@@ -123,7 +123,7 @@ Openstaande punten voor het besluit:
 
 De aanbeveling in §4 ("A + B nu, C later") ging uit van één regel. Zodra je dezelfde vraag
 stelt voor **persoonsgegevens** en **AI** vallen er niet één maar circa tien van de negentien
-formulieren onder een toepasselijkheidsregel — en dan is een generieke motor goedkoper dan
+formulieren onder een toepasselijkheidsregel, en dan is een generieke motor goedkoper dan
 tien losse gate-secties. Dit hoofdstuk beschrijft die motor.
 
 ### 5.1 Waar de gate hoort
@@ -140,7 +140,7 @@ dossier**. Redenen:
 - **Dossiers zonder intake** moeten ook werken.
 
 De vragen worden drie keer verspreid al gesteld (`quickscan.qs_d.persoonsgegevens`,
-`prescandpia.d1.1.1`, `prescandpia.d6.1.1`) — die blijven staan als inhoudelijke vragen, maar
+`prescandpia.d1.1.1`, `prescandpia.d6.1.1`). Die blijven staan als inhoudelijke vragen, maar
 zijn te laat en te versnipperd om de formulierlijst mee te sturen.
 
 ### 5.2 Precedent: hetzelfde patroon als de beslishulp
@@ -158,7 +158,7 @@ De beslishulp doet nu al precies dit soort werk op dossierniveau en levert het b
 getoond als een rij tags op de dossierpagina (bijv. `persoonsgegevens` · `bijzondere pg` ·
 `AI-systeem` · `besluit over personen` · `gebruikersinterface`), net zoals de beslishulp haar
 verdict toont. Die tags zijn tegelijk de verklaring waaróm bepaalde formulieren verplicht of
-niet van toepassing zijn — klikken op een tag zou de betrokken formulieren kunnen markeren.
+niet van toepassing zijn; klikken op een tag zou de betrokken formulieren kunnen markeren.
 Ze staan naast, niet in plaats van, de bestaande `domains`-facettags op de formulierkaarten:
 `domains` beschrijft wat een formulier ís, de kenmerken beschrijven wat dit dossier heeft.
 
@@ -188,7 +188,7 @@ formulieren declareren condities over die kenmerken:
 }
 ```
 
-Dat ontkoppelt vraagteksten van de motor — je mag vragen herformuleren zonder negentien
+Dat ontkoppelt vraagteksten van de motor: je mag vragen herformuleren zonder negentien
 formulieren te breken, en het omzeilt de bekende val dat vraag-ids de persistence key zijn.
 
 Kenmerken hebben **twee bronnen**, en dat onderscheid is wezenlijk:
@@ -199,7 +199,7 @@ Kenmerken hebben **twee bronnen**, en dat onderscheid is wezenlijk:
 | Uitkomst van een formulier | prescan-verdict, beslishulp-conclusie, BBN uit de quickscan | afgeleid, duurder, sterk bewijs |
 
 De DPIA hangt daarom aan de tweede soort (de prescan-uitkomst), niet aan de eerste. De scan
-bepaalt alleen of de *prescan zelf* zin heeft. Een kenmerk mag ook `onbekend` zijn — dat is
+bepaalt alleen of de *prescan zelf* zin heeft. Een kenmerk mag ook `onbekend` zijn; dat is
 een derde waarde, geen `false`.
 
 ### 5.4 Matrix
@@ -225,7 +225,7 @@ datakwaliteit áán; persoonsgegevens *zonder* AI is het spiegelbeeld. Eén enke
 AI?"-vlag volstaat dus niet.
 
 De laatste rij is een tweede toepasselijkheidsas (projectomvang). Zelfde motor, andere
-kenmerken — een extra argument om de motor generiek te bouwen in plaats van per formulier.
+kenmerken. Dat is een extra argument om de motor generiek te bouwen in plaats van per formulier.
 
 ### 5.5 Hoe je de vragen stelt
 
@@ -239,7 +239,7 @@ zit er een ingekochte component in die als "slim" of "AI" wordt aangeprezen? Eé
 AI-tak aan, en dan **doorverwijzen naar de bestaande beslishulp** voor het echte oordeel.
 
 Idem voor persoonsgegevens: niet *"verwerkt u persoonsgegevens?"* maar: staan er gegevens in
-die — ook indirect — naar een persoon te herleiden zijn (IP-adres, personeelsnummer,
+die, ook indirect, naar een persoon te herleiden zijn (IP-adres, personeelsnummer,
 dossiernummer, logging, pseudoniemen)? · gaat het (ook) om eigen medewerkers? · worden er
 gegevens uit een basisregistratie gebruikt?
 
@@ -254,7 +254,7 @@ officer); daar past een akkoordveld bij, ook als dat proces buiten de tool loopt
 
 Vier kaarttoestanden: **verplicht** · **mogelijk relevant** (aanbevolen, of kenmerk onbekend) ·
 **niet van toepassing** (ingeklapte groep, met reden) · **onbepaald** (scan niet gedaan → alles
-neutraal, met een banner die naar de scan wijst). Nooit verbergen — dat maakt de beslissing
+neutraal, met een banner die naar de scan wijst). Nooit verbergen, want dat maakt de beslissing
 onvindbaar, conform de voorkeur in §4.
 
 - **Scope-drift.** Als een herziene scan een formulier van n.v.t. naar verplicht laat springen,
@@ -267,7 +267,7 @@ onvindbaar, conform de voorkeur in §4.
 ### 5.7 Aansprakelijkheidsrand
 
 "Een DPIA is niet nodig" wordt in de praktijk gelezen als juridisch oordeel. Houd de
-formulering op *"op basis van je antwoorden lijkt X niet van toepassing — leg dit voor aan
+formulering op *"op basis van je antwoorden lijkt X niet van toepassing; leg dit voor aan
 FG/CISO"*, met de gebruikte kenmerken zichtbaar erbij. En neem de n.v.t.-verklaringen op als
 bijlage in de dossier-PDF ("Niet van toepassing verklaarde onderdelen, met motivatie"). Dat is
 het verschil tussen werk wegmoffelen en een verantwoordingsdocument.
@@ -277,7 +277,7 @@ het verschil tussen werk wegmoffelen en een verantwoordingsdocument.
 1. **Nu, zonder code:** een `Deel 0 – Van toepassing?`-sectie in `toegankelijkheid`, `iama`,
    `algoritmeregister` en `dataethiek`. Levert meteen de auditwaardige "nee, want…" op.
 2. **Scan + kenmerken:** dossiertegel, wizard, kenmerken in de store en als tags zichtbaar op
-   de dossierpagina — nog zonder effect op de formulierlijst.
+   de dossierpagina, nog zonder effect op de formulierlijst.
 3. **`applicability` in `index.json` + kaarttoestanden** (`FormIndexEntry` in `formLoader.ts`,
    `trackGroups` en de kaartweergave in `DossierDetail.vue`).
 4. **Overrides, driftdetectie, export-bijlage.**
@@ -291,13 +291,13 @@ al klaar.
   bevestigen? (Trager, maar aanzienlijk verdedigbaarder.)
 - Kenmerken op het dossierobject (netjes, raakt sync) of op een host-formulier (goedkoop,
   volgt de beslishulp)?
-- Zijn de kenmerktags klikbaar — filteren ze de formulierlijst, of zijn ze puur informatief?
+- Zijn de kenmerktags klikbaar: filteren ze de formulierlijst, of zijn ze puur informatief?
 
 ## 6. Raakvlakken
 
-- [`sporen-en-roadmap.md`](sporen-en-roadmap.md) §5 — waar `track`/`domains`/`index.json` in
+- [`sporen-en-roadmap.md`](sporen-en-roadmap.md) §5: waar `track`/`domains`/`index.json` in
   de code zitten; optie C haakt daar direct op aan.
-- [`beslishulp-integration-design.md`](beslishulp-integration-design.md) — de beslisboom van
+- [`beslishulp-integration-design.md`](beslishulp-integration-design.md): de beslisboom van
   de AI-verordening doet iets verwants (bepalen wat er geldt), maar op verplichtingenniveau
   binnen één formulier, niet op formulierniveau. Bij optie C is het de moeite waard te kijken
   of de twee patronen elkaar moeten kennen.
@@ -324,14 +324,14 @@ waar het antwoord niets aanstuurt.
   ingeklapte groep, met reden, en zijn met "Toch openen" gewoon te openen.
 - **Dossier zonder scan?** Alles blijft staan zoals voorheen; elk oordeel is dan `onbepaald`
   en er verschijnt geen enkele badge. De motor gokt nooit.
-- **Kenmerken op het dossierobject of op een host-formulier?** Host-formulier — de intake,
+- **Kenmerken op het dossierobject of op een host-formulier?** Host-formulier: de intake,
   via dezelfde constructie als de beslishulp (`TOEPASSINGSSCAN_HOST_FORM_ID`). Dat scheelt
   een wijziging in `dossierstore.py`, de grants en het CRDT-schema; een echte dossier-eigen
   plek blijft de nettere optie zodra er meer dossier-brede state komt.
 - **Mag de motor automatisch n.v.t. zetten?** Ja, maar alleen als *advies*: de tekst zegt dat
   het geen juridisch oordeel is, de reden staat erbij, en er is niets dat een formulier
   onbereikbaar maakt.
-- **Zijn de kenmerktags klikbaar?** Nee — voorlopig puur informatief.
+- **Zijn de kenmerktags klikbaar?** Nee, voorlopig puur informatief.
 - **Verplicht versus mogelijk relevant.** Een regel met `advisory: true` levert "mogelijk
   relevant" op ook als de conditie klopt. Dat is precies het DPIA-geval uit §5.3: alleen de
   prescan maakt een DPIA verplicht, persoonsgegevens op zichzelf niet.
@@ -342,14 +342,14 @@ De eerste versie stelde acht vragen in een wizard van negen schermen. Bij review
 helft van dat gewicht niets te sturen:
 
 - **Twee kenmerken zonder afnemer.** Geen enkele regel in `index.json` testte
-  `bijzondere_persoonsgegevens` of `grootschalig` — ze leverden alleen een tag op. De twee
+  `bijzondere_persoonsgegevens` of `grootschalig`; ze leverden alleen een tag op. De twee
   vragen die ze bepaalden (`bijzonder`, 9 opties; `schaal`, 5 opties) zijn vervallen. De
   prescan en de DPIA vragen die details wél op de plek waar ze werk doen. Een test bewaakt
   nu de omgekeerde richting: elk kenmerk in `KENMERK_IDS` moet door minstens één regel in
   `index.json` gelezen worden.
 - **De gate-machinerie is daarmee weg** (`alleenAls`, `questionApplies`, `visibleQuestions`).
   Dat ruimde ook een inconsistentie op: `visibleQuestions` toonde een gated vraag zolang de
-  gate `onbekend` was, terwijl `deriveKenmerken` de antwoorden dan juist weggooide — wie
+  gate `onbekend` was, terwijl `deriveKenmerken` de antwoorden dan juist weggooide: wie
   "Weet ik niet" antwoordde op persoonsgegevens kreeg twee schermen te zien die niets deden.
   En de voortgangsteller sprong ("vraag 2 van 6" werd "vraag 2 van 8" zodra de gate opende).
 - **Zes onafhankelijke vragen passen op één pagina.** Geen stappen, geen voortgangsbalk, geen
@@ -359,7 +359,7 @@ helft van dat gewicht niets te sturen:
   in drie formuleringen. Nu één zin op elk van de twee plekken waar iemand hem nodig heeft.
 
 Oude runs blijven geldig: `answers` is een blob, `deriveKenmerken` negeert antwoorden op
-vragen die niet meer bestaan, en de kenmerken worden live herleid — niet uit de opgeslagen
+vragen die niet meer bestaan, en de kenmerken worden live herleid, niet uit de opgeslagen
 snapshot.
 
 ### 7.3 Wat nog niet is gebouwd

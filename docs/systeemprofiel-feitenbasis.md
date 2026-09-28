@@ -1,6 +1,6 @@
 # Systeemprofiel: de feitenbasis onder de formulieren
 
-> **Status:** analyse + ontwerp — geen commitment. Vervolg op
+> **Status:** analyse + ontwerp, zonder toezeggingen. Vervolg op
 > `docs/normenkader-dekkingsanalyse.md` §8 en op `docs/toepasselijkheid-van-formulieren.md`
 > §5. Dit document beantwoordt een vraag die breder is dan dekking: *is een
 > formulierengedreven invulhulp eigenlijk wel de goede vorm, of pakken we het verkeerde
@@ -11,14 +11,14 @@
 
 Er is een normenkader (`../vendor/normenkader_v20_backup.json`, 481 controls). Teams hebben daar
 deelverzamelingen uit genomen en er formulieren van gemaakt. Die formulieren zitten in deze
-invulhulp — 22 stuks, 930 vragen. Het voelt achterstevoren om de *formulieren* aan te
+invulhulp: 22 stuks, 930 vragen. Het voelt achterstevoren om de *formulieren* aan te
 pakken in plaats van de *normen*. Tegelijk mist het normenkader de ethiek, en dat is de
 reden dat de kernvragen zijn toegevoegd.
 
 Twee vragen dus:
 
 1. Is formulier-eerst een verkeerde volgorde, en zijn de normen het echte object?
-2. Wat is de ontbrekende schakel — of is deze stap juist noodzakelijk om de organisatie
+2. Wat is de ontbrekende schakel? Of is deze stap juist noodzakelijk om de organisatie
    mee te krijgen?
 
 ## 2. Het normenkader is geen betere baas dan de formulieren
@@ -37,7 +37,7 @@ Kijk naar wat een control feitelijk *is* in v2.0:
 }
 ```
 
-Die drieslag — *vastgesteld? aantoonbaar? periodiek getoetst?* — is over het overgrote deel
+Die drieslag (*vastgesteld? aantoonbaar? periodiek getoetst?*) is over het overgrote deel
 van de 481 controls gesjabloneerd. Het normenkader beschrijft niet wat een goed systeem is;
 het is een machine die auditbeweringen genereert. Het selecteert op wat goedkoop als
 aanwezig/afwezig te verifiëren valt.
@@ -46,12 +46,12 @@ Daarmee is ook meteen verklaard waarom de ethiek ontbreekt. Dat is geen omissie 
 eigenschap van het genre: een normenkader kan alleen opnemen wat afvinkbaar is. Ethiek is
 betwist, contextueel en vraagt deliberatie; die komt er hoogstens in als procedurele proxy
 ("is er een IAMA gedaan?"), en dan is het weer een formulier. **Normen-eerst had dit niet
-opgelost — het had 481 stuks hetzelfde papierwerk opgeleverd, anders gerangschikt.**
+opgelost: het had 481 stuks hetzelfde papierwerk opgeleverd, anders gerangschikt.**
 
 De conclusie is niet "de formulieren zijn dus goed". De conclusie is dat *geen van beide*
 het echte object is.
 
-## 3. Het echte object is het systeem — en het schema staat er al
+## 3. Het echte object is het systeem, en het schema staat er al
 
 Lees `public/forms/kernvragen.json` terug met andere ogen. Het is geen formulier. Het is een
 **datamodel van een systeem**:
@@ -76,7 +76,7 @@ feiten.
 ### 3.1 De koppelingskosten zijn het signaal
 
 `public/forms/crossFormMappings.json` telt **351 mappings** tussen 22 formulieren, waarvan
-er al 81 uit de kernvragen komen — de op één na grootste bron, na de AIIA. Dat bestand is de
+er al 81 uit de kernvragen komen, de op één na grootste bron na de AIIA. Dat bestand is de
 met de hand geschreven, kwadratische versie van precies deze feitenbasis. Elke nieuwe
 formulier-vraag die iets herhaalt wat elders al staat, kost N nieuwe regels.
 
@@ -86,7 +86,7 @@ ophoudt te lonen en begint te belasten.
 ### 3.2 Dit verandert ook het antwoord op §8 van de dekkingsanalyse
 
 De dekkingsanalyse stelde niveau B voor: een veld `normenkader: ["CRA-01"]` op
-formuliervragen. Dat koppelt controls aan **vraag-id's** — een mapping die breekt bij elke
+formuliervragen. Dat koppelt controls aan **vraag-id's**: een mapping die breekt bij elke
 formulierherziening, en die precies de artefacten als anker neemt waarvan §2 zegt dat ze het
 object niet zijn. Controls koppelen aan **feiten over het systeem** is stabiel over
 formulierwijzigingen heen. Doe niveau B tegen de feitenbasis, niet tegen vraag-id's.
@@ -95,13 +95,13 @@ formulierwijzigingen heen. Doe niveau B tegen de feitenbasis, niet tegen vraag-i
 
 Op volgorde van hoeveel ze aan het gereedschap zouden veranderen.
 
-**1. Een werkings-as.** Het normenkader heeft `assurance: {opzet, bestaan, werking}` — overal
+**1. Een werkings-as.** Het normenkader heeft `assurance: {opzet, bestaan, werking}`, overal
 leeg. Alle 22 formulieren dekken alleen *opzet*. En juist de kernvragen waarvan het antwoord
 het meest telt (`kern.ongelijke_uitwerking`, `kern.monitoring`, `kern.exit`) zijn niet
 eerlijk te beantwoorden vóór ingebruikname. Ondertussen staan `evaluatie`,
 `voortgangsrapportage` en `risicoimpact` in `index.json` als placeholder zonder bestand. Dat
 is geen toeval: het gereedschap eindigt nu op het moment van de minste informatie. Ethiek
-die je één keer bij de start toetst en nooit herziet, is per constructie ritueel — hoe goed
+die je één keer bij de start toetst en nooit herziet, is per constructie ritueel, hoe goed
 de vragen ook zijn.
 
 **2. Een tegenpartij voor de ethische antwoorden.** Elk ander formulier heeft iemand met
@@ -116,7 +116,7 @@ naam eronder in plaats van een tekstveld.
 **3. Een product voor degene op wie het systeem wordt toegepast.** De invulhulp produceert nu
 22 documenten voor 22 functionarissen en nul voor de burger uit `kern.doelgroep` die er niet
 voor kan kiezen. Geen van de 481 controls produceert dat document ook. De kernvragen staan
-al in gewone taal — dat is precies het materiaal voor een **systeemverklaring**: wat dit
+al in gewone taal, en dat is precies het materiaal voor een **systeemverklaring**: wat dit
 systeem doet, wat het over u beslist, wat er gebeurt als het misgaat, hoe u bezwaar maakt.
 Samengesteld uit kernvragen + algoritmeregister + restrisico. Dat is het ene artefact dat het
 normenkader structureel niet kan opleveren.
@@ -125,17 +125,17 @@ De feitenbasis uit §5 is de voorwaarde voor alle drie: een systeemverklaring is
 rendering van feiten, een werkings-as is een feit met een tweede meetmoment, en een
 restrisicobesluit is een feit met een handtekening.
 
-## 5. Is formulier-eerst dan een verkeerde stap? Nee — en dit is de grens
+## 5. Is formulier-eerst dan een verkeerde stap?
 
-Ja, noodzakelijk, en niet als compromis. De formulieren zijn de **vertrouwensmunt van de
+Nee. Het is een noodzakelijke stap, en geen compromis. De formulieren zijn de **vertrouwensmunt van de
 organisatie**: de privacy-officer is verantwoordelijk voor een DPIA, niet voor "het
 gereedschap zegt dat AVG-04 groen is". Een normen-eerst gereedschap zou aan elke balie
 worden afgewezen, en terecht. Formulier-eerst is het bruggenhoofd: je ontmoet iedere
 eigenaar in zijn eigen artefact en verdient daarmee het recht op de gegevens eronder.
 
 Het wordt achterstevoren op precies één grens: **wanneer formulieren het datamodel zijn in
-plaats van de presentatielaag.** Daar staan we nu. Steek die grens bewust over — laat elk
-formulier exact zoals de eigenaar het herkent, en trek de feitenbasis eronder vandaan — dan
+plaats van de presentatielaag.** Daar staan we nu. Steek die grens bewust over: laat elk
+formulier exact zoals de eigenaar het herkent, en trek de feitenbasis eronder vandaan. Dan
 hoeft de organisatie nooit in te stemmen met een reorganisatie die ze zou weigeren.
 
 Kort door de bocht: het normenkader weet wat *aantoonbaar* moet zijn, de formulieren weten
@@ -157,7 +157,7 @@ Het ontwerp hieronder is een **generalisatie van bestaande code**, geen nieuw su
 - drie-waardigheid: `true | false | 'onbekend'`, met de expliciete regel dat `onbekend` géén
   synoniem is van `false`;
 - `KENMERK_SOURCE`: per kenmerk of het uit een **zelfverklaring** (kernvragen) of uit een
-  **instrument** (beslishulp) komt — herkomst, dus, en het onderscheid dat §5.3 van het
+  **instrument** (beslishulp) komt. Dat is herkomst, en het onderscheid dat §5.3 van het
   toepasselijkheidsdocument al maakt;
 - een pure, synchrone regelmachine (`evaluateApplicability`).
 
@@ -254,7 +254,7 @@ veld:
 ```
 
 `feitModus` is het bestaande `CrossFormMode`-onderscheid (`copy` letterlijk overnemen,
-`synthesize` via de ✦-knop herschrijven) — dat blijft, want twee formulieren die hetzelfde
+`synthesize` via de ✦-knop herschrijven), en dat blijft, want twee formulieren die hetzelfde
 feit gebruiken vragen er niet altijd in dezelfde vorm naar. Wat verdwijnt zijn de
 N×M-paren: zeven formulieren die `beschrijving` nodig hebben zijn zeven `feit`-annotaties in
 plaats van (bij groei) 21 mappings.
@@ -262,7 +262,7 @@ plaats van (bij groei) 21 mappings.
 **Eerlijk over de opbrengst:** alleen de `copy`-mappings die *hetzelfde feit* betreffen
 verdwijnen. Het merendeel van de 351 zijn `synthesize`-mappings tussen inhoudelijk
 verschillende vragen (AIIA → DPIA), en die blijven. De schatting van wat opgaat in feiten
-moet nog gemaakt worden — zie §11.
+moet nog gemaakt worden; zie §11.
 
 ## 9. Waarom afgeleid en niet opgeslagen
 
@@ -299,7 +299,7 @@ werkelijk het schema zijn niet, en stopt het hier.
 
 Fase 1 tot en met 3 zijn elk zelfstandig waardevol en in willekeurige volgorde te doen. De
 gaten uit de dekkingsanalyse (`bia`, informatiebeheer/openbaarheid, Awb) blijven gewoon
-nuttig werk, maar het is *dekking*, geen richting — en elk nieuw formulier op het huidige
+nuttig werk, maar het is *dekking*, geen richting, en elk nieuw formulier op het huidige
 model vergroot de koppeling die fase 1 juist afbouwt.
 
 ## 11. Wat dit document niet doet
@@ -319,6 +319,6 @@ model vergroot de koppeling die fase 1 juist afbouwt.
 1. **Sterft een dossier met het project, of blijft het systeem bestaan en moet het bij elke
    wijziging opnieuw beoordeeld worden?** Bij het tweede moet de feitenbasis het dossier
    overleven, en volgt fase 4 vrijwel vanzelf uit de rest.
-2. **Is er iemand die de ethische antwoorden wíl hebben** — een ethiekcommissie, een CIO die
-   ze leest — of zou een systeemverklaring vandaag geen lezer hebben? Dat bepaalt of §4-punt
+2. **Is er iemand die de ethische antwoorden wíl hebben** (een ethiekcommissie, een CIO die
+   ze leest), of zou een systeemverklaring vandaag geen lezer hebben? Dat bepaalt of §4-punt
    3 een bouwopdracht is of een lobby.

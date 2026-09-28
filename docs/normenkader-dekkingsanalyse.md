@@ -1,6 +1,6 @@
 # Dekkingsanalyse: normenkader v2.0 tegenover de formulieren
 
-> **Status:** analyse + brainstorm — geen commitment. Dit document zet de 481 controls uit
+> **Status:** analyse + brainstorm, zonder toezeggingen. Dit document zet de 481 controls uit
 > `../vendor/normenkader_v20_backup.json` naast de 22 formulier-JSON's, samen 930 vragen:
 
 | Formulier | Vragen | `derivation` | Dekt welk cluster |
@@ -27,7 +27,7 @@
 | kernvragen | 22 | harmonized | Triage |
 | euaiact | 20 | harmonized | AI |
 
-## 3. Gat 1 — vijf formulieren staan in de index maar bestaan niet
+## 3. Gat 1: vijf formulieren staan in de index maar bestaan niet
 
 In `public/forms/index.json` staan vijf entries **zonder `file`-sleutel**, met een
 `placeholder`-veld:
@@ -45,9 +45,9 @@ NIS2-continuïteitscontrols (`NIS2-0325` business continuity, `NIS2-08` ketenwee
 `NIS2-09` incidentdossier, `NIS2-0322`/`NIS2-05` meldtermijnen). De andere vier zijn
 projectbeheersing, niet normenkader.
 
-## 4. Gat 2 — drie clusters zonder enig formulier
+## 4. Gat 2: drie clusters zonder enig formulier
 
-### 4A. Openbaarheid en Woo — 19 controls, nul dekking
+### 4A. Openbaarheid en Woo: 19 controls, nul dekking
 
 `OPEN-0303` t/m `OPEN-0307`, `Woo-01` t/m `Woo-04`, `WEP-01`, `Who-01`, plus
 `OPEN-0308`–`OPEN-0310` (pas-toe-of-leg-uit, API-standaarden, open formaten) en `NORA-01`.
@@ -58,21 +58,21 @@ uitzonderingsgronden en herleidbaarheid, de beslistermijnen, en de **antihinderb
 informatie vernietigen om openbaarmaking te frustreren). Dat laatste is een systeemeis: als een
 nieuwe applicatie automatisch opschoont, moet je die vraag stellen.
 
-`toegankelijkheid.json` dekt uit dit cluster alleen `OPEN-0311` (WCAG). De IHH-toets — waar je
-Woo zou verwachten — noemt openbaarheid nergens.
+`toegankelijkheid.json` dekt uit dit cluster alleen `OPEN-0311` (WCAG). De IHH-toets, waar je
+Woo zou verwachten, noemt openbaarheid nergens.
 
-### 4B. Bestuursrecht / Awb — 12 controls, nul dekking
+### 4B. Bestuursrecht / Awb: 12 controls, nul dekking
 
 `AWB-0336` t/m `AWB-0343`, `AWB-09`, `AWB-10`, `Awb-05`, `Awb-06`: zorgvuldige voorbereiding en
 dossieropbouw, motivering en herleidbaarheid, belangenafweging en evenredigheid, reconstructie bij
 bezwaar en beroep, termijnen en bekendmaking, mandaat en bevoegdheid, hoorplicht, elektronische
 weg (art. 2:15), dwangsom bij niet tijdig beslissen.
 
-De IAMA raakt dit in deel 4 en `kern.bezwaar` stelt één vraag — maar allebei alleen als er een
+De IAMA raakt dit in deel 4 en `kern.bezwaar` stelt één vraag, maar allebei alleen als er een
 algoritme in het spel is. Een gewoon vergunning- of subsidiesysteem zonder AI komt geen enkele
 Awb-vraag tegen.
 
-### 4C. Datagovernance op organisatie-/domeinniveau — ± 30 van de 54 controls
+### 4C. Datagovernance op organisatie-/domeinniveau: ± 30 van de 54 controls
 
 `datakwaliteit` en `datasetregistratie` dekken het **objectniveau** (deze dataset, deze
 kwaliteitsdimensies). Wat niet gedekt is: datarollen en stewardship per gegevensdomein
@@ -88,7 +88,7 @@ kritieke gegevenselementen (`DG-DCAM-07`, `DG-PUBLIC-02`) en dataproduct-eigenaa
 charter zelf, maar níet voor de projectvragen die eruit volgen: *welk datadomein raakt dit
 project, wie is steward, staat het in de catalogus, is de lineage naar het besluit vastgelegd?*
 
-## 5. Gat 3 — de IHH-toets is het dunste formulier ten opzichte van zijn kader
+## 5. Gat 3: de IHH-toets is het dunste formulier ten opzichte van zijn kader
 
 68 controls in het archiefcluster, tegenover 18 inhoudelijke vragen. En dat is geen slordigheid:
 `ihhtoets.json` is `derivation: "harmonized"` en de `source.note` zegt expliciet dat de achttien
@@ -110,7 +110,7 @@ Wat het normenkader eist en de toets niet vraagt:
 | Woo / openbaarheid | zie §4A | niets |
 
 **Advies: verleng de IHH-toets niet in deel B–D.** Dan wijk je af van het CDIO-origineel en
-verlies je de waarde van `harmonized` — dezelfde reden waarom Prescan DPIA en DPIA aparte
+verlies je de waarde van `harmonized`. Dat is ook de reden waarom Prescan DPIA en DPIA aparte
 formulieren zijn, en waarom `restrisico` naast de DPIA staat in plaats van erin. De verdieping
 hoort in een eigen, `derived` formulier.
 
@@ -132,7 +132,7 @@ hoort in een eigen, `derived` formulier.
 Vijf sporen, van klein naar groot. Ze zijn niet exclusief, maar de volgorde hieronder is wél de
 volgorde waarin ik ze zou doen.
 
-### Stap 1 — De losse vragen bijplaatsen (klein, direct waardevol)
+### Stap 1: de losse vragen bijplaatsen (klein, meteen nuttig)
 
 De acht regels uit §6 zijn samen ± 15 vragen in vier bestaande formulieren. Geen nieuw bestand,
 geen codewijziging, geen index-regel. Dit is de goedkoopste dekkingswinst die er is en het maakt
@@ -142,37 +142,37 @@ meteen duidelijk hoe zwaar het bijhouden van de mapping gaat wegen.
 (bijvoorbeeld `normenkader: ["CRA-01"]`), zodat de dekking machinaal te controleren is? Als het
 antwoord ja is, moet dat *vóór* stap 1 in het schema staan, anders doen we het twee keer.
 
-### Stap 2 — `bia.json` bouwen
+### Stap 2: `bia.json` bouwen
 
 Staat al als `placeholder: "onzeker"` in de index, dekt 22 NIS2/CRA-controls, en is inhoudelijk
 het best afgebakende ontbrekende formulier (RTO/RPO per proces, ketenafhankelijkheden,
 continuïteitsscenario's, incidentmeldroute en -termijnen). Applicability koppelen aan de
-BIV-beschikbaarheidsscore uit de Quickscan zou logisch zijn — dat is precies het soort
+BIV-beschikbaarheidsscore uit de Quickscan zou logisch zijn. Dat is precies het soort
 cross-form-koppeling dat `crossFormMappings.json` al ondersteunt.
 
-### Stap 3 — Nieuw formulier "Informatiebeheer en openbaarheid"
+### Stap 3: nieuw formulier "Informatiebeheer en openbaarheid"
 
 Het grootste inhoudelijke gat (§4A + §5 samen: ± 50 ongedekte controls) in één `derived`
 formulier, track `initiatie`, naast de IHH-toets in plaats van erin. Voorlopige indeling:
 
-- **A. Verblijfplaatsen** — waar komt de informatie te staan, inclusief informatie buiten formele
+- **A. Verblijfplaatsen**: waar komt de informatie te staan, inclusief informatie buiten formele
   systemen (`IHH-LC-04`)
-- **B. Selectie en waardering** — selectielijstproces, hotspots, vernietigingsverklaringen
-- **C. Metadata (MDTO)** — de tien MDTO-velden concreet per informatieobject
-- **D. Overbrenging** — moment, e-depot, ED3/OAIS, verkorte termijn Archiefwet 2021
-- **E. Openbaarheid (Woo)** — actieve openbaarmaking van de zeventien categorieën, lakproces en
+- **B. Selectie en waardering**: selectielijstproces, hotspots, vernietigingsverklaringen
+- **C. Metadata (MDTO)**: de tien MDTO-velden concreet per informatieobject
+- **D. Overbrenging**: moment, e-depot, ED3/OAIS, verkorte termijn Archiefwet 2021
+- **E. Openbaarheid (Woo)**: actieve openbaarmaking van de zeventien categorieën, lakproces en
   uitzonderingsgronden, beslistermijnen, antihinderbepaling
-- **F. Hergebruik en open standaarden** — Who, pas-toe-of-leg-uit, open formaten
+- **F. Hergebruik en open standaarden**: Who, pas-toe-of-leg-uit, open formaten
 
 **Open vraag:** is dit één formulier of twee (archief vs. openbaarheid)? Eén formulier is
-samenhangender — de Woo-vragen leunen op de metadata-vragen — maar wordt met ± 45 vragen fors, en
+samenhangender (de Woo-vragen leunen op de metadata-vragen), maar wordt met ± 45 vragen fors, en
 openbaarheid heeft een andere eigenaar dan archivering. Ik neig naar **één** formulier met een
 duidelijke deel-E-knip, omdat de invulhulp per dossier werkt en niet per afdeling.
 
-### Stap 4 — Nieuw formulier "Datagovernance in het project"
+### Stap 4: nieuw formulier "Datagovernance in het project"
 
-De ± 30 ongedekte datagovernance-controls uit §4C, maar **strikt projectgebonden** geformuleerd —
-niet het organisatiecharter dat we in juli bewust parkeerden. Applicability op de bestaande tag
+De ± 30 ongedekte datagovernance-controls uit §4C, maar **strikt projectgebonden** geformuleerd,
+en dus niet als het organisatiecharter dat we in juli bewust parkeerden. Applicability op de bestaande tag
 `eigen_dataset`, net als datakwaliteit en datasetregistratie. Kandidaat-secties: datadomein en
 steward, catalogus en gegevenswoordenboek, lineage naar besluit en publicatie, open data en FAIR,
 DGA/Data Act, kritieke gegevenselementen.
@@ -181,26 +181,26 @@ DGA/Data Act, kritieke gegevenselementen.
 formulier met twee secties beter dan een derde datavormulier. Dat vraagt een vragen-voor-vragen
 vergelijking die dit document nog niet gemaakt heeft.
 
-### Stap 5 — Awb-vragen: eigen formulier of kernvragen-uitbreiding?
+### Stap 5. Awb-vragen: eigen formulier of kernvragen-uitbreiding?
 
 De twaalf Awb-controls gaan over besluitvorming, niet over een systeem. Twee routes:
 
 1. **Een klein formulier "Behoorlijk bestuur"** (± 12 vragen), applicability op een nieuwe tag
-   `besluit_over_personen` — die bestaat al in `kernvragen.json` (`kern.besluit`) en wordt nu
+   `besluit_over_personen`. Die bestaat al in `kernvragen.json` (`kern.besluit`) en wordt nu
    alleen door `aiia`, `iama` en `dataethiek` gebruikt.
 2. **Uitbreiden van de kernvragen** met twee of drie vragen over mandaat, termijnen en bezwaar,
    en de rest overlaten aan de IAMA.
 
 Route 1 is inhoudelijk vollediger; route 2 is goedkoper en voorkomt dat een projectleider zonder
 AI ineens een extra formulier krijgt. Ik neig naar **route 1**, omdat de Awb juist geldt voor de
-niet-AI-besluiten die nu helemaal buiten beeld vallen — maar dit is echt een keuze voor de
+niet-AI-besluiten die nu helemaal buiten beeld vallen. Dit is wel een keuze voor de
 inhoudelijk eigenaar, niet voor de bouwer.
 
 ## 8. De onderliggende vraag: willen we de mapping expliciet maken?
 
 Alle bovenstaande stappen dekken gaten, maar geen ervan maakt de dekking *aantoonbaar*. Het
 normenkader heeft daar de velden al voor (`dependsOn`, `evidencedBy`, `bioOverheid`, `mdto`,
-`legalRefs` — nu vrijwel allemaal leeg) en `connections` bevat 32 kant-en-klare thema's die
+`legalRefs`, nu vrijwel allemaal leeg) en `connections` bevat 32 kant-en-klare thema's die
 controls uit verschillende kaders koppelen, precies zoals `crossFormMappings.json` dat voor
 formuliervragen doet.
 
@@ -212,7 +212,7 @@ Drie ambitieniveaus:
 | **B. Eén richting** | veld `normenkader: ["UID", …]` op formuliervragen + een script dat ongedekte controls rapporteert | klein: schemaveld + ± 100 regels script |
 | **C. Twee richtingen** | normenkader wordt een eigen bron in de app, met een dekkingsrapport per dossier en `evidencedBy` gevuld vanuit ingevulde antwoorden | groot: nieuw datamodel, UI, onderhoud |
 
-Niveau B lijkt me de juiste eerste zet, en zou eigenlijk vóór stap 1 moeten komen — anders
+Niveau B lijkt me de juiste eerste zet, en zou eigenlijk vóór stap 1 moeten komen, anders
 annoteren we later handmatig terug wat we nu gratis kunnen meenemen.
 
 Twee dingen die niveau B ook zou opleveren: `termMap` (31 begrippen met synoniemen) is direct

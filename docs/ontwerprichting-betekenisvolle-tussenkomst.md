@@ -1,6 +1,6 @@
 # Ontwerprichting: betekenisvolle menselijke tussenkomst in de invulhulp
 
-> **Status:** ontwerprichting — geen commitment, geen bouwbesluit. Dit document is het vervolg
+> **Status:** ontwerprichting, zonder toezeggingen of bouwbesluit. Dit document is het vervolg
 > op [`systeemanalyse-invulhulp-in-het-stelsel.md`](systeemanalyse-invulhulp-in-het-stelsel.md)
 > §3.2 en §3.4: die beschrijven *dat* de tool mensen tot stempelmachine kan maken, dit document
 > beschrijft *wat je daaraan doet*. §1–2 zijn de probleemstelling, §3 de optieruimte (inclusief
@@ -11,8 +11,8 @@
 
 ## 1. Wat een stempelmachine precies is
 
-Een *stempelmachine* — in AVG-termen: het ontbreken van **betekenisvolle menselijke
-tussenkomst** — is een mens wiens aanwezigheid aan een eis voldoet zonder het oordeel te
+Een *stempelmachine* (in AVG-termen: het ontbreken van **betekenisvolle menselijke
+tussenkomst**) is een mens wiens aanwezigheid aan een eis voldoet zonder het oordeel te
 leveren waarvoor die eis geschreven is.
 
 Er zijn vier voorwaarden voor, en ze zijn alle vier nodig:
@@ -27,16 +27,14 @@ Er zijn vier voorwaarden voor, en ze zijn alle vier nodig:
 Elke ingreep in §4 valt aan op ten minste één van deze vier. Een maatregel die er geen van
 raakt is versiering, hoe goedbedoeld ook. Gebruik deze tabel als toets bij elk volgend voorstel.
 
-## 2. De recursie — en waarom die de scherpste test is
-
-Dit is geen bijkomstigheid maar de kern van de zaak:
+## 2. De recursie, en waarom die de scherpste test is
 
 > **Een tool die ambtenaren tot stempelmachine maakt, terwijl hij menselijk toezicht op
 > AI-systemen documenteert, voert precies de fout uit die hij toetst.**
 
 AI-verordening art. 26 en AVG art. 22 bestaan om stempelmachines in *uitgerolde* systemen te
-voorkomen. De voorwaarden voor echt toezicht dáár — begrijpen wat je beoordeelt, kunnen
-afwijken, gevolgen dragen, tijd hebben — zijn exact dezelfde vier als hierboven.
+voorkomen. De voorwaarden voor echt toezicht dáár (begrijpen wat je beoordeelt, kunnen
+afwijken, gevolgen dragen, tijd hebben) zijn exact dezelfde vier als hierboven.
 
 Daaruit volgt een goedkope, harde en ongemakkelijke zelftest: **laat de invulhulp de
 toezichtvragen uit `iama.json` en `aiia.json` op zichzelf beantwoorden.** Begrijpt de mens in
@@ -46,7 +44,7 @@ zijn eigen grondrechtentoets niet doorstaat, heeft geen positie om hem af te nem
 ## 3. De optieruimte
 
 Gegroepeerd naar het *mechanisme* waar ze op steunen, niet naar feature. Ook wat is afgevallen
-staat erbij — anders komt het over een half jaar terug als een nieuw idee.
+staat erbij, anders komt het over een half jaar terug als een nieuw idee.
 
 ### 3.1 Cognitief
 
@@ -67,12 +65,12 @@ staat erbij — anders komt het over een half jaar terug als een nieuw idee.
   vinden tussen antwoord 12 en antwoord 407, het sterkste bezwaar formuleren dat de advocaat van
   een burger zou maken, benoemen wat het antwoord gemakshalve weglaat.
 - **Twee-pettenregel.** Wie met AI heeft gesteld, is niet degene die bevestigt.
-- **Roulerende advocaat van de duivel** in het dossier, bemenst door een collega-projectleider —
-  geen compliance-functionaris.
+- **Roulerende advocaat van de duivel** in het dossier, bemenst door een collega-projectleider
+  en niet door een compliance-functionaris.
 
 ### 3.3 Aandacht en economie
 
-- **Herkomst per antwoord** — gegenereerd-ongewijzigd / gegenereerd-bewerkt / mensgeschreven —
+- **Herkomst per antwoord**: gegenereerd-ongewijzigd / gegenereerd-bewerkt / mensgeschreven,
   en de tool stuurt het uur van de toetser naar waar het het meest waard is.
 - **Steekproefaudits met gepubliceerde trefkans.** Alles lezen kan niet; lees 5% tot op het bot
   en publiceer wat je vindt. Uitgerekend MinFin kent de economie van de aselecte controle.
@@ -90,7 +88,7 @@ staat erbij — anders komt het over een half jaar terug als een nieuw idee.
 
 ### 3.5 Structureel
 
-- **Asymmetrische automatisering** — automatiseer het administratieve, verbied het op het
+- **Asymmetrische automatisering**: automatiseer het administratieve, verbied het op het
   afwegende.
 - **Omkering:** maak de systeemverklaring het primaire artefact en genereer de 22 formulieren
   daaruit.
@@ -109,7 +107,7 @@ staat erbij — anders komt het over een half jaar terug als een nieuw idee.
 
 De eerste drie zijn goedkoop genoeg voor dit kwartaal.
 
-### 4.1 Keer de rol van de AI om — mens eerst, model spreekt tegen
+### 4.1 Keer de rol van de AI om: mens eerst, model spreekt tegen
 
 > Breekt **V1**. Kosten: een flowwijziging en een promptherziening; de infrastructuur staat er.
 
@@ -121,7 +119,7 @@ het model, in drie vaste bewegingen:
 3. wat je weglaat dat een criticus als eerste zou noemen.
 
 Dit is de grootste enkele hefboom in de lijst, omdat het het model verandert van *datgene wat
-het denken wegneemt* in *datgene wat erom vraagt* — en omdat het de werkelijke meerwaarde van
+het denken wegneemt* in *datgene wat erom vraagt*, en omdat het de werkelijke meerwaarde van
 het model gebruikt. Consistentie over antwoorden heen is het enige wat geen mens in dit proces
 kan. [`systeemprofiel-feitenbasis.md`](systeemprofiel-feitenbasis.md) §3 zag dit al: de
 tegenstrijdigheid zit tussen twee *feiten*, dus ze is deterministisch te detecteren en het model
@@ -135,14 +133,14 @@ antwoord voor op een feitvraag, ook niet verpakt als vraag.
 
 > Breekt **V1**. Kosten: één veld in het formulierschema plus beleid.
 
-Voeg aan het schema een veld toe — `modus: extractief | afwegend`. Op extractieve vragen (welke
+Voeg aan het schema een veld toe: `modus: extractief | afwegend`. Op extractieve vragen (welke
 systemen, welke bewaartermijn, welke basisregistraties) mag het model vrij stellen; dat is
-administratief werk en dat automatiseren is pure winst. Op afwegende vragen — `kern.waarden`,
-`kern.ongelijke_uitwerking`, `kern.bezwaar`, de proportionaliteitsdelen van de IAMA — **mag het
+administratief werk en dat automatiseren is pure winst. Op afwegende vragen (`kern.waarden`,
+`kern.ongelijke_uitwerking`, `kern.bezwaar`, de proportionaliteitsdelen van de IAMA) **mag het
 model vragen en tegenspreken, nooit antwoorden.**
 
 Dat haalt de ergste faalwijze uit het systeem: de machine die de ethiekparagraaf schrijft. En
-het legt in het product zelf vast wat deze organisatie wel en niet delegeerbaar acht — een
+het legt in het product zelf vast wat deze organisatie wel en niet delegeerbaar acht: een
 bestuurlijke uitspraak die het waard is om expliciet te hebben.
 
 ### 4.3 Verander het scorebord
@@ -155,13 +153,13 @@ stempelmachine: hij stijgt het snelst als er niet wordt nagedacht.
 Meet in plaats daarvan, op de plek waar nu het percentage staat:
 
 - gevonden tegenstrijdigheden, en hoe ze zijn opgelost;
-- openstaande `onbekend`-antwoorden (de code behandelt onbekend al níet als nee — maak dat
+- openstaande `onbekend`-antwoorden (de code behandelt onbekend al níet als nee; maak dat
   zichtbaar in plaats van gênant);
 - **besluiten die door een assessment zijn veranderd.**
 
 Die laatste is de eerlijke maat van het hele regime. Een verantwoordingsstelsel dat nooit een
 ontwerp verandert is theater, en deze tool is het eerste in het departement dat dat met data
-kan aantonen — in beide richtingen. Het is bovendien de maat die, zodra de leiding erop kijkt,
+kan aantonen, in beide richtingen. Het is bovendien de maat die, zodra de leiding erop kijkt,
 al het andere gedrag meetrekt.
 
 ### 4.4 Maak er het instrument van de toetser van
@@ -183,16 +181,16 @@ waardevolste werk in de repo dat nu niet op de roadmap staat.
 > Breekt **V4** (deels **V3**). Kosten: klein; `restrisico.json` staat er al.
 
 Verander wat deel D vraagt: een zin in de eigen woorden van de tekenaar die benoemt wélke
-mensen wélke restschade dragen en om welke reden — gerouteerd vanuit `kern.waarden`,
+mensen wélke restschade dragen en om welke reden, gerouteerd vanuit `kern.waarden`,
 `kern.ongelijke_uitwerking` en `kern.bezwaar`. Met naam, in eigen woorden, en waar het mag:
 openbaar.
 
-Daarmee wordt ethiek een besluit met een naam eronder in plaats van een tekstveld — precies wat
+Daarmee wordt ethiek een besluit met een naam eronder in plaats van een tekstveld. Dat is precies wat
 [`systeemprofiel-feitenbasis.md`](systeemprofiel-feitenbasis.md) §4.2 al bepleit.
 
 ### 4.6 Maak assessments achteraf falsifieerbaar
 
-> Breekt **V3** — de enige voorwaarde die met ontwerp aan de voorkant niet te raken is.
+> Breekt **V3**, de enige voorwaarde die met ontwerp aan de voorkant niet te raken is.
 
 De werkings-as, met tanden: als er een incident, een bezwaar of een monitoringbevinding
 binnenkomt, koppel die aan het antwoord dat hem had moeten voorzien. Zodra een DPIA later
@@ -217,8 +215,7 @@ Je kunt mensen niet tot nadenken verplichten. Je kunt alleen **het eerlijke pad 
 dan het rituele pad.**
 
 De goedkoopste route door de tool is nu: AI Modus → export → tekenen. Elk voorstel hierboven is
-een manier om een andere route de goedkoopste te maken — niet door het ritueel duurder te maken,
-maar door het denkpad sneller, beter ondersteund en beter beloond te maken dan het nu is.
+een manier om een andere route de goedkoopste te maken. Dat gebeurt door het denkpad sneller, beter ondersteund en beter beloond te maken dan het nu is, zonder het ritueel duurder te maken.
 
 En de toets of dat gelukt is staat in §2: laat de invulhulp zijn eigen toezichtvragen
 beantwoorden, en kijk of het antwoord standhoudt.

@@ -9,7 +9,7 @@ Een koppeling heeft een **modus**:
 | `copy` | Het antwoord wordt **letterlijk overgenomen**, en bij het openen van het doelformulier automatisch ingevuld zolang de vraag nog leeg is. Geen AI. Werkt ook voor keuzevragen en tabellen. | De twee vragen stellen dezelfde vraag |
 | `synthesize` (standaard) | Het bronantwoord staat naast de vraag; met **✦ AI-suggestie** herschrijft het model het naar de context van de doelvraag. Alleen bij tekstvragen. | De vragen raken elkaar, maar vragen iets anders |
 
-Een `copy`-koppeling naar een keuzevraag waarvan het bronantwoord geen geldige optie is (of een tabel met andere kolommen) vult niets in — dan toont het paneel alleen het bronantwoord ter informatie.
+Een `copy`-koppeling naar een keuzevraag waarvan het bronantwoord geen geldige optie is (of een tabel met andere kolommen) vult niets in; dan toont het paneel alleen het bronantwoord ter informatie.
 
 **Totaal: 276 koppelingen** verdeeld over 58 formulierparen, waarvan 45 in `copy`-modus.
 
@@ -242,9 +242,9 @@ Doelvragen volgen het PPM-Projectplan 2.0 (september 2026).
 
 ## Nieuwe formulieren (juli 2026)
 
-De zeven formulieren die in juli 2026 zijn toegevoegd — Restrisico-acceptatie, Datakwaliteit-assessment,
+De zeven formulieren die in juli 2026 zijn toegevoegd (Restrisico-acceptatie, Datakwaliteit-assessment,
 Dataset-registratie, Data-ethiektoets, Algoritmeregister-publicatie, Verwerkingsregister en
-Toegankelijkheidsverklaring — zijn met **65 koppelingen** aan de bestaande formulieren gehangen.
+Toegankelijkheidsverklaring) zijn met **65 koppelingen** aan de bestaande formulieren gehangen.
 Dat is bewust: nul koppelingen was destijds het meetbare symptoom dat een formulier niet in het
 dossiermodel paste (zie [`sporen-en-roadmap.md`](sporen-en-roadmap.md) §3).
 
@@ -259,7 +259,7 @@ dossiermodel paste (zie [`sporen-en-roadmap.md`](sporen-en-roadmap.md) §3).
 | Toegankelijkheidsverklaring | AIIA (1), PSA (1) | 2 |
 
 De zwaartepunten volgen de inhoudelijke logica: het **Verwerkingsregister** vult zich vrijwel geheel
-uit de DPIA (doeleinden, categorieën, ontvangers, doorgifte, bewaartermijnen, maatregelen — de
+uit de DPIA (doeleinden, categorieën, ontvangers, doorgifte, bewaartermijnen, maatregelen: de
 artikel 30-elementen staan daar al), en de **Algoritmeregister-publicatie** uit de AIIA en de Model
 Card, met als voornaamste bewerking het herschrijven naar begrijpelijke taal voor een openbaar
 register. De **Toegankelijkheidsverklaring** heeft er maar twee: zij gaat over de gebruikersinterface
@@ -274,7 +274,7 @@ Twee koppelingen lopen tussen de nieuwe formulieren onderling: Datakwaliteit →
 
 Het IAMA (Impact Assessment Mensenrechten en Algoritmes) stond met 83 vragen volledig los: nul
 koppelingen, in geen van beide richtingen. Dat is nu rechtgezet met **60 koppelingen**, alle in
-`synthesize`-modus — het IAMA stelt zijn vragen in mensenrechtentermen, dus antwoorden uit de AIIA
+`synthesize`-modus: het IAMA stelt zijn vragen in mensenrechtentermen, dus antwoorden uit de AIIA
 en de DPIA moeten daarheen worden herschreven en kunnen niet letterlijk worden overgenomen.
 
 **IAMA als doelformulier (52 koppelingen)**
@@ -301,7 +301,7 @@ en de DPIA moeten daarheen worden herschreven en kunnen niet letterlijk worden o
 
 De Informatiehuishoudingstoets bij IV-verzoeken hangt met **12 koppelingen** aan de rest van het
 dossier. Het zwaartepunt ligt in deel A: de algemene gegevens en de bewaarcontext staan elders al,
-en de achttien toetsvragen zelf gaan over functionaliteit van de beoogde applicatie — die kan geen
+en de achttien toetsvragen zelf gaan over functionaliteit van de beoogde applicatie, en die kan geen
 ander formulier beantwoorden.
 
 **IHH-toets als doelformulier (10 koppelingen)**
@@ -323,7 +323,7 @@ ander formulier beantwoorden.
 
 De koppelingen naar de keuzevragen (rubricering, vraag 17 en 18) staan in `copy`-modus zonder dat
 de bronwaarde een geldige optie is: het paneel toont het bronantwoord dan ter informatie naast de
-vraag, wat hier precies de bedoeling is — de IHH-professional leest de PSA-tekst mee bij het
+vraag, wat hier precies de bedoeling is: de IHH-professional leest de PSA-tekst mee bij het
 beantwoorden, maar de keuze blijft aan de invuller.
 
 ---
@@ -331,8 +331,8 @@ beantwoorden, maar de keuze blijft aan de invuller.
 ## Cloudtoets (augustus 2026)
 
 De cloudtoets (Handreiking gebruik clouddienst) hangt met **14 koppelingen** aan het dossier. De
-zwaartepunten zijn de gegevensverwerking — rubricering, basisregistratie en bijzondere
-persoonsgegevens staan al in de Quickscan BIO2 en de prescan DPIA — en de exitstrategie, die de
+zwaartepunten zijn de gegevensverwerking (rubricering, basisregistratie en bijzondere
+persoonsgegevens staan al in de Quickscan BIO2 en de prescan DPIA) en de exitstrategie, die de
 PSA al beschrijft.
 
 **Cloudtoets als doelformulier (13 koppelingen)**

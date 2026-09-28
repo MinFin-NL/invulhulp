@@ -1,14 +1,14 @@
 # Sporen: de indeling, en de roadmap van wat er nog ontbreekt
 
-> **Status:** de indeling is doorgevoerd (juli 2026). De roadmap in §4 is een voorstel —
-> geen commitment.
+> **Status:** de indeling is doorgevoerd (juli 2026). De roadmap in §4 is een voorstel,
+> zonder toezeggingen.
 >
-> **Herzien 12 augustus 2026 — de sporen zijn hernoemd naar de projectfasering van de
+> **Herzien 12 augustus 2026: de sporen zijn hernoemd naar de projectfasering van de
 > organisatie** (zie `docs/nieuwe_indeling.md`): `intake` → `aanbieding` → `initiatie` →
 > `uitvoering` → `afronding`. Intake en aanbieding zijn géén fase; ze staan wel in de
 > tijdlijn maar krijgen geen fasenummer. Het spoor `beheer` is vervallen: `afronding`
-> dekt het einde van het traject. De redenering in §1–§3 hieronder — één as, domein als
-> facet — blijft onverkort gelden; alleen de namen en de knip tussen de fasen zijn
+> dekt het einde van het traject. De redenering in §1–§3 hieronder (één as, domein als
+> facet) blijft onverkort gelden; alleen de namen en de knip tussen de fasen zijn
 > veranderd. `TRACK_META` in `src/utils/tracks.ts` is de bron van waarheid.
 
 Dit document legt vast *waarom* de formulieren zijn ingedeeld zoals ze zijn ingedeeld, zodat
@@ -28,7 +28,7 @@ De vier oude sporen waren vier *verschillende classificatie-assen* door elkaar:
 
 Elk formulier scoort tegelijk op alle vier de assen, dus de categorieën konden per definitie
 niet wederzijds uitsluitend zijn. Dat is de klassieke fout uit de informatie-architectuur: een
-*facet* platslaan tot een *hiërarchie*. Het symptoom is altijd hetzelfde — overlap, wezen, en
+*facet* platslaan tot een *hiërarchie*. Het symptoom is altijd hetzelfde: overlap, wezen, en
 auteurs die niet kunnen kiezen.
 
 De symptomen waren allemaal aanwezig:
@@ -36,8 +36,8 @@ De symptomen waren allemaal aanwezig:
 - **De DPIA is wettelijk verplicht (AVG art. 35) maar stond niet in Compliance.** De *EU AI
   Act Compliance Checklist* had "compliance" in de eigen titel en stond in Assessments.
   "Compliance" betekende dus niets consistents.
-- **Quickscan BIO2 en Prescan DPIA zijn hetzelfde instrumenttype** — een triage die bepaalt of
-  een zwaarder instrument nodig is — en stonden in verschillende sporen.
+- **Quickscan BIO2 en Prescan DPIA zijn hetzelfde instrumenttype** (een triage die bepaalt of
+  een zwaarder instrument nodig is), en stonden in verschillende sporen.
 - **Het Compliancespoor had n=1.** Een categorie van één is geen categorie.
 - **De cross-form-graaf sprak de sporen tegen.** Bijna elke van de 87 mappings in
   `crossFormMappings.json` kruiste een spoorgrens: `quickscan`→`prescandpia`,
@@ -57,7 +57,7 @@ de gebruiker heeft op het moment dat hij een dossier opent: *waar ben ik?*
 
 **`domains` = het onderwerpsdomein**, als tag op de kaart: `privacy` · `beveiliging` · `ai` ·
 `data` · `project`. Een formulier mag er meerdere hebben. Dit is bewust géén kop, want het is
-een facet — het antwoordt op *wat raakt dit?*, een andere vraag.
+een facet: het antwoordt op *wat raakt dit?*, en dat is een andere vraag.
 
 > **Voeg nooit een spoor toe om een domein uit te drukken.** Een datakwaliteitsformulier is
 > `track: "ontwerpen"` + `domains: ["data"]`, niet `track: "data"`. Precies die verwarring is
@@ -99,12 +99,12 @@ dat object moet passen bij het dossier dat ze bevat:
 | ~~shadowai~~ | ~~afdeling~~ |
 
 `Dossier` (`src/stores/assessmentStore.ts`) = één project, met `forms: Record<FormId,
-FormState>` — één exemplaar van *elk* formulier. Je vult één governance charter in voor je
+FormState>`: één exemplaar van *elk* formulier. Je vult één governance charter in voor je
 ministerie, niet één per project; de tool nodigde uit om dat veertig keer te doen. Dat de
 drie **nul cross-form-mappings** hadden, in noch uit, was daar het meetbare symptoom van: ze
 deelden niets met de rest omdat ze ergens anders over gingen.
 
-Een eigen spoor eronder loste dat niet op — het gaf de mismatch alleen een nettere naam. Een
+Een eigen spoor eronder loste dat niet op; het gaf de mismatch alleen een nettere naam. Een
 echte oplossing is een organisatieniveau *naast* de dossiers, met een eigen levensduur en
 eigen rechten, wat `Dossier`-state, persistence, sharing en collab raakt. Tot dat er is, is
 niets tonen eerlijker dan iets tonen dat structureel verkeerd staat.
@@ -122,14 +122,14 @@ drie systemen en vijf verwerkingen op, en dat is nu niet uitdrukbaar.
 verwerkingsregister beschrijft één *verwerking* (art. 30 AVG kent geen 'project'), en de
 datakwaliteit- en dataset-formulieren beschrijven één *dataset*. Beide zijn fijnmaziger dan een
 dossier: een project met drie datasets zou drie datasheets moeten opleveren, en `Dossier` biedt
-er één. Dat is een andere fout dan bij de organisatiebrede formulieren — daar was het object
-te *groot* voor het dossier, hier is het te *klein* — maar het is dezelfde onderliggende
+er één. Dat is een andere fout dan bij de organisatiebrede formulieren. Daar was het object
+te *groot* voor het dossier, hier is het te *klein*, maar het is dezelfde onderliggende
 beperking: `forms: Record<FormId, FormState>` staat precies één exemplaar van elk formulier toe.
 Anders dan de organisatiebrede formulieren zijn deze wél in het dossier bruikbaar (ze koppelen
 sterk aan de rest en beschrijven de kern van het project), dus ze zijn gebouwd met de kanttekening
 in de intro van elk formulier: registreer de belangrijkste dataset of verwerking, en neem de
 andere op als aanvullende registratie. Een echte oplossing vraagt herhaalbare formulierinstanties
-binnen een dossier — dat raakt `Dossier`-state, persistence, export en collab, en is daarmee
+binnen een dossier, en dat raakt `Dossier`-state, persistence, export en collab, en is daarmee
 hetzelfde soort ingreep als het organisatieniveau hierboven.
 
 ## 4. Roadmap: wat er ontbreekt
@@ -137,7 +137,7 @@ hetzelfde soort ingreep als het organisatieniveau hierboven.
 ### 4.1 Het structurele gat: alles ná het besluit
 
 Elk instrument in de tool is *ex ante*. In PDCA-termen: alleen Plan, niets voor Check en Act.
-Dat is niet alleen theoretisch onbevredigend — het is precies waar de wetgeving doorlopende
+Dat wringt ook in de praktijk, want juist daar legt de wetgeving doorlopende
 verplichtingen legt, o.a. AI Act art. 26 (menselijk toezicht), art. 72 (post-market
 monitoring), art. 73 (melden ernstige incidenten) en art. 12 (logging); AVG art. 35 lid 11
 (herbeoordeling bij gewijzigd risico) en art. 33 (meldplicht datalek); en de Archiefwet voor
@@ -148,7 +148,7 @@ bewaren en vernietigen. Vandaar dat `beheer` als leeg spoor zichtbaar is.
 Volgorde op (waarde × wettelijke hardheid) ÷ bouwkosten. Nrs. 1–4 zijn JSON-only en vormen
 samen de sterkste sprong.
 
-> **Status juli 2026:** nrs. **1, 2, 3, 4 en 9 zijn gebouwd** — samen met de data-ethiektoets
+> **Status juli 2026:** nrs. **1, 2, 3, 4 en 9 zijn gebouwd**, samen met de data-ethiektoets
 > (`DAMA-DMBOK-form-opportunities.md` §4E) zijn dat zeven nieuwe formulieren. Nrs. 5–8 en 10 staan
 > nog open; nrs. 7, 8 en 10 vullen het lege `beheer`-spoor en daarmee het structurele gat uit §4.1,
 > dus dáár zit nu de grootste winst. Herkomst per formulier: de `source`-blokken in de form-JSON en
@@ -169,7 +169,7 @@ samen de sterkste sprong.
 
 > **Bij het bouwen:** de artikelverwijzingen hierboven zijn de *aanleiding*, niet de inhoud.
 > Verifieer elke grondslag tegen de actuele wettekst voordat er gebruikersgerichte tekst in een
-> formulier komt — mensen steunen op wat de tool zegt.
+> formulier komt, want mensen gaan af op wat de tool zegt.
 
 ### 4.3 Bewust niet op de lijst
 
@@ -178,7 +178,7 @@ samen de sterkste sprong.
   eigen product en past slecht in de dossier-vorm. Beter ernaar verwijzen dan half nabouwen.
   (De Quickscan BIO2 v2.0 blijft wat hij is: een classificatietoets op beschikbaarheid,
   integriteit en vertrouwelijkheid, met een selectie van toepasselijke BIO2-maatregelen als
-  input voor het risicoacceptatieformulier — geen risicoanalyse en geen in-controlverklaring.)
+  input voor het risicoacceptatieformulier, dus geen risicoanalyse en geen in-controlverklaring.)
 
 ### 4.4 Open ontwerpvraag: toepasselijkheid per formulier
 
@@ -186,31 +186,29 @@ Alle dossiers tonen nu alle formulieren. Dat houdt op bij de toegankelijkheidsve
 3): een koppelvlak of dataproduct zonder gebruikersinterface valt er niet onder, en een leeg
 formulier is niet te onderscheiden van een vergeten formulier. Analyse, opties en een
 voorlopige aanbeveling staan in
-[`toepasselijkheid-van-formulieren.md`](toepasselijkheid-van-formulieren.md) — nog te
-besluiten, er is niets aan de formulieren gewijzigd.
+[`toepasselijkheid-van-formulieren.md`](toepasselijkheid-van-formulieren.md), nog te
+besluiten; er is niets aan de formulieren gewijzigd.
 
 ### 4.5 Losse inhoudelijke observatie
 
 44 van de 87 cross-form-mappings lopen tussen DPIA en AIIA (23 heen, 21 terug). Dat is een
 sterk signaal van inhoudelijke duplicatie. De vraag of AIIA en IAMA allebei als volledig
-formulier moeten bestaan — of dat één ervan een module binnen de ander wordt — is het
+formulier moeten bestaan, of dat één ervan een module binnen de ander wordt, is het
 overwegen waard, maar staat los van de indeling.
 
 ## 5. Waar het in de code zit
 
-- `public/forms/index.json` — `track`, `order`, `domains` per formulier
-- `src/utils/tracks.ts` — `TRACK_META` (labels, beschrijvingen, volgorde, `emptyHint`),
+- `public/forms/index.json`: `track`, `order`, `domains` per formulier
+- `src/utils/tracks.ts`: `TRACK_META` (labels, beschrijvingen, volgorde, `emptyHint`),
   `TrackId`, `TRACK_IDS`, `groupFormsByTrack`, `trackLabel`, `connectorGlyph`
-- `src/components/DossierDetail.vue` — de fasebalk bovenaan (`.phase-rail`, met per fase
+- `src/components/DossierDetail.vue`: de fasebalk bovenaan (`.phase-rail`, met per fase
   een NLDD-icoon in een cirkel die zich vult naar `done/total`), de verticale tijdlijn
   (`.track-timeline`) en `DOMAIN_LABELS`. De faseknoppen scrollen naar `#fase-<track>`.
-  De icoon-maskers staan als **statische** `url()`-regels in het `<style>`-blok, één per
-  fase — een runtime `:style`-binding levert in de productiebuild witte vierkanten op.
-- `src/composables/useFormProgress.ts` — `trackSummary`: afgerond/totaal per fase
-- `src/components/DossierList.vue` — de fasebalk op de dossierkaart
-- `src/components/AppHeader.vue` — de fase-kruimel (`dossier › Toetsen › DPIA`)
-- `src/services/formLoader.ts` — `FormIndexEntry`, `FormDomain`
-- `.claude/skills/forms/SKILL.md` — de dev-contract voor het toevoegen van een formulier
+- `src/composables/useFormProgress.ts`: `trackSummary`: afgerond/totaal per fase
+- `src/components/DossierList.vue`: de fasebalk op de dossierkaart
+- `src/components/AppHeader.vue`: de fase-kruimel (`dossier › Toetsen › DPIA`)
+- `src/services/formLoader.ts`: `FormIndexEntry`, `FormDomain`
+- `.claude/skills/forms/SKILL.md`: het dev-contract voor het toevoegen van een formulier
 
 > **Woordkeuze:** de gebruikersinterface zegt consequent **"fase"**; *spoor* / `track`
 > blijft de term in de code, de form-registry en deze documentatie. Uitzondering: de
@@ -218,4 +216,4 @@ overwegen waard, maar staat los van de indeling.
 > richten zich op de ontwikkelaar die `index.json` bewerkt en zeggen dus "spoor".
 
 Een onbekende `track` in `index.json` belandt in een zichtbaar `onbekend`-spoor en logt een
-`console.warn` — vroeger viel zo'n typo stil in de assessments-groep.
+`console.warn`; vroeger viel zo'n typo stil in de assessments-groep.

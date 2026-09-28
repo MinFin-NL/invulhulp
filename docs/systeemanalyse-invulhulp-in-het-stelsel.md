@@ -1,13 +1,13 @@
 # Systeemanalyse: de invulhulp in het verantwoordingsstelsel
 
-> **Status:** analyse — geen commitment. Dit document beschrijft geen ontwerp en vraagt geen
+> **Status:** analyse, zonder toezeggingen. Dit document beschrijft geen ontwerp en vraagt geen
 > bouwbesluit. Het zet de invulhulp neer als ingreep in het stelsel waarin hij landt, en
 > benoemt welke terugkoppelingen die ingreep in gang zet. Het bouwt voort op
 > [`normenkader-dekkingsanalyse.md`](normenkader-dekkingsanalyse.md),
 > [`systeemprofiel-feitenbasis.md`](systeemprofiel-feitenbasis.md),
 > [`sporen-en-roadmap.md`](sporen-en-roadmap.md),
 > [`interviewmodus-socratisch-gesprek.md`](interviewmodus-socratisch-gesprek.md) en
-> [`rollen-en-rechten-advies.md`](rollen-en-rechten-advies.md) — die documenten leveren de
+> [`rollen-en-rechten-advies.md`](rollen-en-rechten-advies.md). Die documenten leveren de
 > feiten, dit document de systeemlaag eromheen.
 >
 > Een vormgegeven versie met dezelfde inhoud (Engelstalig, met getekende diagrammen) staat op
@@ -57,7 +57,7 @@ projecten door mogen.*
 
 ## 2. Waar in het stelsel grijpt de tool aan?
 
-Op de hefboomladder van Donella Meadows raakt de invulhulp vier niveaus tegelijk — en het
+Op de hefboomladder van Donella Meadows raakt de invulhulp vier niveaus tegelijk, en het
 niveau dat het meest wordt genoemd is het zwakste.
 
 | Niveau | Wat in de tool | Hefboom |
@@ -74,7 +74,7 @@ informatiestroom, en dáár zit goedkope, duurzame hefboom.
 
 ## 3. Voorspelde effecten
 
-### 3.1 De beperking verplaatst zich — B1
+### 3.1 De beperking verplaatst zich (B1)
 
 De voorspelling met de hoogste zekerheid in dit document. De tool verlaagt de kosten van het
 *produceren* van verantwoordingsdocumenten met naar schatting een factor 3 tot 10. De kosten
@@ -90,10 +90,10 @@ bij het knelpunt. Binnen twee kwartalen na echte adoptie is te verwachten:
 
 De remedie staat al half uitgewerkt in [`rollen-en-rechten-advies.md`](rollen-en-rechten-advies.md):
 de adviesrol, de besluitrol, de publicatierol. Dat is geen rechtenhygiëne maar **de
-doorstroomingreep**. Vandaag kan de invuller zijn eigen restrisico accepteren — een
+doorstroomingreep**. Vandaag kan de invuller zijn eigen restrisico accepteren: een
 regelkring met de terugkoppeldraad doorgeknipt.
 
-### 3.2 Vlotheid ontkoppelt van begrip — R2
+### 3.2 Vlotheid ontkoppelt van begrip (R2)
 
 De waarde van een DPIA zat nooit in het document; die zat erin dat het schrijven ervan iemand
 dwong na te denken. Het document was een *proxy* voor dat denken, en die proxy werkte mede
@@ -114,7 +114,7 @@ flowchart LR
 
 Elke stap is op zichzelf redelijk; het is de kring die maakt dat de *gemeten* compliance stijgt
 terwijl de feitelijke veiligheid van de systemen blijft waar hij was. Alle remmen werken op
-dezelfde manier: ze houden een bewering falsifieerbaar — herleidbaar tot een bron, of tot iets
+dezelfde manier: ze houden een bewering falsifieerbaar: herleidbaar tot een bron, of tot iets
 dat een met naam genoemd mens werkelijk heeft gezegd.
 
 §9.2 van [`interviewmodus-socratisch-gesprek.md`](interviewmodus-socratisch-gesprek.md) bevat
@@ -126,7 +126,7 @@ een tool die helpt op te schrijven wat ze niet weten.
 schreef, tot in de Word-export en tot in het oog van de toetser. Zodra die twee in het artefact
 niet meer te onderscheiden zijn, is de proxy dood en leest de toetser theater.
 
-### 3.3 Jevons: goedkoper toetsen betekent méér toetsen, niet minder werk — R1
+### 3.3 Jevons: goedkoper toetsen betekent méér toetsen, niet minder werk (R1)
 
 Als compliance goedkoop wordt, spaart de organisatie de winst niet op. Ze breidt het regime
 uit: naar kleinere projecten, naar wat eerder werd doorgelaten, naar verplichtingen die eerder
@@ -135,10 +135,10 @@ en alleen in het cluster openbaarheid/Woo nog eens ± 50 ongedekte controls
 ([`normenkader-dekkingsanalyse.md`](normenkader-dekkingsanalyse.md) §4A).
 
 Netto-effect op de werklast van de gemiddelde projectleider: waarschijnlijk vlak. Netto-effect
-op de dekking: fors omhoog. Dat is een echte winst — maar het *is* de winst. Wie dit verkoopt
+op de dekking: fors omhoog. Dat is een echte winst, en ook de enige. Wie dit verkoopt
 als "minder papierwerk" wordt binnen een jaar tegengesproken door zijn eigen gebruikers.
 
-### 3.4 De last verschuiven naar de hulpconstructie — B3
+### 3.4 De last verschuiven naar de hulpconstructie (B3)
 
 Een klassiek archetype (*shifting the burden to the intervenor*). Het eigen begrip van de
 projectleider van privacy-, beveiligings- en grondrechtenrisico is de *fundamentele* oplossing;
@@ -148,15 +148,15 @@ fundamentele capaciteit op te bouwen, en de afhankelijkheid versterkt zichzelf.
 Concreet: weet een projectleider na twee jaar AI Modus nog waaróm zijn systeem een DPIA nodig
 heeft, of alleen dat de tool er een heeft opgeleverd? Dat antwoord bepaalt of deze organisatie
 competenter wordt of alleen volgzamer. De interviewmodus is het enige ontwerp in de repo dat de
-andere kant op duwt — een socratische interviewer bouwt het begrip op dat hij ophaalt. Niet
+andere kant op duwt: een socratische interviewer bouwt het begrip op dat hij ophaalt. Niet
 toevallig is het ook het ontwerp met het scherpst beschreven risico: een sturende vraag kan een
 DPIA laten verdwijnen (§9.1 aldaar).
 
-### 3.5 Zwaartekracht richting standaard — R3
+### 3.5 Zwaartekracht richting standaard (R3)
 
 Door `urn:nl:minfin:tr:*` te munten naast `urn:nl:aivt:tr:*`, de MinBZK-beslishulp te vendoren,
 DPIA en IAMA uit upstream-YAML te genereren en onder EUPL-1.2 te publiceren, is de tool
-feitelijk een interoperabiliteitslaag tussen departementen geworden — vanaf de rand gebouwd,
+feitelijk een interoperabiliteitslaag tussen departementen geworden, vanaf de rand gebouwd en
 niet vanuit het centrum. Dat werkt meestal: de standaard die wint is die met een draaiende
 implementatie. Twee tweede-orde-effecten volgen.
 
@@ -168,12 +168,12 @@ implementatie. Twee tweede-orde-effecten volgen.
 - **Harmonisatie is een voorraad die vervalt.** Model DPIA v3.0, het Algoritmeregister-schema
   en de modelverklaring toegankelijkheid ontwikkelen zich onafhankelijk door. Zonder een
   *staande stroom* onderhoud wordt een tool die lineage claimt op enig moment met overtuiging
-  onjuist — op een manier die een Word-sjabloon nooit kon zijn, juist omdat mensen de tool meer
+  onjuist, op een manier die een Word-sjabloon nooit kon zijn, juist omdat mensen de tool meer
   vertrouwen.
 
-### 3.6 De ex-ante-scheefheid wordt eerst groter — B2
+### 3.6 De ex-ante-scheefheid wordt eerst groter (B2)
 
-Elk instrument in de tool zit in Plan. Het spoor `beheer` is leeg — bewust en eerlijk zichtbaar,
+Elk instrument in de tool zit in Plan. Het spoor `beheer` is leeg: bewust en eerlijk zichtbaar,
 maar leeg. Ondertussen zijn juist de verplichtingen die tijdens het gebruik bijten de ongedekte:
 AI Act art. 26, 72 en 73; AVG art. 35 lid 11 en art. 33.
 
@@ -182,16 +182,16 @@ onaangeroerd. Op korte termijn **vergroot** hij de scheefheid. Ethiek die je é�
 het moment van de minste informatie en daarna nooit herziet is, in de woorden van deze repo,
 per constructie ritueel.
 
-> De grootste ongebouwde hefboom is de **werkings-as**. Geen nieuw formulier — een tweede
+> De grootste ongebouwde hefboom is de **werkings-as**. Geen nieuw formulier, maar een tweede
 > waarneming van dezelfde feiten, later. Dat is wat een document verandert in een regelkring,
 > en een systeem zonder regelkring kan niet leren.
 
-### 3.7 De systeemgrens: wie zit er in de lus? — B4
+### 3.7 De systeemgrens: wie zit er in de lus? (B4)
 
 De tool levert 22 documenten voor 22 functionarissen en nul voor degene op wie het systeem wordt
 toegepast. Het normenkader met zijn 481 controls doet dat evenmin. De lus die geoptimaliseerd
 wordt loopt ambtenaar → toetser → ambtenaar, en die lus is gesloten: de burger uit
-`kern.doelgroep` — die er volgens de eigen vraag van de tool niet voor kan kiezen — levert geen
+`kern.doelgroep`, die er volgens de eigen vraag van de tool niet voor kan kiezen, levert geen
 signaal en ontvangt geen artefact.
 
 ```mermaid
@@ -221,7 +221,7 @@ binnen zou kunnen komen.
 **Richting van het effect: positief, met een goed begrepen manier om mis te gaan.**
 
 Het waarschijnlijke beeld over twee à drie jaar, zonder bewust tegenontwerp: duidelijk betere
-dekking en herleidbaarheid — echt, duurzaam, en een reële winst in uitvoeringskracht. Ongeveer
+dekking en herleidbaarheid, en daarmee echte uitvoeringskracht. Ongeveer
 gelijke werklast. En een kwaliteit van toetsing per document die daalt terwijl de schijnbare
 volledigheid stijgt.
 
@@ -240,11 +240,11 @@ Deze vier zijn uitgewerkt tot zeven concrete ingrepen, met de vier voorwaarden w
 mens tot stempelmachine wordt en welke ingreep welke voorwaarde breekt, in
 [`ontwerprichting-betekenisvolle-tussenkomst.md`](ontwerprichting-betekenisvolle-tussenkomst.md).
 
-Tot slot, en het is het vermelden waard omdat de repo het zelf al goed ziet: **formulier-eerst
-was de juiste binnenkomst.** Je ontmoet elke eigenaar in het artefact waar hij verantwoordelijk
+De repo ziet zelf al goed dat **formulier-eerst
+de juiste binnenkomst was.** Je ontmoet elke eigenaar in het artefact waar hij verantwoordelijk
 voor is, en verdient daarmee het recht op de feiten eronder
 ([`systeemprofiel-feitenbasis.md`](systeemprofiel-feitenbasis.md) §5). Het systeemrisico is niet
-dat die strategie fout was. Het is dat het bruggenhoofd wordt aangezien voor de bestemming — en
+dat die strategie fout was. Het is dat het bruggenhoofd wordt aangezien voor de bestemming, en dat
 de organisatie eindigt met een zeer snelle, zeer herleidbare, zeer goed ontworpen machine die
 verantwoording produceert over systemen die niemand beter is gaan begrijpen.
 
@@ -257,5 +257,5 @@ Geschreven tegen de repo zoals die op 23 september 2026 stond. Gelezen: `README.
 `public/forms/index.json`.
 
 Let op één inconsistentie in de brondocumenten: het aantal cross-form-mappings staat er als 87,
-152 en 351 — die groei is het gevolg van de uitdijende formulierenset tussen die documenten in,
+152 en 351. Die groei is het gevolg van de uitdijende formulierenset tussen die documenten in,
 en is zelf een illustratie van §2 (de handgeschreven, kwadratische versie van een feitenbasis).

@@ -7,7 +7,7 @@ verhouden tot de bestaande dossier-grants, en in welke volgorde je ze zou invoer
 > **Wat er inmiddels wél is: scope-rollen.** Er bestaat één laag-B-achtige rol,
 > `projectmanagement`, die het *formulierenaanbod* inperkt: `auth.SCOPE_ROLES` in de
 > backend, een `roles`-blok in `public/forms/index.json`, en filtering in
-> `loadFormRegistry()`. Wie de rol niet heeft ziet alles — de standaard verandert
+> `loadFormRegistry()`. Wie de rol niet heeft, ziet alles; de standaard verandert
 > dus niet. Belangrijke afbakening: dit is **menu-inperking, geen autorisatie**. Het
 > gate't geen enkel endpoint; een dossier delen met iemand geeft nog steeds toegang
 > tot de antwoorden op elk formulier. Voor echte rechten blijft §4 (capabilities)
@@ -42,7 +42,7 @@ Er staan 18 formulieren in `public/forms/index.json`, verdeeld over 6 fasen
 | `data` | datakwaliteit, datasetregistratie, dataethiek, psa, modelcard | Data steward / CDO-office |
 | `project` | intake, aanbiedingsformulier, ppm, psa, restrisico, toegankelijkheid | Projectleider, architect, portfolio |
 
-Die rollen staan al **letterlijk in de formulieren zelf** — `dpia.json` vraagt om
+Die rollen staan al **letterlijk in de formulieren zelf**: `dpia.json` vraagt om
 het FG-advies, `restrisico.json` Deel D om een expliciet acceptatiebesluit,
 `aanbiedingsformulier.json` om de opdrachtgever, `psa.json` om de architect. De
 applicatie kent die rollen alleen niet: ze zijn vrije tekst in een antwoordveld
@@ -74,7 +74,7 @@ Regel: **laag B geeft nooit vanzelf toegang tot een dossier**, behalve leesrecht
 binnen het eigen domein (zie §5). Toegang blijft per dossier belegd; laag B
 bepaalt *wat* je in dat dossier extra mag (adviseren, aftekenen, publiceren).
 
-### Laag A — organisatierollen
+### Laag A: organisatierollen
 
 | Rol | Vervangt/nieuw | Rechten |
 | --- | --- | --- |
@@ -86,7 +86,7 @@ bepaalt *wat* je in dat dossier extra mag (adviseren, aftekenen, publiceren).
 De splitsing beheerder → platform + functioneel is de belangrijkste: nu heeft
 degene die formulierteksten wil aanpassen ook de macht om accounts aan te maken.
 
-### Laag B — domeinrollen
+### Laag B: domeinrollen
 
 Eén rol per domein-facet dat al in `index.json` staat, zodat de koppeling
 rol → formulier data-gedreven blijft en niet hardgecodeerd:
@@ -107,10 +107,10 @@ En twee rollen die niet aan een domein maar aan een *fase* hangen:
 | `publicatiebeheerder` | `ingebruikname` | Algoritmeregister-publicatie en toegankelijkheidsverklaring vrijgeven/exporteren als definitief |
 
 Bewust **niet** als rol opgenomen: risico-eigenaar / bestuurder die het
-restrisico accepteert. Dat is een persoon per dossier, niet een organisatierol —
+restrisico accepteert. Dat is een persoon per dossier, geen organisatierol;
 die hoort in laag C als grant `goedkeurder` (§4).
 
-### Laag C — dossier-grants uitbreiden
+### Laag C: dossier-grants uitbreiden
 
 `ROLE_ORDER` is nu een strikte ladder (`viewer` 1 < `editor` 2 < `owner` 3) en
 `resolve_session_access` doet `>=`-vergelijkingen. Twee toevoegingen die in die
@@ -124,7 +124,7 @@ ladder passen:
 ⚠️ `goedkeurder` past *niet* in een lineaire ladder: het is meer dan viewer maar
 minder dan editor op de meeste velden, en meer dan editor op één veld. Dat
 betekent dat `ROLE_ORDER` als simpele `int`-vergelijking hierop stukloopt. Zie
-§6 — dit is de reden om de ladder te vervangen door een set capabilities voordat
+§6; dit is de reden om de ladder te vervangen door een set capabilities voordat
 je `goedkeurder` invoert. `adviseur` kan wél gewoon als 1.5 in de ladder, mits
 schrijfrechten per veldtype worden gecontroleerd.
 
@@ -149,7 +149,7 @@ De rolnamen blijven zo in Keycloak, de capabilities leven in één tabel in
 ## 5. Domeinrol → leesrecht (optioneel, wel aan te raden)
 
 Een FG die pas een DPIA mag zien nadat iemand hem heeft uitgenodigd, mist per
-definitie de dossiers die vergeten zijn hem uit te nodigen — juist het risico
+definitie de dossiers die vergeten zijn hem uit te nodigen, en dat is juist het risico
 dat je wilt afdekken. Voorstel: een domeinrol geeft **leesrecht op alle
 dossiers waarin een formulier van dat domein is gestart**, afgeleid uit
 `domains` in `index.json`. Adviseren blijft een expliciete grant.

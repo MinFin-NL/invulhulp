@@ -1,8 +1,8 @@
-# Phase 0 spike — collab transport de-risk
+# Phase 0 spike: de-risking the collab transport
 
-**Purpose:** answer one question before committing to option 3 —
+**Purpose:** answer one question before committing to option 3:
 **pycrdt-in-FastAPI (one backend) vs. Hocuspocus Node sidecar (second service).**
-Test the *riskier, cheaper-if-it-works* option first: Python-native. The
+Try the Python-native option first. It is riskier, but cheaper if it works. The
 sidecar is known-good; we only fall back to it if pycrdt disappoints.
 
 **Rules:** throwaway branch, no production wiring, one rich-text field, two
@@ -11,7 +11,7 @@ browser tabs. Delete after the decision. Its only durable output is the answer.
 ## What the spike must prove
 
 1. Two tabs typing in the **same** answer merge with no lost keystrokes.
-2. The socket authenticates with the **existing Keycloak session cookie** — no
+2. The socket authenticates with the **existing Keycloak session cookie**, with no
    new auth mechanism.
 3. A Yjs update **round-trips to disk** and rehydrates on reconnect/restart.
 4. Editor role gates writes; a viewer connects read-only.
@@ -64,8 +64,8 @@ Wire it in a **spike-only** `main.py` block (guarded, removed before merge):
 `app.include_router(spike_collab.router)`. Because the global
 `Depends(auth.require_user)` can't resolve a `Request` on a WS route, either (a)
 teach `require_user` to no-op on `scope["type"] == "websocket"`, or (b) mount
-the spike on a bare sub-app without the global dep. **Note which fix you needed
-— it's a real Phase 2 task, not spike noise.**
+the spike on a bare sub-app without the global dep. **Note which fix you needed:
+Phase 2 will need it too.**
 
 Persistence check: point `FileYStore` at
 `scratchpad/spike-<dossier>.y`, kill uvicorn mid-edit, restart, confirm the
@@ -113,7 +113,7 @@ temporarily. Open two tabs, type in both.
 
 ## Measurements that decide sidecar vs. Python
 
-Record these — they are the deliverable:
+Record these. They are the deliverable:
 
 | Question | Why it decides |
 |---|---|

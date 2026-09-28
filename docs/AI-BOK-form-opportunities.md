@@ -1,6 +1,6 @@
 # Plan: mogelijke nieuwe assessments & formulieren op basis van de AI Body of Knowledge
 
-> **Status:** verkenning / brainstorm — geen commitment. Dit document inventariseert welke
+> **Status:** verkenning / brainstorm, zonder toezeggingen. Dit document inventariseert welke
 > assessments en formulieren we *zouden kunnen* toevoegen aan de invulhulp op basis van
 > `docs/AI-Body-of-Knowledge-EN-v4.pdf` (AI-BOK v1.0, Jan Willem van Veen, 2026).
 >
@@ -9,7 +9,7 @@
 > codewijzigingen nodig. Dat maakt de drempel om er een paar toe te voegen laag.
 >
 > **Update (juli 2026):** de vijf templates uit §2 zijn alle vijf gebouwd, en drie ervan zijn
-> daarna weer **verwijderd** — Maturity Quick Scan (C), Shadow AI Inventory (D) en Governance
+> daarna weer **verwijderd**: Maturity Quick Scan (C), Shadow AI Inventory (D) en Governance
 > Charter (E) beschrijven een *organisatie* of *afdeling*, terwijl een dossier één project of
 > systeem beschrijft. Ze staan in de git-historie. Alleen de EU AI Act Checklist (A) en de Model
 > Card (B) zijn gebleven. Zie [`sporen-en-roadmap.md`](sporen-en-roadmap.md) voor de indeling en
@@ -35,7 +35,7 @@ tool, want ze gaan over de organisatie in plaats van over een project.
 ## 2. Direct bruikbare templates uit de AI-BOK (laaghangend fruit)
 
 De AI-BOK-appendix bevat 5 uitgewerkte templates die zich 1-op-1 laten omzetten naar een
-invulhulp-formulier. Ze zijn al gestructureerd als velden/tabellen/checkboxes — precies het
+invulhulp-formulier. Ze zijn al gestructureerd als velden/tabellen/checkboxes, precies het
 formaat dat onze JSON-schema aankan.
 
 ### A. EU AI Act Compliance Checklist  ⭐ hoogste prioriteit
@@ -63,7 +63,7 @@ formaat dat onze JSON-schema aankan.
 - **Bron:** Template 4 (p. 199–201).
 - **Wat:** 12 vragen (één per kennisgebied KA1–KA12), score 1–5, optelling → volwassenheidsniveau
   met interpretatie en aanbevelingen.
-- **Spoor:** geen — **verwijderd** (organisatieniveau, past niet in een projectdossier).
+- **Spoor:** geen; **verwijderd** (organisatieniveau, past niet in een projectdossier).
 - **Waarom interessant:** een *organisatie/afdeling*-brede zelfscan i.p.v. per-systeem. Nieuw
   type invulhulp (scoringsmodel + berekend totaal). Vergt lichte featurecheck: kunnen we een
   som/gemiddelde tonen? Zo niet, dan als tekstuele score-invoer met interpretatietabel.
@@ -73,14 +73,14 @@ formaat dat onze JSON-schema aankan.
 - **Wat:** per afdeling inventariseren welke (ongeautoriseerde) AI-tools in gebruik zijn, met
   datatype, risicoclassificatie, eigenaar en actie (formaliseren/blokkeren/monitoren) + checklist
   van veelvoorkomende tools (ChatGPT, Copilot, Claude, Gemini, …).
-- **Spoor:** geen — **verwijderd** (afdelingsniveau, past niet in een projectdossier).
+- **Spoor:** geen; **verwijderd** (afdelingsniveau, past niet in een projectdossier).
 - **Waarom interessant:** sterk tabel-gedreven → past bij onze table-question-ondersteuning.
   Goede "instap"-oefening voor organisaties die nog niets hebben.
 
 ### E. AI Governance Charter (1 pagina)
 - **Bron:** Template 1 (p. 192–193).
 - **Wat:** scope, 5–6 principes, governance-organen, rollen & verantwoordelijkheden.
-- **Spoor:** geen — **verwijderd** (organisatieniveau, past niet in een projectdossier).
+- **Spoor:** geen; **verwijderd** (organisatieniveau, past niet in een projectdossier).
 - **Kanttekening:** minder een "assessment", meer een beleidsdocument. Waardevol als
   document-generator, maar minder afhankelijk van AI-modus/grounding. Lagere prioriteit.
 
@@ -103,11 +103,11 @@ meer organisatie- dan systeemgericht en overlappen deels met de Maturity Quick S
 
 ## 4. Aanbevolen volgorde (indien we doorgaan)
 
-1. **EU AI Act Compliance Checklist** (A) — grootste gat, sterkste fit met bestaande features.
-2. **Model Card / AI-systeemregistratie** (B) — natuurlijk sluitstuk, sterke cross-form mapping.
-3. **AI Maturity Quick Scan** (C) — nieuw scoringstype; eerst featurecheck of totaalscore kan.
-4. **Shadow AI Inventory** (D) — tabelgedreven, goede instap.
-5. **AI Governance Charter** (E) — beleidsdocument, lagere prioriteit.
+1. **EU AI Act Compliance Checklist** (A): grootste gat, sterkste fit met bestaande features.
+2. **Model Card / AI-systeemregistratie** (B): natuurlijk sluitstuk, sterke cross-form mapping.
+3. **AI Maturity Quick Scan** (C): nieuw scoringstype; eerst featurecheck of totaalscore kan.
+4. **Shadow AI Inventory** (D): tabelgedreven, goede instap.
+5. **AI Governance Charter** (E): beleidsdocument, lagere prioriteit.
 
 ## 5. Aandachtspunten vóór implementatie
 
@@ -117,11 +117,11 @@ meer organisatie- dan systeemgericht en overlappen deels met de Maturity Quick S
   and adapted", p. 204). Bronvermelding (Jan Willem van Veen, AI-BOK v1.0) opnemen.
 - **Featurecheck maturity-scan:** controleer of het schema berekende velden (som/gemiddelde)
   ondersteunt; anders als handmatige score + interpretatietabel.
-- **Cross-form mappings:** EU AI Act-checklist en Model Card delen velden met intake/DPIA/AIIA —
+- **Cross-form mappings:** EU AI Act-checklist en Model Card delen velden met intake/DPIA/AIIA;
   uitbreiden van `crossFormMappings.json` zou dubbel invullen voorkomen.
 - **Decision gates:** het cumulatieve risiconiveau van de EU AI Act-checklist leent zich voor het
   bestaande gate-patroon (hoger risico ⇒ meer verplichte secties).
 
 ---
-*Bron: AI Body of Knowledge (AI-BOK) v1.0, Jan Willem van Veen, 2026 — Appendix "Templates,
+*Bron: AI Body of Knowledge (AI-BOK) v1.0, Jan Willem van Veen, 2026, Appendix "Templates,
 Checklists and Quick Start" (p. 190–204) en Module 1 (kennisgebieden KA1–KA12).*

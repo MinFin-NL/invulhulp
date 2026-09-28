@@ -1,6 +1,6 @@
 # Addendum: meer beslishulpen, en de lineage opnieuw bekeken
 
-> **Status:** ontwerp / verkenning — geen commitment, geen code. Addendum bij
+> **Status:** ontwerp / verkenning, zonder toezeggingen en zonder code. Addendum bij
 > [`beslishulp-integration-design.md`](beslishulp-integration-design.md), geschreven nadat de
 > Beslishulp AI-verordening daadwerkelijk is gebouwd. Het oorspronkelijke ontwerp beschreef een
 > *iframe-embed* met een uitkomst-contract; wat er staat is iets anders en beters (een gevendorde,
@@ -24,8 +24,8 @@
 | Opslag | `FormState.beslishulp` op `euaiact`, via `store.beslishulpRun` |
 
 De **engine is al generiek**: het is een labelmachine met een vooraf geparseerde guard-AST; niets
-in `evaluateGuard`, `replay` of `answerStep` weet iets van de AI-verordening. Dat is het goede
-nieuws — de uitbreiding is geen herbouw.
+in `evaluateGuard`, `replay` of `answerStep` weet iets van de AI-verordening. De uitbreiding
+vraagt dus geen herbouw.
 
 ## 2. Wat een tweede beslishulp blokkeert
 
@@ -44,7 +44,7 @@ Voorstel, in deze volgorde:
    `loadBeslishulpTree(id)` met een `Map<id, Promise>` in plaats van één promise.
 2. **Opslag op dossierniveau.** `dossier.beslishulps: Record<BeslishulpId, BeslishulpRun>` in
    plaats van `forms.euaiact.beslishulp`. Dit raakt `src/models/Assessment.ts`,
-   `assessmentStore.ts`, de CRDT-codec (`src/collab/dossierDoc.ts`) en het backend-payloadmodel —
+   `assessmentStore.ts`, de CRDT-codec (`src/collab/dossierDoc.ts`) en het backend-payloadmodel:
    precies de vier plekken die het oorspronkelijke ontwerp wilde vermijden. Met één beslishulp was
    dat de juiste afweging; met een register is het niet meer vol te houden, want een
    AVG-rolbepaling hoort niet op de euaiact-state.
@@ -62,7 +62,7 @@ Gerangschikt op of de uitkomst iets **scopet dat de tool al heeft**. Dat is het 
 README: een beslishulp bepaalt de scope, findocs vult in. Een beslishulp die nergens in uitmondt
 is een quiz.
 
-### 3.1 Tier 1 — de uitkomst bepaalt welk bestaand instrument van toepassing is
+### 3.1 Tier 1: de uitkomst bepaalt welk bestaand instrument van toepassing is
 
 | Beslishulp | Bepaalt | Voedt |
 |---|---|---|
@@ -73,14 +73,14 @@ is een quiz.
 | **Archiefwet: bewaren of vernietigen** (selectielijst) | bewaartermijn en grondslag | roadmap #10 uitfaseringsplan, bewaartermijnen in het verwerkingsregister |
 | **Mag deze dataset open?** (Woo / Who, hergebruik) | open / beperkt / gesloten, met grond | gebruiksvoorwaarden in de dataset-registratie — en dit is precies IBDS/ICTU-terrein, dus eerst navragen bij teamIBDS@ictu.nl |
 
-### 3.2 Tier 2 — klein, regelgebaseerd, geen upstream-boom nodig
+### 3.2 Tier 2: klein, regelgebaseerd, zonder upstream-boom
 
-- **AcICT/BIT-toets en CIO-oordeel: drempel gehaald?** (> € 5 mln) — pure drempellogica, voedt het
+- **AcICT/BIT-toets en CIO-oordeel: drempel gehaald?** (> € 5 mln): pure drempellogica, voedt het
   aanbiedingsformulier.
 - **Valt deze dienst onder het Tijdelijk besluit digitale toegankelijkheid, en welke
-  nalevingsstatus?** — voedt de toegankelijkheidsverklaring, die nu veronderstelt dat de gebruiker
+  nalevingsstatus?** Voedt de toegankelijkheidsverklaring, die nu veronderstelt dat de gebruiker
   dat al weet.
-- **Risicoafweging Rijksbreed cloudbeleid 2022** — voedt de PSA.
+- **Risicoafweging Rijksbreed cloudbeleid 2022**: voedt de PSA.
 
 ### 3.3 Bestaande beslishulpen van derden
 
@@ -104,7 +104,7 @@ nodig", de prescan naar "is een volledige DPIA verplicht" volgens de AP/EDPB-cri
 Ze omzetten naar beslishulpen zou de scope→invullen-verhaallijn consistent maken, en de prescan is
 toch al `generated` uit een gevendorde MinBZK-definitie, dus die blijft hoe dan ook gevendord.
 Maar het verandert wat er in `index.json` staat en wat een dossier oplevert (een beslishulprun is
-geen in te vullen document met export). **Dit is een besluit, geen taak** — hier expliciet
+geen in te vullen document met export). **Dit is een besluit, geen taak.** Het staat hier expliciet
 opgeschreven zodat het een keer echt gewogen wordt in plaats van steeds opnieuw opgemerkt.
 
 ### 3.5 De asymmetrie die beslishulpen mogelijk maken
@@ -112,12 +112,12 @@ opgeschreven zodat het een keer echt gewogen wordt in plaats van steeds opnieuw 
 §3 van de sporenroadmap parkeert organisatiebrede instrumenten (AI Governance Charter,
 maturityscan, Shadow AI, Data Governance Charter) omdat een *formulier* een eenheid van analyse
 heeft die bij het dossier moet passen. Een **beslishulp levert een scopebeslissing op, geen
-document** — en heeft die eenheid van analyse dus niet op dezelfde manier. Een
+document**, en heeft die eenheid van analyse dus niet op dezelfde manier. Een
 NIS2/Cyberbeveiligingswet-zelfevaluatie (RDI) of een organisatiebrede
 verplichtingenscan kan daarom wél op organisatieniveau bestaan zonder de dossierstructuur te
 breken, mits de uitkomst buiten het dossier wordt opgeslagen.
 
-Dat is de eerlijke ontsnapping voor de geparkeerde instrumenten — **geen nieuw spoor**, want dat
+Dat is de eerlijke ontsnapping voor de geparkeerde instrumenten, **zonder nieuw spoor**, want dat
 was juist de fout die §1 van de sporenroadmap opruimt.
 
 ## 4. Lineage, opnieuw bekeken
@@ -134,7 +134,7 @@ Systeem 2 is **sterker dan systeem 1**: het pint een commit én bewaart per run 
 oordeel tot stand kwam. Systeem 1 blijft steken bij prozaherkomst waar niets in de runtime van
 afhangt. Daaruit volgen drie dingen.
 
-### (a) Beslishulpen hebben een eigen `derivation`-vocabulaire nodig — niet dat van de formulieren
+### (a) Beslishulpen hebben een eigen `derivation`-vocabulaire nodig, los van dat van de formulieren
 
 Voorstel:
 
@@ -148,7 +148,7 @@ Het onderscheid weegt hier zwaarder dan bij formulieren. Een formulier stelt vra
 **beslishulp doet een uitspraak** die de gebruiker als kwalificatie overneemt. Een `derived` boom
 is dus een juridische claim in onze naam en vraagt de disclaimerbehandeling uit §8 van het
 hoofdontwerp ("een uitkomst is een hulpmiddel, geen besluit") plus een genoemde inhoudelijke
-eigenaar — zoals de MinBZK-boom nu naar ai-verordening@minbzk.nl verwijst.
+eigenaar, zoals de MinBZK-boom nu naar ai-verordening@minbzk.nl verwijst.
 
 Zet beslishulpen vervolgens **in dezelfde README-lineagetabel** als de formulieren. Nu staat de
 AI-verordening-boom alleen in een feature-bullet en in de vergelijkingstabel, en ontbreekt hij in
@@ -165,7 +165,7 @@ een antwoord niet bereikbaar. Zelfde discipline, één veld in het `source`-blok
 De uitkomst bereikt de formulieren nu op twee manieren, en geen van beide is de bestaande
 mapping-graaf:
 
-1. **Expliciete adoptie** in `RiskClassification.vue` — de gebruiker neemt het oordeel over als
+1. **Expliciete adoptie** in `RiskClassification.vue`: de gebruiker neemt het oordeel over als
    risiconiveau van de AIIA. Bewust expliciet, en dat mag zo blijven.
 2. **Als instructie in prozavorm**: `public/forms/algoritmeregister.json:160` vraagt de gebruiker
    *met de hand* de uitkomst van de beslishulp over te nemen. Dat is een mappingkoppeling die als
@@ -175,14 +175,14 @@ Voorstel: maak de run een eersterangs bron in `crossFormMappings.json`, met
 `sourceFormId: "beslishulp:ai-verordening"` en het label of de conclusie-id als
 `sourceQuestionIds`. Dan vullen `euaiact` (rol, risiconiveau), `modelcard`
 (risicoclassificatie) en het algoritmeregister zich via het mechanisme dat er al is, in plaats van
-via drie eigen codepaden — en erft elk zo gevuld antwoord de `treeVersion`-herkomst. Daarmee is een
+via drie eigen codepaden, en erft elk zo gevuld antwoord de `treeVersion`-herkomst. Daarmee is een
 antwoord herleidbaar tot een *versie van een boom*, niet slechts tot "er is ooit een beslishulp
 gedraaid".
 
 Dat zet meteen roadmap #7 (periodieke herijking, spoor `beheer`) op: `replay()` stopt nu stilletjes
 zodra een opgeslagen spoor niet meer op de boom past (zie de comment bij de `break` in
 `src/utils/beslishulp.ts`). Met één boom is dat zeldzaam; met zes is het routine. Een
-"dit oordeel is geveld met boom v1.0.0, de boom staat nu op v1.2.0 — opnieuw doorlopen"-signaal is
+"dit oordeel is geveld met boom v1.0.0, de boom staat nu op v1.2.0; opnieuw doorlopen"-signaal is
 hetzelfde mechanisme als "wat is er veranderd sinds de vorige DPIA".
 
 ## 5. Volgorde
@@ -197,7 +197,7 @@ hetzelfde mechanisme als "wat is er veranderd sinds de vorige DPIA".
 
 > Zoals overal in deze docs: de artikelverwijzingen hierboven zijn de *aanleiding*, niet de inhoud.
 > Verifieer elke grondslag tegen de actuele wettekst en de actuele upstream-beslisboom voordat er
-> gebruikersgerichte tekst in een beslishulp komt — bij een beslishulp geldt dat scherper dan bij
+> gebruikersgerichte tekst in een beslishulp komt. Bij een beslishulp geldt dat scherper dan bij
 > een formulier, omdat de tool hier een uitspraak doet in plaats van een vraag stelt.
 
 ## 6. Open vragen
