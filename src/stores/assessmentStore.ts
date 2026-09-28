@@ -139,6 +139,8 @@ function newDossier(name: string): Dossier {
 // Debounce timers for the server push, keyed by dossier id. Module scope on
 // purpose: timers must never end up in the persisted state.
 const pushTimers = new Map<DossierId, ReturnType<typeof setTimeout>>()
+// Dossiers whose last push failed; retried by the next edit or at logout.
+const unsyncedIds = new Set<DossierId>()
 const PUSH_DEBOUNCE_MS = 1500
 
 /**
@@ -205,6 +207,9 @@ interface StoreState {
   dossierOrder: DossierId[]
   activeDossierId: DossierId | null
   screen: Screen
+  // The account this browser's cache belongs to (see adoptUser). null on a
+  // cache persisted before the field existed.
+  cacheOwner: { sub: string; email: string | null } | null
   // Legacy fields — preserved for one-shot migration from older persisted state
   forms?: Record<FormId, FormState>
   activeFormId?: FormId | null
@@ -220,6 +225,7 @@ export const useAssessmentStore = defineStore('assessment', {
     // Default doubles as migration: state persisted before this field existed
     // lands on the dossier overview.
     screen: 'dossierList',
+    cacheOwner: null,
   }),
 
   getters: {
@@ -366,32 +372,102 @@ export const useAssessmentStore = defineStore('assessment', {
         id,
         setTimeout(() => {
           pushTimers.delete(id)
-          const d = this.dossiers[id]
-          if (!d) return
-          saveStatus.value = 'saving'
-          saveDossier({
-            id: d.id,
-            name: d.name,
-            createdAt: d.createdAt,
-            updatedAt: d.updatedAt,
-            sessionId: d.sessionId,
-            activeFormId: d.activeFormId,
-            forms: d.forms,
-          })
-            .then(() => {
-              // A newer edit already re-armed the timer: don't overwrite its
-              // 'pending' with a 'saved' that describes the previous push.
-              if (pushTimers.has(id)) return
-              lastSavedAt.value = Date.now()
-              saveStatus.value = 'saved'
-            })
-            .catch(() => {
-              // offline or denied — localStorage keeps the state, next edit retries
-              if (pushTimers.has(id)) return
-              saveStatus.value = 'error'
-            })
+          void this._push(id)
         }, PUSH_DEBOUNCE_MS),
       )
+    },
+
+    /** Push one dossier to the server now. Never throws: a failure leaves the
+     *  state in localStorage and the next edit retries. */
+    _push(id: DossierId): Promise<void> {
+      const d = this.dossiers[id]
+      if (!d) return Promise.resolve()
+      saveStatus.value = 'saving'
+      return saveDossier({
+        id: d.id,
+        name: d.name,
+        createdAt: d.createdAt,
+        updatedAt: d.updatedAt,
+        sessionId: d.sessionId,
+        activeFormId: d.activeFormId,
+        forms: d.forms,
+      })
+        .then((saved) => {
+          // Record the server's answer: a dossier with a myRole counts as
+          // synced, which is what loadFromServer needs to drop it once the
+          // server no longer lists it (revoked share, another account).
+          unsyncedIds.delete(id)
+          const current = this.dossiers[id]
+          if (current) {
+            current.myRole = saved.myRole
+            current.ownerName = saved.ownerName ?? undefined
+            current.sharedWithMe = saved.sharedWithMe
+          }
+          // A newer edit already re-armed the timer: don't overwrite its
+          // 'pending' with a 'saved' that describes the previous push.
+          if (pushTimers.has(id)) return
+          lastSavedAt.value = Date.now()
+          saveStatus.value = 'saved'
+        })
+        .catch(() => {
+          // offline or denied — localStorage keeps the state, next edit retries
+          unsyncedIds.add(id)
+          if (pushTimers.has(id)) return
+          saveStatus.value = 'error'
+        })
+    },
+
+    /** Push every dossier with a waiting or failed push. Returns the ids that
+     *  still did not reach the server. */
+    async flushPendingPushes(): Promise<DossierId[]> {
+      const ids = [...new Set([...pushTimers.keys(), ...unsyncedIds])]
+      for (const id of ids) {
+        clearTimeout(pushTimers.get(id))
+        pushTimers.delete(id)
+      }
+      await Promise.all(ids.map((id) => this._push(id)))
+      return ids.filter((id) => unsyncedIds.has(id))
+    },
+
+    /** Bind the local cache to the logged-in account. localStorage and
+     *  IndexedDB belong to the browser, not the user: when another account
+     *  logs in here, the previous one's dossiers must be neither shown to it
+     *  nor pushed to the server under its name. Matches on sub or email —
+     *  a Keycloak reseed changes the sub, not the person. A cache persisted
+     *  before this binding existed is adopted by whoever logs in first. */
+    async adoptUser(user: { sub: string; email: string | null }) {
+      const email = user.email?.trim().toLowerCase() || null
+      const owner = this.cacheOwner
+      const sameUser = !owner || owner.sub === user.sub || (email !== null && owner.email === email)
+      if (!sameUser) await this.clearLocalData()
+      this.cacheOwner = { sub: user.sub, email }
+    },
+
+    /** Forget the dossiers on this machine: the persisted state, the live
+     *  docs and their IndexedDB copies. Server data is untouched. `keep` spares
+     *  dossiers that could not be saved to the server — they stay bound to
+     *  cacheOwner, so only that account gets them back (adoptUser). */
+    async clearLocalData(keep: DossierId[] = []) {
+      for (const timer of pushTimers.values()) clearTimeout(timer)
+      pushTimers.clear()
+      const ids = Object.keys(this.dossiers).filter((id) => !keep.includes(id))
+      for (const id of ids) {
+        dossierDocs.get(id)?.destroy()
+        dossierDocs.delete(id)
+        unsyncedIds.delete(id)
+      }
+      await Promise.all(ids.map((id) => purgeDossierLocalState(id)))
+      this.$patch((state) => {
+        for (const id of ids) delete state.dossiers[id]
+        state.dossierOrder = state.dossierOrder.filter((id) => keep.includes(id))
+        state.activeDossierId = null
+        state.screen = 'dossierList'
+        if (keep.length === 0) state.cacheOwner = null
+        delete state.forms
+        delete state.activeFormId
+        delete state.documents
+        delete state.sessionId
+      })
     },
 
     /** Load the user's dossiers (own + shared) from the server and merge them
@@ -420,6 +496,8 @@ export const useAssessmentStore = defineStore('assessment', {
       for (const id of [...this.dossierOrder]) {
         const local = this.dossiers[id]
         if (local?.myRole !== undefined && !serverById.has(id)) {
+          // Its offline CRDT copy too, or the answers stay in IndexedDB.
+          void purgeDossierLocalState(id)
           delete this.dossiers[id]
           this.dossierOrder = this.dossierOrder.filter((x) => x !== id)
         }

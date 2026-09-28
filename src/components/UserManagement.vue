@@ -395,7 +395,7 @@ function toggleScopeRole(u: ManagedUser, roleId: string) {
     await api(`/${u.id}`, { method: 'PUT', body: JSON.stringify({ scopeRoles: wanted }) })
     // De rollen zitten in de sessiecookie, dus de wijziging telt pas na een
     // nieuwe login — zeg dat, anders lijkt het scherm te liegen.
-    notice.value = `Formulierenset van ${userLabel(u)} aangepast. De wijziging geldt zodra deze gebruiker opnieuw inlogt.`
+    notice.value = `Formulierenset van ${userLabel(u)} aangepast. De wijziging geldt binnen enkele minuten.`
   })
 }
 

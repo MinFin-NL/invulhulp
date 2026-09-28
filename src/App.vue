@@ -93,10 +93,13 @@ onMounted(async () => {
   try {
     await auth.fetchMe()
     if (auth.status === 'authenticated') {
+      const store = useAssessmentStore()
       if (auth.user) {
         setLocalUser({ sub: auth.user.sub, name: auth.user.name ?? auth.user.email ?? 'Gebruiker' })
+        // Before loadFromServer: another account's cache must be gone before
+        // anything is rendered or migrated to the server under this user.
+        await store.adoptUser({ sub: auth.user.sub, email: auth.user.email })
       }
-      const store = useAssessmentStore()
       // Server first: shared dossiers and other-device edits come in before
       // ensureDossier() would auto-create a spurious empty dossier.
       await store.loadFromServer()

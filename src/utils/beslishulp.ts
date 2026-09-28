@@ -182,7 +182,7 @@ export function findQuestion(tree: BeslishulpTree, id: string): BeslishulpQuesti
   return tree.questions.find((q) => q.questionId === id) ?? null
 }
 
-export function findConclusion(tree: BeslishulpTree, id: string): BeslishulpConclusion | null {
+function findConclusion(tree: BeslishulpTree, id: string): BeslishulpConclusion | null {
   return tree.conclusions.find((c) => c.conclusionId === id) ?? null
 }
 

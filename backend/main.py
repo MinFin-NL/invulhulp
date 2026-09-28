@@ -97,6 +97,7 @@ app = FastAPI(
 app.add_middleware(
     SessionMiddleware,
     secret_key=SESSION_SECRET,
+    max_age=auth.SESSION_MAX_AGE,
     same_site="lax",
     https_only=SESSION_HTTPS_ONLY,
 )
@@ -1282,7 +1283,7 @@ async def list_documents(session_id: str, request: Request) -> dict:
 @app.delete("/api/documents/{doc_id}")
 async def remove_document(doc_id: str, session_id: str, request: Request) -> dict:
     user_sub = await dossiers.resolve_session_access(request, session_id, "editor")
-    await rag.delete_document(doc_id)
+    await rag.delete_document(session_id, doc_id)
     await asyncio.to_thread(docstore.delete_document, user_sub, doc_id)
     return {"deleted": doc_id}
 

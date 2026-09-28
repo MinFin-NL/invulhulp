@@ -13,11 +13,17 @@ Environment variables:
     OIDC_REDIRECT_URI           — public callback URL (browser-reachable)
     OIDC_POST_LOGIN_REDIRECT    — where to send the browser after login
     OIDC_POST_LOGOUT_REDIRECT   — where to send the browser after logout
+    SESSION_MAX_AGE             — session cookie lifetime in seconds (default: 12 h)
+    SESSION_REVALIDATE_SECONDS  — how often a session's account is re-checked
+                                  against Keycloak (default: 300)
 """
 
+import logging
 import os
-from urllib.parse import urlencode
+import time
+from urllib.parse import quote, urlencode
 
+import httpx
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import RedirectResponse
@@ -56,6 +62,16 @@ OIDC_REDIRECT_URI = os.environ.get(
 )
 POST_LOGIN_REDIRECT = os.environ.get("OIDC_POST_LOGIN_REDIRECT", "/")
 POST_LOGOUT_REDIRECT = os.environ.get("OIDC_POST_LOGOUT_REDIRECT", "/")
+
+# Identity and roles are captured at login, but the cookie outlives that
+# moment. Without a re-check, a deactivated or deleted account — or one that
+# lost 'beheerder' — keeps its access until the cookie expires. So the account
+# is re-read from Keycloak once per SESSION_REVALIDATE_SECONDS, and the cookie
+# itself lasts one working day instead of Starlette's default two weeks.
+SESSION_MAX_AGE = int(os.environ.get("SESSION_MAX_AGE", str(12 * 3600)))
+SESSION_REVALIDATE_SECONDS = int(os.environ.get("SESSION_REVALIDATE_SECONDS", "300"))
+
+log = logging.getLogger(__name__)
 
 oauth = OAuth()
 oauth.register(
@@ -97,6 +113,7 @@ async def callback(request: Request):
         "email": claims.get("email"),
         "roles": sorted(APP_ROLES.intersection(raw_roles)),
     }
+    request.session["checked_at"] = time.time()
     return RedirectResponse(url=POST_LOGIN_REDIRECT)
 
 
@@ -105,7 +122,7 @@ async def me(request: Request):
     """Return the logged-in user, or 401. The SPA polls this on startup."""
     if DEV_AUTH_BYPASS:
         return DEV_USER
-    user = request.session.get("user")
+    user = await session_user(request)
     if not user:
         raise HTTPException(status_code=401, detail="Niet ingelogd")
     return user
@@ -130,6 +147,63 @@ async def logout(request: Request):
     return RedirectResponse(url=f"{end_session}?{params}")
 
 
+async def _fresh_account(user: dict) -> dict | None:
+    """The session user with its roles re-read from Keycloak, or None when the
+    account no longer exists or is disabled.
+
+    Keycloak being unreachable (or the service account lacking view-users) is
+    no verdict on the user: the session is kept as it is and re-checked at the
+    next interval, so a Keycloak hiccup does not log everyone out.
+    """
+    # Imported here: admin_users imports auth.
+    from admin_users import _kc
+
+    sub = user.get("sub")
+    if not sub:
+        return None
+    path = f"/users/{quote(sub, safe='')}"
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            res = await _kc(client, "GET", path)
+            if res.status_code == 404:
+                return None
+            if res.status_code != 200:
+                log.warning("sessiecontrole: Keycloak gaf HTTP %s voor %s", res.status_code, sub)
+                return user
+            if not res.json().get("enabled", False):
+                return None
+            roles_res = await _kc(client, "GET", f"{path}/role-mappings/realm/composite")
+    except HTTPException as exc:
+        log.warning("sessiecontrole overgeslagen: %s", exc.detail)
+        return user
+    if roles_res.status_code != 200:
+        log.warning("sessiecontrole: rollen ophalen gaf HTTP %s", roles_res.status_code)
+        return user
+    names = {r.get("name") for r in roles_res.json()}
+    return {**user, "roles": sorted(APP_ROLES.intersection(names))}
+
+
+async def session_user(conn: HTTPConnection) -> dict | None:
+    """The logged-in user, or None. Re-checks the account against Keycloak
+    when the last check is older than SESSION_REVALIDATE_SECONDS, refreshes
+    the roles in the session, and ends the session of an account that was
+    deleted or disabled. (On a WebSocket the refreshed session is not written
+    back — there is no response cookie — so it is simply checked again.)"""
+    user = conn.session.get("user")
+    if not user:
+        return None
+    now = time.time()
+    if now - conn.session.get("checked_at", 0) < SESSION_REVALIDATE_SECONDS:
+        return user
+    fresh = await _fresh_account(user)
+    if fresh is None:
+        conn.session.clear()
+        return None
+    conn.session["user"] = fresh
+    conn.session["checked_at"] = now
+    return fresh
+
+
 def current_user(request: Request) -> dict:
     """The logged-in user's claims (sub/name/email). require_user has already
     gated the request, so outside the dev bypass this never returns empty."""
@@ -138,7 +212,7 @@ def current_user(request: Request) -> dict:
     return request.session.get("user") or {}
 
 
-def require_user(conn: HTTPConnection) -> None:
+async def require_user(conn: HTTPConnection) -> None:
     """Global dependency: let /api/auth/* through, gate everything else.
 
     Attached to the FastAPI app so every existing endpoint is protected
@@ -153,7 +227,7 @@ def require_user(conn: HTTPConnection) -> None:
         return
     if conn.url.path.startswith("/api/auth"):
         return
-    if not conn.session.get("user"):
+    if not await session_user(conn):
         raise HTTPException(status_code=401, detail="Niet ingelogd")
 
 

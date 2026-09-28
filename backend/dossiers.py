@@ -172,11 +172,20 @@ async def put_dossier(dossier_id: str, body: DossierPayload, request: Request) -
         await asyncio.to_thread(
             dossierstore.reconcile_identity, existing, user_sub, user.get("email")
         )
+    if existing is None or not existing.get("sessionId"):
+        # A sessionId is the access key for documents, images and the vector
+        # store (resolve_session_access looks the dossier up by it), so it can
+        # belong to one dossier only — claiming another dossier's sessionId
+        # would hand the caller that dossier's session-scoped data.
+        claimed = await asyncio.to_thread(dossierstore.find_by_session, body.sessionId)
+        if claimed is not None and claimed.get("id") != dossier_id:
+            raise HTTPException(status_code=409, detail="Deze sessie hoort al bij een ander dossier")
     if existing is None:
         # Create-if-absent: this is also the migration path for dossiers that
         # so far lived only in the caller's localStorage.
         record = {
             "id": dossier_id,
+            "sessionId": body.sessionId,
             "ownerSub": user_sub,
             "grants": [
                 {
@@ -189,15 +198,16 @@ async def put_dossier(dossier_id: str, body: DossierPayload, request: Request) -
         }
     else:
         _require_role(existing, user_sub, "editor", user.get("email"))
-        # ownerSub and grants are never client-writable through this endpoint.
+        # ownerSub, grants and sessionId are never client-writable through
+        # this endpoint; sessionId is fixed at creation (see above).
         record = {
             "id": existing["id"],
             "ownerSub": existing.get("ownerSub"),
+            "sessionId": existing.get("sessionId") or body.sessionId,
             "grants": existing.get("grants", []),
         }
     record.update(
         name=body.name,
-        sessionId=body.sessionId,
         createdAt=body.createdAt,
         updatedAt=body.updatedAt or int(time.time() * 1000),
         activeFormId=body.activeFormId,

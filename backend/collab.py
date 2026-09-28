@@ -18,6 +18,7 @@ Design:
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import logging
 import os
 import uuid
@@ -255,13 +256,8 @@ class _StarletteChannel(Channel):
         return bytes(await self._ws.receive_bytes())
 
 
-def _authorize(websocket: WebSocket, dossier_id: str) -> bool:
-    """True if the connecting user may edit this dossier. Runs before accept."""
-    if auth.DEV_AUTH_BYPASS:
-        return True
-    user = websocket.session.get("user")
-    if not user:
-        return False
+def _authorize(user: dict, dossier_id: str) -> bool:
+    """True if this user may edit this dossier."""
     record = dossierstore.load_dossier(dossier_id)
     if record is None:
         # No server record yet (unmigrated/local dossier) — the caller owns it,
@@ -271,13 +267,40 @@ def _authorize(websocket: WebSocket, dossier_id: str) -> bool:
     return role is not None and ROLE_ORDER[role] >= ROLE_ORDER["editor"]
 
 
+# How often an open connection re-checks the dossier grant. A revoked or
+# downgraded share must end live editing, not only the next connect.
+_ACCESS_RECHECK_S = 30
+
+
+async def _still_allowed(websocket: WebSocket, dossier_id: str) -> bool:
+    if auth.DEV_AUTH_BYPASS:
+        return True
+    # session_user re-checks the account itself (deleted / disabled) once
+    # per SESSION_REVALIDATE_SECONDS; in between it only reads the cookie.
+    user = await auth.session_user(websocket)
+    if not user:
+        return False
+    return await asyncio.to_thread(_authorize, user, dossier_id)
+
+
+async def _watch_access(websocket: WebSocket, dossier_id: str) -> None:
+    """Close the socket once the user loses edit access. The client's
+    reconnect is then refused at the handshake."""
+    while True:
+        await asyncio.sleep(_ACCESS_RECHECK_S)
+        if not await _still_allowed(websocket, dossier_id):
+            with contextlib.suppress(Exception):
+                await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
+            return
+
+
 @router.websocket("/api/collab/{dossier_id}")
 async def collab(websocket: WebSocket, dossier_id: str) -> None:
-    allowed = await asyncio.to_thread(_authorize, websocket, dossier_id)
-    if not allowed:
+    if not await _still_allowed(websocket, dossier_id):
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)
         return
     await websocket.accept()
+    watcher = asyncio.create_task(_watch_access(websocket, dossier_id))
     try:
         await ws_server.serve(_StarletteChannel(websocket, dossier_id))
     except WebSocketDisconnect:
@@ -286,3 +309,5 @@ async def collab(websocket: WebSocket, dossier_id: str) -> None:
         # A peer disconnecting mid-send can surface here as an ExceptionGroup;
         # log it instead of bubbling a server error — the client reconnects.
         log.exception("collab session for %s ended abnormally", dossier_id)
+    finally:
+        watcher.cancel()

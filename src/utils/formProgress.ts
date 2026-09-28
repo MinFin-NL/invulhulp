@@ -35,7 +35,7 @@ export function computeNavOrder(config: FormConfig, form?: FormState): string[] 
  * (e.g. AIIA's decision gate marks '3'); 'summary' is never marked complete
  * and is excluded from the denominator.
  */
-export function countableStepIds(config: FormConfig, form?: FormState): string[] {
+function countableStepIds(config: FormConfig, form?: FormState): string[] {
   const completionIdByView = new Map<string, string>()
   for (const step of config.navigation) {
     if (step.type === 'specialView') {

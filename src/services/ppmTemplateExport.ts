@@ -17,7 +17,7 @@ import { imageDimensions } from './wordExport'
 // heading in a new template version, that paragraph silently stays guidance;
 // ppmTemplateExport.test.ts pins that every mapped heading is found.
 
-export const PPM_TEMPLATE_URL = '/templates/PPM-Projectplan-2.0.docx'
+const PPM_TEMPLATE_URL = '/templates/PPM-Projectplan-2.0.docx'
 
 const W = 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
 const REL_NS = 'http://schemas.openxmlformats.org/package/2006/relationships'

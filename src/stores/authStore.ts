@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useAssessmentStore } from './assessmentStore'
 
 export interface AuthUser {
   sub: string
@@ -61,8 +62,16 @@ export const useAuthStore = defineStore('auth', {
       if (AUTH_BYPASS) return
       window.location.href = '/api/auth/login'
     },
-    logout() {
+    /** Save what is still waiting to be pushed, then erase this account's
+     *  dossiers from the browser before leaving: on a shared workstation the
+     *  next user must not find them in localStorage or IndexedDB. Dossiers
+     *  that could not be saved stay, bound to this account — a different
+     *  account logging in here still wipes them (adoptUser). */
+    async logout() {
       if (AUTH_BYPASS) return
+      const store = useAssessmentStore()
+      const unsaved = await store.flushPendingPushes()
+      await store.clearLocalData(unsaved)
       window.location.href = '/api/auth/logout'
     },
   },

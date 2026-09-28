@@ -31,7 +31,7 @@ export interface TrackMeta {
 
 // `emptyHint` is shown instead of cards for a track we deliberately want
 // visible while it has no forms yet: the gap is information, not an omission.
-export const TRACK_META: Record<TrackId, TrackMeta> = {
+const TRACK_META: Record<TrackId, TrackMeta> = {
   intake: {
     label: 'Intake',
     description: 'Het startpunt: registreer het IV-verzoek. Nog geen projectfase.',

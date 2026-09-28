@@ -16,7 +16,7 @@ export interface ChunkMatch {
 }
 
 // Below this score a source is considered not to support the answer.
-export const GROUNDING_THRESHOLD = 0.45
+const GROUNDING_THRESHOLD = 0.45
 
 // Answers up to this length (think: e-mail, phone, date, option label) are
 // matched as a literal substring instead of sentence-by-sentence.
@@ -141,11 +141,6 @@ export function matchAnswerToChunk(answer: string, chunkText: string): ChunkMatc
     }
   }
   return { ranges, score: best }
-}
-
-/** true when at least one source passage supports the answer. */
-export function computeGrounding(answer: string, sources: AnswerSource[]): boolean {
-  return sources.some((src) => matchAnswerToChunk(answer, src.text).score >= GROUNDING_THRESHOLD)
 }
 
 /** Only the sources that actually support the answer, best match first.

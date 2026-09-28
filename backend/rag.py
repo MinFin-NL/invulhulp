@@ -227,11 +227,18 @@ def _table_for_dim(dim: int) -> Any:
     return db.create_table(CHUNKS_TABLE, schema=schema)
 
 
-def _replace_doc_rows(doc_id: str, rows: list[dict], dim: int) -> None:
+def _doc_predicate(session_id: str, doc_id: str) -> str:
+    # Always scoped to the session: doc_ids are visible to anyone who can view
+    # a dossier, so a doc_id-only predicate would let a caller authorized on
+    # their *own* session delete or overwrite another dossier's chunks.
+    return f"session_id = '{_escape(session_id)}' AND doc_id = '{_escape(doc_id)}'"
+
+
+def _replace_doc_rows(session_id: str, doc_id: str, rows: list[dict], dim: int) -> None:
     table = _table_for_dim(dim)
     # Remove any pre-existing rows for this doc_id (idempotent re-index)
     try:
-        table.delete(f"doc_id = '{_escape(doc_id)}'")
+        table.delete(_doc_predicate(session_id, doc_id))
     except Exception:
         pass
     table.add(rows)
@@ -275,7 +282,7 @@ async def index_document(
         }
         for i, (chunk, vec) in enumerate(zip(chunks, vectors, strict=True))
     ]
-    await asyncio.to_thread(_replace_doc_rows, doc_id, rows, len(vectors[0]))
+    await asyncio.to_thread(_replace_doc_rows, session_id, doc_id, rows, len(vectors[0]))
 
     return {
         "chunk_count": len(chunks),
@@ -291,9 +298,10 @@ def _delete_where(predicate: str) -> int:
     return 1
 
 
-async def delete_document(doc_id: str) -> int:
-    """Remove all chunks for a doc_id. Returns number of tables touched."""
-    return await asyncio.to_thread(_delete_where, f"doc_id = '{_escape(doc_id)}'")
+async def delete_document(session_id: str, doc_id: str) -> int:
+    """Remove all chunks of one document in one session. Returns number of
+    tables touched."""
+    return await asyncio.to_thread(_delete_where, _doc_predicate(session_id, doc_id))
 
 
 async def delete_session(session_id: str) -> int:

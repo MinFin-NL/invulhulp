@@ -282,6 +282,8 @@ Available variables:
 | `OIDC_REDIRECT_URI` | `http://localhost:8080/api/auth/callback` | OIDC redirect URI |
 | `SESSION_SECRET` | `change-me-…` | Secret used to sign the session cookie (`openssl rand -hex 32`) |
 | `SESSION_HTTPS_ONLY` | `false` | Set to `true` in production |
+| `SESSION_MAX_AGE` | `43200` (12 h) | Session cookie lifetime in seconds |
+| `SESSION_REVALIDATE_SECONDS` | `300` | How often a session's account (exists, enabled, roles) is re-checked against Keycloak |
 | `LANCEDB_PATH` | `./data/lancedb` | LanceDB vector-store path |
 | `DOCS_PATH` / `IMAGES_PATH` / `DOSSIERS_PATH` | `./data/...` | Persistent stores for documents, images, and dossiers |
 | `COLLAB_PATH` | `./data/collab` | Durable Yjs/CRDT state for real-time collaboration (one binary file per dossier) |

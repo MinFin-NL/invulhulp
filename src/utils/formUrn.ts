@@ -27,7 +27,7 @@
 
 /** Vorm van een URN in dit systeem — bewust identiek aan het upstream-patroon,
  *  alleen met vrije authority en registry. */
-export const FORM_URN_PATTERN = /^urn:nl:[a-z]+:[a-z]+:[a-z]+:[0-9]+\.[0-9]+$/
+const FORM_URN_PATTERN = /^urn:nl:[a-z]+:[a-z]+:[a-z]+:[0-9]+\.[0-9]+$/
 
 /** Onze eigen authority + registry. */
 export const FORM_URN_AUTHORITY = 'minfin'

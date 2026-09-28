@@ -19,21 +19,6 @@ export interface SynthesizeRequest {
   synthesisHint?: string
 }
 
-export interface ExtractDocument {
-  name: string
-  content: string
-}
-
-export interface ExtractRequest {
-  documents: ExtractDocument[]
-  targetQuestion: string
-  options?: string[]
-  questionType?: string
-  fieldFormat?: string
-  formContext?: string
-  columns?: TableColumn[]
-}
-
 function postJson(url: string, body: unknown, signal?: AbortSignal): Promise<Response> {
   return fetch(url, {
     method: 'POST',
@@ -359,18 +344,6 @@ export async function fetchImageDimensions(
   }
 }
 
-export async function fetchImageDataUrl(imageId: string, sessionId: string): Promise<string> {
-  const res = await fetch(imageUrl(imageId, sessionId))
-  if (!res.ok) throw new Error(`HTTP ${res.status}`)
-  const blob = await res.blob()
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => resolve(reader.result as string)
-    reader.onerror = () => reject(new Error('Afbeelding kon niet worden gelezen'))
-    reader.readAsDataURL(blob)
-  })
-}
-
 export async function deleteImage(imageId: string, sessionId: string): Promise<void> {
   await fetch(imageUrl(imageId, sessionId), { method: 'DELETE' })
 }
@@ -422,33 +395,6 @@ export async function extractRagStream(
   } catch (e) {
     onError(e instanceof Error ? e.message : 'Stream verbroken')
   }
-}
-
-export async function extractFromDocumentsStream(
-  req: ExtractRequest,
-  onChunk: (text: string) => void,
-  onDone: (result: ImproveResponse) => void,
-  onError: (message: string) => void,
-): Promise<void> {
-  await postSse(
-    '/api/extract/stream',
-    {
-      documents: req.documents,
-      target_question: req.targetQuestion,
-      options: req.options ?? [],
-      question_type: req.questionType ?? 'text',
-      field_format: req.fieldFormat ?? '',
-      form_context: req.formContext ?? '',
-      columns: req.columns ?? [],
-    },
-    onChunk,
-    onDone,
-    onError,
-  )
-}
-
-export async function synthesize(req: SynthesizeRequest): Promise<ImproveResponse> {
-  return postJsonOrThrow<ImproveResponse>('/api/synthesize', synthesizeBody(req))
 }
 
 const EMAIL_RE = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/
@@ -554,7 +500,7 @@ export interface BulkExtractParams {
  *  that actually support it. Choice questions are exempt from the grounding
  *  warning (option labels rarely appear verbatim in source documents) and
  *  fall back to the closest retrieval matches. */
-export function buildAnswerSourceMeta(
+function buildAnswerSourceMeta(
   sources: AnswerSource[] | undefined,
   value: string | string[],
   questionType: string,
@@ -746,8 +692,4 @@ export async function smoothFormAnswers(params: SmoothFormParams): Promise<numbe
     if (applied.get(qId) !== original) rewritten++
   }
   return rewritten
-}
-
-export async function improveText(text: string, questionContext: string): Promise<ImproveResponse> {
-  return postJsonOrThrow<ImproveResponse>('/api/improve', { text, question_context: questionContext })
 }

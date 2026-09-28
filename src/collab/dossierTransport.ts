@@ -92,7 +92,7 @@ const USER_CATEGORIES = [
 /** A stable, readable colour from a user id — same person, same colour. It is
  *  a CSS custom-property reference, so it follows the colour scheme; consumers
  *  must use it as a whole value (no hex-alpha suffixes — use color-mix). */
-export function colorForUser(sub: string): string {
+function colorForUser(sub: string): string {
   let h = 0
   for (let i = 0; i < sub.length; i++) h = (h * 31 + sub.charCodeAt(i)) % USER_CATEGORIES.length
   return `var(--semantics-categories-${USER_CATEGORIES[h]}-filled-background-color)`
@@ -306,7 +306,7 @@ export function connectDossier(doc: Y.Doc, dossierId: string, onReady: () => voi
 /** Tear down a dossier's live sync (revoked share, dossier closed). Resolves
  *  once the IndexedDB connection is actually closed — callers that want to
  *  delete that database have to wait for it, or the delete blocks. */
-export function disconnectDossier(dossierId: string): Promise<void> {
+function disconnectDossier(dossierId: string): Promise<void> {
   const p = providers.get(dossierId)
   if (p) {
     p.destroy()
@@ -334,14 +334,22 @@ export function disconnectDossier(dossierId: string): Promise<void> {
  *  database. disconnectDossier alone keeps the stored doc for the next open —
  *  which for a deleted dossier means its answers stay on the machine. */
 export function purgeDossierLocalState(dossierId: string): Promise<void> {
-  return disconnectDossier(dossierId).then(() => {
-    if (typeof indexedDB === 'undefined') return
-    try {
-      indexedDB.deleteDatabase(`dossier:${dossierId}:g2`)
-    } catch {
-      // Private mode / storage disabled — nothing was persisted either.
-    }
-  })
+  return disconnectDossier(dossierId).then(
+    () =>
+      new Promise<void>((resolve) => {
+        if (typeof indexedDB === 'undefined') return resolve()
+        try {
+          const req = indexedDB.deleteDatabase(`dossier:${dossierId}:g2`)
+          // Resolve once the delete has run, so a caller about to leave the
+          // page (logout) doesn't cut it off. `blocked` = another tab still
+          // has it open; the delete stays queued, so don't wait on that tab.
+          req.onsuccess = req.onerror = req.onblocked = () => resolve()
+        } catch {
+          // Private mode / storage disabled — nothing was persisted either.
+          resolve()
+        }
+      }),
+  )
 }
 
 /** Drop all live connections (e.g. before a full server reload). */
