@@ -100,24 +100,6 @@
           >
             <div slot="toolbar" class="assessment-shell__toolbar">
               <PresenceBar :dossier-id="store.activeDossierId" />
-              <!-- The toolbar never shrinks, so on a phone the labelled button
-                   would squeeze the back button; the icon button takes over. -->
-              <template v-if="showResetButton">
-                <nldd-button
-                  class="assessment-shell__reset--wide"
-                  variant="neutral-transparent"
-                  start-icon="arrow-2-counter-clockwise"
-                  text="Opnieuw beginnen"
-                  @click="resetDialog?.open()"
-                />
-                <nldd-icon-button
-                  class="assessment-shell__reset--narrow"
-                  variant="neutral-transparent"
-                  icon="arrow-2-counter-clockwise"
-                  text="Opnieuw beginnen"
-                  @click="resetDialog?.open()"
-                />
-              </template>
             </div>
           </nldd-top-title-bar>
 
@@ -221,16 +203,6 @@
         </nldd-page>
       </nldd-split-view-pane>
     </nldd-navigation-split-view>
-
-    <ConfirmDialog
-      ref="resetDialog"
-      :title="`&quot;${formConfig?.title ?? 'dit formulier'}&quot; opnieuw beginnen?`"
-      message="Al uw antwoorden in dit formulier worden gewist."
-      confirm-label="Opnieuw beginnen"
-      cancel-label="Annuleren"
-      variant="warning"
-      @confirm="store.resetActive()"
-    />
   </div>
 </template>
 
@@ -256,7 +228,6 @@ import SummaryView from './SummaryView.vue'
 import UserManagement from './UserManagement.vue'
 import DossierFormsNav from './DossierFormsNav.vue'
 import PresenceBar from './PresenceBar.vue'
-import ConfirmDialog from './ConfirmDialog.vue'
 
 const store = useAssessmentStore()
 const auth = useAuthStore()
@@ -422,13 +393,6 @@ const mainLabel = computed(() =>
     : store.activeDossier.name || 'Dossier',
 )
 
-// Reset applies to a single form, so only offer it while one is open and past
-// its introductie.
-const showResetButton = computed(
-  () => store.activeFormId !== null && store.currentView !== 'home',
-)
-const resetDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
-
 // Build ordered navigation list from form config
 const navOrder = computed((): string[] => {
   if (!formConfig.value) return []
@@ -572,20 +536,8 @@ function onDecisionNext(go: boolean) {
   gap: var(--primitives-space-12);
 }
 
-.assessment-shell__reset--narrow {
-  display: none;
-}
-
 /* NLDD's sm breakpoint (≤640px). */
 @media (max-width: 640px) {
-  .assessment-shell__reset--wide {
-    display: none;
-  }
-
-  .assessment-shell__reset--narrow {
-    display: inline-flex;
-  }
-
   /* The avatars carry their own names; the caption is what has to give. */
   .assessment-shell__toolbar :deep(.presence-label) {
     display: none;

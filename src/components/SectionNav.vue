@@ -84,17 +84,45 @@
           </template>
         </nldd-text>
       </div>
+
+      <!-- Opnieuw beginnen wist alleen dit formulier, dus het staat in de
+           stappenkolom van dit formulier — onderaan, ver van de stappenlijst,
+           zodat een misklik daar hem niet raakt. Pas zichtbaar zodra er iets
+           te wissen valt. -->
+      <div v-if="hasProgress" class="invulhulp-nav__reset">
+        <hr class="invulhulp-divider" />
+        <nldd-button
+          variant="neutral-transparent"
+          size="sm"
+          start-icon="arrow-2-counter-clockwise"
+          text="Formulier opnieuw beginnen"
+          @click="resetDialog?.open()"
+        />
+      </div>
+
+      <!-- Buiten de v-if: NLDD wil de dialoog in de DOM houden, anders vallen
+           de animaties weg — en na bevestigen verdwijnt de knop meteen. -->
+      <ConfirmDialog
+        ref="resetDialog"
+        :title="`&quot;${formConfig.title}&quot; opnieuw beginnen?`"
+        message="Al uw antwoorden in dit formulier worden gewist."
+        confirm-label="Opnieuw beginnen"
+        cancel-label="Annuleren"
+        variant="warning"
+        @confirm="store.resetActive()"
+      />
     </nldd-simple-section>
   </nldd-page>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAiMode } from '../composables/useAiMode'
 import type { FormConfig, NavStepSubsections, NavStepSpecialView, Subsection } from '../models/Assessment'
-import { missingMandatoryBySubsection } from '../utils/formProgress'
+import { formProgress, missingMandatoryBySubsection } from '../utils/formProgress'
 import AiModeToggle from './AiModeToggle.vue'
+import ConfirmDialog from './ConfirmDialog.vue'
 
 const props = defineProps<{
   formConfig: FormConfig
@@ -222,6 +250,12 @@ const completedCount = computed(
 )
 const totalCount = computed(() => props.navOrder.filter((v) => v !== 'home' && v !== 'summary').length)
 
+// Same notion of "begonnen" as the form cards: a completed step or an answer.
+const hasProgress = computed(
+  () => formProgress(props.formConfig, store.activeForm).status !== 'niet-gestart',
+)
+const resetDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
+
 function navigate(id: string) {
   store.setCurrentView(id)
   emit('navigate', id)
@@ -246,5 +280,18 @@ function navigate(id: string) {
 .invulhulp-nav__ai-hint {
   margin: 0;
   color: var(--invulhulp-color-text-subtle);
+}
+
+.invulhulp-nav__reset {
+  margin-block-start: var(--primitives-space-24);
+  display: flex;
+  flex-direction: column;
+  gap: var(--primitives-space-8);
+}
+
+/* Not stretched to the column width like the divider: a full-width
+   destructive action reads heavier than it is. */
+.invulhulp-nav__reset > nldd-button {
+  align-self: flex-start;
 }
 </style>
