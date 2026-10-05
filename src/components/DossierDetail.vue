@@ -4,16 +4,9 @@
 
       <!-- Dossier page header -->
       <section class="dossier-header" aria-labelledby="dossier-title">
-        <button
-          type="button"
-          class="invulhulp-linkbutton dossier-header__back"
-          @click="store.goToDossierList()"
-        >
-          ‹ Alle dossiers
-        </button>
         <div class="dossier-header__row">
           <div class="dossier-header__title-group">
-            <nldd-icon class="dossier-header__icon" name="folder" size="32" color="accent" />
+            <nldd-icon class="dossier-header__icon" icon="folder" size="32" color="accent" />
             <nldd-title size="1"><h1 class="dossier-header__name" id="dossier-title">
               {{ store.activeDossier.name }}
             </h1></nldd-title>
@@ -27,7 +20,7 @@
               @click="openShareDialog"
             >
               <span slot="text">
-<nldd-icon class="dossier-actions__share-icon" name="square-arrow-up" size="16" />
+<nldd-icon class="dossier-actions__share-icon" icon="square-arrow-up" size="16" />
               Delen
               </span>
             </nldd-button>
@@ -99,7 +92,7 @@
             class="invulhulp-visually-hidden"
             @change="onFilesSelected"
           />
-          <nldd-icon class="first-run__dropzone-icon" name="arrow-up-out-bucket" size="40" color="accent" />
+          <nldd-icon class="first-run__dropzone-icon" icon="arrow-up-out-bucket" size="40" color="accent" />
           <span class="invulhulp-heading--md first-run__dropzone-title">
             {{ isUploading ? 'Bezig met inlezen…' : 'Sleep je documenten hierheen' }}
           </span>
@@ -190,7 +183,7 @@
                 ]"
                 :style="{ '--phase-fill': phaseFill(group) }"
               >
-                <nldd-icon class="phase-rail__icon" :name="trackIcon(group.track)" size="20" />
+                <nldd-icon class="phase-rail__icon" :icon="trackIcon(group.track)" size="20" />
               </span>
               <span class="phase-rail__label">{{ group.label }}</span>
               <span class="phase-rail__count">
@@ -252,7 +245,7 @@
 
           <details class="invulhulp-disclosure docs-info-details">
             <summary class="invulhulp-text--sm">
-              <nldd-icon class="docs-info-icon" name="info-circle" size="16" />
+              <nldd-icon class="docs-info-icon" icon="info-circle" size="16" />
               Ondersteunde bestandstypen
             </summary>
             <div class="invulhulp-disclosure__details">
@@ -306,7 +299,7 @@
           >
             <div class="docs-item__row">
               <div class="docs-item__info">
-                <nldd-icon class="docs-item__check" name="check-mark-circle" size="16" color="success" />
+                <nldd-icon class="docs-item__check" icon="check-mark-circle" size="16" color="success" />
                 <div class="docs-item__text">
                   <span class="docs-item__name">{{ doc.name }}</span>
                   <span class="docs-item__meta invulhulp-text--sm">
@@ -442,17 +435,20 @@
         <div class="track-phase__lane" aria-hidden="true">
           <nldd-timeline-track-cell
             class="track-phase__step"
-            variant="step"
+            size="md"
             :status="stepStatus(group)"
             :position="stepPosition(phaseIdx)"
             :icon="markerState(group) === 'done' ? 'check-mark-small' : ''"
             :text="stepNumber(group)"
           />
+          <!-- A line-only row takes the status of the step above it, so the
+               track below a finished phase is drawn as covered. -->
           <nldd-timeline-track-cell
             v-if="phaseIdx < timelineGroups.length - 1"
             class="track-phase__rail"
-            variant="step"
-            status="none"
+            size="md"
+            variant="none"
+            :status="stepStatus(group)"
           />
         </div>
 
@@ -1245,19 +1241,6 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   margin-block-end: var(--primitives-space-40);
 }
 
-.dossier-header__back {
-  display: inline-block;
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  font: inherit;
-  font-size: var(--primitives-font-size-90);
-  color: var(--semantics-content-accent-color);
-  text-decoration: underline;
-  margin-block-end: var(--primitives-space-12);
-}
-
 .dossier-header__row {
   display: flex;
   align-items: center;
@@ -1876,7 +1859,7 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   margin: 0;
   padding: 0;
   /* The lane is the step marker's own width (nldd-timeline-track-cell,
-     variant="step"); only the gap to the content is ours. */
+     size="md"); only the gap to the content is ours. */
   --track-gutter: var(--primitives-space-16);
 }
 

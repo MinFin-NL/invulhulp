@@ -222,7 +222,7 @@ function navigate(id: string) {
   /* Fill exactly the space under whatever is pinned above (the header, plus the
      AI Modus banner while it runs) and stick flush to its underside. Both
      heights are measured at runtime — a hardcoded value here left a dead gap
-     once the fase-rail breadcrumb made the header taller than the 100px this
+     once a second header row made the header taller than the 100px this
      used to assume.
 
      max() is the floor that keeps this bug from coming back: a bogus or

@@ -25,7 +25,7 @@ export interface TrackMeta {
   isPhase: boolean
   emptyHint?: string
   /** Naam van het NLDD-icoon voor deze fase in de fasetijdlijn
-   *  (<nldd-icon name="…">). */
+   *  (<nldd-icon icon="…">). */
   icon: string
 }
 

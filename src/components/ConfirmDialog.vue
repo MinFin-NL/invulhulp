@@ -31,14 +31,15 @@
           </label>
           <nldd-text-field
             :input-id="phraseId"
+            :accessible-label="`Typ ${confirmPhrase} om te bevestigen`"
             ref="phraseEl"
             class="invulhulp-modal__input"
             autocomplete="off"
             :value="phraseValue"
-            :error-message-ids="phraseHintId"
+            :describedByElements.prop="phraseHintEl ? [phraseHintEl] : []"
             @input="phraseValue = $event.detail.value"
           />
-          <span :id="phraseHintId" class="invulhulp-text--sm invulhulp-modal__danger-hint">
+          <span ref="phraseHintEl" class="invulhulp-text--sm invulhulp-modal__danger-hint">
             {{ phraseMatches
               ? 'De naam komt overeen — de knop is nu actief.'
               : 'De knop wordt actief zodra de naam exact overeenkomt.' }}
@@ -50,6 +51,7 @@
         <label class="invulhulp-modal__field-label" :for="inputId">{{ inputLabel || 'Naam' }}</label>
         <nldd-text-field
           :input-id="inputId"
+          :accessible-label="inputLabel || 'Naam'"
           ref="inputEl"
           class="invulhulp-modal__input"
           :value="inputValue"
@@ -112,6 +114,9 @@ type ModalDialog = HTMLElement & { show(): void; hide(): void }
 const dialogEl = ref<ModalDialog | null>(null)
 const inputEl = ref<HTMLElement | null>(null)
 const phraseEl = ref<HTMLElement | null>(null)
+// Handed to the field as an element, not an id: an aria-describedby id on the
+// input inside its shadow root cannot see a span out here.
+const phraseHintEl = ref<HTMLElement | null>(null)
 
 /** nldd-text-field delegates focus() to its inner <input>, but exposes no
  *  select(). Reach for the native input only for that, so opening the rename
@@ -124,7 +129,6 @@ const phraseValue = ref('')
 const uid = Math.random().toString(36).slice(2, 9)
 const inputId = `invulhulp-dialog-input-${uid}`
 const phraseId = `invulhulp-dialog-phrase-${uid}`
-const phraseHintId = `invulhulp-dialog-phrase-hint-${uid}`
 
 // A warning confirm is the destructive path (dossier wissen, gebruiker
 // verwijderen); everything else is the ordinary primary action.
@@ -189,10 +193,11 @@ defineExpose({ open })
   inline-size: 100%;
 }
 
-/* These two fields keep their own <label for> rather than an nldd-form-field
+/* These two fields keep their own <label> rather than an nldd-form-field
    wrapper: the phrase label carries inline markup (the name in <strong>) and
-   the hint below is wired with error-message-ids. Same type as a
-   form-field label. */
+   the hint below is wired with describedByElements. The `for` cannot reach
+   the input inside the field's shadow root, so the accessible name goes in
+   through accessible-label as well. Same type as a form-field label. */
 .invulhulp-modal__field {
   display: flex;
   flex-direction: column;

@@ -71,7 +71,7 @@
                 class="dossier-card__open"
                 @click="store.openDossier(d.id)"
               >
-                <nldd-icon class="dossier-card__icon" name="folder" size="32" color="accent" />
+                <nldd-icon class="dossier-card__icon" icon="folder" size="32" color="accent" />
                 <span class="dossier-card__body">
                   <span class="invulhulp-heading--md dossier-card__name">{{ d.name }}</span>
                   <nldd-tag v-if="d.sharedWithMe" size="sm" color="accent" class="dossier-card__shared">

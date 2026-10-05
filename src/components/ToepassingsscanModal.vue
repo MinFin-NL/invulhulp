@@ -260,11 +260,12 @@ defineExpose({ open })
 /* De vraag staat op het witte corpus, met de ruimte van het venster eromheen —
    geen eigen vlak of rand. Bij het meerkeuzetype is dit een echte <fieldset>
    (de groepssemantiek moet ergens vandaan komen); bij het enkelkeuzetype doet
-   nldd-radio-button-group dat zelf en is dit een gewone <div>. */
+   nldd-radio-button-group dat zelf en is dit een gewone <div>. De opties
+   staan zoals in die radiogroep zonder tussenruimte onder elkaar: elk veld
+   heeft zijn eigen hoogte. */
 .scan__options {
   display: flex;
   flex-direction: column;
-  gap: var(--semantics-forms-gap-tight, var(--primitives-space-8));
 }
 
 .scan__fieldset {

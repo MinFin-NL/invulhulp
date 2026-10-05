@@ -122,7 +122,7 @@
     </div>
 
     <p v-if="overflowing && gridOpen" class="invulhulp-table-question__scroll-hint">
-      <nldd-icon name="arrow-left-right" size="20" color="inherit" aria-hidden="true" />
+      <nldd-icon icon="arrow-left-right" size="20" color="inherit" aria-hidden="true" />
       Deze tabel heeft {{ columns.length }} kolommen — scroll of gebruik de pijlen om ze allemaal te zien.
     </p>
 

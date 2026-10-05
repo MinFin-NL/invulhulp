@@ -4,7 +4,7 @@
        one move in two steps, so they read as one object in the track. -->
   <article class="beslishulp-tile" :class="`beslishulp-tile--${toneClass}`">
     <div class="beslishulp-tile__body">
-      <nldd-icon class="beslishulp-tile__icon" name="score-meter" size="28" />
+      <nldd-icon class="beslishulp-tile__icon" icon="score-meter" size="28" />
       <p class="beslishulp-tile__kicker">Beslishulp</p>
       <h3 class="beslishulp-tile__title">AI-verordening</h3>
 

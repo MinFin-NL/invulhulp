@@ -18,7 +18,7 @@
   >
     <div class="scan-tile__body">
       <nldd-text color="inherit" size="sm" weight="bold" class="scan-tile__kicker">
-        <nldd-icon class="scan-tile__icon" name="magnifier" size="24" color="accent" />
+        <nldd-icon class="scan-tile__icon" icon="magnifier" size="24" color="accent" />
         Toepassingsscan
       </nldd-text>
       <nldd-title size="2"><h2 class="scan-tile__title" id="scan-tile-title">

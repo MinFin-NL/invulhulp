@@ -28,13 +28,6 @@
       </nldd-menu-bar>
 
       <nldd-menu-bar slot="utility" accessible-label="Accountnavigatie">
-        <nldd-menu-bar-item
-          v-if="showResetButton"
-          text="Opnieuw beginnen"
-          icon="arrow-2-counter-clockwise"
-          content-priority="text"
-          @select="openResetDialog"
-        />
         <!-- De naam is geen bestemming maar de opener van het accountmenu; op
              smalle breedtes blijft alleen het icoon staan. -->
         <nldd-menu-bar-item
@@ -55,29 +48,44 @@
       </nldd-menu-bar>
     </nldd-top-navigation-bar>
 
-    <!-- Breadcrumb: dossier › fase › formulier. The dossier crumb is a real
-         hash link: useAppHistory maps the resulting popstate back onto the
-         store, and it opens in a new tab like any link. -->
-    <div v-if="showBreadcrumb" class="invulhulp-header__breadcrumb-bar">
-      <nldd-breadcrumbs class="invulhulp-header__breadcrumb">
-        <nldd-breadcrumbs-item
-          :href="store.activeFormId !== null ? dossierHref : undefined"
-          :current="store.activeFormId === null"
-        >
-          <!-- No whitespace between icon and name: it would be underlined as part of the link. -->
-          <nldd-icon class="invulhulp-header__crumb-icon" name="folder" size="20" color="inherit" />{{ store.activeDossier.name }}
-        </nldd-breadcrumbs-item>
-        <!-- Lifecycle phase of the open form. Not a link: there is no
-             per-phase destination, the phase only exists as a grouping. -->
-        <nldd-breadcrumbs-item
-          v-if="activePhaseLabel"
-          class="invulhulp-header__crumb--phase"
-          :text="activePhaseLabel"
-        />
-        <nldd-breadcrumbs-item v-if="activeFormTitle" current :text="activeFormTitle" />
-      </nldd-breadcrumbs>
-      <PresenceBar :dossier-id="store.activeDossierId" class="invulhulp-header__presence" />
-    </div>
+    <!-- Title bar: the back link goes one level up (form → dossier → list).
+         It is a real hash link: useAppHistory maps the resulting popstate back
+         onto the store, and it opens in a new tab like any link.
+         There is no collapse-anchor: the bar only collapses on scroll inside an
+         nldd-page, which this app shell does not use. Without one the state is
+         static: on a form, `text` is set and the bar is compact (icon back
+         button + form title); on the dossier page, `text` is empty and the back
+         button shows its label. -->
+    <nldd-top-title-bar
+      v-if="showTitleBar"
+      class="invulhulp-header__title-bar"
+      :back-text="backText"
+      :back-href="backHref"
+      :text="activeFormTitle ?? ''"
+      :supporting-text="formContext"
+    >
+      <div slot="toolbar" class="invulhulp-header__toolbar">
+        <PresenceBar :dossier-id="store.activeDossierId" />
+        <!-- The toolbar never shrinks, so on a phone the labelled button would
+             squeeze the form title; the icon button takes over there. -->
+        <template v-if="showResetButton">
+          <nldd-button
+            class="invulhulp-header__reset--wide"
+            variant="neutral-transparent"
+            start-icon="arrow-2-counter-clockwise"
+            text="Opnieuw beginnen"
+            @click="openResetDialog"
+          />
+          <nldd-icon-button
+            class="invulhulp-header__reset--narrow"
+            variant="neutral-transparent"
+            icon="arrow-2-counter-clockwise"
+            text="Opnieuw beginnen"
+            @click="openResetDialog"
+          />
+        </template>
+      </div>
+    </nldd-top-title-bar>
   </header>
 
   <ConfirmDialog
@@ -111,8 +119,8 @@ onMounted(async () => {
   availableForms.value = await loadAvailableForms()
 })
 
-// The header is not a fixed height: the breadcrumb row wraps, the phase crumb
-// drops out below 640px, and the presence bar appears only in a shared dossier.
+// The header is not a fixed height: the title bar shows only inside a dossier,
+// and its toolbar (presence avatars, reset button) comes and goes.
 // The form sidebar sticks right under it, so publish the measured height as a
 // custom property instead of letting every consumer hardcode a guess.
 let headerObserver: ResizeObserver | null = null
@@ -150,7 +158,7 @@ const showResetButton = computed(
     store.currentView !== 'home',
 )
 
-const showBreadcrumb = computed(
+const showTitleBar = computed(
   () => store.screen === 'dossier' && !auth.userManagementOpen && store.activeDossier.name !== '',
 )
 
@@ -168,6 +176,17 @@ const homeHref = computed(() =>
   store.screen === 'dossier' && store.activeDossierId ? dossierHref.value : '#/dossiers',
 )
 
+// NLDD labels the back button with the title of the page it returns to.
+const backText = computed(() => (store.activeFormId !== null ? store.activeDossier.name : 'Dossiers'))
+const backHref = computed(() => (store.activeFormId !== null ? dossierHref.value : '#/dossiers'))
+
+// On a compact bar the back button is icon-only, so the dossier name would
+// otherwise only show in its tooltip; the subtitle keeps it visible.
+const formContext = computed(() => {
+  if (store.activeFormId === null) return ''
+  return [store.activeDossier.name, activePhaseLabel.value].filter(Boolean).join(' · ')
+})
+
 const activeFormTitle = computed(() => {
   if (store.activeFormId === null) return null
   return availableForms.value.find((f) => f.id === store.activeFormId)?.title ?? null
@@ -177,7 +196,7 @@ const activePhaseLabel = computed(() => {
   if (store.activeFormId === null) return null
   const track = availableForms.value.find((f) => f.id === store.activeFormId)?.track
   // A form with a typo'd track is already surfaced on the dossier page; don't
-  // repeat "Niet ingedeeld" in the breadcrumb of every one of its views.
+  // repeat "Niet ingedeeld" in the title bar of every one of its views.
   if (!track || trackIdFor(track, store.activeFormId) === 'onbekend') return null
   return trackLabel(track)
 })
@@ -214,35 +233,52 @@ function openResetDialog() {
   border-block-end: 1px solid var(--semantics-dividers-color);
 }
 
-/* The nav bar caps its own content to the page-section width; the breadcrumb
-   row below it has to line up with that same measure. */
-.invulhulp-header__breadcrumb-bar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--primitives-space-8);
+/* The nav bar caps its own content to the page-section width; the title bar
+   below it has to line up with that same measure. Its controls carry a top
+   margin inside the shadow root; the bottom padding balances that. */
+.invulhulp-header__title-bar {
   max-inline-size: var(--semantics-page-sections-body-max-width);
   margin-inline: auto;
-  padding-inline: var(--semantics-page-sections-md-margin-inline, var(--primitives-space-16));
-  padding-block: var(--primitives-space-8);
+  padding-inline: var(--semantics-page-sections-md-margin-inline);
+  padding-block-end: var(--primitives-space-6);
   border-block-start: var(--semantics-dividers-thickness) solid var(--semantics-dividers-color);
 }
 
-/* Push the "who's here" avatars to the trailing edge of the breadcrumb row. */
-.invulhulp-header__presence {
-  margin-inline-start: auto;
+.invulhulp-header__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--primitives-space-12);
 }
 
-.invulhulp-header__crumb-icon {
-  vertical-align: text-bottom;
-  margin-inline-end: var(--primitives-space-4);
+.invulhulp-header__reset--narrow {
+  display: none;
 }
 
-/* The phase is context, not a destination — and the first thing to go when
-   the row gets tight. */
+/* Same steps as the nav bar's own side margin: NLDD's sm (≤640px) and lg
+   (≥1008px) breakpoints. The header spans the viewport, so a media query sees
+   the width the nav bar's container query does. */
 @media (max-width: 640px) {
-  .invulhulp-header__crumb--phase {
+  .invulhulp-header__title-bar {
+    padding-inline: var(--semantics-page-sections-sm-margin-inline);
+  }
+
+  .invulhulp-header__reset--wide {
     display: none;
+  }
+
+  .invulhulp-header__reset--narrow {
+    display: inline-flex;
+  }
+
+  /* The avatars carry their own names; the caption is what has to give. */
+  .invulhulp-header__toolbar :deep(.presence-label) {
+    display: none;
+  }
+}
+
+@media (min-width: 1008px) {
+  .invulhulp-header__title-bar {
+    padding-inline: var(--semantics-page-sections-lg-margin-inline);
   }
 }
 </style>

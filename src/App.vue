@@ -41,7 +41,7 @@
       <!-- Feature highlights -->
       <section class="findocs-features" aria-label="Wat FinDocs voor je doet">
         <article v-for="f in features" :key="f.title" class="findocs-feature">
-          <span class="findocs-feature__icon"><nldd-icon :name="f.icon" size="28" color="accent" /></span>
+          <span class="findocs-feature__icon"><nldd-icon :icon="f.icon" size="28" color="accent" /></span>
           <h2 class="findocs-feature__title">{{ f.title }}</h2>
           <p class="findocs-feature__desc">{{ f.desc }}</p>
         </article>

@@ -378,10 +378,11 @@ function onCheckboxToggle(option: string) {
   min-inline-size: 0;
 }
 
+/* Stacked like the options of nldd-radio-button-group: no gap, each field
+   carries its own height. NLDD has no checkbox group to do this for us. */
 .invulhulp-question__options {
   display: flex;
   flex-direction: column;
-  gap: var(--semantics-forms-gap-tight, var(--primitives-space-8));
 }
 
 /* One heading style for all four question types — the <label> of an open
