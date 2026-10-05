@@ -1,10 +1,22 @@
 <template>
-  <nav class="invulhulp-nav" :aria-label="`Navigatie ${formConfig.title}`">
+  <!-- Tweede kolom van het dossier: de stappen van het open formulier. De
+       voortgang staat bovenaan, AI Modus onderaan; daartussen per deel van het
+       formulier een lijst, zoals de eerste kolom de formulieren per fase toont. -->
+  <nldd-page sticky-header :accessible-label="`Stappen van ${formConfig.title}`">
+    <nldd-top-title-bar
+      slot="header"
+      class="invulhulp-pane-bar"
+      :text="formConfig.title"
+      :back-text="backText"
+      heading-level="2"
+      collapse-anchor="form-nav-title"
+    />
+    <nldd-simple-section width="full">
+      <nldd-title id="form-nav-title" size="3" heading-level="2" :text="formConfig.title" />
+      <nldd-spacer size="16" />
 
-    <!-- Progress. accessible-label overschrijft de aria-valuetext ("x%
-         voltooid") die de balk zelf zou opbouwen; secties tellen hier, geen
-         percentages. -->
-    <div class="invulhulp-nav__progress">
+      <!-- accessible-label overschrijft de aria-valuetext ("x% voltooid") die
+           de balk zelf zou opbouwen; stappen tellen hier, geen percentages. -->
       <nldd-progress-bar
         size="sm"
         text="Voortgang"
@@ -13,147 +25,86 @@
         :max="totalCount"
         :accessible-label="`${completedCount} van ${totalCount} stappen voltooid`"
       />
-    </div>
 
-    <ol class="invulhulp-nav__list">
-      <!-- Home -->
-      <li class="invulhulp-nav__step">
-        <button
-          type="button"
-          class="invulhulp-nav__link"
-          :class="{ 'invulhulp-nav__link--active': store.currentView === 'home' }"
-          :aria-current="store.currentView === 'home' ? 'page' : undefined"
-          @click="navigate('home')"
-        >
-          Introductie
-        </button>
-      </li>
-
-      <!-- Data-driven nav from form config -->
-      <template v-for="step in props.formConfig.navigation" :key="stepKey(step)">
-
-        <!-- Subsections step: render section header + subsection items -->
-        <template v-if="step.type === 'subsections'">
-          <template v-if="!step.condition || store[step.condition.storeKey] !== false">
-            <li class="invulhulp-nav__step invulhulp-nav__step--header">
-              <span class="invulhulp-nav__group-label">{{ getSectionTitle(step.sectionId) }}</span>
-            </li>
-            <li
-              v-for="sub in getSubsections(step)"
-              :key="sub.id"
-              class="invulhulp-nav__step"
-              :class="{ 'invulhulp-nav__step--completed': isSubsectionDone(sub.id) }"
-            >
-              <button
-                type="button"
-                class="invulhulp-nav__link"
-                :class="{ 'invulhulp-nav__link--active': store.currentView === sub.id }"
-                :aria-current="store.currentView === sub.id ? 'page' : undefined"
-                @click="navigate(sub.id)"
-              >
-                <svg v-if="isSubsectionDone(sub.id)" class="invulhulp-nav__check" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="currentColor" d="m41.262 6.164c-1.133-.836-2.707-.676-3.641.367l-15.879 17.77-9.547-8.27a2.7 2.7 0 0 0 -3.516-.027 2.71 2.71 0 0 0 -.586 3.469l11.563 19.301a2.72 2.72 0 0 0 2.316 1.316c.957 0 1.836-.492 2.328-1.301l17.66-29.043c.727-1.195.426-2.75-.699-3.582zm0 0"/></svg>
-                <!-- Doorgeklikt, maar er staan nog verplichte vragen open: geen
-                     vinkje, wel een teller. Anders leest de zijbalk het
-                     formulier af als klaar terwijl het leeg is. -->
-                <span v-else-if="openMandatory.get(sub.id) && store.isSectionCompleted(sub.id)" class="invulhulp-nav__open" aria-hidden="true" />
-                {{ sub.title }}
-                <span v-if="openMandatory.get(sub.id)" class="invulhulp-visually-hidden">
-                  — nog {{ openMandatory.get(sub.id) }} verplichte
-                  {{ openMandatory.get(sub.id) === 1 ? 'vraag' : 'vragen' }}
-                </span>
-              </button>
-            </li>
-          </template>
+      <template v-for="(group, idx) in groups" :key="group.key">
+        <nldd-spacer :size="idx === 0 ? '16' : '24'" />
+        <template v-if="group.title">
+          <nldd-title size="5" heading-level="3" :text="group.title" />
+          <nldd-spacer size="8" />
         </template>
-
-        <!-- Special view: skip summary (rendered at bottom) -->
-        <template v-else-if="step.viewId !== 'summary'">
-          <li v-if="step.navGroupHeader" class="invulhulp-nav__step invulhulp-nav__step--header">
-            <span class="invulhulp-nav__group-label">{{ step.navGroupHeader }}</span>
-          </li>
-          <li
-            class="invulhulp-nav__step"
-            :class="{ 'invulhulp-nav__step--completed': store.isSectionCompleted(completionId(step)) }"
+        <nldd-list variant="simple" type="navigation" :aria-label="group.title ?? group.label">
+          <nldd-list-item
+            v-for="item in group.items"
+            :key="item.id"
+            size="md"
+            button
+            :current="store.currentView === item.id || undefined"
+            @click="navigate(item.id)"
           >
-            <button
-              type="button"
-              class="invulhulp-nav__link"
-              :class="{ 'invulhulp-nav__link--active': store.currentView === step.viewId }"
-              :aria-current="store.currentView === step.viewId ? 'page' : undefined"
-              @click="navigate(step.viewId)"
-            >
-              <svg v-if="store.isSectionCompleted(completionId(step))" class="invulhulp-nav__check" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path fill="currentColor" d="m41.262 6.164c-1.133-.836-2.707-.676-3.641.367l-15.879 17.77-9.547-8.27a2.7 2.7 0 0 0 -3.516-.027 2.71 2.71 0 0 0 -.586 3.469l11.563 19.301a2.72 2.72 0 0 0 2.316 1.316c.957 0 1.836-.492 2.328-1.301l17.66-29.043c.727-1.195.426-2.75-.699-3.582zm0 0"/></svg>
-              {{ step.navLabel ?? step.viewId }}
-              <nldd-tag
-                v-if="step.viewId === 'risk' && store.riskLevel"
-                class="invulhulp-nav__tag"
-                size="sm"
-                :color="riskTagColor(store.riskLevel)"
-                :text="riskLabels[store.riskLevel!]"
-              />
-            </button>
-          </li>
-        </template>
-
+            <template v-if="item.icon">
+              <nldd-icon-cell size="20" :icon="item.icon" />
+              <nldd-spacer-cell size="8" />
+            </template>
+            <nldd-text-cell :text="item.label" :supporting-text="item.supportingText" />
+            <nldd-spacer-cell size="8" />
+            <template v-if="item.done">
+              <nldd-icon-cell size="20" icon="check-mark-circle" color="success" />
+              <nldd-spacer-cell size="4" />
+            </template>
+            <nldd-icon-cell size="20" icon="chevron-right" />
+          </nldd-list-item>
+        </nldd-list>
       </template>
 
-      <!-- Summary -->
-      <li class="invulhulp-nav__step invulhulp-nav__step--summary">
-        <button
-          type="button"
-          class="invulhulp-nav__link invulhulp-nav__link--summary"
-          :class="{ 'invulhulp-nav__link--active': store.currentView === 'summary' }"
-          :aria-current="store.currentView === 'summary' ? 'page' : undefined"
-          @click="navigate('summary')"
-        >
-          Samenvatting &amp; export
-        </button>
-      </li>
-    </ol>
-
-    <!-- AI Mode: always reachable while working in the form -->
-    <div class="invulhulp-nav__ai-mode">
-      <hr class="invulhulp-divider" />
-      <nldd-text size="xxs" weight="bold" color="inherit" class="invulhulp-nav__ai-label">AI Modus</nldd-text>
-      <AiModeToggle
-        :form-id="formConfig.id"
-        :has-documents="readyDocIds.length > 0"
-        :is-active="aiModeActive.has(formConfig.id)"
-        :is-done="formConfig.id in aiModeDone"
-        :done-filled-count="aiModeDone[formConfig.id] ?? 0"
-        :done-total-count="aiModeTotal[formConfig.id] ?? 0"
-        :progress="aiModeProgress[formConfig.id] ?? null"
-        :phase="aiModePhase[formConfig.id] ?? null"
-        :can-undo-smoothing="hasSmoothingUndo(formConfig.id)"
-        @activate="startAiMode"
-        @cancel="cancelAiMode"
-        @dismiss="dismissAiModeDone"
-        @undo-smoothing="undoSmoothing"
-      />
-      <nldd-text line-height="snug" size="xxs" color="inherit" class="invulhulp-nav__ai-hint">
-        <template v-if="readyDocIds.length > 0">
-          Overschrijft alle antwoorden met AI op basis van {{ readyDocIds.length }} brondocument{{ readyDocIds.length === 1 ? '' : 'en' }}.
-        </template>
-        <template v-else>
-          Upload brondocumenten op de startpagina om AI Modus te gebruiken.
-        </template>
-      </nldd-text>
-    </div>
-  </nav>
+      <!-- AI Mode: always reachable while working in the form -->
+      <div class="invulhulp-nav__ai-mode">
+        <hr class="invulhulp-divider" />
+        <nldd-text size="xxs" weight="bold" color="inherit" class="invulhulp-nav__ai-label">AI Modus</nldd-text>
+        <AiModeToggle
+          :form-id="formConfig.id"
+          :has-documents="readyDocIds.length > 0"
+          :is-active="aiModeActive.has(formConfig.id)"
+          :is-done="formConfig.id in aiModeDone"
+          :done-filled-count="aiModeDone[formConfig.id] ?? 0"
+          :done-total-count="aiModeTotal[formConfig.id] ?? 0"
+          :progress="aiModeProgress[formConfig.id] ?? null"
+          :phase="aiModePhase[formConfig.id] ?? null"
+          :can-undo-smoothing="hasSmoothingUndo(formConfig.id)"
+          @activate="startAiMode"
+          @cancel="cancelAiMode"
+          @dismiss="dismissAiModeDone"
+          @undo-smoothing="undoSmoothing"
+        />
+        <nldd-text line-height="snug" size="xxs" color="inherit" class="invulhulp-nav__ai-hint">
+          <template v-if="readyDocIds.length > 0">
+            Overschrijft alle antwoorden met AI op basis van {{ readyDocIds.length }} brondocument{{ readyDocIds.length === 1 ? '' : 'en' }}.
+          </template>
+          <template v-else>
+            Upload brondocumenten op het dossieroverzicht om AI Modus te gebruiken.
+          </template>
+        </nldd-text>
+      </div>
+    </nldd-simple-section>
+  </nldd-page>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAiMode } from '../composables/useAiMode'
-import type { FormConfig, NavStepSubsections, NavStepSpecialView, NavStep, Subsection } from '../models/Assessment'
+import type { FormConfig, NavStepSubsections, NavStepSpecialView, Subsection } from '../models/Assessment'
 import { missingMandatoryBySubsection } from '../utils/formProgress'
 import AiModeToggle from './AiModeToggle.vue'
 
 const props = defineProps<{
   formConfig: FormConfig
   navOrder: string[]
+  /** Label of the title bar's back button: the pane it returns to (the
+   *  dossier's forms list). Only visible once the panes stack. */
+  backText?: string
 }>()
+
+const emit = defineEmits<{ navigate: [viewId: string] }>()
 
 const store = useAssessmentStore()
 const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModePhase, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone, hasSmoothingUndo, undoSmoothing } = useAiMode()
@@ -165,21 +116,22 @@ const riskLabels: Record<string, string> = {
   minimaal: 'Minimaal',
 }
 
-function riskTagColor(level: string): string {
-  switch (level) {
-    case 'onaanvaardbaar': return 'critical'
-    case 'hoog': return 'warning'
-    case 'beperkt': return 'accent'
-    default: return 'success'
-  }
+interface StepItem {
+  id: string
+  label: string
+  supportingText: string
+  done: boolean
+  icon?: string
 }
 
-function stepKey(step: NavStep): string {
-  return step.type === 'subsections' ? step.sectionId : step.viewId
-}
-
-function getSectionTitle(sectionId: string): string {
-  return props.formConfig.sections.find((s) => s.id === sectionId)?.title ?? sectionId
+interface StepGroup {
+  key: string
+  /** Visible heading; null for the groups that stand on their own (Introductie,
+   *  Samenvatting). */
+  title: string | null
+  /** Accessible name of the list when it has no visible heading. */
+  label: string
+  items: StepItem[]
 }
 
 function getSubsections(step: NavStepSubsections): Subsection[] {
@@ -201,6 +153,70 @@ function isSubsectionDone(subId: string): boolean {
   return store.isSectionCompleted(subId) && !openMandatory.value.has(subId)
 }
 
+// Doorgeklikt, maar er staan nog verplichte vragen open: geen vinkje, wel de
+// telling als zichtbare tekst. Anders leest de zijbalk het formulier af als
+// klaar terwijl het leeg is.
+function subsectionStatus(subId: string): string {
+  if (isSubsectionDone(subId)) return 'Afgerond'
+  const open = openMandatory.value.get(subId)
+  if (open && store.isSectionCompleted(subId)) {
+    return open === 1 ? 'Nog 1 verplichte vraag' : `Nog ${open} verplichte vragen`
+  }
+  return ''
+}
+
+const groups = computed((): StepGroup[] => {
+  const out: StepGroup[] = [
+    {
+      key: 'start',
+      title: null,
+      label: 'Start',
+      items: [{ id: 'home', label: 'Introductie', supportingText: '', done: false, icon: 'info-circle' }],
+    },
+  ]
+  for (const step of props.formConfig.navigation) {
+    if (step.type === 'subsections') {
+      if (step.condition && store[step.condition.storeKey] === false) continue
+      const title = props.formConfig.sections.find((s) => s.id === step.sectionId)?.title ?? step.sectionId
+      out.push({
+        key: step.sectionId,
+        title,
+        label: title,
+        items: getSubsections(step).map((sub) => ({
+          id: sub.id,
+          label: sub.title,
+          supportingText: subsectionStatus(sub.id),
+          done: isSubsectionDone(sub.id),
+        })),
+      })
+    } else if (step.viewId !== 'summary') {
+      const done = store.isSectionCompleted(completionId(step))
+      const item: StepItem = {
+        id: step.viewId,
+        label: step.navLabel ?? step.viewId,
+        supportingText:
+          step.viewId === 'risk' && store.riskLevel
+            ? `Risiconiveau: ${riskLabels[store.riskLevel]}`
+            : done ? 'Afgerond' : '',
+        done,
+      }
+      // A special view joins the list above it unless it opens a group of its own.
+      if (step.navGroupHeader) {
+        out.push({ key: step.viewId, title: step.navGroupHeader, label: step.navGroupHeader, items: [item] })
+      } else {
+        out[out.length - 1].items.push(item)
+      }
+    }
+  }
+  out.push({
+    key: 'summary',
+    title: null,
+    label: 'Afronden',
+    items: [{ id: 'summary', label: 'Samenvatting & export', supportingText: '', done: false, icon: 'clipboard-bullet-list' }],
+  })
+  return out
+})
+
 const completedCount = computed(
   () => store.completedSections.filter((id) => !openMandatory.value.has(id)).length,
 )
@@ -208,133 +224,13 @@ const totalCount = computed(() => props.navOrder.filter((v) => v !== 'home' && v
 
 function navigate(id: string) {
   store.setCurrentView(id)
+  emit('navigate', id)
 }
 </script>
 
 <style scoped>
-.invulhulp-nav {
-  inline-size: 240px;
-  flex-shrink: 0;
-  background: var(--semantics-surfaces-base-background-color);
-  border-inline-end: 1px solid var(--invulhulp-color-border);
-  padding: 0 var(--primitives-space-16) var(--primitives-space-32);
-  overflow-y: auto;
-  /* Fill exactly the space under whatever is pinned above (the header, plus the
-     AI Modus banner while it runs) and stick flush to its underside. Both
-     heights are measured at runtime — a hardcoded value here left a dead gap
-     once a second header row made the header taller than the 100px this
-     used to assume.
-
-     max() is the floor that keeps this bug from coming back: a bogus or
-     oversized offset (a stale banner height, a header taller than the
-     viewport) would otherwise make the calc zero or negative and the whole
-     sidebar would silently vanish. Below 320px it stops shrinking and
-     overflows instead — visible beats correct here. The var() fallbacks do
-     the same for the case where the custom property never lands at all. */
-  block-size: max(320px, calc(100vh - var(--invulhulp-sticky-offset, 173px)));
-  position: sticky;
-  top: var(--invulhulp-sticky-offset, 173px);
-  /* The banner animates with a transform, so its layout height lands in one
-     step; match its 0.3s so the sidebar slides with it instead of snapping. */
-  transition: top var(--invulhulp-duration-slow) var(--invulhulp-ease), block-size var(--invulhulp-duration-slow) var(--invulhulp-ease);
-}
-
-/* The sidebar scrolls on its own (its content is taller than the viewport once
-   the AI Modus block is in play). Pin the voortgang readout to the top of that
-   scrollport, otherwise it scrolls out of the sidebar and reads as missing. */
-.invulhulp-nav__progress {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background: var(--semantics-surfaces-base-background-color);
-  padding-block: var(--primitives-space-16);
-  margin-block-end: var(--primitives-space-8);
-  border-block-end: 1px solid var(--invulhulp-color-border);
-}
-.invulhulp-nav__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.invulhulp-nav__step {
-  margin-block-end: var(--primitives-space-2);
-}
-.invulhulp-nav__step--header {
-  margin-block-start: var(--primitives-space-12);
-}
-.invulhulp-nav__step--summary {
-  margin-block-start: var(--primitives-space-16);
-  border-block-start: 1px solid var(--invulhulp-color-border);
-  padding-block-start: var(--primitives-space-12);
-}
-
-.invulhulp-nav__group-label {
-  font-size: var(--primitives-font-size-70);
-  color: var(--semantics-content-secondary-color);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: var(--primitives-space-8) var(--primitives-space-8) var(--primitives-space-4);
-  display: inline-block;
-}
-
-.invulhulp-nav__link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--primitives-space-4);
-  inline-size: 100%;
-  text-align: start;
-  background: none;
-  border: 0;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-  font-size: var(--primitives-font-size-90);
-  padding: var(--primitives-space-4) var(--primitives-space-8);
-  border-radius: var(--primitives-corner-radius-sm);
-  transition: background var(--invulhulp-duration-fast);
-}
-.invulhulp-nav__link:hover {
-  background: var(--semantics-surfaces-tinted-background-color);
-}
-.invulhulp-nav__link--active {
-  background: var(--semantics-categories-accent-tinted-background-color);
-  font-weight: var(--primitives-font-weight-body-semi-bold);
-}
-.invulhulp-nav__link--summary {
-  font-weight: var(--primitives-font-weight-body-semi-bold);
-  color: var(--semantics-content-accent-color);
-}
-
-.invulhulp-nav__step--completed .invulhulp-nav__link {
-  color: var(--invulhulp-color-optional);
-}
-.invulhulp-nav__check {
-  inline-size: 1em;
-  block-size: 1em;
-  flex-shrink: 0;
-  color: var(--invulhulp-color-optional);
-}
-
-/* Doorlopen, maar nog niet ingevuld: een open ring op de plek van het vinkje,
-   zodat de rij niet verspringt. De telling zelf staat als verborgen tekst in
-   de knop — kleur draagt hier geen informatie alleen. */
-.invulhulp-nav__open {
-  inline-size: 1em;
-  block-size: 1em;
-  flex-shrink: 0;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 2px var(--semantics-content-warning-color);
-}
-
-.invulhulp-nav__tag {
-  font-size: var(--primitives-font-size-70);
-  padding-inline: var(--primitives-space-4);
-  margin-inline-start: var(--primitives-space-4);
-}
-
 .invulhulp-nav__ai-mode {
-  margin-block-start: var(--primitives-space-16);
+  margin-block-start: var(--primitives-space-24);
   display: flex;
   flex-direction: column;
   gap: var(--primitives-space-8);

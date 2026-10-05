@@ -1,5 +1,5 @@
 /**
- * Contract for the form sidebar (SectionNav).
+ * Contract for the form sidebar (SectionNav): the steps column of the dossier.
  *
  * De zijbalk met "Voortgang: x/y" en de sectielijst is meermaals "weg"
  * geweest. Er zijn precies twee manieren waarop dat kan en dit bestand
@@ -8,9 +8,10 @@
  *  1. Niet gerenderd. AssessmentForm hing de zijbalk lang aan
  *     `v-if="store.currentView !== 'home'"`, waardoor hij op de introductie —
  *     precies het scherm dat je ziet als je een formulier opent — ontbrak.
- *  2. Wel gerenderd, maar zonder hoogte. `block-size: calc(100vh - <offset>)`
- *     wordt 0 of negatief zodra die runtime-offset ontspoort, en dan is de
- *     kolom onzichtbaar zonder dat er iets "kapot" is.
+ *  2. Wel gerenderd, maar zonder hoogte. De kolommen vullen
+ *     `calc(100dvh - <offset>)`; dat wordt 0 of negatief zodra die
+ *     runtime-offset ontspoort, en dan is alles onzichtbaar zonder dat er
+ *     iets "kapot" is.
  *
  * Dit zijn broncontroles, geen layouttests: zonder echte browser is er geen
  * layout om te meten, en juist de twee schakelaars hierboven zijn wél
@@ -28,7 +29,6 @@ import type { FormConfig } from '../models/Assessment'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const assessmentForm = readFileSync(join(here, 'AssessmentForm.vue'), 'utf8')
-const sectionNav = readFileSync(join(here, 'SectionNav.vue'), 'utf8')
 
 describe('de zijbalk wordt altijd gerenderd', () => {
   it('AssessmentForm plaatst <SectionNav> zonder v-if/v-show', () => {
@@ -37,28 +37,30 @@ describe('de zijbalk wordt altijd gerenderd', () => {
     expect(tag![0]).not.toMatch(/\bv-(if|show)\b/)
   })
 
-  it('de zijbalk zit in de tak die een geopend formulier toont', () => {
-    // Same branch as the form body: als de zijbalk buiten
-    // assessment-shell__layout belandt staat hij naast de verkeerde content.
-    const layout = assessmentForm.indexOf('assessment-shell__layout')
+  it('de zijbalk is de stappenkolom van de split view, vóór de inhoud', () => {
+    // Als de zijbalk in een andere kolom belandt staat hij naast de verkeerde
+    // content, of klapt hij op smalle schermen in de verkeerde volgorde in.
+    const splitView = assessmentForm.indexOf('<nldd-navigation-split-view')
+    const pane = assessmentForm.indexOf('slot="secondary-sidebar"')
     const nav = assessmentForm.indexOf('<SectionNav')
-    const main = assessmentForm.indexOf('assessment-shell__main')
-    expect(layout).toBeGreaterThan(-1)
-    expect(nav).toBeGreaterThan(layout)
+    const main = assessmentForm.indexOf('slot="main"')
+    expect(splitView).toBeGreaterThan(-1)
+    expect(pane).toBeGreaterThan(splitView)
+    expect(nav).toBeGreaterThan(pane)
     expect(nav).toBeLessThan(main)
   })
 })
 
-describe('de zijbalk kan niet naar nul hoogte inklappen', () => {
-  const blockSize = sectionNav.match(/^\s*block-size:\s*(.+);$/m)?.[1] ?? ''
+describe('de kolommen kunnen niet naar nul hoogte inklappen', () => {
+  const workspace = assessmentForm.match(/\.assessment-shell__workspace\s*\{([^}]*)\}/)?.[1] ?? ''
+  const blockSize = workspace.match(/block-size:\s*(.+);/)?.[1] ?? ''
 
   it('block-size heeft een ondergrens', () => {
     expect(blockSize).toMatch(/^max\(/)
   })
 
-  it('de runtime-offset heeft een fallback, ook in top', () => {
+  it('de runtime-offset heeft een fallback', () => {
     expect(blockSize).toMatch(/var\(--invulhulp-sticky-offset,\s*\d+px\)/)
-    expect(sectionNav).toMatch(/top:\s*var\(--invulhulp-sticky-offset,\s*\d+px\)/)
   })
 })
 
@@ -102,8 +104,13 @@ describe('de zijbalk toont voortgang en secties', () => {
 
   it('markeert Introductie als huidige stap zolang currentView "home" is', async () => {
     // Dit is waarom de zijbalk op de introductie hoort te staan: hij is er
-    // altijd al op ingericht geweest.
+    // altijd al op ingericht geweest. `current` op de rij in een
+    // navigatielijst is wat NLDD als aria-current="page" doorgeeft.
     const html = await render()
-    expect(html).toMatch(/aria-current="page"[\s\S]{0,200}Introductie/)
+    const rows = html.match(/<nldd-list-item[^>]*>[\s\S]*?<\/nldd-list-item>/g) ?? []
+    const current = rows.filter((row) => /^<nldd-list-item[^>]*\scurrent\b/.test(row))
+    expect(current).toHaveLength(1)
+    expect(current[0]).toContain('Introductie')
+    expect(html).toMatch(/<nldd-list[^>]*type="navigation"/)
   })
 })

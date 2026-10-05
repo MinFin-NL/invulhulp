@@ -1827,8 +1827,9 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   background: var(--semantics-surfaces-base-background-color);
   border: 1px solid var(--semantics-dividers-color);
   border-radius: var(--primitives-corner-radius-md);
-  /* Clear the sticky header when the fase rail scrolls here. */
-  scroll-margin-block-start: calc(var(--invulhulp-header-height) + var(--primitives-space-24));
+  /* Clear the column's sticky title bar when the fase rail scrolls here;
+     nldd-page publishes its height as --context-inset-top. */
+  scroll-margin-block-start: calc(var(--context-inset-top, 0px) + var(--primitives-space-24));
 }
 
 .prelude__header {
@@ -1867,8 +1868,9 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   display: grid;
   grid-template-columns: auto 1fr;
   column-gap: var(--track-gutter);
-  /* Clear the sticky header, or the fase rail scrolls a phase to right under it. */
-  scroll-margin-block-start: calc(var(--invulhulp-header-height) + var(--primitives-space-24));
+  /* Clear the column's sticky title bar, or the fase rail scrolls a phase to
+     right under it. */
+  scroll-margin-block-start: calc(var(--context-inset-top, 0px) + var(--primitives-space-24));
 }
 
 /* The whitespace between two phases sits inside the body column, so the lane

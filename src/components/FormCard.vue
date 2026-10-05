@@ -80,7 +80,7 @@
           class="form-card__status"
           size="sm"
           :color="statusColor(status.status)"
-          :text="statusLabel(status)"
+          :text="formStatusLabel(status)"
         />
         <!-- Secundair, bewust. Een fasetijdlijn met twaalf primaire knoppen
              wijst nergens heen; de ene primaire actie van de dossierpagina
@@ -117,7 +117,7 @@
 import { computed } from 'vue'
 import AiModeToggle from './AiModeToggle.vue'
 import type { FormIndexEntry, FormPlaceholder } from '../services/formLoader'
-import type { FormProgress } from '../utils/formProgress'
+import { formStatusLabel, type FormProgress } from '../utils/formProgress'
 import { applicabilityLabel, type ApplicabilityVerdict } from '../utils/toepassingsscan'
 
 /**
@@ -202,17 +202,6 @@ function statusColor(status: string): string {
     case 'afgerond': return 'success'
     default: return 'neutral'
   }
-}
-
-function statusLabel(p: FormProgress): string {
-  if (p.status === 'afgerond') return 'Afgerond'
-  // Doorgeklikt maar niet ingevuld: zeg hoeveel verplichte vragen nog open
-  // staan, zodat "afgerond" alleen op de kaart staat als het waar is.
-  if (p.status === 'onvolledig') {
-    return p.missingMandatory === 1 ? 'Nog 1 verplichte vraag' : `Nog ${p.missingMandatory} verplichte vragen`
-  }
-  if (p.status === 'bezig') return `Bezig (${p.completed}/${p.total})`
-  return 'Niet gestart'
 }
 
 const openLabel = computed(() => {

@@ -142,3 +142,16 @@ export function formProgress(config: FormConfig, form?: FormState): FormProgress
   }
   return { status: 'niet-gestart', completed, total, missingMandatory }
 }
+
+/** The status of a form in words, as the form cards and the forms list in the
+ *  dossier sidebar both show it. */
+export function formStatusLabel(p: FormProgress): string {
+  if (p.status === 'afgerond') return 'Afgerond'
+  // Doorgeklikt maar niet ingevuld: zeg hoeveel verplichte vragen nog open
+  // staan, zodat "afgerond" alleen op de kaart staat als het waar is.
+  if (p.status === 'onvolledig') {
+    return p.missingMandatory === 1 ? 'Nog 1 verplichte vraag' : `Nog ${p.missingMandatory} verplichte vragen`
+  }
+  if (p.status === 'bezig') return `Bezig (${p.completed}/${p.total})`
+  return 'Niet gestart'
+}

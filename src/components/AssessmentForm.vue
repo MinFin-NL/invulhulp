@@ -45,116 +45,192 @@
       <DossierList />
     </main>
 
-    <!-- Dossier detail page (no form selected) -->
-    <main v-else-if="store.activeFormId === null" class="assessment-shell__portal">
-      <DossierDetail @open="store.setActiveForm" />
-    </main>
+    <!-- Inside a dossier: three columns, like a mail client. The first lists
+         every form of the dossier, the second the steps of the open form, the
+         third shows the dossier overview or the step itself. Once the columns
+         stop fitting, NLDD folds them: first the forms list tucks behind the
+         steps' back button, then only one column shows at a time and each
+         column's title bar carries the way back (onPaneBack). -->
+    <nldd-navigation-split-view
+      v-else
+      class="assessment-shell__workspace"
+      primary-sidebar-accessible-label="Formulieren"
+      @back="onPaneBack"
+    >
+      <nldd-split-view-pane slot="primary-sidebar" has-content>
+        <DossierFormsNav @overview="openOverview" @open="openFormSteps" />
+      </nldd-split-view-pane>
 
-    <div v-else-if="isLoading" class="assessment-shell__loading">
-      <nldd-text color="inherit" class="assessment-shell__loading-text">Formulier laden...</nldd-text>
-    </div>
-
-    <div v-else-if="formConfig" class="assessment-shell__layout">
-      <!-- Sidebar. Rendered for EVERY view of an open form, introductie
-           included — it is the only place the voortgang and the sectielijst
+      <!-- The steps column is there for EVERY view of an open form, introductie
+           included — it is the only place the voortgang and the stappenlijst
            live, and hiding it on one view reads as "de zijbalk is weg". The
-           nav already highlights "Introductie" when currentView === 'home',
-           so it was always built for this. Do not put a v-if back here:
-           sectionNav.contract.test.ts fails if you do. -->
-      <SectionNav :form-config="formConfig" :nav-order="navOrder" />
-
-      <!-- Main content -->
-      <main class="assessment-shell__main">
-
-        <!-- Answers taken over verbatim from an earlier form on opening -->
-        <nldd-banner
-          variant="accent"
-          size="sm"
-          class="assessment-shell__prefill"
-          v-if="prefill"
-          role="status"
-        >
-          <div class="assessment-shell__prefill-row">
-            <span>{{ prefillMessage }}</span>
-            <nldd-button
-              variant="neutral-transparent"
-              size="sm"
-              text="Sluiten"
-              aria-label="Melding over overgenomen antwoorden sluiten"
-              @click="prefill = null"
-            />
-          </div>
-        </nldd-banner>
-
-        <!-- Home -->
-        <FormIntro
-          v-if="store.currentView === 'home'"
+           nav already highlights "Introductie" when currentView === 'home', so
+           it was always built for this. The pane only waits for the form's
+           config, so it never shows the steps of the previous form. Do not put
+           a v-if on the SectionNav tag itself: sectionNav.contract.test.ts fails if
+           you do. -->
+      <nldd-split-view-pane
+        v-if="formConfig && formConfig.id === store.activeFormId"
+        slot="secondary-sidebar"
+        has-content
+      >
+        <SectionNav
           :form-config="formConfig"
-          @start="startAssessment"
+          :nav-order="navOrder"
+          :back-text="store.activeDossier.name"
+          @navigate="mainOpen = true"
         />
+      </nldd-split-view-pane>
 
-        <!-- AIIA-only: Forbidden onaanvaardbaar risk stop screen -->
-        <div
-          v-else-if="formConfig.features.riskClassification && store.riskLevel === 'onaanvaardbaar' && store.currentView !== 'risk'"
-          class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad assessment-shell__forbidden"
-        >
-          <div class="invulhulp-column invulhulp-gap--xl">
-                        <nldd-banner
-                          variant="critical"
-                        >
-                <strong>Dit AI-systeem is verboden</strong><br />
-                Op basis van de risicoclassificatie valt dit systeem in de categorie
-                <em>onaanvaardbaar risico</em> onder de EU AI-verordening (Art. 5).
-                Het systeem mag niet worden ingezet.
-            </nldd-banner>
-            <div class="invulhulp-row invulhulp-gap--md">
-              <nldd-button
-                variant="secondary"
-                text="Risicoclassificatie herzien"
-                @click="store.setCurrentView('risk')"
-              />
-              <nldd-button
-                variant="primary"
-                text="Samenvatting bekijken"
-                @click="store.setCurrentView('summary')"
-              />
+      <!-- has-content only matters once the columns stack: it decides whether
+           the stack shows this column or the list before it. Set as an
+           attribute ('' or absent) — the split view watches the attribute, and
+           Vue would write has-content="false" for a boolean, which Lit reads
+           as true. -->
+      <nldd-split-view-pane
+        slot="main"
+        background="tinted"
+        :has-content="mainOpen ? '' : undefined"
+      >
+        <nldd-page ref="mainPage" landmarks="page" sticky-header :accessible-label="mainLabel">
+          <nldd-top-title-bar
+            slot="header"
+            class="invulhulp-pane-bar"
+            :back-text="mainBackText"
+          >
+            <div slot="toolbar" class="assessment-shell__toolbar">
+              <PresenceBar :dossier-id="store.activeDossierId" />
+              <!-- The toolbar never shrinks, so on a phone the labelled button
+                   would squeeze the back button; the icon button takes over. -->
+              <template v-if="showResetButton">
+                <nldd-button
+                  class="assessment-shell__reset--wide"
+                  variant="neutral-transparent"
+                  start-icon="arrow-2-counter-clockwise"
+                  text="Opnieuw beginnen"
+                  @click="resetDialog?.open()"
+                />
+                <nldd-icon-button
+                  class="assessment-shell__reset--narrow"
+                  variant="neutral-transparent"
+                  icon="arrow-2-counter-clockwise"
+                  text="Opnieuw beginnen"
+                  @click="resetDialog?.open()"
+                />
+              </template>
             </div>
+          </nldd-top-title-bar>
+
+          <!-- Dossier overview (no form selected) -->
+          <DossierDetail v-if="store.activeFormId === null" @open="openFormFromOverview" />
+
+          <div v-else-if="isLoading" class="assessment-shell__loading">
+            <nldd-text color="inherit" class="assessment-shell__loading-text">Formulier laden...</nldd-text>
           </div>
-        </div>
 
-        <!-- Risk classification (forms with riskClassification feature) -->
-        <RiskClassification
-          v-else-if="formConfig.features.riskClassification && store.currentView === 'risk'"
-          :form-config="formConfig"
-          @confirmed="onRiskConfirmed"
-        />
+          <div v-else-if="formConfig" class="assessment-shell__main">
 
-        <!-- Decision gate (forms with decisionGate feature) -->
-        <DecisionGate
-          v-else-if="formConfig.features.decisionGate && store.currentView === 'decision'"
-          :form-config="formConfig"
-          @next="onDecisionNext"
-          @prev="store.setCurrentView(prevViewOf('decision'))"
-        />
+            <!-- Answers taken over verbatim from an earlier form on opening -->
+            <nldd-banner
+              variant="accent"
+              size="sm"
+              class="assessment-shell__prefill"
+              v-if="prefill"
+              role="status"
+            >
+              <div class="assessment-shell__prefill-row">
+                <span>{{ prefillMessage }}</span>
+                <nldd-button
+                  variant="neutral-transparent"
+                  size="sm"
+                  text="Sluiten"
+                  aria-label="Melding over overgenomen antwoorden sluiten"
+                  @click="prefill = null"
+                />
+              </div>
+            </nldd-banner>
 
-        <!-- Summary -->
-        <SummaryView
-          v-else-if="store.currentView === 'summary'"
-          :form-config="formConfig"
-        />
+            <!-- Home -->
+            <FormIntro
+              v-if="store.currentView === 'home'"
+              :form-config="formConfig"
+              @start="startAssessment"
+            />
 
-        <!-- Section views -->
-        <SectionView
-          v-else-if="currentSection"
-          :section="currentSection"
-          :has-prev="hasPrev"
-          :next-label="nextLabel"
-          @next="goNext"
-          @prev="goPrev"
-        />
+            <!-- AIIA-only: Forbidden onaanvaardbaar risk stop screen -->
+            <div
+              v-else-if="formConfig.features.riskClassification && store.riskLevel === 'onaanvaardbaar' && store.currentView !== 'risk'"
+              class="invulhulp-measure invulhulp-measure--md invulhulp-measure--pad assessment-shell__forbidden"
+            >
+              <div class="invulhulp-column invulhulp-gap--xl">
+                            <nldd-banner
+                              variant="critical"
+                            >
+                    <strong>Dit AI-systeem is verboden</strong><br />
+                    Op basis van de risicoclassificatie valt dit systeem in de categorie
+                    <em>onaanvaardbaar risico</em> onder de EU AI-verordening (Art. 5).
+                    Het systeem mag niet worden ingezet.
+                </nldd-banner>
+                <div class="invulhulp-row invulhulp-gap--md">
+                  <nldd-button
+                    variant="secondary"
+                    text="Risicoclassificatie herzien"
+                    @click="store.setCurrentView('risk')"
+                  />
+                  <nldd-button
+                    variant="primary"
+                    text="Samenvatting bekijken"
+                    @click="store.setCurrentView('summary')"
+                  />
+                </div>
+              </div>
+            </div>
 
-      </main>
-    </div>
+            <!-- Risk classification (forms with riskClassification feature) -->
+            <RiskClassification
+              v-else-if="formConfig.features.riskClassification && store.currentView === 'risk'"
+              :form-config="formConfig"
+              @confirmed="onRiskConfirmed"
+            />
+
+            <!-- Decision gate (forms with decisionGate feature) -->
+            <DecisionGate
+              v-else-if="formConfig.features.decisionGate && store.currentView === 'decision'"
+              :form-config="formConfig"
+              @next="onDecisionNext"
+              @prev="store.setCurrentView(prevViewOf('decision'))"
+            />
+
+            <!-- Summary -->
+            <SummaryView
+              v-else-if="store.currentView === 'summary'"
+              :form-config="formConfig"
+            />
+
+            <!-- Section views -->
+            <SectionView
+              v-else-if="currentSection"
+              :section="currentSection"
+              :has-prev="hasPrev"
+              :next-label="nextLabel"
+              @next="goNext"
+              @prev="goPrev"
+            />
+
+          </div>
+        </nldd-page>
+      </nldd-split-view-pane>
+    </nldd-navigation-split-view>
+
+    <ConfirmDialog
+      ref="resetDialog"
+      :title="`&quot;${formConfig?.title ?? 'dit formulier'}&quot; opnieuw beginnen?`"
+      message="Al uw antwoorden in dit formulier worden gewist."
+      confirm-label="Opnieuw beginnen"
+      cancel-label="Annuleren"
+      variant="warning"
+      @confirm="store.resetActive()"
+    />
   </div>
 </template>
 
@@ -178,6 +254,9 @@ import RiskClassification from './RiskClassification.vue'
 import DecisionGate from './DecisionGate.vue'
 import SummaryView from './SummaryView.vue'
 import UserManagement from './UserManagement.vue'
+import DossierFormsNav from './DossierFormsNav.vue'
+import PresenceBar from './PresenceBar.vue'
+import ConfirmDialog from './ConfirmDialog.vue'
 
 const store = useAssessmentStore()
 const auth = useAuthStore()
@@ -217,10 +296,10 @@ const aiProgressPct = computed(() => {
   return Math.round((p.filled / p.total) * 100)
 })
 
-// The AI banner parks under the header, so while it is on screen everything
-// that sticks below it — the form sidebar — has to clear both. Its height is
-// not a constant: the label swaps between "invullen" and "gladstrijken" and the
-// body wraps on narrow viewports, so publish the measured height and let
+// The AI banner parks under the header, so while it is on screen the dossier
+// columns below it have to give up its height too. Its height is not a
+// constant: the label swaps between "invullen" and "gladstrijken" and the body
+// wraps on narrow viewports, so publish the measured height and let
 // --invulhulp-sticky-offset (main.css) add it to the header height.
 const bannerEl = ref<HTMLElement | null>(null)
 let bannerObserver: ResizeObserver | null = null
@@ -282,16 +361,73 @@ watch(() => store.activeFormId, loadActiveForm)
 
 // Elke stap begint bovenaan. Zonder dit blijft de scrollpositie van de vorige
 // pagina staan, zodat je halverwege (of onderaan) de volgende stap binnenkomt.
+// De derde kolom scrollt zelf (nldd-page), niet het document.
+const mainPage = ref<(HTMLElement & { scrollTarget?: HTMLElement }) | null>(null)
+
 watch(
-  () => store.currentView,
+  () => [store.activeFormId, store.currentView],
   async () => {
     await nextTick()
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
-    // .assessment-shell__main is zelf ook een scrollcontainer (overflow-y: auto);
-    // die scrollt alleen mee als de hoogte begrensd is, maar dan blijft hij anders staan.
-    document.querySelector('.assessment-shell__main')?.scrollTo({ top: 0, left: 0 })
+    mainPage.value?.scrollTarget?.scrollTo({ top: 0, left: 0, behavior: 'auto' })
   },
 )
+
+// ---- Columns ----------------------------------------------------------------
+// Wide, all three columns show and every choice simply fills the next one.
+// Narrow, the split view shows one column at a time: the third when it has
+// content, else the steps, else the forms. mainOpen is that "has content":
+// picking a form shows its steps first, picking a step (or the overview) shows
+// the step, and a column's back button steps one column back.
+const mainOpen = ref(true)
+
+function openOverview() {
+  store.goToPortal()
+  mainOpen.value = true
+}
+
+function openFormSteps(formId: string) {
+  store.setActiveForm(formId)
+  mainOpen.value = false
+}
+
+// A card on the dossier overview opens the form where you left off.
+function openFormFromOverview(formId: string) {
+  store.setActiveForm(formId)
+  mainOpen.value = true
+}
+
+// The title bars' back events bubble up to the split view; only those of the
+// column bars count, not one from a dialog inside the content.
+function onPaneBack(event: Event) {
+  const path = event.composedPath() as Element[]
+  if (!path.some((el) => el.classList?.contains('invulhulp-pane-bar'))) return
+  const pane = path.find((el) => el.tagName === 'NLDD-SPLIT-VIEW-PANE')
+  const slot = pane?.getAttribute('slot')
+  if (slot === 'main') {
+    mainOpen.value = false
+  } else if (slot === 'secondary-sidebar') {
+    store.goToPortal()
+    mainOpen.value = false
+  }
+}
+
+// NLDD labels a back button with the title of the column it returns to.
+const mainBackText = computed(() =>
+  store.activeFormId !== null ? formConfig.value?.title ?? 'Stappen' : 'Formulieren',
+)
+
+const mainLabel = computed(() =>
+  store.activeFormId !== null
+    ? formConfig.value?.title ?? 'Formulier'
+    : store.activeDossier.name || 'Dossier',
+)
+
+// Reset applies to a single form, so only offer it while one is open and past
+// its introductie.
+const showResetButton = computed(
+  () => store.activeFormId !== null && store.currentView !== 'home',
+)
+const resetDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 
 // Build ordered navigation list from form config
 const navOrder = computed((): string[] => {
@@ -414,20 +550,57 @@ function onDecisionNext(go: boolean) {
   overflow-y: auto;
 }
 
+/* The columns fill exactly the viewport under whatever is pinned above them
+   (the header, plus the AI Modus banner while it runs); each column scrolls on
+   its own. Both heights are measured at runtime.
+
+   max() is the floor: a bogus or oversized offset (a stale banner height, a
+   header taller than the viewport) would otherwise make the calc zero or
+   negative and the whole workspace would silently vanish. Below 320px it stops
+   shrinking and the document scrolls instead — visible beats correct here. The
+   var() fallback does the same for the case where the property never lands. */
+.assessment-shell__workspace {
+  block-size: max(320px, calc(100dvh - var(--invulhulp-sticky-offset, 173px)));
+  /* The banner animates with a transform, so its layout height lands in one
+     step; match its 0.3s so the columns slide with it instead of snapping. */
+  transition: block-size var(--invulhulp-duration-slow) var(--invulhulp-ease);
+}
+
+.assessment-shell__toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--primitives-space-12);
+}
+
+.assessment-shell__reset--narrow {
+  display: none;
+}
+
+/* NLDD's sm breakpoint (≤640px). */
+@media (max-width: 640px) {
+  .assessment-shell__reset--wide {
+    display: none;
+  }
+
+  .assessment-shell__reset--narrow {
+    display: inline-flex;
+  }
+
+  /* The avatars carry their own names; the caption is what has to give. */
+  .assessment-shell__toolbar :deep(.presence-label) {
+    display: none;
+  }
+}
+
 .assessment-shell__loading {
   display: flex;
-  flex: 1;
   align-items: center;
   justify-content: center;
+  padding-block: var(--primitives-space-48);
 }
 
 .assessment-shell__loading-text {
   color: var(--invulhulp-color-text-subtle);
-}
-
-.assessment-shell__layout {
-  display: flex;
-  flex: 1;
 }
 
 .assessment-shell__prefill {
@@ -446,8 +619,6 @@ function onDecisionNext(go: boolean) {
 }
 
 .assessment-shell__main {
-  flex: 1;
-  overflow-y: auto;
   padding-block-end: var(--primitives-space-48);
 }
 
