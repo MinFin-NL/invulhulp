@@ -106,6 +106,7 @@ import { useAssessmentStore } from '../stores/assessmentStore'
 import { getCachedForm, flattenFormQuestions } from '../services/formLoader'
 import { synthesizeStream } from '../services/llmService'
 import { answerPlainText } from '../utils/sourceMatching'
+import { streamingTagContent } from '../utils/streamingTag'
 import { copyValueFor, sourceAnswerText } from '../utils/crossFormCopy'
 
 const props = defineProps<{
@@ -186,14 +187,7 @@ const isLoading = ref(false)
 const error = ref('')
 const streamingRaw = ref('')
 
-const streamingText = computed((): string => {
-  if (!streamingRaw.value) return ''
-  const afterOpen = streamingRaw.value.match(/<suggestie>([\s\S]*)/i)
-  if (!afterOpen) return ''
-  const content = afterOpen[1]
-  const beforeClose = content.match(/([\s\S]*?)<\/suggestie>/i)
-  return (beforeClose ? beforeClose[1] : content).trim()
-})
+const streamingText = computed(() => streamingTagContent(streamingRaw.value, 'suggestie'))
 
 const diffParts = computed((): Change[] => {
   if (suggestion.value === null) return []
@@ -270,7 +264,8 @@ function rejectSuggestion() {
   font-size: var(--primitives-font-size-90);
 }
 
-.cross-suggestion__header {
+.cross-suggestion__header,
+.cross-suggestion__panel-header {
   display: flex;
   align-items: baseline;
   gap: var(--primitives-space-8);
@@ -322,14 +317,6 @@ function rejectSuggestion() {
 
 .cross-suggestion__panel {
   margin-block: var(--primitives-space-8) var(--primitives-space-8);
-}
-
-.cross-suggestion__panel-header {
-  display: flex;
-  align-items: baseline;
-  gap: var(--primitives-space-8);
-  margin-block-end: var(--primitives-space-8);
-  flex-wrap: wrap;
 }
 
 .cross-suggestion__panel-label {

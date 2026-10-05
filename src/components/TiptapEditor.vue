@@ -153,6 +153,7 @@ import { diffWords } from 'diff'
 import type { Change } from 'diff'
 import { improveTextStream } from '../services/llmService'
 import { htmlToMarkdown, markdownToHtml } from '../utils/htmlRuns'
+import { streamingTagContent } from '../utils/streamingTag'
 import { useAssessmentStore } from '../stores/assessmentStore'
 
 // Mermaid is heavy (~1.5 MB of chunks); load it lazily, only when the model
@@ -290,14 +291,7 @@ const diagramSvg = ref('')
 
 const hasContent = computed(() => (editor.value?.getText().trim().length ?? 0) > 0)
 
-const streamingText = computed((): string => {
-  if (!streamingRaw.value) return ''
-  const afterOpen = streamingRaw.value.match(/<verbeterd>([\s\S]*)/i)
-  if (!afterOpen) return ''
-  const content = afterOpen[1]
-  const beforeClose = content.match(/([\s\S]*?)<\/verbeterd>/i)
-  return (beforeClose ? beforeClose[1] : content).trim()
-})
+const streamingText = computed(() => streamingTagContent(streamingRaw.value, 'verbeterd'))
 
 // Diffs compare markdown against markdown, so bold/italic markers line up
 // with what the improve endpoint sends back.

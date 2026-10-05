@@ -14,6 +14,7 @@ import {
 import { saveAs } from 'file-saver'
 import type { Answers, FormConfig } from '../models/Assessment'
 import { parseTableAnswer, tableAnswerToPlainText } from '../utils/tableAnswer'
+import { htmlToPlainText } from '../utils/htmlRuns'
 
 // Legacy exporter: reproduces the exact table-based layout of the official
 // "Intakeformulier 2.0" Word template, so a filled dossier can be handed in in
@@ -35,17 +36,7 @@ function plain(value: string | string[] | undefined): string {
   if (Array.isArray(value)) return value.join('\n')
   const table = parseTableAnswer(value)
   if (table) return tableAnswerToPlainText(table)
-  return value
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
+  return htmlToPlainText(value)
 }
 
 function run(text: string, opts: { bold?: boolean; italics?: boolean } = {}): TextRun {

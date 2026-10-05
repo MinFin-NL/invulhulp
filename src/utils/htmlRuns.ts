@@ -208,3 +208,19 @@ export function markdownToHtml(md: string): string {
   }
   return html.join('')
 }
+
+/** Tiptap HTML → plain text for export cells that cannot carry styling:
+ *  paragraphs and <br> become newlines, tags go, the common entities decode. */
+export function htmlToPlainText(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+}

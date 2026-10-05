@@ -139,6 +139,7 @@ import { extractRagStream } from '../services/llmService'
 import type { AnswerSource, AnswerSourceMeta, TableColumn } from '../models/Assessment'
 import { answerPlainText, filterSupportingSources, topRetrievedSources } from '../utils/sourceMatching'
 import { parsePipeSuggestion, serializeTableAnswer } from '../utils/tableAnswer'
+import { streamingTagContent } from '../utils/streamingTag'
 import SourcePanel from './SourcePanel.vue'
 import DocumentViewerModal from './DocumentViewerModal.vue'
 
@@ -232,14 +233,7 @@ function showDocument(source: AnswerSource) {
   docViewer.value?.open(source, suggestionPlainText.value)
 }
 
-const streamingText = computed((): string => {
-  if (!streamingRaw.value) return ''
-  const afterOpen = streamingRaw.value.match(/<suggestie>([\s\S]*)/i)
-  if (!afterOpen) return ''
-  const content = afterOpen[1]
-  const beforeClose = content.match(/([\s\S]*?)<\/suggestie>/i)
-  return (beforeClose ? beforeClose[1] : content).trim()
-})
+const streamingText = computed(() => streamingTagContent(streamingRaw.value, 'suggestie'))
 
 /** Er is iets gaande of iets te zien: pas dan verdient dit een eigen kader. */
 const isActive = computed(

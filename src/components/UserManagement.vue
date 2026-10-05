@@ -488,10 +488,6 @@ async function copyTempPassword() {
   grid-column: 1 / -1;
 }
 
-.user-mgmt__input {
-  max-inline-size: 28rem;
-}
-
 .user-mgmt__admin-check {
   display: flex;
   align-items: center;

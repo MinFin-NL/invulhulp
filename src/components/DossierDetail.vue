@@ -1489,14 +1489,6 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
   margin: 0;
 }
 
-.portal-card__controls {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--primitives-space-16);
-  flex-wrap: wrap;
-}
-
 .dossier-actions {
   display: flex;
   gap: var(--primitives-space-8);

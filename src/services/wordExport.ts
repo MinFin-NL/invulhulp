@@ -21,7 +21,7 @@ import {
 import { saveAs } from 'file-saver'
 import type { Answers, Question, QuestionAttachment, RiskLevelValue, FormConfig } from '../models/Assessment'
 import { parseTableAnswer } from '../utils/tableAnswer'
-import { htmlToParagraphs } from '../utils/htmlRuns'
+import { htmlToParagraphs, htmlToPlainText } from '../utils/htmlRuns'
 import { fetchImageArrayBuffer } from './llmService'
 
 // Rijkshuisstijl / NL Design System styling for the modern report export.
@@ -95,24 +95,10 @@ const BODY_INDENT = 240
 // collapses a single-cell table to its minimum content width.
 const CONTENT_WIDTH = 9026
 
-function stripHtml(html: string): string {
-  return html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
-}
-
 function formatAnswer(value: string | string[] | undefined): string {
   if (!value) return '(niet ingevuld)'
-  if (Array.isArray(value)) return value.map(stripHtml).join(', ') || '(niet ingevuld)'
-  return stripHtml(value) || '(niet ingevuld)'
+  if (Array.isArray(value)) return value.map(htmlToPlainText).join(', ') || '(niet ingevuld)'
+  return htmlToPlainText(value) || '(niet ingevuld)'
 }
 
 /** Styled paragraphs (bold/italic runs) for a string answer, or null when the
@@ -153,11 +139,11 @@ function choiceAnswerParagraphs(
   const selected = new Set<string>()
   let followUp = ''
   if (Array.isArray(value)) {
-    for (const v of value) selected.add(stripHtml(v).trim().toLowerCase())
+    for (const v of value) selected.add(htmlToPlainText(v).trim().toLowerCase())
   } else if (typeof value === 'string' && value.trim()) {
     const [picked, follow] = value.split('\n---\n')
-    selected.add(stripHtml(picked).trim().toLowerCase())
-    if (follow) followUp = stripHtml(follow).trim()
+    selected.add(htmlToPlainText(picked).trim().toLowerCase())
+    if (follow) followUp = htmlToPlainText(follow).trim()
   }
 
   const options = question.options

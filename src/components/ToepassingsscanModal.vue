@@ -338,11 +338,6 @@ defineExpose({ open })
   grid-column: 1 / -1;
 }
 
-/* Not-applicable rows are quieter than the rest of the list, but never hidden. */
-.scan__tag--nvt {
-  color: var(--semantics-content-secondary-color);
-}
-
 .scan__alert {
   margin-block-start: var(--primitives-space-16);
 }
