@@ -7,7 +7,13 @@
         <div class="dossier-list-hero__content">
           <nldd-title size="1"><h1 class="dossier-list-hero__title">FinDocs</h1></nldd-title>
           <nldd-text size="lg" color="inherit" class="dossier-list-hero__subtitle">
-            Digitale instrumenten voor IV-projecten, privacy en AI-impact assessments — Ministerie van Financiën
+            De invulhulp voor de formulieren die een IV-project doorloopt, van intake en business case
+            tot PSA, BIO-quickscan, DPIA en AI-impact assessment.
+          </nldd-text>
+          <nldd-text size="md" color="inherit" class="dossier-list-hero__lead">
+            Upload je projectdocumenten en FinDocs stelt per vraag een antwoord voor met een
+            verwijzing naar de bron; jij controleert, vult aan en downloadt het resultaat als
+            Word-document.
           </nldd-text>
         </div>
       </section>
@@ -526,6 +532,11 @@ onBeforeUnmount(() => {
 
 .dossier-list-hero__subtitle {
   max-inline-size: 52ch;
+}
+
+.dossier-list-hero__lead {
+  max-inline-size: 64ch;
+  margin-block-start: var(--primitives-space-8);
 }
 
 .dossier-list__header {
