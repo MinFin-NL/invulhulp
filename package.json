@@ -17,13 +17,13 @@
   },
   "dependencies": {
     "@nldd/design-system": "0.8.93",
-    "@tiptap/extension-collaboration": "~3.30.1",
-    "@tiptap/extension-collaboration-caret": "~3.30.1",
-    "@tiptap/extension-placeholder": "~3.30.1",
-    "@tiptap/html": "~3.30.1",
-    "@tiptap/pm": "~3.30.1",
-    "@tiptap/starter-kit": "~3.30.1",
-    "@tiptap/vue-3": "~3.30.1",
+    "@tiptap/extension-collaboration": "~3.31.4",
+    "@tiptap/extension-collaboration-caret": "~3.31.4",
+    "@tiptap/extension-placeholder": "~3.31.4",
+    "@tiptap/html": "~3.31.4",
+    "@tiptap/pm": "~3.31.4",
+    "@tiptap/starter-kit": "~3.31.4",
+    "@tiptap/vue-3": "~3.31.4",
     "diff": "^9.0.0",
     "docx": "^9.7.1",
     "file-saver": "^2.0.5",
@@ -39,7 +39,7 @@
     "y-indexeddb": "^9.0.12",
     "y-prosemirror": "^1.3.7",
     "y-websocket": "^3.1.0",
-    "yjs": "^13.6.32"
+    "yjs": "^13.6.33"
   },
   "overrides": {
     "@tiptap/core": "~3.30.1",
