@@ -1,11 +1,27 @@
 <template>
   <header ref="headerEl" class="invulhulp-header">
+    <!-- Bètamelding: NLDD's statusbalk hoort helemaal bovenaan, boven het lint.
+         Hij draagt maar één actie en geen links in de tekst, dus de hele balk
+         is de mailto-link. Binnen de sticky header blijft hij in beeld, en de
+         gemeten headerhoogte telt hem mee. -->
+    <nldd-status-bar
+      variant="warning"
+      text="Dit is een bètaversie van dit hulpmiddel. Vragen of feedback? innovatiemanagamentfinancien@minfin.nl"
+      href="mailto:innovatiemanagamentfinancien@minfin.nl"
+    />
+
     <!-- Rijkslogo, woordmerk, hoofd- en utility-navigatie komen uit NLDD. De
          globale menubalk klapt onder lg zelf in achter de menuknop. -->
     <!-- Logo, woordmerk en "FinDocs" leiden terug naar het overzicht van het
          open dossier (of naar de dossierlijst als er geen open is). Het zijn
          gewone hash-links: useAppHistory zet de popstate om in de store. -->
+    <!-- Binnen een dossier of formulier valt het logolint weg: de sticky
+         header zou daar met titelbalk erbij te veel hoogte innemen. "FinDocs"
+         blijft staan als weg terug. Via de property, niet het attribuut: Vue
+         zou anders no-logo="false" zetten, en Lit leest elk aanwezig
+         boolean-attribuut als true. -->
     <nldd-top-navigation-bar
+      :noLogo.prop="inDossier"
       logo-title="Ministerie van Financiën"
       website-title="FinDocs"
       :logo-href="homeHref"
@@ -18,18 +34,13 @@
           :current="!auth.userManagementOpen"
           @select="goHome"
         />
-        <nldd-menu-bar-item
-          v-if="auth.isAdmin"
-          text="Gebruikersbeheer"
-          icon="gear"
-          :current="auth.userManagementOpen"
-          @select="openUserManagement"
-        />
       </nldd-menu-bar>
 
       <nldd-menu-bar slot="utility" accessible-label="Accountnavigatie">
         <!-- De naam is geen bestemming maar de opener van het accountmenu; op
-             smalle breedtes blijft alleen het icoon staan. -->
+             smalle breedtes blijft alleen het icoon staan. Gebruikersbeheer is
+             een beheertaak van dit account, geen hoofdbestemming, dus die
+             staat hier en niet in de hoofdnavigatie. -->
         <nldd-menu-bar-item
           :text="userLabel"
           icon="person"
@@ -38,6 +49,24 @@
           :accessible-label="`Account: ${userLabel}`"
         >
           <nldd-menu accessible-label="Accountmenu">
+            <!-- Op smalle schermen staat alleen het icoon in de balk; de kop
+                 laat dan alsnog zien met welk account je bent ingelogd. -->
+            <nldd-container slot="header" padding-inline="16" padding-block="12">
+              <nldd-identity :text="userLabel" :supporting-text="userSupportingText">
+                <nldd-avatar
+                  slot="avatars"
+                  :name="userLabel"
+                  :initials="initials(userLabel)"
+                  decorative
+                />
+              </nldd-identity>
+            </nldd-container>
+            <nldd-menu-item
+              v-if="auth.isAdmin"
+              text="Gebruikersbeheer"
+              icon="gear"
+              @select="openUserManagement"
+            />
             <nldd-menu-item
               text="Uitloggen"
               icon="arrow-right-out-bucket"
@@ -106,6 +135,7 @@ import { useAuthStore } from '../stores/authStore'
 import { loadAvailableForms, type FormIndexEntry } from '../services/formLoader'
 import { trackIdFor, trackLabel } from '../utils/tracks'
 import { serialize } from '../composables/useAppHistory'
+import { initials } from '../utils/initials'
 import ConfirmDialog from './ConfirmDialog.vue'
 import PresenceBar from './PresenceBar.vue'
 
@@ -147,6 +177,12 @@ onBeforeUnmount(() => {
 
 const userLabel = computed(() => auth.user?.name ?? auth.user?.email ?? 'Account')
 
+// The e-mail under the name, unless it already is the name line.
+const userSupportingText = computed(() => {
+  const email = auth.user?.email ?? ''
+  return email === userLabel.value ? '' : email
+})
+
 // Reset applies to a single form, so only offer it while a form is actually
 // open — not on the dossier list or dossier detail page, where activeFormId
 // can still hold a stale value from the last visited form.
@@ -158,9 +194,9 @@ const showResetButton = computed(
     store.currentView !== 'home',
 )
 
-const showTitleBar = computed(
-  () => store.screen === 'dossier' && !auth.userManagementOpen && store.activeDossier.name !== '',
-)
+const inDossier = computed(() => store.screen === 'dossier' && !auth.userManagementOpen)
+
+const showTitleBar = computed(() => inDossier.value && store.activeDossier.name !== '')
 
 const dossierHref = computed(() =>
   serialize({

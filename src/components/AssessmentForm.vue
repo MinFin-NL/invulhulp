@@ -155,8 +155,6 @@
 
       </main>
     </div>
-
-    <AppFooter />
   </div>
 </template>
 
@@ -171,7 +169,6 @@ import { useAiMode } from '../composables/useAiMode'
 import { useAppHistory } from '../composables/useAppHistory'
 import type { FormConfig, NavStepSubsections, NavStepSpecialView, Section } from '../models/Assessment'
 import AppHeader from './AppHeader.vue'
-import AppFooter from './AppFooter.vue'
 import DossierList from './DossierList.vue'
 import DossierDetail from './DossierDetail.vue'
 import FormIntro from './FormIntro.vue'

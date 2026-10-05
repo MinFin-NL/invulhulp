@@ -84,7 +84,7 @@
 /* Starting value for the first paint only. AppHeader measures the real header
    and overwrites this as an inline style on :root, which outranks this rule. */
 :root {
-  --invulhulp-header-height: 173px;
+  --invulhulp-header-height: 197px;
   /* Non-zero only while the AI Modus banner is on screen. */
   --invulhulp-banner-height: 0px;
   /* What everything below the header has to stick under. */
@@ -105,13 +105,6 @@ body {
 .invulhulp-app {
   background-color: var(--invulhulp-color-page-bg);
   min-block-size: 100vh;
-}
-
-/* ── Footer: don't overlap the sidebar nav ───────────────────────────────── */
-/* When .invulhulp-nav (the form sidebar) is present, push the footer past it */
-.invulhulp-app:has(.invulhulp-nav) .invulhulp-footer {
-  inset-inline-start: 240px;
-  inset-inline-end: 240px;
 }
 
 /* ── Project utilities the design system doesn't ship ────────────────────── */

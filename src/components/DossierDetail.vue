@@ -1884,9 +1884,9 @@ function markerState(group: TrackGroup): 'done' | 'busy' | 'todo' | 'empty' {
 .track-phase__lane {
   display: flex;
   flex-direction: column;
-  /* The marker's masking ring defaults to the base surface; the timeline sits
-     on the tinted page, so tell the cell what it is really standing on. */
-  --context-parent-background-color: var(--semantics-surfaces-tinted-background-color);
+  /* No masking ring: by default the cell cuts a band of page colour around
+     each disc, which reads as a gap between the track and the marker. */
+  --semantics-surfaces-ring-thickness: 0px;
 }
 
 /* The disc centres itself in the cell, so this height decides how far down the

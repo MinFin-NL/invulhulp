@@ -20,6 +20,7 @@
 import { computed } from 'vue'
 import { usePresence } from '../collab/usePresence'
 import { toRef } from 'vue'
+import { initials } from '../utils/initials'
 
 const props = defineProps<{ dossierId: string | null | undefined }>()
 const users = usePresence(toRef(props, 'dossierId'))
@@ -27,15 +28,6 @@ const users = usePresence(toRef(props, 'dossierId'))
 // Show collaborators other than this browser tab. Two tabs of the same account
 // are distinct clients, so a solo user testing still sees presence work.
 const others = computed(() => users.value.filter((u) => !u.isSelf))
-
-function initials(name: string): string {
-  // Words that start with a letter, so "Ontwikkelaar (dev)" -> "O", not "O(".
-  const words = name.trim().split(/\s+/).filter((w) => /^\p{L}/u.test(w))
-  if (!words.length) return '?'
-  const first = words[0][0]
-  const last = words.length > 1 ? words[words.length - 1][0] : ''
-  return (first + last).toUpperCase()
-}
 </script>
 
 <style scoped>

@@ -66,14 +66,18 @@
         </svg>
       </span>
       <span class="ai-mode-active__label">
-        <template v-if="phase">Gladstrijken<span class="ai-mode-active__progress">{{ Math.min(phase.current + 1, phase.total) }}/{{ phase.total }}</span></template>
-        <template v-else>AI Modus<template v-if="progress"><span class="ai-mode-active__progress">{{ progress.filled }}/{{ progress.total }}</span></template></template>
+        <template v-if="phase"><span class="ai-mode-active__text">Gladstrijken</span><span class="ai-mode-active__progress">{{ Math.min(phase.current + 1, phase.total) }}/{{ phase.total }}</span></template>
+        <template v-else><span class="ai-mode-active__text">AI Modus</span><template v-if="progress"><span class="ai-mode-active__progress">{{ progress.filled }}/{{ progress.total }}</span></template></template>
       </span>
-      <nldd-button
+      <!-- Icoonknop, zoals Sluiten in de done-staat: een tekstknop past in een
+           formulierkaart niet naast label en teller. De tekst wordt aria-label
+           en tooltip. -->
+      <nldd-icon-button
         variant="neutral-transparent"
-        size="sm"
+        size="xs"
         class="ai-mode-stop-btn"
-        text="Stop"
+        icon="stop"
+        text="AI Modus stoppen"
         @click="$emit('cancel', formId)"
       />
     </div>
@@ -142,6 +146,9 @@ defineEmits<{
 .ai-mode-toggle {
   margin-block-start: var(--primitives-space-12);
   width: 100%;
+  /* The running state lays itself out by the room it gets, not the viewport:
+     the same toggle sits in a 210px form card and in a wide form page. */
+  container: ai-mode / inline-size;
 }
 
 /* ── Idle button ─────────────────────────────────────────────────────────── */
@@ -201,7 +208,7 @@ defineEmits<{
   padding: var(--primitives-space-4) var(--primitives-space-8);
   background: linear-gradient(135deg, rgba(15, 45, 92, 0.08), rgba(91, 33, 182, 0.12));
   border: 1px solid rgba(91, 33, 182, 0.4);
-  border-radius: 999px;
+  border-radius: var(--primitives-corner-radius-full);
   font-size: var(--primitives-font-size-90);
   width: 100%;
   box-sizing: border-box;
@@ -222,9 +229,16 @@ defineEmits<{
   font-weight: var(--primitives-font-weight-body-semi-bold);
   color: #0f2d5c;
   white-space: nowrap;
-  flex-shrink: 1;
-  flex-grow: 1;
+  flex: 1 1 auto;
   min-width: 0;
+}
+
+/* Only the word gives way when the row is too narrow (a 210px form card): it
+   truncates, so it can never run under the counter or the stop button. */
+.ai-mode-active__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .ai-mode-active__progress {
@@ -237,14 +251,46 @@ defineEmits<{
   font-weight: var(--primitives-font-weight-body-bold);
   color: #5b21b6;
   letter-spacing: 0.02em;
+  flex-shrink: 0;
 }
 
 .ai-mode-stop-btn {
-  color: var(--semantics-content-critical-color) !important;
-  flex-shrink: 0;
-  flex-grow: 0;
-  padding-inline: var(--primitives-space-8) !important;
-  min-inline-size: 0 !important;
+  flex: 0 0 auto;
+}
+
+/* Too narrow for word, counter and stop button on one line (a form card): the
+   counter moves under the word, with the spinner and the stop button centred
+   on both lines — the same shape as the done state that follows. */
+@container ai-mode (max-width: 13rem) {
+  .ai-mode-active {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--primitives-space-8);
+    row-gap: var(--primitives-space-2);
+    padding-block: var(--primitives-space-6);
+    border-radius: var(--primitives-corner-radius-md);
+  }
+
+  .ai-mode-active__label {
+    display: contents;
+  }
+
+  .ai-mode-active__spinner,
+  .ai-mode-stop-btn {
+    grid-row: 1 / span 2;
+  }
+
+  .ai-mode-active__text,
+  .ai-mode-active__progress {
+    grid-column: 2;
+    justify-self: start;
+    max-width: 100%;
+  }
+
+  .ai-mode-stop-btn {
+    grid-column: 3;
+  }
 }
 
 /* ── Done state ──────────────────────────────────────────────────────────── */

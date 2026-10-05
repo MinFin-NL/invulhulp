@@ -5,16 +5,19 @@
        scrollt. De sluitknop van nldd-top-title-bar vuurt `dismiss`, waar het
        venster zelf op sluit. Korte bevestigingen gebruiken ConfirmDialog
        (nldd-modal-dialog). -->
+  <!-- Dynamische booleans gaan via .prop: Vue zou een kebab-case binding als
+       attribuut zetten (no-light-dismiss="false"), en Lit leest elk aanwezig
+       boolean-attribuut als true. -->
   <nldd-window
     ref="windowEl"
     centered
     :width="`var(--primitives-area-${width})`"
     :accessible-label="title"
-    :no-light-dismiss="noLightDismiss"
+    :noLightDismiss.prop="noLightDismiss"
     @open.self="$emit('open')"
     @close.self="$emit('close')"
   >
-    <nldd-page sticky-header :sticky-footer="!!$slots.footer">
+    <nldd-page sticky-header :stickyFooter.prop="!!$slots.footer">
       <nldd-top-title-bar
         slot="header"
         :text="title"
