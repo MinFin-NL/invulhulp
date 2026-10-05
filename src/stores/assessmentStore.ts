@@ -26,6 +26,7 @@ import {
 } from '../collab/dossierTransport'
 import type { DossierPayload } from '../collab/ydocCodec'
 import { BESLISHULP_HOST_FORM_ID, riskLevelFor, type BeslishulpRun } from '../utils/beslishulp'
+import { DEFAULT_DOSSIER_VIEW, type DossierView } from '../utils/dossierViews'
 import {
   TOEPASSINGSSCAN_HOST_FORM_ID,
   deriveKenmerken,
@@ -207,6 +208,9 @@ interface StoreState {
   dossierOrder: DossierId[]
   activeDossierId: DossierId | null
   screen: Screen
+  // Which of the four dossier views shows while no form is open. Navigation
+  // state like `screen`, so it lives here and in the URL hash.
+  dossierView: DossierView
   // The account this browser's cache belongs to (see adoptUser). null on a
   // cache persisted before the field existed.
   cacheOwner: { sub: string; email: string | null } | null
@@ -225,6 +229,7 @@ export const useAssessmentStore = defineStore('assessment', {
     // Default doubles as migration: state persisted before this field existed
     // lands on the dossier overview.
     screen: 'dossierList',
+    dossierView: DEFAULT_DOSSIER_VIEW,
     cacheOwner: null,
   }),
 
@@ -560,6 +565,7 @@ export const useAssessmentStore = defineStore('assessment', {
       this.dossierOrder.push(d.id)
       this.activeDossierId = d.id
       this.screen = 'dossier'
+      this.dossierView = DEFAULT_DOSSIER_VIEW
       this.schedulePush(d.id)
       return d.id
     },
@@ -594,6 +600,8 @@ export const useAssessmentStore = defineStore('assessment', {
       this.activeDossierId = id
       dossier.activeFormId = null
       this.screen = 'dossier'
+      // A dossier always opens on its overview, whatever view was open last.
+      this.dossierView = DEFAULT_DOSSIER_VIEW
       this.syncDocumentsFromServer()
     },
 
@@ -826,11 +834,17 @@ export const useAssessmentStore = defineStore('assessment', {
       return doc
     },
 
-    /** Back to the active dossier's detail page (closes the open form). */
+    /** Back to the active dossier's detail page (closes the open form). The
+     *  dossier view stays as it was, so closing a form returns to the view it
+     *  was opened from. */
     goToPortal() {
       const dossier = this.activeDossierId ? this.dossiers[this.activeDossierId] : null
       if (dossier) dossier.activeFormId = null
       this.screen = 'dossier'
+    },
+
+    setDossierView(view: DossierView) {
+      this.dossierView = view
     },
 
     resetActive() {

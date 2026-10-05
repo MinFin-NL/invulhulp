@@ -1,6 +1,7 @@
 import { computed, onBeforeUnmount, onMounted, watch } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAuthStore } from '../stores/authStore'
+import { DEFAULT_DOSSIER_VIEW, isDossierView, type DossierView } from '../utils/dossierViews'
 
 /**
  * Browser-history integratie voor een app zonder router.
@@ -11,7 +12,8 @@ import { useAuthStore } from '../stores/authStore'
  * gaan naar het vorige scherm.
  *
  * Werkwijze: elke wijziging van die vier waarden krijgt een `pushState` met de
- * locatie in de state én in de hash (`#/dossier/<id>/form/<formId>/<view>`).
+ * locatie in de state én in de hash (`#/dossier/<id>/form/<formId>/<view>`,
+ * of `#/dossier/<id>/<weergave>` op de dossierpagina zelf).
  * Bij `popstate` wordt de locatie terug in de store gezet. De hash is bewust
  * gekozen boven een pad: hij bereikt de server nooit, dus proxy, SPA-fallback
  * en de OIDC-redirect blijven ongemoeid.
@@ -24,6 +26,9 @@ export interface AppLocation {
   dossierId: string | null
   formId: string | null
   view: string | null
+  /** De weergave van de dossierpagina; alleen gezet op die pagina zelf, dus
+   *  zonder open formulier. */
+  dossierView: DossierView | null
 }
 
 const MARKER = 'invulhulp'
@@ -32,7 +37,11 @@ export function serialize(loc: AppLocation): string {
   if (loc.admin) return '#/beheer'
   if (loc.screen === 'dossierList' || !loc.dossierId) return '#/dossiers'
   const base = `#/dossier/${encodeURIComponent(loc.dossierId)}`
-  if (!loc.formId) return base
+  if (!loc.formId) {
+    // Het overzicht is de kale dossierlink, zodat bestaande links blijven werken.
+    const view = loc.dossierView ?? DEFAULT_DOSSIER_VIEW
+    return view === DEFAULT_DOSSIER_VIEW ? base : `${base}/${view}`
+  }
   const form = `${base}/form/${encodeURIComponent(loc.formId)}`
   return loc.view ? `${form}/${encodeURIComponent(loc.view)}` : form
 }
@@ -46,6 +55,7 @@ export function parseHash(hash: string): AppLocation | null {
     dossierId: null,
     formId: null,
     view: null,
+    dossierView: null,
   }
   if (parts[0] === 'beheer') return { ...empty, admin: true }
   if (parts[0] === 'dossiers') return empty
@@ -54,6 +64,9 @@ export function parseHash(hash: string): AppLocation | null {
     if (parts[2] === 'form' && parts[3]) {
       loc.formId = parts[3]
       loc.view = parts[4] ?? null
+    } else {
+      // Een onbekende weergave (oude of getypte link) valt terug op het overzicht.
+      loc.dossierView = isDossierView(parts[2]) ? parts[2] : DEFAULT_DOSSIER_VIEW
     }
     return loc
   }
@@ -66,7 +79,8 @@ function sameLocation(a: AppLocation, b: AppLocation): boolean {
     a.screen === b.screen &&
     a.dossierId === b.dossierId &&
     a.formId === b.formId &&
-    a.view === b.view
+    a.view === b.view &&
+    a.dossierView === b.dossierView
   )
 }
 
@@ -82,6 +96,11 @@ export function useAppHistory() {
     // currentView is een getter met fallback; zonder open formulier zegt hij
     // niets, dus dan hoort er ook geen view in de locatie te staan.
     view: store.activeFormId ? store.currentView : null,
+    // Andersom: de dossierweergave telt alleen zolang er géén formulier open is.
+    dossierView:
+      store.screen === 'dossier' && store.activeDossierId && !store.activeFormId
+        ? store.dossierView
+        : null,
   }))
 
   // De locatie die op dit moment bovenaan de history-stack staat. De watcher
@@ -112,6 +131,7 @@ export function useAppHistory() {
         if (loc.view) store.setCurrentView(loc.view)
       } else {
         store.goToPortal()
+        store.setDossierView(loc.dossierView ?? DEFAULT_DOSSIER_VIEW)
       }
     }
     // De store kan de locatie hebben bijgesteld (onbekend dossier, formulier

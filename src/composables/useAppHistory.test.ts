@@ -7,6 +7,7 @@ const base: AppLocation = {
   dossierId: null,
   formId: null,
   view: null,
+  dossierView: null,
 }
 
 describe('useAppHistory locatie-encoding', () => {
@@ -14,7 +15,10 @@ describe('useAppHistory locatie-encoding', () => {
     const locations: AppLocation[] = [
       base,
       { ...base, admin: true },
-      { ...base, screen: 'dossier', dossierId: 'd-1' },
+      { ...base, screen: 'dossier', dossierId: 'd-1', dossierView: 'overzicht' },
+      { ...base, screen: 'dossier', dossierId: 'd-1', dossierView: 'project' },
+      { ...base, screen: 'dossier', dossierId: 'd-1', dossierView: 'formulieren' },
+      { ...base, screen: 'dossier', dossierId: 'd-1', dossierView: 'bronnen' },
       { ...base, screen: 'dossier', dossierId: 'd-1', formId: 'intake', view: null },
       { ...base, screen: 'dossier', dossierId: 'd-1', formId: 'intake', view: 'summary' },
     ]
@@ -32,6 +36,13 @@ describe('useAppHistory locatie-encoding', () => {
       view: 'deel a',
     }
     expect(parseHash(serialize(loc))).toEqual(loc)
+  })
+
+  it('houdt de kale dossierlink op het overzicht', () => {
+    expect(serialize({ ...base, screen: 'dossier', dossierId: 'd-1', dossierView: 'overzicht' })).toBe('#/dossier/d-1')
+    expect(parseHash('#/dossier/d-1')?.dossierView).toBe('overzicht')
+    // Een onbekende weergave is geen reden om de link te weigeren.
+    expect(parseHash('#/dossier/d-1/bestaat-niet')?.dossierView).toBe('overzicht')
   })
 
   it('geeft null bij een lege of onbekende hash', () => {

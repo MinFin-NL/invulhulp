@@ -336,7 +336,7 @@ watch(() => store.activeFormId, loadActiveForm)
 const mainPage = ref<(HTMLElement & { scrollTarget?: HTMLElement }) | null>(null)
 
 watch(
-  () => [store.activeFormId, store.currentView],
+  () => [store.activeFormId, store.currentView, store.dossierView],
   async () => {
     await nextTick()
     mainPage.value?.scrollTarget?.scrollTo({ top: 0, left: 0, behavior: 'auto' })
@@ -353,6 +353,7 @@ const mainOpen = ref(true)
 
 function openOverview() {
   store.goToPortal()
+  store.setDossierView('overzicht')
   mainOpen.value = true
 }
 

@@ -143,6 +143,7 @@ const dossierHref = computed(() =>
     dossierId: store.activeDossierId,
     formId: null,
     view: null,
+    dossierView: 'overzicht',
   }),
 )
 
