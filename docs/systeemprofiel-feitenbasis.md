@@ -42,18 +42,17 @@ van de 481 controls gesjabloneerd. Het normenkader beschrijft niet wat een goed 
 het is een machine die auditbeweringen genereert. Het selecteert op wat goedkoop als
 aanwezig/afwezig te verifiëren valt.
 
-Daarmee is ook meteen verklaard waarom de ethiek ontbreekt. Dat is geen omissie maar een
-eigenschap van het genre: een normenkader kan alleen opnemen wat afvinkbaar is. Ethiek is
+Daarmee is ook meteen verklaard waarom de ethiek ontbreekt. Het is een eigenschap van het
+genre: een normenkader kan alleen opnemen wat afvinkbaar is. Ethiek is
 betwist, contextueel en vraagt deliberatie; die komt er hoogstens in als procedurele proxy
 ("is er een IAMA gedaan?"), en dan is het weer een formulier. **Normen-eerst had dit niet
 opgelost: het had 481 stuks hetzelfde papierwerk opgeleverd, anders gerangschikt.**
 
-De conclusie is niet "de formulieren zijn dus goed". De conclusie is dat *geen van beide*
-het echte object is.
+Geen van beide is het echte object; dat is het systeem zelf (§3).
 
 ## 3. Het echte object is het systeem, en het schema staat er al
 
-Lees `public/forms/kernvragen.json` terug met andere ogen. Het is geen formulier. Het is een
+Lees `public/forms/kernvragen.json` terug met andere ogen, dan zie je een
 **datamodel van een systeem**:
 
 | Kernvraag | Feit over het systeem |
@@ -107,7 +106,7 @@ de vragen ook zijn.
 **2. Een tegenpartij voor de ethische antwoorden.** Elk ander formulier heeft iemand met
 bevoegdheid die erop wacht: de DPIA een FG, de quickscan een CISO, het
 aanbiedingsformulier een portfolioberaad. De kernvragen hebben geen geadresseerde en kunnen
-niets blokkeren. Dát, en niet een gat in het normenkader, is de reden dat ethiek wegzakt.
+niets blokkeren. Dát is de reden dat ethiek wegzakt.
 `restrisico.json` staat er al: route `kern.waarden`, `kern.ongelijke_uitwerking` en
 `kern.bezwaar` naar de beslissing, zodat iemand tekent voor *"ik accepteer deze restschade,
 voor deze mensen, om deze reden"*. Goedkoop, en het maakt van ethiek een besluit met een
@@ -121,13 +120,12 @@ systeem doet, wat het over u beslist, wat er gebeurt als het misgaat, hoe u bezw
 Samengesteld uit kernvragen + algoritmeregister + restrisico. Dat is het ene artefact dat het
 normenkader structureel niet kan opleveren.
 
-De feitenbasis uit §5 is de voorwaarde voor alle drie: een systeemverklaring is een
-rendering van feiten, een werkings-as is een feit met een tweede meetmoment, en een
-restrisicobesluit is een feit met een handtekening.
+De feitenbasis uit §5 is de voorwaarde voor alle drie: de systeemverklaring, de werkings-as
+en het restrisicobesluit bouwen op dezelfde feiten over het systeem.
 
 ## 5. Is formulier-eerst dan een verkeerde stap?
 
-Nee. Het is een noodzakelijke stap, en geen compromis. De formulieren zijn de **vertrouwensmunt van de
+Nee. Het is een noodzakelijke stap. De formulieren zijn de **vertrouwensmunt van de
 organisatie**: de privacy-officer is verantwoordelijk voor een DPIA, niet voor "het
 gereedschap zegt dat AVG-04 groen is". Een normen-eerst gereedschap zou aan elke balie
 worden afgewezen, en terecht. Formulier-eerst is het bruggenhoofd: je ontmoet iedere
@@ -138,17 +136,13 @@ plaats van de presentatielaag.** Daar staan we nu. Steek die grens bewust over: 
 formulier exact zoals de eigenaar het herkent, en trek de feitenbasis eronder vandaan. Dan
 hoeft de organisatie nooit in te stemmen met een reorganisatie die ze zou weigeren.
 
-Kort door de bocht: het normenkader weet wat *aantoonbaar* moet zijn, de formulieren weten
-wie moet *tekenen*, en alleen de kernvragen weten wat het ding *is* en op wie het landt. De
-invulhulp behandelt de derde als extraatje, terwijl dat de enige van de drie is die draagt.
-
 ---
 
 # Ontwerp: de feitenbasis
 
 ## 6. Wat er al staat
 
-Het ontwerp hieronder is een **generalisatie van bestaande code**, geen nieuw subsysteem.
+Het ontwerp hieronder generaliseert **bestaande code**.
 
 `src/utils/toepasselijkheid.ts` heeft nu:
 
@@ -236,14 +230,14 @@ Toepasselijkheid, `index.json` en alle bestaande tests veranderen op dag één n
 
 ## 8. De vier consumenten
 
-Het punt van de feitenbasis is niet de abstractie, maar dat vier bestaande mechanismen hun
-eigen bedrading kwijtraken.
+Met de feitenbasis hoeven vier bestaande mechanismen niet meer elk hun eigen koppeling te
+onderhouden.
 
 | Consument | Nu | Straks |
 |---|---|---|
-| **Toepasselijkheid** | leest `Kenmerken` uit `deriveKenmerken` | leest het booleaanse deel van het profiel — ongewijzigd gedrag |
+| **Toepasselijkheid** | leest `Kenmerken` uit `deriveKenmerken` | leest het booleaanse deel van het profiel; het gedrag blijft gelijk |
 | **Cross-form prefill** | 351 handgeschreven paren, 81 vanuit kernvragen | een vraag declareert `feit: "doel"`; prefill leest het feit |
-| **AI-grounding** | `kernvragenSource.ts` rendert de kernvragen als transcript-document | rendert het profiel — beslishulp- en quickscanfeiten komen er gratis bij |
+| **AI-grounding** | `kernvragenSource.ts` rendert de kernvragen als transcript-document | rendert het profiel, en daarmee komen de beslishulp- en quickscanfeiten er gratis bij |
 | **Normenkaderdekking** | bestaat niet (§8 niveau A) | control → `feiten: [...]`, dekkingsrapport zonder vraag-id's |
 
 De prefill-winst is de meest tastbare. Een vraag in een formulier-JSON krijgt een optioneel
@@ -259,7 +253,7 @@ feit gebruiken vragen er niet altijd in dezelfde vorm naar. Wat verdwijnt zijn d
 N×M-paren: zeven formulieren die `beschrijving` nodig hebben zijn zeven `feit`-annotaties in
 plaats van (bij groei) 21 mappings.
 
-**Eerlijk over de opbrengst:** alleen de `copy`-mappings die *hetzelfde feit* betreffen
+**Kanttekening bij de opbrengst:** alleen de `copy`-mappings die *hetzelfde feit* betreffen
 verdwijnen. Het merendeel van de 351 zijn `synthesize`-mappings tussen inhoudelijk
 verschillende vragen (AIIA → DPIA), en die blijven. De schatting van wat opgaat in feiten
 moet nog gemaakt worden; zie §11.
@@ -275,9 +269,9 @@ redenen die alle vier al in de codebase gedocumenteerd staan:
 2. **Kan niet verouderen.** Precies het argument dat `deriveKenmerken` nu al maakt: live
    herberekenen zodat een beslishulprun ná de kernvragen het beeld bijwerkt.
 3. **Geen tweede waarheid.** Het antwoord blijft het antwoord; het feit is een lezing ervan.
-   Dat is ook wat de honesty-eis uit `kernvragenSource.ts` beschermt: een AI-antwoord dat het
+   Dat is ook wat de eerlijkheidseis uit `kernvragenSource.ts` beschermt: een AI-antwoord dat het
    transcript citeert is een herformulering van de invuller, geen bevestiging door een bron.
-4. **Terugtrekbaar.** Gaat het ontwerp niet vliegen, dan is er niets te ontmigreren.
+4. **Terugtrekbaar.** Werkt het ontwerp niet, dan is er niets te ontmigreren.
 
 De uitzondering komt pas bij §4-punt-1: **waarnemingen** (een feit dat na ingebruikname is
 gemeten) zijn per definitie niet afleidbaar uit formulierantwoorden en hebben wél opslag
@@ -287,11 +281,11 @@ nodig. Dat is bewust fase 4 en niet eerder.
 
 | Fase | Wat | Verandert voor de gebruiker | Kosten |
 |---|---|---|---|
-| **0** | `src/facts/vocabulaire.ts` + `resolveFeiten`; `deriveKenmerken` herschreven als adapter | niets — bewijsbaar via de bestaande `kernvragen.test.ts` en `toepasselijkheid.test.ts` | 1 bestand + adapter |
+| **0** | `src/facts/vocabulaire.ts` + `resolveFeiten`; `deriveKenmerken` herschreven als adapter | niets, bewijsbaar via de bestaande `kernvragen.test.ts` en `toepasselijkheid.test.ts` | 1 bestand + adapter |
 | **1** | `feit`-veld op vragen; prefill leest feiten vóór `crossFormMappings`; de opgegane mappings verwijderd | niets zichtbaar; minder onderhoud | schemaveld + prefill-tak + annotaties |
 | **2** | `kernvragenSource.ts` rendert het profiel | AI-Modus kent nu ook BIV-classificatie en AI-risicoklasse | klein |
 | **3** | Niveau B tegen feiten: `feiten: [...]` per control + dekkingsscript | dekkingsrapport per dossier | script + annotatiewerk |
-| **4** | Profiel overleeft het dossier (systeemregister) + `waarneming`-feiten | herbeoordeling bij wijziging; werking naast opzet | groot — nieuw datamodel |
+| **4** | Profiel overleeft het dossier (systeemregister) + `waarneming`-feiten | herbeoordeling bij wijziging; werking naast opzet | groot: nieuw datamodel |
 
 Fase 0 is een refactor met nul gedragsverandering en is het hele risico van het voorstel:
 gaat die niet schoon door de bestaande tests, dan klopt de aanname dat de kernvragen

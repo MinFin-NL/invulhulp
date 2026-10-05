@@ -27,16 +27,16 @@ Dat stelsel heeft een herkenbare vorm:
 | Element | Wat het hier is |
 |---|---|
 | **Voorraad** | De stapel IV-verzoeken die nog verantwoord moet worden |
-| **Instroom** | Nieuwe verplichtingen — AVG art. 35, AI-verordening, BIO2, NIS2, Woo, Archiefwet, Tijdelijk besluit digitale toegankelijkheid |
+| **Instroom** | Nieuwe verplichtingen: AVG art. 35, AI-verordening, BIO2, NIS2, Woo, Archiefwet, Tijdelijk besluit digitale toegankelijkheid |
 | **Uitstroom** | Getekende assessments |
 | **Beperking op de uitstroom** | Niet de invullers, maar de lezers en tekenaars: FG, CISO, architect, portfolioberaad, AcICT |
 | **Vertraging** | Maanden tussen "we beginnen aan een DPIA" en "iemand met bevoegdheid accepteert het restrisico" |
 
 De instroom wordt extern gezet (Brussel, Den Haag) en groeit al een decennium superlineair. De
-verwerkingscapaciteit groeit met de snelheid waarmee een departement mensen aanneemt. **Die
-scheefheid is de motor onder alles wat volgt.**
+verwerkingscapaciteit groeit met de snelheid waarmee een departement mensen aanneemt. Uit die
+scheefheid volgt de rest van deze analyse.
 
-De symptomen zijn precies waar deze repo tegen gebouwd is: knip-en-plak tussen DPIA en AIIA
+De symptomen zijn waar deze repo tegen gebouwd is: knip-en-plak tussen DPIA en AIIA
 (44 van de toen 87 mappings liepen tussen die twee), formulieren die de avond voor een
 poortje worden ingevuld, en tegenstrijdigheden die maanden te laat boven water komen.
 
@@ -51,10 +51,6 @@ flowchart LR
     T2["invulhulp: geen verandering<br/>zelfde uren, zelfde toetsers"] -.-> D
 ```
 
-*De doorstroom wordt bepaald bij het ventiel, niet bij de tank ervoor. Sneller produceren
-terwijl het ventiel gelijk blijft verhoogt het onderhanden werk, niet het tempo waarin
-projecten door mogen.*
-
 ## 2. Waar in het stelsel grijpt de tool aan?
 
 Op de hefboomladder van Donella Meadows raakt de invulhulp vier niveaus tegelijk, en het
@@ -62,10 +58,10 @@ niveau dat het meest wordt genoemd is het zwakste.
 
 | Niveau | Wat in de tool | Hefboom |
 |---|---|---|
-| Stroomsnelheden | AI Modus, RAG-extractie, "verbeter tekst" | zwak — maakt invullen sneller |
-| Informatiestromen | 351 cross-form-mappings, URN's, `source`-lineage, het dossier als één gedeeld object | **sterk** — maakt het landschap leesbaar |
-| Regels | toepasselijkheid, decision gates, de blokkade bij onaanvaardbaar risico, restrisico als sluitsteen | **sterk** — bepaalt wat door mag |
-| Paradigma | feitenbasis in plaats van formulieren-als-datamodel; de systeemverklaring voor de burger | **sterkst** — nog niet gebouwd |
+| Stroomsnelheden | AI Modus, RAG-extractie, "verbeter tekst" | zwak: maakt invullen sneller |
+| Informatiestromen | 351 cross-form-mappings, URN's, `source`-lineage, het dossier als één gedeeld object | **sterk**: maakt het landschap leesbaar |
+| Regels | toepasselijkheid, decision gates, de blokkade bij onaanvaardbaar risico, restrisico als sluitsteen | **sterk**: bepaalt wat door mag |
+| Paradigma | feitenbasis in plaats van formulieren-als-datamodel; de systeemverklaring voor de burger | **sterkst**: nog niet gebouwd |
 
 **De AI is het systemisch minst interessante deel van deze tool.** Het interessantste is dat
 22 instrumenten van vijf verschillende eigenaren voor het eerst bestaan als één samenhangende
@@ -84,12 +80,12 @@ Een niet-knelpunt versnellen verhoogt de doorstroom niet; het verhoogt het onder
 bij het knelpunt. Binnen twee kwartalen na echte adoptie is te verwachten:
 
 - de wachtrijen bij FG en CISO worden langer, niet korter;
-- de leestijd per document daalt (meer binnen, gelijk aantal uren), precies terwijl het
+- de leestijd per document daalt (meer binnen, gelijk aantal uren), terwijl het
   volume per project stijgt;
 - de waardering splitst per rol: projectleiders zijn enthousiast, toetsers stil geïrriteerd.
 
 De remedie staat al half uitgewerkt in [`rollen-en-rechten-advies.md`](rollen-en-rechten-advies.md):
-de adviesrol, de besluitrol, de publicatierol. Dat is geen rechtenhygiëne maar **de
+de adviesrol, de besluitrol, de publicatierol. Die rollen zijn **de
 doorstroomingreep**. Vandaag kan de invuller zijn eigen restrisico accepteren: een
 regelkring met de terugkoppeldraad doorgeknipt.
 
@@ -114,17 +110,15 @@ flowchart LR
 
 Elke stap is op zichzelf redelijk; het is de kring die maakt dat de *gemeten* compliance stijgt
 terwijl de feitelijke veiligheid van de systemen blijft waar hij was. Alle remmen werken op
-dezelfde manier: ze houden een bewering falsifieerbaar: herleidbaar tot een bron, of tot iets
+dezelfde manier: ze houden een bewering falsifieerbaar, dus herleidbaar tot een bron of tot iets
 dat een met naam genoemd mens werkelijk heeft gezegd.
 
 §9.2 van [`interviewmodus-socratisch-gesprek.md`](interviewmodus-socratisch-gesprek.md) bevat
 de scherpste formulering: *sla het citaat op, niet de parafrase; publiceer wat de mens zei.*
-Die ene regel is het verschil tussen een tool die mensen helpt op te schrijven wat ze weten en
-een tool die helpt op te schrijven wat ze niet weten.
 
 **Versterk hem.** Wat het model schreef moet visueel onderscheidbaar blijven van wat een mens
 schreef, tot in de Word-export en tot in het oog van de toetser. Zodra die twee in het artefact
-niet meer te onderscheiden zijn, is de proxy dood en leest de toetser theater.
+niet meer te onderscheiden zijn, laat het document niet meer zien of iemand heeft nagedacht.
 
 ### 3.3 Jevons: goedkoper toetsen betekent méér toetsen, niet minder werk (R1)
 
@@ -135,7 +129,7 @@ en alleen in het cluster openbaarheid/Woo nog eens ± 50 ongedekte controls
 ([`normenkader-dekkingsanalyse.md`](normenkader-dekkingsanalyse.md) §4A).
 
 Netto-effect op de werklast van de gemiddelde projectleider: waarschijnlijk vlak. Netto-effect
-op de dekking: fors omhoog. Dat is een echte winst, en ook de enige. Wie dit verkoopt
+op de dekking: fors omhoog, en dat is de enige winst. Wie dit verkoopt
 als "minder papierwerk" wordt binnen een jaar tegengesproken door zijn eigen gebruikers.
 
 ### 3.4 De last verschuiven naar de hulpconstructie (B3)
@@ -182,9 +176,8 @@ onaangeroerd. Op korte termijn **vergroot** hij de scheefheid. Ethiek die je é�
 het moment van de minste informatie en daarna nooit herziet is, in de woorden van deze repo,
 per constructie ritueel.
 
-> De grootste ongebouwde hefboom is de **werkings-as**. Geen nieuw formulier, maar een tweede
-> waarneming van dezelfde feiten, later. Dat is wat een document verandert in een regelkring,
-> en een systeem zonder regelkring kan niet leren.
+> De grootste ongebouwde hefboom is de **werkings-as**. Daarvoor is geen nieuw formulier nodig,
+> alleen een tweede waarneming van dezelfde feiten, later. Dat is wat een document verandert in een regelkring.
 
 ### 3.7 De systeemgrens: wie zit er in de lus? (B4)
 
@@ -196,20 +189,20 @@ signaal en ontvangt geen artefact.
 
 ```mermaid
 flowchart LR
-    subgraph grens["systeemgrens — alles wat de tool meet"]
+    subgraph grens["systeemgrens: alles wat de tool meet"]
         I["Invuller<br/>projectleider"]
         T["Toetser<br/>FG · CISO · beraad"]
         I -- "22 documenten" --> T
         T -- "handtekening · herstelwerk" --> I
     end
-    B["De betrokkene<br/>kern.doelgroep — kan niet weglopen<br/>levert geen signaal, ontvangt niets"]
+    B["De betrokkene<br/>kern.doelgroep, kan niet weglopen<br/>levert geen signaal, ontvangt niets"]
     T -. "systeemverklaring" .-> B
     B -. "bezwaar · monitoring · ongelijke uitwerking" .-> T
 ```
 
-*Beide stippellijnen zijn gestippeld omdat geen van beide bestaat.*
+*De twee stippellijnen bestaan nog niet.*
 
-Een gesloten lus optimaliseert voor zijn eigen leden. Dat is geen cynisme maar structuur: het
+Een gesloten lus optimaliseert voor zijn eigen leden: het
 stelsel wordt beter in het tevredenstellen van toetsers en niet beter in het beschermen van de
 bestuurden, omdat niets erin dat laatste meet. De **systeemverklaring** uit
 [`systeemprofiel-feitenbasis.md`](systeemprofiel-feitenbasis.md) §4.3 wordt daar beschreven als
@@ -231,7 +224,7 @@ Vier ontwerpkeuzes bepalen of die laatste zin uitkomt. Op volgorde van hefboom:
 
 | # | Keuze | Waarom |
 |---|---|---|
-| 1 | **Geef de toetsrollen echte bevoegdheid** — advies, besluit, publicatie | Het knelpunt zit in de uitstroom, niet in de instroom. En niemand accepteert zijn eigen restrisico. |
+| 1 | **Geef de toetsrollen echte bevoegdheid** (advies, besluit, publicatie) | Het knelpunt zit in de uitstroom, niet in de instroom. En niemand accepteert zijn eigen restrisico. |
 | 2 | **Bouw de werkings-as** | Eén tweede meetmoment maakt van papierwerk een regelkring: het verschil tussen Plan en PDCA. |
 | 3 | **Laat modeltekst nooit doorgaan voor mensentekst** | Citaten in plaats van parafrases, citaten bij elke bewering, AI-herkomst zichtbaar tot in de export. |
 | 4 | **Lever de systeemverklaring** | Het enige artefact hier dat de lus opent naar de mensen over wie die lus zogenaamd gaat. |
@@ -243,14 +236,14 @@ mens tot stempelmachine wordt en welke ingreep welke voorwaarde breekt, in
 De repo ziet zelf al goed dat **formulier-eerst
 de juiste binnenkomst was.** Je ontmoet elke eigenaar in het artefact waar hij verantwoordelijk
 voor is, en verdient daarmee het recht op de feiten eronder
-([`systeemprofiel-feitenbasis.md`](systeemprofiel-feitenbasis.md) §5). Het systeemrisico is niet
-dat die strategie fout was. Het is dat het bruggenhoofd wordt aangezien voor de bestemming, en dat
-de organisatie eindigt met een zeer snelle, zeer herleidbare, zeer goed ontworpen machine die
+([`systeemprofiel-feitenbasis.md`](systeemprofiel-feitenbasis.md) §5). Het systeemrisico is
+dat het bruggenhoofd wordt aangezien voor de bestemming, en dat
+de organisatie eindigt met een snelle, herleidbare machine die
 verantwoording produceert over systemen die niemand beter is gaan begrijpen.
 
 ## 5. Verantwoording
 
-Geschreven tegen de repo zoals die op 23 september 2026 stond. Gelezen: `README.md`,
+Geschreven op basis van de repo zoals die op 23 september 2026 stond. Gelezen: `README.md`,
 `ARCHITECTURE.md`, `docs/sporen-en-roadmap.md`, `docs/normenkader-dekkingsanalyse.md`,
 `docs/systeemprofiel-feitenbasis.md`, `docs/interviewmodus-socratisch-gesprek.md`,
 `docs/toepasselijkheid-van-formulieren.md`, `docs/rollen-en-rechten-advies.md`,

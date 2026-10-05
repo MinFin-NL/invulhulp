@@ -22,7 +22,7 @@
 | Bron | Link | Wat |
 |---|---|---|
 | Beslishulp AI-verordening (gehost) | https://algoritmes.rijksapp.nl/beslishulp-ai-verordening | Vragenboom → is de AI-verordening van toepassing, welke rol, welke risicocategorie |
-| Broncode beslishulp | https://github.com/MinBZK/ai-verordening-beslishulp | MinBZK, EUPL-1.2, Vue (zelfde stack als findocs) — eigenaarschap blijft hier |
+| Broncode beslishulp | https://github.com/MinBZK/ai-verordening-beslishulp | MinBZK, EUPL-1.2, Vue (zelfde stack als findocs); eigenaarschap blijft hier |
 | IBDS beslishulpen-overzicht | https://realisatieibds.nl/page/view/ad94d97c-4d48-443c-aedd-235b2d0ca8b6/teamIBDS@ictu.nl | ICTU / team IBDS (Interbestuurlijke Datastrategie); verzamelt meerdere beslishulpen. Contact: teamIBDS@ictu.nl |
 
 ## 1. Doel en scope

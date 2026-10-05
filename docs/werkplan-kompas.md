@@ -1,0 +1,183 @@
+# Werkplan: van invulhulp naar kompas
+
+> **Status:** werkopdracht voor Claude Code, oktober 2026. Bouwt voort op
+> [`systeemprofiel-feitenbasis.md`](systeemprofiel-feitenbasis.md),
+> [`interviewmodus-socratisch-gesprek.md`](interviewmodus-socratisch-gesprek.md),
+> [`toepasselijkheid-van-formulieren.md`](toepasselijkheid-van-formulieren.md) en
+> [`systeemanalyse-invulhulp-in-het-stelsel.md`](systeemanalyse-invulhulp-in-het-stelsel.md).
+> Dit document zegt **wat** en **in welke volgorde**; die documenten zeggen hoe.
+
+## 1. Het probleem dat we oplossen
+
+> Hoe kunnen we projectleiders hun project één keer laten uitleggen, en ze daaruit laten
+> zien welke regels gelden en over welke vragen ze echt zelf moeten nadenken?
+
+Het probleem is niet het invullen, maar het overzicht: veel regels, van een stuk of vijf
+afdelingen, die elk als eigen formulier binnenkomen. Drie lagen, in volgorde van gewicht:
+
+1. **Oriëntatie** — welke regels/formulieren gelden voor mijn project, en waarom (niet)?
+2. **Dubbeling** — het project één keer uitleggen in plaats van per formulier.
+3. **Oordeel** — het afdelingsspecifieke deel (75–90% van elk formulier) beter laten
+   nadenken, niet laten wegschrijven.
+
+### Wat de telling zegt (A2, `scripts/overlap_count.py`, main, 924 vragen)
+
+| Projecttype | Formulieren | Vragen | Voor te vullen uit eerder formulier |
+|---|---|---|---|
+| IT zonder persoonsgegevens/AI | 9 | 380 | 14% |
+| IT met persoonsgegevens | 13 | 567 | 15% |
+| AI-systeem dat over burgers beslist | 20 | 924 | 22% |
+
+- Steekproef van 30 mappings: ~1/3 hetzelfde feit, ~57% verwant maar herschrijven nodig,
+  ~10% zwak. Letterlijk overtypen is grofweg 10–13% van de vragen.
+- "Worden er persoonsgegevens verwerkt / welke" staat **24 keer in 9 formulieren**, terwijl
+  de toepassingsscan het al weet — maar die stuurt alleen toepasselijkheid, geen prefill.
+- Voorbladvelden (naam project, directie, opdrachtgever, opsteller, contactpersoon): 54 in
+  14 formulieren, 14 gemapt.
+- Quickscan (140 vragen) is vrijwel geheel eigen oordeelswerk: 0% voor te vullen.
+
+Gevolg: een formulier dat niet hoeft, scheelt 100%; ontdubbelen scheelt 10–25%.
+Oriëntatie gaat vóór ontdubbeling, en ontdubbeling vóór meer AI.
+
+## 2. Spelregels voor dit werk
+
+- **Minder overtypen, niet minder nadenken.** Prefill alleen waar het hetzelfde *feit* is.
+  Waar een ander juridisch oordeel gevraagd wordt (subsidiariteit vs. alternatieven,
+  proportionaliteit), hooguit context tonen, niet invullen.
+- **Het formulier blijft de uitvoer.** Elke afdeling krijgt haar eigen formulier en
+  export, ongewijzigd herkenbaar (feitenbasis §5).
+- **Feiten worden afgeleid, niet opgeslagen** (feitenbasis §6–9): puur, synchroon, geen
+  CRDT-migratie.
+- **Herkomst altijd zichtbaar**: zelfverklaard / afgeleid / vastgesteld, en mens- vs.
+  modeltekst tot in de Word-export.
+- **Niet uitbreiden** wat het probleem niet raakt: geen nieuwe formulieren, geen nieuwe
+  AI-Modus-features. Niets verwijderen zonder aparte opdracht.
+- NLDD-checklist uit `CLAUDE.md` bij elke UI-wijziging; `npm run build` en de tests
+  groen per stap; **niet committen of pushen** zonder expliciete vraag.
+
+## 3. Stap 0 — Herstructurering van de dossierpagina (voorwaarde)
+
+### Wat er nu is
+
+`src/components/DossierDetail.vue` is ~2000 regels en stapelt alles op één pagina:
+header + delen, eerste-keer-blok, "volgende stap", brondocumenten met entiteitengraaf en
+ontologie, AI-Modus-voor-het-hele-dossier, toepassingsscan-tegel, "Vooraf", de tijdlijn
+met formulierkaarten per fase, n.v.t.-groepen en vier dialogen. Er is geen router;
+`AssessmentForm.vue` schakelt de weergaven. Oriëntatie (wat geldt) verdrinkt tussen
+documentbeheer en AI-acties.
+
+### Doel
+
+Eén dossier, **vier weergaven** met elk één vraag:
+
+| Weergave | Vraag die hij beantwoordt | Inhoud (bestaand → nieuw) |
+|---|---|---|
+| **Overzicht** (start) | Wat geldt voor mijn project en wat is de volgende stap? | volgende stap, toepassingsscan-uitkomst, lijst geldende formulieren met *waarom*, n.v.t. met reden, voortgang per fase |
+| **Project** | Wat weten we over het project? | toepassingsscan/kernvragen, later het systeemprofiel (feiten + herkomst) en het gesprek |
+| **Formulieren** | Wat moet ik invullen? | de huidige tijdlijn met kaarten, AI-Modus per formulier |
+| **Bronnen** | Waar baseren we het op? | brondocumenten, graaf, ontologie, dossierbrede AI-Modus |
+
+Delen/hernoemen/verwijderen blijven in de header.
+
+### Taken
+
+1. Bepaal hoe de weergave wordt bijgehouden. Voorkeur: één `dossierView`-state in de
+   store, gespiegeld naar de URL-hash zodat terug-knop en deeplinks werken. Lees eerst de
+   `frontend`-skill en de bestaande `nldd-navigation-split-view`-opzet
+   (`DossierFormsNav.vue`) en sluit daarop aan; kies een NLDD-component voor de
+   weergavekeuze (tabs of navigatie) via de `.d.ts` in `node_modules/@nldd/design-system`.
+2. Splits `DossierDetail.vue` in `DossierOverview.vue`, `DossierProject.vue`,
+   `DossierForms.vue`, `DossierSources.vue` + een dunne `DossierDetail.vue` (header +
+   weergavekeuze + dialogen). Verplaats code, herschrijf niet; gedrag blijft gelijk.
+3. Overzicht wordt de standaard bij het openen van een dossier; het eerste-keer-blok
+   verwijst naar **Project** (scan/gesprek) in plaats van naar documentupload.
+4. Bestaande tests (`formCard.render`, `toepassingsscan.render`, `sectionNav.contract`)
+   blijven groen; voeg een rendertest toe die per weergave de kerncomponent vindt.
+
+**Klaar als:** geen component boven ~600 regels, alle vier weergaven bereikbaar met
+toetsenbord, browsercheck (`npm run preview`) zonder regressie in delen, upload,
+AI-Modus en formulier openen.
+
+## 4. Stap 1 — Oriëntatie (laag 1)
+
+1. Overzicht toont per formulier: **geldt / geldt niet / nog onbekend**, de reden (uit
+   `applicability.reason` in `index.json`), de eigenaar-afdeling, en wat het ongeveer
+   vraagt (`shortDescription`). `onbekend` is nooit hetzelfde als `false`.
+2. Toon bij "nog onbekend" welke scanvraag het beslist, met één klik naar die vraag.
+3. Formulieren zonder `applicability` gelden altijd; maak dat expliciet ("geldt voor elk
+   IV-verzoek") in plaats van stil.
+4. Geef de afdelingen een plek: voeg per formulier een `owner`-veld toe aan `index.json`
+   (FG, CISO, portfolioberaad, …) en toon het. Laat de waarden open (`TODO`) waar ze niet
+   in de bronbestanden staan — niet raden.
+
+**Klaar als:** een nieuw dossier na alleen de toepassingsscan een volledige lijst toont
+van wat geldt, waarom, en voor wie.
+
+## 5. Stap 2 — Eén keer uitleggen (laag 2)
+
+Volg fase 0 en 1 uit `systeemprofiel-feitenbasis.md` §10, met deze eerste winst:
+
+1. **Kenmerkvragen voorinvullen uit de scan.** De 24 persoonsgegevens-vragen en de
+   overige vragen die een kenmerk herhalen (AI ja/nee, cloud, gebruikersinterface,
+   eigen dataset) krijgen een voorstel uit de toepassingsscan, zichtbaar als
+   *afgeleid* met bron. Vind de vragen met `scripts/overlap_count.py` als startpunt.
+2. **Gedeeld voorblad.** Naam project, directie/afdeling, opdrachtgever, contactpersoon,
+   opsteller: één keer op dossierniveau, voorstel in elk formulier. Versie, datum en
+   status zijn per document en blijven per formulier.
+3. **Ontbrekende identieke mappings** toevoegen (o.a. data-eigenaar, datasteward, omvang
+   en persoonsgegevens tussen `datakwaliteit` en `datasetregistratie`; logging PSA ↔
+   AIIA; grondslag prescan ↔ verwerkingsregister). Alleen hetzelfde feit.
+4. Draai `python3 scripts/overlap_count.py main` vóór en na en zet de cijfers in dit
+   document.
+
+**Open beslissing (vraag de gebruiker):** op branch `feat/kernvragen` vervangen de
+kernvragen de toepassingsscan, maar die branch loopt 24 commits achter op main. Kies vóór
+fase 0: scan uitbreiden tot kernvragen op main, of de branch bijwerken.
+
+## 6. Stap 3 — Herkomst zichtbaar (beschermt laag 3)
+
+1. Elk antwoord dat (deels) uit een voorstel komt, draagt zijn herkomst: scan, ander
+   formulier, document (met citaat) of model.
+2. Modeltekst die niet door een mens is aangepast blijft gemarkeerd in de UI én in de
+   Word-export, zodat de afdeling ziet wat gedacht en wat gegenereerd is
+   (systeemanalyse §3.2, `ontwerprichting-betekenisvolle-tussenkomst.md`).
+
+**Klaar als:** een toetser in de export per antwoord kan zien waar het vandaan komt.
+
+## 7. Stap 4 — Gesprek als invoer (laag 2 en 3)
+
+Volg `interviewmodus-socratisch-gesprek.md` §11:
+
+1. **Fase 0, alleen een spike:** persona-eval in `eval_prompts.py`, geen UI. Meet sturing
+   (doel: nul), convergentie op toepasselijkheidsfeiten, beurten. Lees eerst de
+   `llm-pipeline`-skill.
+2. Alleen als fase 0 slaagt: startgesprek in de **Project**-weergave, feiten als voorstel
+   ter bevestiging. Stop en rapporteer als het model stuurt.
+
+## 8. Niet doen (bevriezen)
+
+- Nieuwe formulieren of placeholders uitwerken.
+- AI-Modus (bulk invullen uit documenten) uitbreiden; het blijft werken zoals het is.
+- RAG-, graaf- en ontologie-uitbreidingen.
+
+## 9. Buiten Claude Code: de validatie
+
+Deze stappen rusten op eigen ervaring en een bureautelling. Twee menselijke tests
+beslissen of de richting klopt; doe ze parallel aan stap 0–1:
+
+- **A1:** vijf projectleiders lopen hun laatste initiatiefase door. Meet de tijd aan
+  zoeken welk formulier, overtypen, nadenken en wachten. Domineert zoeken niet, dan
+  verschuift het gewicht van stap 1 naar stap 2/3.
+- **A5:** twee formuliereigenaren (bijv. FG en CISO) beoordelen een uit feiten
+  voorgevuld formulier. Weigeren ze, dan blijft stap 2 binnen de invulhulp en gaat er
+  niets voorgevuld naar de afdeling.
+
+## 10. Volgorde in één oogopslag
+
+| Stap | Wat | Hangt af van |
+|---|---|---|
+| 0 | Dossierpagina in vier weergaven | — |
+| 1 | Oriëntatie in Overzicht | 0 |
+| 2 | Kenmerkvragen + voorblad voorinvullen, ontbrekende mappings | 0, open beslissing §5 |
+| 3 | Herkomst zichtbaar tot in export | 2 |
+| 4 | Gesprek: spike, daarna Project-weergave | 2 (fase 0 kan direct) |

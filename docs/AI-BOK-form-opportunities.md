@@ -35,8 +35,8 @@ tool, want ze gaan over de organisatie in plaats van over een project.
 ## 2. Direct bruikbare templates uit de AI-BOK (laaghangend fruit)
 
 De AI-BOK-appendix bevat 5 uitgewerkte templates die zich 1-op-1 laten omzetten naar een
-invulhulp-formulier. Ze zijn al gestructureerd als velden/tabellen/checkboxes, precies het
-formaat dat onze JSON-schema aankan.
+invulhulp-formulier. Ze zijn al gestructureerd als velden/tabellen/checkboxes, het
+formaat dat ons JSON-schema aankan.
 
 ### A. EU AI Act Compliance Checklist  ⭐ hoogste prioriteit
 - **Bron:** Template 3 (p. 196–198).
@@ -91,10 +91,10 @@ kansrijk voor de invulhulp (governmental IV-context):
 
 | KA | Kennisgebied | Mogelijk formulier |
 |---|---|---|
-| KA9 | AI Risk Management & Safety | AI-risicoassessment (adversarial, prompt injection, drift, red teaming) — vult risicokant naast BIO-quickscan |
+| KA9 | AI Risk Management & Safety | AI-risicoassessment (adversarial, prompt injection, drift, red teaming); vult de risicokant naast de BIO-quickscan |
 | KA10 | AI Compliance & Audit | zie EU AI Act-checklist (A) + audit-checklist |
 | KA11 | AI Ethics & Responsible AI | Ethische toets / Responsible-AI-review (complementair aan IAMA grondrechten) |
-| KA5 | Data & Semantics | Datakwaliteit- & datasheet-assessment ("Datasheets for Datasets") — sluit aan op onze RAG/ontologie |
+| KA5 | Data & Semantics | Datakwaliteit- & datasheet-assessment ("Datasheets for Datasets"); sluit aan op onze RAG/ontologie |
 | KA6 | Model Management | Model-validatie & drift-monitoring checklist |
 | KA7 | AI Interaction & UX | Prompt/UX-review (transparantie, vertrouwen, human-in-the-loop) |
 

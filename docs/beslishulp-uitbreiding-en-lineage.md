@@ -15,10 +15,10 @@
 
 | Onderdeel | Waar |
 |---|---|
-| Beslisboom als runtime-asset | `public/beslishulp/ai-verordening.json` — 22 vragen, 50 conclusies, 108 definities |
+| Beslisboom als runtime-asset | `public/beslishulp/ai-verordening.json`: 22 vragen, 50 conclusies, 108 definities |
 | Gepinde upstream-kopie | `vendor/ai-verordening-beslishulp/` (MinBZK, EUPL-1.2) |
 | Conversie | `scripts/convert-beslishulp.mjs`, `npm run beslishulp:build` |
-| Engine | `src/utils/beslishulp.ts` — guard-AST, `replay`, `answerStep`, risicoladder |
+| Engine | `src/utils/beslishulp.ts`: guard-AST, `replay`, `answerStep`, risicoladder |
 | Laden | `src/services/beslishulpLoader.ts` |
 | UI | `BeslishulpModal.vue`, `BeslishulpTile.vue` (vastgeplakt aan de euaiact-kaart), `RiskClassification.vue` |
 | Opslag | `FormState.beslishulp` op `euaiact`, via `store.beslishulpRun` |
@@ -34,8 +34,8 @@ Drie plekken coderen "er is er precies één":
 | Plek | Wat er hardcoded staat |
 |---|---|
 | `src/services/beslishulpLoader.ts:16` | vaste URL `/beslishulp/ai-verordening.json`, één gecachete promise |
-| `src/utils/beslishulp.ts:121` | `BESLISHULP_HOST_FORM_ID = 'euaiact'` — de run woont op de state van een *formulier*; de comment erboven geeft toe dat dat een PoC-afkorting is |
-| `src/utils/beslishulp.ts:262/271/307` | `RISK_LADDER`, `RISK_NEUTRAL_LABELS`, `OUT_OF_SCOPE_CONCLUSION_PREFIX` — AI-verordening-semantiek in engine-code |
+| `src/utils/beslishulp.ts:121` | `BESLISHULP_HOST_FORM_ID = 'euaiact'`: de run woont op de state van een *formulier*; de comment erboven geeft toe dat dat een PoC-afkorting is |
+| `src/utils/beslishulp.ts:262/271/307` | `RISK_LADDER`, `RISK_NEUTRAL_LABELS`, `OUT_OF_SCOPE_CONCLUSION_PREFIX`: AI-verordening-semantiek in engine-code |
 
 Voorstel, in deze volgorde:
 
@@ -59,19 +59,18 @@ een regel in een index.
 ## 3. Kandidaat-beslishulpen
 
 Gerangschikt op of de uitkomst iets **scopet dat de tool al heeft**. Dat is het criterium uit de
-README: een beslishulp bepaalt de scope, findocs vult in. Een beslishulp die nergens in uitmondt
-is een quiz.
+README: een beslishulp bepaalt de scope, findocs vult in.
 
 ### 3.1 Tier 1: de uitkomst bepaalt welk bestaand instrument van toepassing is
 
 | Beslishulp | Bepaalt | Voedt |
 |---|---|---|
-| **AVG-rolbepaling** (verwerkingsverantwoordelijke / gezamenlijk / verwerker) | welke rol je hebt — en daarmee of je een register onder art. 30 lid 1 of lid 2 moet bijhouden | verwerkingsregister (structureel, niet alleen een veld), DPIA "betrokken partijen met AVG-rol per partij", roadmap #6 verwerkersovereenkomst-checklist |
-| **Meldplicht datalek** (AVG art. 33/34) | melden aan de AP ja/nee, betrokkenen informeren ja/nee | roadmap #8 incidentregistratie — dit *is* de beslispoort van dat formulier, en het vult het lege `beheer`-spoor |
-| **Doorgifte buiten de EER / TIA** (Schrems II; EDPB-aanbevelingen 01/2020, zes stappen) | adequaatheidsbesluit / SCC + aanvullende maatregelen / niet toegestaan | DPIA-doorgiftesectie, doorgiftevelden van het verwerkingsregister — nu vrije tekst waar men naar raadt |
+| **AVG-rolbepaling** (verwerkingsverantwoordelijke / gezamenlijk / verwerker) | welke rol je hebt, en daarmee of je een register onder art. 30 lid 1 of lid 2 moet bijhouden | verwerkingsregister (structureel, niet alleen een veld), DPIA "betrokken partijen met AVG-rol per partij", roadmap #6 verwerkersovereenkomst-checklist |
+| **Meldplicht datalek** (AVG art. 33/34) | melden aan de AP ja/nee, betrokkenen informeren ja/nee | roadmap #8 incidentregistratie; dit *is* de beslispoort van dat formulier, en het vult het lege `beheer`-spoor |
+| **Doorgifte buiten de EER / TIA** (Schrems II; EDPB-aanbevelingen 01/2020, zes stappen) | adequaatheidsbesluit / SCC + aanvullende maatregelen / niet toegestaan | DPIA-doorgiftesectie, doorgiftevelden van het verwerkingsregister (nu vrije tekst waar men naar raadt) |
 | **Inkoop vs. zelfbouw AI** (PIANOo, EU-modelcontractbepalingen AI) | welke verplichtingen bij jou landen als inkopende partij | roadmap #5 inkoop- & leverancierstoets; de splitsing gekocht/gebouwd is bij uitstek een scopebeslissing |
 | **Archiefwet: bewaren of vernietigen** (selectielijst) | bewaartermijn en grondslag | roadmap #10 uitfaseringsplan, bewaartermijnen in het verwerkingsregister |
-| **Mag deze dataset open?** (Woo / Who, hergebruik) | open / beperkt / gesloten, met grond | gebruiksvoorwaarden in de dataset-registratie — en dit is precies IBDS/ICTU-terrein, dus eerst navragen bij teamIBDS@ictu.nl |
+| **Mag deze dataset open?** (Woo / Who, hergebruik) | open / beperkt / gesloten, met grond | gebruiksvoorwaarden in de dataset-registratie; dit is IBDS/ICTU-terrein, dus eerst navragen bij teamIBDS@ictu.nl |
 
 ### 3.2 Tier 2: klein, regelgebaseerd, zonder upstream-boom
 
@@ -117,7 +116,7 @@ NIS2/Cyberbeveiligingswet-zelfevaluatie (RDI) of een organisatiebrede
 verplichtingenscan kan daarom wél op organisatieniveau bestaan zonder de dossierstructuur te
 breken, mits de uitkomst buiten het dossier wordt opgeslagen.
 
-Dat is de eerlijke ontsnapping voor de geparkeerde instrumenten, **zonder nieuw spoor**, want dat
+Dat is een uitweg voor de geparkeerde instrumenten, **zonder nieuw spoor**, want dat
 was juist de fout die §1 van de sporenroadmap opruimt.
 
 ## 4. Lineage, opnieuw bekeken

@@ -59,8 +59,8 @@ AI-synthese.
 | Afhankelijkheden met andere activiteiten/projecten | Afhankelijkheden |
 | Risico's (tabel) | Risico's |
 | Beoogde start-/einddatum | Beoogde start- / einddatum |
-| Globale raming van de kosten | Raming projectkosten *(alleen ter info — keuzevraag)* |
-| Benodigde resources | Benodigde resources *(alleen ter info — andere tabelkolommen)* |
+| Globale raming van de kosten | Raming projectkosten *(alleen ter info: keuzevraag)* |
+| Benodigde resources | Benodigde resources *(alleen ter info: andere tabelkolommen)* |
 
 **Via AI-synthese (`synthesize`)**
 
@@ -191,10 +191,10 @@ Doelvragen volgen het PPM-Projectplan 2.0 (september 2026).
 | Beschrijving AI-systeem + Aanleiding | Doeleinden van alle gegevensverwerkingen |
 | Communicatie AI-gegenereerde output aan eindgebruikers | Verwerkingsdoeleinden gecommuniceerd aan betrokkenen? |
 | Rolverdeling + Gebruikers en betrokkenen | Betrokken partijen met AVG-rol per partij |
-| Externe hosting — onder welke voorwaarden? | Verwerkersovereenkomst afgesloten met externe verwerkers? |
+| Externe hosting: onder welke voorwaarden? | Verwerkersovereenkomst afgesloten met externe verwerkers? |
 | Geconsulteerde stakeholders + Feedback van kwetsbare groepen | Overleg gevoerd met betrokkenen of hun vertegenwoordigers? |
 | Beschrijving AI-systeem (techniek, data, algoritme) | (Semi-)geautomatiseerde besluitvorming of profilering |
-| Externe hosting — onder welke voorwaarden? | Gebruik van cloudoplossing of big data-verwerkingen |
+| Externe hosting: onder welke voorwaarden? | Gebruik van cloudoplossing of big data-verwerkingen |
 | Wettelijke grondslag + Grondrechtelijke bepalingen | Relevante wet- en regelgeving |
 | Opslag en bewaartermijn inputdata + Bewaartermijn outputdata | Bewaartermijnen per categorie persoonsgegevens |
 | Opslag en bewaartermijn inputdata + Opslag en versiebeheer model | Toezicht op bewaartermijnen en vernietiging |
@@ -226,7 +226,7 @@ Doelvragen volgen het PPM-Projectplan 2.0 (september 2026).
 | Negatieve gevolgen voor rechten en vrijheden van betrokkenen | Rechten die kunnen worden geschonden bij incorrect functioneren |
 | Noodzakelijkheid verwerking + Proportionaliteit | Proportionaliteit ten opzichte van doelstellingen |
 | Organisatorische maatregelen | Aanvullende maatregelen voor verantwoord gebruik |
-| Verwerkersovereenkomst + Cloudgebruik | Externe hosting — onder welke voorwaarden? |
+| Verwerkersovereenkomst + Cloudgebruik | Externe hosting: onder welke voorwaarden? |
 | Technische maatregelen (versleuteling, toegangscontrole, logging) | Toegangsbeheer |
 | Technische maatregelen | Logging en monitoring |
 | Noodzakelijkheid verwerking persoonsgegevens | Dataminimalisatie: is de gebruikte data noodzakelijk? |
@@ -288,7 +288,7 @@ en de DPIA moeten daarheen worden herschreven en kunnen niet letterlijk worden o
 
 | Doelformulier | Koppelingen | Zwaartepunt |
 |---|---|---|
-| Algoritmeregister-publicatie | 8 | Doel, proces, geraakte groepen, grondslag, grondrechten, menselijke tussenkomst, monitoring, beperkingen — steeds herschreven naar begrijpelijke taal |
+| Algoritmeregister-publicatie | 8 | Doel, proces, geraakte groepen, grondslag, grondrechten, menselijke tussenkomst, monitoring, beperkingen; steeds herschreven naar begrijpelijke taal |
 | Restrisico-acceptatie | 4 | Restrisico's voor betrokkenen, baten, overwogen alternatieven |
 | Data-ethiektoets | 3 | Geraakte betrokkenen, het "niet doen"-scenario, blijvend dilemma |
 | AIIA | 3 | Grondrechtenimpact, proportionaliteit, human in the loop |
@@ -323,7 +323,7 @@ ander formulier beantwoorden.
 
 De koppelingen naar de keuzevragen (rubricering, vraag 17 en 18) staan in `copy`-modus zonder dat
 de bronwaarde een geldige optie is: het paneel toont het bronantwoord dan ter informatie naast de
-vraag, wat hier precies de bedoeling is: de IHH-professional leest de PSA-tekst mee bij het
+vraag, en dat is hier ook de bedoeling: de IHH-professional leest de PSA-tekst mee bij het
 beantwoorden, maar de keuze blijft aan de invuller.
 
 ---

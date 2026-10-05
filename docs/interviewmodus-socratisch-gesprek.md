@@ -13,7 +13,7 @@ tekstvakken maar een gesprekspartner die doorvraagt over het systeem: wat het is
 raakt, wat er misgaat als het misgaat. Uit dat gesprek rollen de feiten, en uit de feiten
 rollen de formulieren.
 
-## 2. Waarom dit precies de ontbrekende invoerkant is
+## 2. Waarom dit de ontbrekende invoerkant is
 
 `docs/systeemprofiel-feitenbasis.md` betoogt dat formulieren moeten ophouden het *datamodel*
 te zijn. Dit document is de tweede helft van diezelfde beweging: formulieren moeten ook
@@ -23,9 +23,6 @@ ophouden de *invoermodus* te zijn.
 nu:      mens leest 22 formulieren  →  mens schrijft 930 antwoorden  →  dossier
 straks:  mens praat  →  feiten  →  formulieren renderen zichzelf  →  mens corrigeert
 ```
-
-De invulhulp keert daarmee om: hij houdt op een stapel vragenlijsten te zijn en wordt een
-gesprek met een dossier als bijproduct.
 
 ## 3. Waarom een gesprek hier beter is dan een formulier
 
@@ -44,19 +41,18 @@ staan los van elkaar; niemand legt antwoord 12 naast antwoord 407. Een interview
 > rangschikt op urgentie. Wie krijgt er dan als eerste antwoord, en wat betekent dat voor
 > wie onderaan staat?*
 
-Dat is precies de tegenstrijdigheid die nu pas maanden later bij een DPIA of een IAMA boven
+Dat is de tegenstrijdigheid die nu pas maanden later bij een DPIA of een IAMA boven
 water komt. En dankzij de feitenbasis is het goedkoop: de tegenstrijdigheid zit tussen twee
-*feiten*, niet tussen twee lappen tekst. Regels als "`besluit_over_personen` = nee terwijl
+*feiten*. Regels als "`besluit_over_personen` = nee terwijl
 `gedrag` ⊇ rangschikt" zijn deterministisch te detecteren; het model hoeft de spanning alleen
 nog in gewone taal voor te leggen.
 
-**3.3 De ethische vragen zijn precies de vragen die een formulier het slechtst behandelt.**
+**3.3 De ethische vragen zijn de vragen die een formulier het slechtst behandelt.**
 Een tekstvak met *"welke publieke waarden worden geraakt"* nodigt uit tot een
 compliance-klinkend non-antwoord. Deliberatie heeft een tegenover nodig. Het gesprek is
 *geen* vervanging van de ontbrekende tegenpartij met bevoegdheid uit
 `normenkader-dekkingsanalyse.md` §4 (een model tekent niets en accepteert geen restrisico),
-maar het is het verschil tussen een vraag die gesteld wordt en een vraag die beantwoord
-wordt.
+maar in een gesprek wordt de vraag ook echt beantwoord.
 
 **3.4 Het lost de koude start beter op dan de huidige truc.** AI-Modus weigert zonder
 documenten, en dat is de juiste standaard. `src/services/kernvragenSource.ts` bestaat om die
@@ -67,7 +63,7 @@ voor de systeemverklaring uit `normenkader-dekkingsanalyse.md` §4.
 
 ## 4. Er ligt al een precedent in de code
 
-Dit is geen greenfield-feature. `/api/improve/stream` doet dit al één beurt lang:
+`/api/improve/stream` doet dit al, één beurt lang:
 
 - `backend/main.py`: de improve-prompt mag `<verduidelijking>jouw vraag</verduidelijking>`
   teruggeven in plaats van een suggestie;
@@ -78,11 +74,11 @@ Dit is geen greenfield-feature. `/api/improve/stream` doet dit al één beurt la
 - en er staat een expliciete rem op: `allow_clarification=not req.clarification_answer.strip()`,
   met als commentaar *"Never re-ask after a clarification round, to avoid loops."*
 
-Een interview is exact die lus, bewust aangezet en van een budget voorzien. Het patroon, het
+Een interview is diezelfde lus, bewust aangezet en van een budget voorzien. Het patroon, het
 SSE-contract, de XML-uitvoerconventie en zelfs de UI-vorm bestaan dus al; wat ontbreekt is
 beurtbeheer, een doel om naartoe te werken (de feitenbasis) en de remmen uit §9.
 
-## 5. Drie gesprekken, niet één
+## 5. Drie gesprekken
 
 | Modus | Wanneer | Wat het vult | Waarom een gesprek wint |
 |---|---|---|---|
@@ -104,7 +100,7 @@ mag:
 
 1. **Doorvragen op abstractie.** "Burgers" → *welke burgers, en wie van hen kan niet weg?*
 2. **Een tegenvoorbeeld leggen.** *Wat gebeurt er bij iemand die geen DigiD heeft?*
-3. **Twee eerdere antwoorden naast elkaar leggen** (§3.2): de sterkste zet, en de enige die
+3. **Twee eerdere antwoorden naast elkaar leggen** (§3.2). Dat is de sterkste zet, en de enige die
    deterministisch getriggerd kan worden.
 4. **De negatieve vraag stellen.** *Wat gaat er mis, wie merkt het als eerste, en hoe komt
    die erachter?*
@@ -130,7 +126,7 @@ transcript per beurt in het user-bericht vouwen.
 
 **Kies het tweede.** Een startgesprek is grofweg 20 tot 40 korte beurten; dat past ruim, het
 houdt beide backends symmetrisch, en het houdt de server staatloos zoals `/api/improve/stream` en
-`/api/synthesize/stream` dat al zijn. De gesprekstoestand hoort in het dossier, niet in het model.
+`/api/synthesize/stream` dat al zijn. De gesprekstoestand hoort in het dossier.
 
 ### 7.2 Eén endpoint, bestaand SSE-contract
 
@@ -151,8 +147,8 @@ Uitvoer via `_sse_stream`, met de bestaande events plus één nieuwe:
 | Event | Payload | Bestaat al |
 |---|---|---|
 | `chunk` | tekst, token voor token | ja |
-| `vraag` | `{ vraag, waarvoor: FeitId[] }` — de volgende beurt | **nieuw** |
-| `voorstel` | `{ feitId, waarde, citaat }` — een feit uit een uitspraak | **nieuw** |
+| `vraag` | `{ vraag, waarvoor: FeitId[] }`: de volgende beurt | **nieuw** |
+| `voorstel` | `{ feitId, waarde, citaat }`: een feit uit een uitspraak | **nieuw** |
 | `done` | `{ klaar: true, samenvatting }` | ja |
 | `error` | `{ detail }` | ja |
 
@@ -160,11 +156,10 @@ De XML-uitvoerconventie van de bestaande prompts wordt doorgetrokken:
 `<vraag>`, `<waarvoor>`, `<voorstel feit="…">`, `<klaar/>`. `_xml_tag` doet het parsen al.
 
 De **spanningen** worden op de client deterministisch berekend uit het profiel (§3.2) en
-meegestuurd. Het model verzint geen tegenstrijdigheden; het verwoordt de tegenstrijdigheden
-die de regels vinden. Dat scheelt precies de categorie hallucinatie die hier het meeste
+meegestuurd. Het model verwoordt alleen de tegenstrijdigheden die de regels vinden. Dat scheelt de categorie hallucinatie die hier het meeste
 kwaad zou doen.
 
-### 7.3 Opslag: het transcript is een run, geen antwoord
+### 7.3 Opslag: het transcript als run
 
 Precedent: `BeslishulpRun` en `ToepassingsscanRun` liggen als blob op een gastformulier
 (`src/stores/assessmentStore.ts`), rijden mee door `ydocCodec` en hebben allebei een
@@ -190,13 +185,13 @@ gesprek dat door een ander model anders zou zijn gelopen moet dat kunnen laten z
 `syncKernvragenSource` indexeert nu de kernvragen als document met `derived: 'kernvragen'`,
 juist zodat `SourcePanel` kan zeggen dat een citaat een herformulering van de invuller is en
 geen bevestiging door een bron. Het interviewtranscript krijgt exact dezelfde behandeling en
-dezelfde waarschuwing. Het is meer tekst, geen hardere tekst.
+dezelfde waarschuwing.
 
 ### 7.5 UI
 
-Nieuw scherm naast `KernvragenView.vue`, niet ervoor in de plaats (§9.5). NLDD-conform: de
-bestaande verduidelijkings-UI in `TiptapEditor.vue` is het visuele precedent: geen
-zelfgebouwde chatbubbels, wel `nldd-card` per beurt, `nldd-text-field` voor het antwoord,
+Nieuw scherm naast `KernvragenView.vue`, niet ervoor in de plaats (§9.5). NLDD-conform. De
+bestaande verduidelijkings-UI in `TiptapEditor.vue` is het visuele precedent, dus geen
+zelfgebouwde chatbubbels maar `nldd-card` per beurt, `nldd-text-field` voor het antwoord,
 `nldd-button` met `text=`-attribuut, en het voorstellenpaneel als `nldd-banner` met
 bevestigknop. De hele beurtenlijst moet met het toetsenbord te doorlopen zijn en elke nieuwe
 vraag moet door een schermlezer worden aangekondigd (`aria-live="polite"`); een gesprek dat
@@ -204,7 +199,7 @@ alleen visueel voortgang toont is voor een schermlezergebruiker een stilstaand s
 
 ## 8. Hoe feiten uit een gesprek komen
 
-Niet door het model een formulier te laten invullen. Per bevestigd feit geldt:
+Het model vult zelf geen formulier in. Per bevestigd feit geldt:
 
 1. Het model doet een **voorstel** met een **letterlijk citaat** uit de uitspraak van de
    invuller.
@@ -216,7 +211,7 @@ Niet door het model een formulier te laten invullen. Per bevestigd feit geldt:
 4. Pas dan krijgt het feit `hardheid: 'zelfverklaard'` en herkomst
    `{ soort: 'kernvraag', … }`.
 
-Stap 3 is niet-onderhandelbaar voor de feiten die toepasselijkheid bepalen
+Stap 3 is verplicht voor de feiten die toepasselijkheid bepalen
 (`persoonsgegevens`, `besluit_over_personen`, `algoritme_of_ai`, `eigen_dataset`,
 `raakt_burgers`, `gebruikersinterface`). Zie §9.1.
 
@@ -238,7 +233,7 @@ Drie remmen, cumulatief:
    blijft de enige weg van antwoord naar kenmerk.
 3. **"Weet ik niet" blijft een volwaardig antwoord.** `onbekend` is geen `false`; dat is de
    bestaande regel in `src/utils/toepasselijkheid.ts`, en een gesprek dat mensen naar een
-   ja/nee praat ondermijnt precies die eigenschap.
+   ja/nee praat ondermijnt die eigenschap.
 
 ### 9.2 Woorden van het model als woorden van de invuller
 
@@ -253,17 +248,17 @@ De bestaande code kiest de veilige kant (nooit opnieuw vragen). Een interview ka
 dus heeft het een expliciet budget: maximaal *n* beurten per feit, een totaalbudget, en een
 altijd zichtbare uitgang. Het gesprek moet op elk moment af te breken en later te hervatten
 zijn, en een half gesprek moet een geldig, incompleet profiel opleveren en geen
-foutmelding. Vraagmoeheid is een echt risico: een gesprek dat langer duurt dan het formulier
-is een slechter formulier.
+foutmelding. Vraagmoeheid is een echt risico, zeker als het gesprek langer duurt dan het
+formulier zelf.
 
 ### 9.4 Modelkwaliteit en degradatie
 
 `backend/eval_prompts.py` liet eerder zien dat Mistral 7B al moeite heeft met
 checkbox-extractie en synthese; de Ollama-standaard in `create_backend()` is nog steeds
-`mistral`. Interviewen is aanzienlijk moeilijker dan extraheren. Daarom: de interviewmodus
-wordt **gated op backendcapaciteit** en degradeert zichtbaar naar het gewone formulier in
-plaats van een slecht gesprek te voeren. Een lokale ontwikkelopstelling is geen bewijs dat
-het werkt.
+`mistral`. Interviewen is aanzienlijk moeilijker dan extraheren. Daarom wordt de interviewmodus
+**alleen aangeboden als de backend het aankan**, en valt hij zichtbaar terug op het gewone
+formulier in plaats van een slecht gesprek te voeren. Een test op een lokale
+ontwikkelopstelling zegt daar weinig over.
 
 ### 9.5 Het formulier moet blijven
 
@@ -290,7 +285,7 @@ vastgelegd gouden profiel, waarbij een tweede model de invuller speelt en het ge
 automatisch wordt gevoerd. Meet dan drie dingen, in deze volgorde van belang:
 
 1. **Geen sturing.** Hoe vaak stelt de interviewer een inhoudelijk antwoord voor op een
-   feitvraag? Doelwaarde nul; dit is een blokkerende meting, geen kwaliteitsmeting.
+   feitvraag? Doelwaarde nul; boven nul gaat de uitrol niet door.
 2. **Convergentie.** Komt het bevestigde profiel overeen met het gouden profiel? Let
    vooral op vals-negatieven op de toepasselijkheidsfeiten (een gemiste
    `persoonsgegevens: ja` is veel erger dan een gemiste vrije tekst).
@@ -304,11 +299,11 @@ projecten voordat er iets breed wordt uitgerold.
 
 | Fase | Wat | Afhankelijk van |
 |---|---|---|
-| **0** | Promptspike in `eval_prompts.py`, geen UI: haalt een gesprek met een persona het gouden profiel? | — |
+| **0** | Spike met alleen prompts in `eval_prompts.py`, geen UI: haalt een gesprek met een persona het gouden profiel? | — |
 | **1** | Startgesprek naast de kernvragen; feiten als **voorstel**, bevestiging in de bestaande kernvragen-UI | fase 0 van `systeemprofiel-feitenbasis.md` |
 | **2** | Transcript vervangt het kernvragentranscript als AI-bron | fase 1 |
 | **3** | Verdiepingsgesprek per formulier, na AI-Modus, over wat de documenten niet dekten | fase 1 + RAG |
-| **4** | Herijkingsgesprek en waarnemingsfeiten — de werkings-as | fase 4 van het feitendocument |
+| **4** | Herijkingsgesprek en waarnemingsfeiten (de werkings-as) | fase 4 van het feitendocument |
 
 Fase 0 is een spike van een dag of wat en beslist alles. Blijkt daar dat het model stuurt
 (§9.1) of niet convergeert, dan is het antwoord "niet doen" en heeft het niets gekost.

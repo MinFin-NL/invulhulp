@@ -141,8 +141,8 @@ dossier in de map van de eigenaar schrijft.
 |---|---|---|
 | `POST /api/recordings` | `editor` | `file`, `session_id`, `title`, optioneel `duration_s`. Valideert vóór opslag, start de achtergrondtaak, geeft direct `{recording_id, status}` terug |
 | `GET /api/recordings?session_id=` | `viewer` | lijst zonder transcript-tekst |
-| `GET /api/recordings/{id}?session_id=` | `viewer` | volledige meta incl. `status`, `transcript`, `segments` — de poll-endpoint |
-| `GET /api/recordings/{id}/audio?session_id=` | `viewer` | `Response(data, media_type=meta["mime"])`. `session_id` als **query**-param, want de URL belandt in `<audio src>` — zelfde reden als bij `/api/images/{id}` |
+| `GET /api/recordings/{id}?session_id=` | `viewer` | volledige meta incl. `status`, `transcript`, `segments`; de poll-endpoint |
+| `GET /api/recordings/{id}/audio?session_id=` | `viewer` | `Response(data, media_type=meta["mime"])`. `session_id` als **query**-param, want de URL belandt in `<audio src>` (zelfde reden als bij `/api/images/{id}`) |
 | `DELETE /api/recordings/{id}` | `editor` | verwijdert audio, sidecar én het bijbehorende document (`rag.delete_document` + `docstore.delete_document`) |
 
 Validatievolgorde bij upload, identiek aan de image-upload: declared mime in de
@@ -244,7 +244,7 @@ De markup kopieert het brondocumenten-paneel:
   zichtbare focus
 - alleen design tokens: `var(--primitives-space-*)`, `var(--semantics-content-*)`;
   geen hardcoded kleuren of spacing
-- iconen via `<nldd-icon name="…" size="…">` uit de NLDD-registry (zie skill
+- iconen via `<nldd-icon icon="…" size="…">` uit de NLDD-registry (zie skill
   `frontend`); de oude NLDS-maskeertruc is weg en komt niet terug
 
 ### `assessmentStore.ts`
@@ -309,18 +309,18 @@ identificerend. Voor productiegebruik minimaal:
   blootstelling aanzienlijk en scheelt opslag.
 - **Verwerkingslocatie**: de Azure-backend stuurt de opname naar Azure. Alleen
   aanzetten in een tenant met de juiste verwerkersovereenkomst. De lokale
-  whisper-backend houdt alles binnen de container. Dat is precies waarom de
-  transcriptielaag pluggable is en niet hardgecodeerd op Azure.
+  whisper-backend houdt alles binnen de container. Daarom is de
+  transcriptielaag pluggable en niet hardgecodeerd op Azure.
 - Deze feature is zelf een verwerking die in de eigen DPIA van de invulhulp thuishoort.
 
 ## Fasering
 
 | Fase | Scope | Klaar als |
 |---|---|---|
-| **0 — spike** | Alleen bestandsupload, alleen lokale whisper, geen UI-glans. `mediastore` + `transcribe` + `POST/GET /api/recordings` + indexering. | Een geüploade `.m4a` verschijnt als brondocument met `chunk_count > 0`. |
-| **1 — opnemen** | `useMeetingRecorder`, `MeetingRecorder.vue`, polling in de store, terugluisteren, verwijderen, cascade-cleanup. | Opnemen in de browser levert een doorzoekbaar transcript; dossier verwijderen laat geen audio achter. |
-| **2 — productie** | Azure-backend, env vars, nginx-limiet, Dockerfile, privacybevestiging in de UI. | Werkt in de Container Apps-omgeving met Azure-transcriptie. |
-| **3 — optioneel** | AI-samenvatting (besluiten, actiepunten) als tweede document; sprekerdiarisatie; springen naar tijdstip vanuit een citaat. | — |
+| **0: spike** | Alleen bestandsupload, alleen lokale whisper, geen UI-glans. `mediastore` + `transcribe` + `POST/GET /api/recordings` + indexering. | Een geüploade `.m4a` verschijnt als brondocument met `chunk_count > 0`. |
+| **1: opnemen** | `useMeetingRecorder`, `MeetingRecorder.vue`, polling in de store, terugluisteren, verwijderen, cascade-cleanup. | Opnemen in de browser levert een doorzoekbaar transcript; dossier verwijderen laat geen audio achter. |
+| **2: productie** | Azure-backend, env vars, nginx-limiet, Dockerfile, privacybevestiging in de UI. | Werkt in de Container Apps-omgeving met Azure-transcriptie. |
+| **3: optioneel** | AI-samenvatting (besluiten, actiepunten) als tweede document; sprekerdiarisatie; springen naar tijdstip vanuit een citaat. | — |
 
 ## Verificatie
 

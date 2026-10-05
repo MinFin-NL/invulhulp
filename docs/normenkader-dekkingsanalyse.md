@@ -121,7 +121,7 @@ hoort in een eigen, `derived` formulier.
 | `CRA-01` SBOM en vulnerability handling | `psa` §7 of `quickscan` §4 |
 | `eIDAS-01` EU Digital Identity Wallet, `Wdo-01` betrouwbare inlogmiddelen | `psa` §5 applicatielaag |
 | `NORA-01` NORA-basisprincipes | `psa` §2 kaders |
-| `VIR-01` rubricering bijzondere informatie | `quickscan` — die vraagt BIV, niet VIR-BI |
+| `VIR-01` rubricering bijzondere informatie | `quickscan` (die vraagt BIV, niet VIR-BI) |
 | `BRP-01` autorisatie en terugmelding BRP | `prescandpia` §5.1 vraagt basisregistraties, niet het autorisatiebesluit |
 | `Wpg-01`, `Wjsg-01` bijzondere privacyregimes | `prescandpia` deel B |
 | `CIO-01` BIT/AcICT-toets, `CW-01` verantwoording IV | `aanbiedingsformulier` §5–6 |
@@ -147,7 +147,7 @@ antwoord ja is, moet dat *vóór* stap 1 in het schema staan, anders doen we het
 Staat al als `placeholder: "onzeker"` in de index, dekt 22 NIS2/CRA-controls, en is inhoudelijk
 het best afgebakende ontbrekende formulier (RTO/RPO per proces, ketenafhankelijkheden,
 continuïteitsscenario's, incidentmeldroute en -termijnen). Applicability koppelen aan de
-BIV-beschikbaarheidsscore uit de Quickscan zou logisch zijn. Dat is precies het soort
+BIV-beschikbaarheidsscore uit de Quickscan zou logisch zijn. Dat is het soort
 cross-form-koppeling dat `crossFormMappings.json` al ondersteunt.
 
 ### Stap 3: nieuw formulier "Informatiebeheer en openbaarheid"
@@ -201,7 +201,7 @@ inhoudelijk eigenaar, niet voor de bouwer.
 Alle bovenstaande stappen dekken gaten, maar geen ervan maakt de dekking *aantoonbaar*. Het
 normenkader heeft daar de velden al voor (`dependsOn`, `evidencedBy`, `bioOverheid`, `mdto`,
 `legalRefs`, nu vrijwel allemaal leeg) en `connections` bevat 32 kant-en-klare thema's die
-controls uit verschillende kaders koppelen, precies zoals `crossFormMappings.json` dat voor
+controls uit verschillende kaders koppelen, zoals `crossFormMappings.json` dat voor
 formuliervragen doet.
 
 Drie ambitieniveaus:

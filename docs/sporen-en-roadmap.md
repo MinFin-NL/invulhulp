@@ -38,7 +38,7 @@ De symptomen waren allemaal aanwezig:
   "Compliance" betekende dus niets consistents.
 - **Quickscan BIO2 en Prescan DPIA zijn hetzelfde instrumenttype** (een triage die bepaalt of
   een zwaarder instrument nodig is), en stonden in verschillende sporen.
-- **Het Compliancespoor had n=1.** Een categorie van één is geen categorie.
+- **Het Compliancespoor had n=1.**
 - **De cross-form-graaf sprak de sporen tegen.** Bijna elke van de 87 mappings in
   `crossFormMappings.json` kruiste een spoorgrens: `quickscan`→`prescandpia`,
   `aiia`→`modelcard`, `psa`→ vier formulieren in twee andere sporen. Als de sporen de
@@ -46,8 +46,7 @@ De symptomen waren allemaal aanwezig:
 - **De eigen brainstormdocumenten konden niet classificeren.** In
   `AI-BOK-form-opportunities.md` en `DAMA-DMBOK-form-opportunities.md` kregen negen
   voorgestelde formulieren negen keer een slash of een "of": "`assessment` (of nieuwe track
-  `eu-ai-act`)", "nieuw `data` of bestaand `compliance`", "`governance`/`data`". Een taxonomie
-  die de eigen auteur niet kan bedienen, bedient de gebruiker ook niet.
+  `eu-ai-act`)", "nieuw `data` of bestaand `compliance`", "`governance`/`data`".
 
 ## 2. De regel: één as, de rest wordt facet
 
@@ -67,15 +66,15 @@ een facet: het antwoordt op *wat raakt dit?*, en dat is een andere vraag.
 
 | Spoor (`track`) | Formulieren nu |
 |---|---|
-| `verkennen` — Verkennen & afbakenen | intake, quickscan (BIO), prescandpia |
-| `besluiten` — Onderbouwen & besluiten | aanbiedingsformulier, restrisico |
-| `ontwerpen` — Ontwerpen | ppm, psa, datakwaliteit, datasetregistratie |
-| `toetsen` — Toetsen | dpia, aiia, iama, euaiact, dataethiek |
-| `ingebruikname` — In gebruik nemen | modelcard, algoritmeregister, verwerkingsregister, toegankelijkheid |
-| `beheer` — Beheren & evalueren | *(leeg, bewust zichtbaar)* |
+| `verkennen`: Verkennen & afbakenen | intake, quickscan (BIO), prescandpia |
+| `besluiten`: Onderbouwen & besluiten | aanbiedingsformulier, restrisico |
+| `ontwerpen`: Ontwerpen | ppm, psa, datakwaliteit, datasetregistratie |
+| `toetsen`: Toetsen | dpia, aiia, iama, euaiact, dataethiek |
+| `ingebruikname`: In gebruik nemen | modelcard, algoritmeregister, verwerkingsregister, toegankelijkheid |
+| `beheer`: Beheren & evalueren | *(leeg, bewust zichtbaar)* |
 
 `beheer` is leeg en wordt tóch getoond, met een `emptyHint` in `TRACK_META`. Het gat
-zichtbaar maken is een doel van deze indeling, geen bijvangst: zolang de as klopt, is een leeg
+zichtbaar maken is een doel van deze indeling: zolang de as klopt, is een leeg
 spoor eerlijker dan een indeling die doet alsof er niets ontbreekt.
 
 ### Waarom de organisatiebrede formulieren zijn verwijderd
@@ -118,7 +117,7 @@ dezelfde reden geparkeerd.
 De frictie project ↔ verwerking ↔ systeem is subtieler maar even echt: één project levert
 drie systemen en vijf verwerkingen op, en dat is nu niet uitdrukbaar.
 
-**Die frictie is met de uitbreiding van juli 2026 groter geworden, niet kleiner.** Het
+**Die frictie is met de uitbreiding van juli 2026 groter geworden.** Het
 verwerkingsregister beschrijft één *verwerking* (art. 30 AVG kent geen 'project'), en de
 datakwaliteit- en dataset-formulieren beschrijven één *dataset*. Beide zijn fijnmaziger dan een
 dossier: een project met drie datasets zou drie datasheets moeten opleveren, en `Dossier` biedt
@@ -138,7 +137,7 @@ hetzelfde soort ingreep als het organisatieniveau hierboven.
 
 Elk instrument in de tool is *ex ante*. In PDCA-termen: alleen Plan, niets voor Check en Act.
 Dat wringt ook in de praktijk, want juist daar legt de wetgeving doorlopende
-verplichtingen legt, o.a. AI Act art. 26 (menselijk toezicht), art. 72 (post-market
+verplichtingen op, o.a. AI Act art. 26 (menselijk toezicht), art. 72 (post-market
 monitoring), art. 73 (melden ernstige incidenten) en art. 12 (logging); AVG art. 35 lid 11
 (herbeoordeling bij gewijzigd risico) en art. 33 (meldplicht datalek); en de Archiefwet voor
 bewaren en vernietigen. Vandaar dat `beheer` als leeg spoor zichtbaar is.
@@ -158,13 +157,13 @@ samen de sterkste sprong.
 |---|---|---|---|---|
 | 1 ✅ | **Verwerkingsregister** | `ingebruikname` | AVG art. 30 | Breder verplicht dan een DPIA en nu volledig afwezig. Sterk tabelgedreven → past op de bestaande table-questions. Vult zich grotendeels uit dpia + intake via `crossFormMappings`. |
 | 2 ✅ | **Restrisico-acceptatie / besluitformulier** | `besluiten` | sluitstuk van DPIA/AIIA/BIO | Klein formulier, groot effect. In elk risicoraamwerk is acceptatie door de verantwoordelijke eigenaar de sluitsteen; zonder handtekening bungelen alle assessments. Trekt restrisico's uit dpia/aiia/quickscan. |
-| 3 ✅ | **Toegankelijkheidsverklaring** | `ingebruikname` | Tijdelijk besluit digitale toegankelijkheid overheid; EN 301 549 / WCAG 2.1 AA | Wettelijk verplicht voor overheidsdiensten en nergens gedekt. **Er bestaat een officieel model** (DigiToegankelijk) — harmoniseren zoals bij `par-dpia-form`, niet zelf verzinnen. |
+| 3 ✅ | **Toegankelijkheidsverklaring** | `ingebruikname` | Tijdelijk besluit digitale toegankelijkheid overheid; EN 301 549 / WCAG 2.1 AA | Wettelijk verplicht voor overheidsdiensten en nergens gedekt. **Er bestaat een officieel model** (DigiToegankelijk): harmoniseren zoals bij `par-dpia-form`, niet zelf verzinnen. |
 | 4 ✅ | **Algoritmeregister-publicatie** | `ingebruikname` | Standaard van het Algoritmeregister | Vast veldenschema upstream → zelfde harmonisatie-aanpak. Sluit direct aan op de Model Card; veel velden zijn afleidbaar. |
 | 5 | **Inkoop- & leverancierstoets AI** | `ontwerpen` | ARBIT/GIBIT; EU-modelcontractbepalingen AI-inkoop (PIANOo); NeRDS "open, tenzij" | De overheid bouwt zelden zelf. Voor ingekochte AI is dit het dominante risico-oppervlak en er is geen instrument voor. Geen kant-en-klaar NL-invulinstrument → afleiden. Neem exit-strategie / vendor lock-in expliciet op. |
 | 6 | **Verwerkersovereenkomst-checklist** | `ontwerpen` | AVG art. 28 | Geen contract, wél een checklist of alle verplichte elementen erin staan. Klein en concreet. |
-| 7 | **Periodieke herijking** | `beheer` | AVG art. 35 lid 11; AI Act art. 72 | Vraagt een nieuw patroon — "wat is er veranderd sinds de vorige DPIA/AIIA" verwijst terug naar eerdere antwoorden. **Mogelijk codewerk** (versievergelijking). |
+| 7 | **Periodieke herijking** | `beheer` | AVG art. 35 lid 11; AI Act art. 72 | Vraagt een nieuw patroon: "wat is er veranderd sinds de vorige DPIA/AIIA" verwijst terug naar eerdere antwoorden. **Mogelijk codewerk** (versievergelijking). |
 | 8 | **Incidentregistratie & melding** | `beheer` | AVG art. 33/34; AI Act art. 73 | Tabelgedreven, JSON-only, met een beslisboom voor de meldplicht (past op het bestaande decision-gate-patroon). |
-| 9 ✅ | **Datakwaliteit + dataset-registratie** | `ontwerpen` | DAMA-DMBOK; ISO/IEC 25012; DCAT-AP-NL, MIM 1.2 | Al uitgewerkt in [`DAMA-DMBOK-form-opportunities.md`](DAMA-DMBOK-form-opportunities.md) §4A en §4C — dat document is de spec. DPIA, AIIA en Model Card leunen allemaal op de datalaag die nu nergens wordt vastgelegd. |
+| 9 ✅ | **Datakwaliteit + dataset-registratie** | `ontwerpen` | DAMA-DMBOK; ISO/IEC 25012; DCAT-AP-NL, MIM 1.2 | Al uitgewerkt in [`DAMA-DMBOK-form-opportunities.md`](DAMA-DMBOK-form-opportunities.md) §4A en §4C; dat document is de spec. DPIA, AIIA en Model Card leunen allemaal op de datalaag die nu nergens wordt vastgelegd. |
 | 10 | **Uitfaseringsplan** | `beheer` | Archiefwet; AVG art. 5 lid 1 sub e | Sluit de levenscyclus. Laagste urgentie, maar zonder dit blijft `beheer` half. |
 
 > **Bij het bouwen:** de artikelverwijzingen hierboven zijn de *aanleiding*, niet de inhoud.

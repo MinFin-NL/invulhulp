@@ -37,7 +37,7 @@ fundament.
 
 > **Niet toevallig:** de AI-BOK is *expliciet gemodelleerd naar* DAMA-DMBOK (centraal
 > governance-gebied omringd door thematische kennisgebieden, elk met activiteiten, rollen,
-> deliverables en metrics). DAMA-forms toevoegen versterkt dus precies de datazijde waarnaar de
+> deliverables en metrics). DAMA-forms toevoegen versterkt dus de datazijde waarnaar de
 > AI-BOK (KA5: Data & Semantics) al verwijst.
 
 ## 2. Belangrijk verschil met de AI-BOK
@@ -156,7 +156,7 @@ de AI-BOK (KA5) al aanhaalt:
 ## 7. Aandachtspunten vóór implementatie
 
 - **Géén nieuwe track.** `track` is uitsluitend de *levensfase*; het onderwerpsdomein is een facet
-  (`domains: ["data"]`) dat als tag op de kaart verschijnt. Een `data`-track zou precies de
+  (`domains: ["data"]`) dat als tag op de kaart verschijnt. Een `data`-track zou de
   as-vermenging terugbrengen die in juli 2026 is opgeruimd; zie
   [`sporen-en-roadmap.md`](sporen-en-roadmap.md).
 - **Computed scores:** net als bij de AI Maturity Scan heeft ons schema geen berekende velden; som/

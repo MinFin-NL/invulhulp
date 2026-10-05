@@ -19,13 +19,13 @@ Er zijn vier voorwaarden voor, en ze zijn alle vier nodig:
 
 | # | Voorwaarde | Wat hem in stand houdt |
 |---|---|---|
-| **V1** | Het artefact arriveert al af — er valt niets te maken, alleen te aanvaarden | AI Modus als eerste beweging |
+| **V1** | Het artefact arriveert al af: er valt niets te maken, alleen te aanvaarden | AI Modus als eerste beweging |
 | **V2** | Afwijzen kost meer dan aanvaarden | geen adviesrol, geen diff, 91 vragen per toets |
 | **V3** | Niets stroomafwaarts spreekt de aanvaarding ooit tegen | alle instrumenten zijn ex ante; `beheer` is leeg |
 | **V4** | Niemand buiten de lus leest het ooit | 22 documenten voor 22 functionarissen, nul voor de betrokkene |
 
-Elke ingreep in §4 valt aan op ten minste één van deze vier. Een maatregel die er geen van
-raakt is versiering, hoe goedbedoeld ook. Gebruik deze tabel als toets bij elk volgend voorstel.
+Elke ingreep in §4 valt aan op ten minste één van deze vier. Gebruik deze tabel als toets bij
+elk volgend voorstel.
 
 ## 2. De recursie, en waarom die de scherpste test is
 
@@ -36,10 +36,9 @@ AI-verordening art. 26 en AVG art. 22 bestaan om stempelmachines in *uitgerolde*
 voorkomen. De voorwaarden voor echt toezicht dáár (begrijpen wat je beoordeelt, kunnen
 afwijken, gevolgen dragen, tijd hebben) zijn exact dezelfde vier als hierboven.
 
-Daaruit volgt een goedkope, harde en ongemakkelijke zelftest: **laat de invulhulp de
+Daaruit volgt een goedkope en ongemakkelijke zelftest: **laat de invulhulp de
 toezichtvragen uit `iama.json` en `aiia.json` op zichzelf beantwoorden.** Begrijpt de mens in
-de lus wat hij goedkeurt? Kan hij afwijken? Gebeurt er iets als hij het mis heeft? Een tool die
-zijn eigen grondrechtentoets niet doorstaat, heeft geen positie om hem af te nemen.
+de lus wat hij goedkeurt? Kan hij afwijken? Gebeurt er iets als hij het mis heeft?
 
 ## 3. De optieruimte
 
@@ -50,8 +49,7 @@ staat erbij, anders komt het over een half jaar terug als een nieuw idee.
 
 - **Blind eerst antwoorden.** De invuller antwoordt vóór hij enige AI-tekst ziet. Het
   *generation effect* is een van de robuustste bevindingen uit de cognitieve psychologie: je
-  begrijpt wat je zelf hebt voortgebracht, niet wat je hebt goedgekeurd. Herkennen is geen
-  weten.
+  begrijpt wat je zelf hebt voortgebracht, niet wat je hebt goedgekeurd.
 - **Terugvertellen bij het besluit.** Alleen op het beslispunt: de tekenaar formuleert het
   risico in eigen woorden; het model toetst dat op tegenspraak met de feiten in het dossier,
   niet op stijl.
@@ -118,9 +116,8 @@ het model, in drie vaste bewegingen:
 2. waar dit botst met een ander antwoord in het dossier;
 3. wat je weglaat dat een criticus als eerste zou noemen.
 
-Dit is de grootste enkele hefboom in de lijst, omdat het het model verandert van *datgene wat
-het denken wegneemt* in *datgene wat erom vraagt*, en omdat het de werkelijke meerwaarde van
-het model gebruikt. Consistentie over antwoorden heen is het enige wat geen mens in dit proces
+Dit is de grootste hefboom in de lijst, omdat het model dan om denkwerk vraagt in plaats van
+het over te nemen, en omdat het de werkelijke meerwaarde van het model gebruikt. Consistentie over antwoorden heen is het enige wat geen mens in dit proces
 kan. [`systeemprofiel-feitenbasis.md`](systeemprofiel-feitenbasis.md) §3 zag dit al: de
 tegenstrijdigheid zit tussen twee *feiten*, dus ze is deterministisch te detecteren en het model
 hoeft haar alleen in gewone taal voor te leggen.
@@ -157,8 +154,8 @@ Meet in plaats daarvan, op de plek waar nu het percentage staat:
   zichtbaar in plaats van gênant);
 - **besluiten die door een assessment zijn veranderd.**
 
-Die laatste is de eerlijke maat van het hele regime. Een verantwoordingsstelsel dat nooit een
-ontwerp verandert is theater, en deze tool is het eerste in het departement dat dat met data
+Die laatste zegt het meest over het hele regime. Als assessments nooit een ontwerp veranderen,
+voegt het regime niets toe, en deze tool is het eerste in het departement dat dat met data
 kan aantonen, in beide richtingen. Het is bovendien de maat die, zodra de leiding erop kijkt,
 al het andere gedrag meetrekt.
 
@@ -185,7 +182,7 @@ mensen wélke restschade dragen en om welke reden, gerouteerd vanuit `kern.waard
 `kern.ongelijke_uitwerking` en `kern.bezwaar`. Met naam, in eigen woorden, en waar het mag:
 openbaar.
 
-Daarmee wordt ethiek een besluit met een naam eronder in plaats van een tekstveld. Dat is precies wat
+Daarmee wordt ethiek een besluit met een naam eronder in plaats van een tekstveld. Dat is wat
 [`systeemprofiel-feitenbasis.md`](systeemprofiel-feitenbasis.md) §4.2 al bepleit.
 
 ### 4.6 Maak assessments achteraf falsifieerbaar
@@ -211,8 +208,8 @@ signaal binnen kan komen.
 
 ## 5. Het ontwerpdoel eronder
 
-Je kunt mensen niet tot nadenken verplichten. Je kunt alleen **het eerlijke pad goedkoper maken
-dan het rituele pad.**
+Nadenken valt niet af te dwingen. Het ontwerpdoel is daarom dat het eerlijke pad door de tool
+goedkoper wordt dan het rituele pad.
 
 De goedkoopste route door de tool is nu: AI Modus → export → tekenen. Elk voorstel hierboven is
 een manier om een andere route de goedkoopste te maken. Dat gebeurt door het denkpad sneller, beter ondersteund en beter beloond te maken dan het nu is, zonder het ritueel duurder te maken.

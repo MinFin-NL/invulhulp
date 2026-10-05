@@ -14,8 +14,8 @@ vrijwel elk IV-verzoek relevant is, maar dat houdt op bij de
 **toegankelijkheidsverklaring** (`toegankelijkheid.json`, spoor `ingebruikname`): een
 koppelvlak, een datapipeline of een stuk backoffice-software zonder gebruikersinterface valt
 er domweg niet onder. Een formulier dat zichtbaar leeg blijft omdat het niet van toepassing
-is, is niet te onderscheiden van een formulier dat vergeten is, en dat is precies het
-verschil dat een dossier zou moeten vastleggen.
+is, is niet te onderscheiden van een formulier dat vergeten is, en dat verschil zou een
+dossier moeten vastleggen.
 
 ## 2. Het juridische criterium is níet "publiek toegankelijk"
 
@@ -150,7 +150,7 @@ De beslishulp doet nu al precies dit soort werk op dossierniveau en levert het b
 | Beslishulp vandaag | Toepassingsscan |
 |---|---|
 | `BeslishulpTile.vue` op de dossierpagina, gefuseerd met de EU AI Act-kaart | eigen tegel bovenaan de dossierpagina, boven de spoorgroepen |
-| `BeslishulpModal.vue` als wizard | zelfde modal, maar één pagina — zie §7.2 |
+| `BeslishulpModal.vue` als wizard | zelfde modal, maar één pagina (zie §7.2) |
 | Uitkomst één keer per dossier opgeslagen, gelezen via een store-getter | idem |
 | `labels` + `conclusionId` → `verdictSummary()` → badge met kleur | afgeleide **kenmerken** → zichtbare tags op de dossierpagina |
 
@@ -246,8 +246,7 @@ gegevens uit een basisregistratie gebruikt?
 Dezelfde valkuil als in §2 bij inkoop: de vraag gaat over wat het project *oplevert of
 aanbiedt*, niet over wat MinFin zelf bouwt.
 
-**"Niet van toepassing" is een product, geen leegte.** Verplichte motivatie, plus wie en
-wanneer. Voor het n.v.t. verklaren van een DPIA hoort een tweede paar ogen (FG of privacy
+**Bij "niet van toepassing" hoort een verplichte motivatie**, plus wie en wanneer. Voor het n.v.t. verklaren van een DPIA hoort een tweede paar ogen (FG of privacy
 officer); daar past een akkoordveld bij, ook als dat proces buiten de tool loopt.
 
 ### 5.6 Toestanden, drift en overrides
@@ -261,16 +260,14 @@ onvindbaar, conform de voorkeur in §4.
   moet dat een zichtbare melding zijn ("scope gewijzigd: IAMA is nu van toepassing"), geen
   stille verschijning in de lijst. Andersom: reeds ingevulde antwoorden worden nooit
   weggegooid wanneer iets n.v.t. wordt.
-- **Overrides in beide richtingen**, altijd met reden vastgelegd. De motor adviseert, de mens
-  beslist.
+- **Overrides in beide richtingen**, altijd met reden vastgelegd.
 
 ### 5.7 Aansprakelijkheidsrand
 
 "Een DPIA is niet nodig" wordt in de praktijk gelezen als juridisch oordeel. Houd de
 formulering op *"op basis van je antwoorden lijkt X niet van toepassing; leg dit voor aan
 FG/CISO"*, met de gebruikte kenmerken zichtbaar erbij. En neem de n.v.t.-verklaringen op als
-bijlage in de dossier-PDF ("Niet van toepassing verklaarde onderdelen, met motivatie"). Dat is
-het verschil tussen werk wegmoffelen en een verantwoordingsdocument.
+bijlage in de dossier-PDF ("Niet van toepassing verklaarde onderdelen, met motivatie").
 
 ### 5.8 Bouwvolgorde
 
@@ -323,7 +320,7 @@ waar het antwoord niets aanstuurt.
 - **Verbergen of doorstrepen?** Doorstrepen. N.v.t.-formulieren staan per fase in een
   ingeklapte groep, met reden, en zijn met "Toch openen" gewoon te openen.
 - **Dossier zonder scan?** Alles blijft staan zoals voorheen; elk oordeel is dan `onbepaald`
-  en er verschijnt geen enkele badge. De motor gokt nooit.
+  en er verschijnt geen enkele badge.
 - **Kenmerken op het dossierobject of op een host-formulier?** Host-formulier: de intake,
   via dezelfde constructie als de beslishulp (`TOEPASSINGSSCAN_HOST_FORM_ID`). Dat scheelt
   een wijziging in `dossierstore.py`, de grants en het CRDT-schema; een echte dossier-eigen
@@ -354,7 +351,7 @@ helft van dat gewicht niets te sturen:
   En de voortgangsteller sprong ("vraag 2 van 6" werd "vraag 2 van 8" zodra de gate opende).
 - **Zes onafhankelijke vragen passen op één pagina.** Geen stappen, geen voortgangsbalk, geen
   Vorige/Volgende. De gevolgenlijst staat eronder en werkt live mee: een antwoord verplaatst
-  meteen een formulier in die lijst, wat het hele argument is om de vraag te stellen.
+  meteen een formulier in die lijst.
 - **De disclaimer stond er drie keer** (samenvatting, n.v.t.-groep in `DossierDetail`, footer),
   in drie formuleringen. Nu één zin op elk van de twee plekken waar iemand hem nodig heeft.
 
