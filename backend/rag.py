@@ -460,28 +460,3 @@ def _parse_json_loose(raw: str) -> dict[str, Any]:
         "relaties": [],
         "_parse_error": True,
     }
-
-
-def ontology_summary_text(ontology: dict[str, Any]) -> str:
-    """Render an ontology dict as compact text for inclusion in LLM prompts."""
-    if not ontology:
-        return ""
-    parts: list[str] = []
-    if s := ontology.get("samenvatting"):
-        parts.append(f"Samenvatting: {s}")
-    if topics := ontology.get("onderwerpen"):
-        parts.append(f"Onderwerpen: {', '.join(topics)}")
-    ent = ontology.get("entiteiten") or {}
-    for label, key in [
-        ("Personen", "personen"),
-        ("Organisaties", "organisaties"),
-        ("Systemen", "systemen"),
-        ("Datasoorten", "datasoorten"),
-    ]:
-        vals = ent.get(key) or []
-        if vals:
-            parts.append(f"{label}: {', '.join(vals)}")
-    if decisions := ontology.get("besluiten"):
-        ds = [f"{d.get('tekst', '')} ({d.get('datum', '')})".strip() for d in decisions]
-        parts.append("Besluiten: " + "; ".join(ds))
-    return "\n".join(parts)

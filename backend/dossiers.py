@@ -67,6 +67,22 @@ async def resolve_session_access(request: Request, session_id: str, minimum: str
     return record.get("ownerSub") or user_sub
 
 
+async def _load_for_caller(
+    request: Request, dossier_id: str
+) -> tuple[dict[str, Any], str, str | None]:
+    """Load a dossier for the calling user (404 when absent), with a stale grant
+    sub healed to the caller's live one first so the role check sees it.
+    Returns (record, user_sub, user_email); the role check stays with the caller."""
+    user = auth.current_user(request)
+    user_sub = user.get("sub") or "anonymous"
+    record = await asyncio.to_thread(dossierstore.load_dossier, dossier_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="Dossier niet gevonden")
+    user_email = user.get("email")
+    await asyncio.to_thread(dossierstore.reconcile_identity, record, user_sub, user_email)
+    return record, user_sub, user_email
+
+
 async def _enrich_grants(records: list[dict[str, Any]]) -> None:
     """Backfill grants whose name/email are missing (owner grants captured from
     thin OIDC claims, pre-enrichment records) from the Keycloak Admin API and
@@ -152,15 +168,10 @@ async def list_dossiers(request: Request) -> dict:
 
 @router.get("/{dossier_id}")
 async def get_dossier(dossier_id: str, request: Request) -> dict:
-    user = auth.current_user(request)
-    user_sub = user.get("sub") or "anonymous"
-    record = await asyncio.to_thread(dossierstore.load_dossier, dossier_id)
-    if record is None:
-        raise HTTPException(status_code=404, detail="Dossier niet gevonden")
-    await asyncio.to_thread(dossierstore.reconcile_identity, record, user_sub, user.get("email"))
-    _require_role(record, user_sub, "viewer", user.get("email"))
+    record, user_sub, user_email = await _load_for_caller(request, dossier_id)
+    _require_role(record, user_sub, "viewer", user_email)
     await _enrich_grants([record])
-    return _view(record, user_sub, user.get("email"))
+    return _view(record, user_sub, user_email)
 
 
 @router.put("/{dossier_id}")
@@ -220,8 +231,8 @@ async def put_dossier(dossier_id: str, body: DossierPayload, request: Request) -
 async def purge_dossier(record: dict[str, Any], fallback_sub: str = "anonymous") -> None:
     """Delete a dossier and every piece of data hanging off it.
 
-    Cascade like main.py's DELETE /api/sessions/{id}, keyed on the storage owner
-    so shared documents/images are cleaned up too: vector chunks (rag), uploaded
+    Cascade keyed on the storage owner, so shared documents/images are cleaned
+    up too: vector chunks (rag), uploaded
     document text (docstore), question images (imagestore), the CRDT collab
     state, and finally the dossier record itself. The record goes last so a
     failure halfway leaves a dossier that still points at its leftovers instead
@@ -239,13 +250,8 @@ async def purge_dossier(record: dict[str, Any], fallback_sub: str = "anonymous")
 
 @router.delete("/{dossier_id}")
 async def delete_dossier(dossier_id: str, request: Request) -> dict:
-    user = auth.current_user(request)
-    user_sub = user.get("sub") or "anonymous"
-    record = await asyncio.to_thread(dossierstore.load_dossier, dossier_id)
-    if record is None:
-        raise HTTPException(status_code=404, detail="Dossier niet gevonden")
-    await asyncio.to_thread(dossierstore.reconcile_identity, record, user_sub, user.get("email"))
-    _require_role(record, user_sub, "owner", user.get("email"))
+    record, user_sub, user_email = await _load_for_caller(request, dossier_id)
+    _require_role(record, user_sub, "owner", user_email)
     await purge_dossier(record, user_sub)
     return {"deleted": dossier_id}
 
@@ -300,13 +306,8 @@ def _owner_count(record: dict[str, Any]) -> int:
 async def set_grant(dossier_id: str, sub: str, body: GrantBody, request: Request) -> dict:
     if body.role not in ROLE_ORDER:
         raise HTTPException(status_code=422, detail="Ongeldige rol")
-    user = auth.current_user(request)
-    user_sub = user.get("sub") or "anonymous"
-    record = await asyncio.to_thread(dossierstore.load_dossier, dossier_id)
-    if record is None:
-        raise HTTPException(status_code=404, detail="Dossier niet gevonden")
-    await asyncio.to_thread(dossierstore.reconcile_identity, record, user_sub, user.get("email"))
-    _require_role(record, user_sub, "owner", user.get("email"))
+    record, user_sub, user_email = await _load_for_caller(request, dossier_id)
+    _require_role(record, user_sub, "owner", user_email)
 
     grants = record.setdefault("grants", [])
     existing = next((g for g in grants if g.get("sub") == sub), None)
@@ -327,17 +328,12 @@ async def set_grant(dossier_id: str, sub: str, body: GrantBody, request: Request
 
 @router.delete("/{dossier_id}/grants/{sub}")
 async def remove_grant(dossier_id: str, sub: str, request: Request) -> dict:
-    user = auth.current_user(request)
-    user_sub = user.get("sub") or "anonymous"
-    record = await asyncio.to_thread(dossierstore.load_dossier, dossier_id)
-    if record is None:
-        raise HTTPException(status_code=404, detail="Dossier niet gevonden")
-    await asyncio.to_thread(dossierstore.reconcile_identity, record, user_sub, user.get("email"))
+    record, user_sub, user_email = await _load_for_caller(request, dossier_id)
     # Owners manage grants; any user may remove their own grant ("leave").
     if sub != user_sub:
-        _require_role(record, user_sub, "owner", user.get("email"))
+        _require_role(record, user_sub, "owner", user_email)
     else:
-        _require_role(record, user_sub, "viewer", user.get("email"))
+        _require_role(record, user_sub, "viewer", user_email)
 
     grants = record.get("grants", [])
     target = next((g for g in grants if g.get("sub") == sub), None)

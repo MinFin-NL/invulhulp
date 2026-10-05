@@ -184,11 +184,9 @@ buiten.
 
 ### Opruimen
 
-`mediastore.delete_session_recordings` moet in **beide** cascades, anders lekt
-audio (de grootste blobs in het systeem) op het volume:
-
-- `dossiers.purge_dossier` (`backend/dossiers.py:210`)
-- `DELETE /api/sessions/{session_id}` (`backend/main.py:1303`)
+`mediastore.delete_session_recordings` moet in de cascade van `dossiers.purge_dossier`
+(`backend/dossiers.py`), anders lekt audio (de grootste blobs in het systeem) op het
+volume. Dat is de enige plek die een sessie opruimt.
 
 ## Frontend
 

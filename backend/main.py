@@ -395,11 +395,6 @@ class ImproveRequest(BaseModel):
     clarification_answer: str = ""
 
 
-class ImproveResponse(BaseModel):
-    suggestion: str
-    rationale: str
-
-
 class SynthesizeRequest(BaseModel):
     source_answers: dict[str, str]
     source_questions: dict[str, str]
@@ -949,35 +944,11 @@ def _validated_improve_text(req: ImproveRequest) -> str:
     return text
 
 
-def _prepare_extract(req: ExtractRequest) -> tuple[str, str]:
-    """Shared prep for both extract endpoints: (system_prompt, source_text)."""
-    if not req.documents:
-        raise HTTPException(status_code=400, detail="Geen brondocumenten opgegeven.")
-    if not req.target_question.strip():
-        raise HTTPException(status_code=400, detail="Doelvraag mag niet leeg zijn.")
-    system_prompt = _build_extract_system_prompt(
-        req.question_type, req.field_format, req.form_context, req.columns
-    )
-    source_text = "\n".join(doc.content for doc in req.documents)
-    return system_prompt, source_text
-
-
 def _extract_parser_for(req: "ExtractRequest | RagExtractRequest", source_text: str):
     """Table questions get their own validator; everything else the default."""
     if req.question_type == "table" and req.columns:
         return _make_table_extract_parser(req.columns, source_text)
     return _make_extract_parser(req.field_format, req.target_question, req.options, source_text)
-
-
-@app.post("/api/improve", response_model=ImproveResponse)
-async def improve_text(req: ImproveRequest) -> ImproveResponse:
-    text = _validated_improve_text(req)
-    try:
-        raw = await backend.chat(SYSTEM_PROMPT, _improve_user_message(req))
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"LLM fout: {e}") from e
-    suggestion, rationale = _parse_improve(raw, text)
-    return ImproveResponse(suggestion=suggestion, rationale=rationale)
 
 
 @app.post("/api/improve/stream")
@@ -997,61 +968,12 @@ async def improve_text_stream(req: ImproveRequest) -> StreamingResponse:
     )
 
 
-@app.post("/api/synthesize", response_model=ImproveResponse)
-async def synthesize_from_source(req: SynthesizeRequest) -> ImproveResponse:
-    if not req.source_answers:
-        raise HTTPException(status_code=400, detail="Geen bronantwoorden opgegeven.")
-    try:
-        raw = await backend.chat(SYNTHESIZE_SYSTEM_PROMPT, _synthesize_user_message(req))
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"LLM fout: {e}") from e
-    suggestion, rationale = _parse_synthesize(raw)
-    if not suggestion:
-        raise HTTPException(status_code=500, detail="Kon geen suggestie genereren.")
-    return ImproveResponse(suggestion=suggestion, rationale=rationale)
-
-
 @app.post("/api/synthesize/stream")
 async def synthesize_stream(req: SynthesizeRequest) -> StreamingResponse:
     if not req.source_answers:
         raise HTTPException(status_code=400, detail="Geen bronantwoorden opgegeven.")
     return StreamingResponse(
         _sse_stream(SYNTHESIZE_SYSTEM_PROMPT, _synthesize_user_message(req), _parse_synthesize),
-        media_type="text/event-stream",
-        headers=_SSE_HEADERS,
-    )
-
-
-async def _smooth_sse_stream(req: SmoothRequest) -> AsyncGenerator[str, None]:
-    """Sibling of _sse_stream with a different done shape: the full id → final
-    answer map instead of a single suggestion."""
-    originals = {a.question_id: a.answer.strip() for a in req.answers}
-    raw = ""
-    try:
-        async for chunk in backend.stream(SMOOTH_SYSTEM_PROMPT, _smooth_user_message(req)):
-            raw += chunk
-            yield f"event: chunk\ndata: {json.dumps({'text': chunk}, ensure_ascii=False)}\n\n"
-        answers = _parse_smooth(raw, originals)
-        yield f"event: done\ndata: {json.dumps({'answers': answers}, ensure_ascii=False)}\n\n"
-    except Exception as e:
-        yield f"event: error\ndata: {json.dumps({'detail': str(e)}, ensure_ascii=False)}\n\n"
-
-
-@app.post("/api/smooth/stream")
-async def smooth_answers_stream(req: SmoothRequest) -> StreamingResponse:
-    if not req.answers:
-        raise HTTPException(status_code=400, detail="Geen antwoorden opgegeven.")
-    # Defense-in-depth: the client already truncates context answers.
-    for ctx in req.context_answers:
-        if len(ctx.answer) > _SMOOTH_CONTEXT_CHARS:
-            ctx.answer = ctx.answer[:_SMOOTH_CONTEXT_CHARS]
-    total_chars = sum(len(a.answer) for a in req.answers) + sum(
-        len(a.answer) for a in req.context_answers
-    )
-    if total_chars > 30000:
-        raise HTTPException(status_code=400, detail="Sectie is te groot (max 30000 tekens).")
-    return StreamingResponse(
-        _smooth_sse_stream(req),
         media_type="text/event-stream",
         headers=_SSE_HEADERS,
     )
@@ -1068,8 +990,7 @@ async def _smooth_form_sse_stream(req: SmoothFormRequest) -> AsyncGenerator[str,
 @app.post("/api/smooth/form/stream")
 async def smooth_form_stream(req: SmoothFormRequest) -> StreamingResponse:
     """Whole-form smoothing. Batching happens here, so a section is never too
-    large to smooth — unlike /api/smooth/stream, which rewrites exactly what it
-    is given and rejects anything over its cap."""
+    large to smooth."""
     if not any(s.answers for s in req.sections):
         raise HTTPException(status_code=400, detail="Geen antwoorden opgegeven.")
     total_chars = sum(len(a.answer) for s in req.sections for a in s.answers)
@@ -1077,30 +998,6 @@ async def smooth_form_stream(req: SmoothFormRequest) -> StreamingResponse:
         raise HTTPException(status_code=400, detail="Formulier is te groot om gelijk te strijken.")
     return StreamingResponse(
         _smooth_form_sse_stream(req),
-        media_type="text/event-stream",
-        headers=_SSE_HEADERS,
-    )
-
-
-@app.post("/api/extract", response_model=ImproveResponse)
-async def extract_from_documents(req: ExtractRequest) -> ImproveResponse:
-    system_prompt, source_text = _prepare_extract(req)
-    try:
-        raw = await backend.chat(system_prompt, _extract_user_message(req))
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"LLM fout: {e}") from e
-    suggestion, rationale = _extract_parser_for(req, source_text)(raw)
-    if not suggestion:
-        raise HTTPException(status_code=500, detail="Kon geen suggestie genereren.")
-    return ImproveResponse(suggestion=suggestion, rationale=rationale)
-
-
-@app.post("/api/extract/stream")
-async def extract_from_documents_stream(req: ExtractRequest) -> StreamingResponse:
-    system_prompt, source_text = _prepare_extract(req)
-    parse_fn = _extract_parser_for(req, source_text)
-    return StreamingResponse(
-        _sse_stream(system_prompt, _extract_user_message(req), parse_fn),
         media_type="text/event-stream",
         headers=_SSE_HEADERS,
     )
@@ -1299,15 +1196,6 @@ async def verify_documents(req: VerifyDocumentsRequest, request: Request) -> dic
     await dossiers.resolve_session_access(request, req.session_id, "viewer")
     found = await rag.get_indexed_doc_ids(req.session_id, req.doc_ids)
     return {"found": found, "missing": [d for d in req.doc_ids if d not in found]}
-
-
-@app.delete("/api/sessions/{session_id}")
-async def remove_session(session_id: str, request: Request) -> dict:
-    user_sub = await dossiers.resolve_session_access(request, session_id, "owner")
-    await rag.delete_session(session_id)
-    await asyncio.to_thread(docstore.delete_session, user_sub, session_id)
-    await asyncio.to_thread(imagestore.delete_session_images, user_sub, session_id)
-    return {"deleted": session_id}
 
 
 # ---------------------------------------------------------------------------

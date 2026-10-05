@@ -67,7 +67,7 @@ voor de systeemverklaring uit `normenkader-dekkingsanalyse.md` §4.
 
 ## 4. Er ligt al een precedent in de code
 
-Dit is geen greenfield-feature. `/api/improve` doet dit al één beurt lang:
+Dit is geen greenfield-feature. `/api/improve/stream` doet dit al één beurt lang:
 
 - `backend/main.py`: de improve-prompt mag `<verduidelijking>jouw vraag</verduidelijking>`
   teruggeven in plaats van een suggestie;
@@ -129,8 +129,8 @@ Ollama delen die ene signatuur. Twee opties: de interface uitbreiden met bericht
 transcript per beurt in het user-bericht vouwen.
 
 **Kies het tweede.** Een startgesprek is grofweg 20 tot 40 korte beurten; dat past ruim, het
-houdt beide backends symmetrisch, en het houdt de server staatloos zoals `/api/extract` en
-`/api/synthesize` dat al zijn. De gesprekstoestand hoort in het dossier, niet in het model.
+houdt beide backends symmetrisch, en het houdt de server staatloos zoals `/api/improve/stream` en
+`/api/synthesize/stream` dat al zijn. De gesprekstoestand hoort in het dossier, niet in het model.
 
 ### 7.2 Eén endpoint, bestaand SSE-contract
 

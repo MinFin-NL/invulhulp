@@ -325,11 +325,9 @@ All endpoints live under `/api` and require an authenticated session (except the
 
 | Endpoint | Method | Description |
 |---|---|---|
-| `/api/improve` · `/api/improve/stream` | `POST` | Suggest an improved version of a text fragment |
-| `/api/synthesize` · `/api/synthesize/stream` | `POST` | Synthesize a DPIA answer from AIIA answers |
+| `/api/improve/stream` | `POST` | Suggest an improved version of a text fragment |
+| `/api/synthesize/stream` | `POST` | Synthesize a DPIA answer from AIIA answers |
 | `/api/smooth/form/stream` | `POST` | Deduplicate a whole form's longtext answers (batched server-side) |
-| `/api/smooth/stream` | `POST` | Smooth one batch of answers (single-call primitive) |
-| `/api/extract` · `/api/extract/stream` | `POST` | Extract an answer for a question |
 | `/api/extract/rag/stream` | `POST` | Extract an answer grounded in retrieved document chunks (RAG) |
 
 ### Documents and images
@@ -342,7 +340,6 @@ All endpoints live under `/api` and require an authenticated session (except the
 | `/api/documents/verify` | `POST` | Verify document availability |
 | `/api/images` | `POST` | Attach an image to a question |
 | `/api/images/{image_id}` | `GET` · `DELETE` | Fetch or delete a question image |
-| `/api/sessions/{session_id}` | `DELETE` | Delete a session's data |
 
 ### Dossiers, users and auth
 

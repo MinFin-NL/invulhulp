@@ -283,15 +283,14 @@ Viewers read through the REST snapshot instead.
 Exactly one backend is active per process: Azure OpenAI if
 `AZURE_OPENAI_ENDPOINT` is set, otherwise Ollama.
 
-Endpoints (streaming variants use SSE with `X-Accel-Buffering: no`):
+Endpoints (all stream over SSE with `X-Accel-Buffering: no`):
 
 | Endpoint | Purpose |
 |---|---|
-| `/api/improve[/stream]` | Rewrite one answer into formal Dutch, with a rationale |
-| `/api/extract[/stream]` | Extract an answer from given document text |
+| `/api/improve/stream` | Rewrite one answer into formal Dutch, with a rationale |
 | `/api/extract/rag/stream` | Retrieve top-k chunks for a question, then extract |
-| `/api/synthesize[/stream]` | Rewrite source-form answers for a target question |
-| `/api/smooth/stream`, `/api/smooth/form/stream` | Remove repetition across answers (batched on the server) |
+| `/api/synthesize/stream` | Rewrite source-form answers for a target question |
+| `/api/smooth/form/stream` | Remove repetition across answers (batched on the server) |
 
 The system is built to prefer an empty field over a made-up answer:
 
