@@ -399,6 +399,8 @@ stages:
               RESOURCE_GROUP: $(RESOURCE_GROUP)
               ALLOWED_IP_1: $(ALLOWED_IP_1)
               ALLOWED_IP_2: $(ALLOWED_IP_2)
+              ALLOWED_IP_3: $(ALLOWED_IP_3)
+              ALLOWED_IP_4: $(ALLOWED_IP_4)
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
               scriptType: bash
@@ -415,4 +417,16 @@ stages:
                   --resource-group "$RESOURCE_GROUP" \
                   --rule-name "ITS" \
                   --ip-address "$ALLOWED_IP_2" \
+                  --action Allow
+                az containerapp ingress access-restriction set \
+                  --name "$FRONTEND_APP" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --rule-name "Allowed range 3" \
+                  --ip-address "$ALLOWED_IP_3" \
+                  --action Allow
+                az containerapp ingress access-restriction set \
+                  --name "$FRONTEND_APP" \
+                  --resource-group "$RESOURCE_GROUP" \
+                  --rule-name "Allowed range 4" \
+                  --ip-address "$ALLOWED_IP_4" \
                   --action Allow
