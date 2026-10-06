@@ -157,19 +157,26 @@ def main(argv: list[str]) -> None:
                     if f == 'quickscan' and (kind == 'scan' or any(order[g] < order['quickscan'] for g, _ in refs))})
     print(f"\nQuickscan: {qs_pref + qs_facts} van {qs} vragen voor te vullen uit een eerder formulier of de scan")
 
+    # A question a fact covers needs no mapping any more (the six voorblad copy
+    # mappings went once their facts existed), so mark it apart.
+    fact_refs = {ref for _, refs in facts for ref in refs}
+
     def report(title: str, patterns: dict[str, re.Pattern]):
         print(f'\n## {title}')
         for name, pat in patterns.items():
             hits = [(f['id'], q['id'], q.get('text', '')) for f in forms for q in questions(configs[f['id']])
                     if pat.search(q.get('text', ''))]
             mapped = sum(1 for f, q, _ in hits if (f, q) in targets)
-            print(f"- {name}: {len(hits)} vragen in {len({f for f, _, _ in hits})} formulieren, {mapped} gemapt")
+            via_fact = sum(1 for f, q, _ in hits if (f, q) in fact_refs and (f, q) not in targets)
+            print(f"- {name}: {len(hits)} vragen in {len({f for f, _, _ in hits})} formulieren, "
+                  f"{mapped} gemapt, {via_fact} alleen via een feit")
             for f, q, text in hits:
-                mark = '·' if (f, q) in targets else ' '
+                mark = '·' if (f, q) in targets else '◦' if (f, q) in fact_refs else ' '
                 print(f"    {mark} {f:20} {q:28} {text[:90]}")
 
-    report('Vragen die een scankenmerk herhalen (· = al doel van een mapping)', REPEATED)
-    report('Voorbladvelden (· = al doel van een mapping)', VOORBLAD)
+    legend = '· = doel van een mapping, ◦ = alleen via een feit'
+    report(f'Vragen die een scankenmerk herhalen ({legend})', REPEATED)
+    report(f'Voorbladvelden ({legend})', VOORBLAD)
 
 
 if __name__ == '__main__':

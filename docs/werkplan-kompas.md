@@ -171,8 +171,9 @@ Telling (`python3 scripts/overlap_count.py main` tegenover de werkboom na stap 2
 
 De quickscan ging van 0 naar 1 voor te vullen vraag. Veel voorbladvelden waren al via een
 copy-mapping gekoppeld; de feiten maken ze vooral in alle richtingen en vanuit het
-dossier bruikbaar. Een deel van die copy-mappings is nu dubbel met een feit; ze zijn
-blijven staan, omdat verwijderen een aparte opdracht vraagt.
+dossier bruikbaar. De zes copy-mappings die daardoor dubbel waren met een voorbladfeit
+(intake → aanbiedingsformulier en IHH-toets, aanbiedingsformulier → IHH-toets en PPM) zijn
+later op 6 oktober in een aparte opdracht verwijderd; de telling hierboven bleef gelijk.
 
 ## 6. Stap 3 — Herkomst zichtbaar (beschermt laag 3)
 

@@ -1411,26 +1411,6 @@
   },
   {
     "targetFormId": "aanbiedingsformulier",
-    "targetQuestionId": "aa_a.directie_afdeling",
-    "sourceFormId": "intake",
-    "sourceQuestionIds": [
-      "intake_a.directie_afdeling"
-    ],
-    "synthesisHint": "Dezelfde vraag als in het intakeformulier — neem het antwoord ongewijzigd over.",
-    "mode": "copy"
-  },
-  {
-    "targetFormId": "aanbiedingsformulier",
-    "targetQuestionId": "aa_a.contactpersoon",
-    "sourceFormId": "intake",
-    "sourceQuestionIds": [
-      "intake_a.contactpersoon"
-    ],
-    "synthesisHint": "Dezelfde vraag als in het intakeformulier — neem het antwoord ongewijzigd over.",
-    "mode": "copy"
-  },
-  {
-    "targetFormId": "aanbiedingsformulier",
     "targetQuestionId": "aa_a.email",
     "sourceFormId": "intake",
     "sourceQuestionIds": [
@@ -1445,16 +1425,6 @@
     "sourceFormId": "intake",
     "sourceQuestionIds": [
       "intake_a.telefoonnummer"
-    ],
-    "synthesisHint": "Dezelfde vraag als in het intakeformulier — neem het antwoord ongewijzigd over.",
-    "mode": "copy"
-  },
-  {
-    "targetFormId": "aanbiedingsformulier",
-    "targetQuestionId": "aa_a.naam_opdrachtgever",
-    "sourceFormId": "intake",
-    "sourceQuestionIds": [
-      "intake_a.naam_opdrachtgever"
     ],
     "synthesisHint": "Dezelfde vraag als in het intakeformulier — neem het antwoord ongewijzigd over.",
     "mode": "copy"
@@ -2320,32 +2290,12 @@
   },
   {
     "targetFormId": "ihhtoets",
-    "targetQuestionId": "ihh_a.naam_project",
-    "sourceFormId": "aanbiedingsformulier",
-    "sourceQuestionIds": [
-      "aa_a.naam_project"
-    ],
-    "synthesisHint": "Neem de projectnaam letterlijk over.",
-    "mode": "copy"
-  },
-  {
-    "targetFormId": "ihhtoets",
     "targetQuestionId": "ihh_a.topdesk",
     "sourceFormId": "intake",
     "sourceQuestionIds": [
       "intake_a.topdesk_nummer"
     ],
     "synthesisHint": "Neem het Topdesk-meldingsnummer letterlijk over.",
-    "mode": "copy"
-  },
-  {
-    "targetFormId": "ihhtoets",
-    "targetQuestionId": "ihh_a.opdrachtgever",
-    "sourceFormId": "intake",
-    "sourceQuestionIds": [
-      "intake_a.naam_opdrachtgever"
-    ],
-    "synthesisHint": "Neem de naam van de opdrachtgever letterlijk over.",
     "mode": "copy"
   },
   {
@@ -2573,16 +2523,6 @@
       "ct_e.uitkomst"
     ],
     "synthesisHint": "Vat de cloudoplossing en de uitkomst van de cloudtoets samen: welk type clouddienst en servicemodel, en of het inschakelen van de clouddienst in beginsel is toegestaan."
-  },
-  {
-    "targetFormId": "ppm",
-    "targetQuestionId": "ppm_0.naam_project",
-    "sourceFormId": "aanbiedingsformulier",
-    "sourceQuestionIds": [
-      "aa_a.naam_project"
-    ],
-    "synthesisHint": "Dezelfde vraag als in het aanbiedingsformulier — neem de projectnaam ongewijzigd over.",
-    "mode": "copy"
   },
   {
     "targetFormId": "ppm",

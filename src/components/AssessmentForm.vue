@@ -119,18 +119,11 @@
               class="assessment-shell__prefill"
               v-if="prefill"
               role="status"
-            >
-              <div class="assessment-shell__prefill-row">
-                <span>{{ prefillMessage }}</span>
-                <nldd-button
-                  variant="neutral-transparent"
-                  size="sm"
-                  text="Sluiten"
-                  aria-label="Melding over overgenomen antwoorden sluiten"
-                  @click="prefill = null"
-                />
-              </div>
-            </nldd-banner>
+              :text="prefillMessage"
+              dismissible
+              :translations.prop="PREFILL_BANNER_TRANSLATIONS"
+              @dismiss="prefill = null"
+            />
 
             <!-- Home -->
             <FormIntro
@@ -208,7 +201,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import { loadForm, getCachedForm } from '../services/formLoader'
+import { loadForm, getCachedForm, loadFormRegistry } from '../services/formLoader'
 import { prefillCopyAnswers, type PrefillSummary } from '../composables/useCrossFormPrefill'
 import { computeNavOrder } from '../utils/formProgress'
 import { useAssessmentStore } from '../stores/assessmentStore'
@@ -237,12 +230,17 @@ const { aiModeActive, aiModeProgress, aiModePhase, cancelAiMode } = useAiMode()
 useAppHistory()
 const formConfig = ref<FormConfig | null>(null)
 const prefill = ref<PrefillSummary | null>(null)
+// The short names from index.json ("Intakeformulier"): the banner names its
+// sources in one sentence, where a form's own long title doesn't fit.
+const registryTitles = ref(new Map<string, string>())
+const PREFILL_BANNER_TRANSLATIONS = {
+  'components.banner.dismiss-action': 'Melding over overgenomen antwoorden sluiten',
+}
 
 const prefillMessage = computed(() => {
   const p = prefill.value
   if (!p) return ''
-  // prefillCopyAnswers loaded every source form, so the cache has their titles.
-  const namen = p.sourceFormIds.map((id) => getCachedForm(id)?.title ?? id)
+  const namen = p.sourceFormIds.map((id) => registryTitles.value.get(id) ?? getCachedForm(id)?.title ?? id)
   if (p.fromScan) namen.push('de toepassingsscan')
   const bronnen = namen.length > 1 ? `${namen.slice(0, -1).join(', ')} en ${namen[namen.length - 1]}` : namen.join('')
   const vragen = p.count === 1 ? '1 vraag is' : `${p.count} vragen zijn`
@@ -315,7 +313,10 @@ async function loadActiveForm() {
     // Take over the answers this form shares verbatim with an earlier form
     // (Intake → Aanbiedingsformulier and friends) before the user sees it.
     const summary = await prefillCopyAnswers(formConfig.value)
-    if (summary.count > 0) prefill.value = summary
+    if (summary.count > 0) {
+      registryTitles.value = new Map((await loadFormRegistry()).map((f) => [f.id, f.title]))
+      prefill.value = summary
+    }
   } catch (err) {
     // A dossier persisted while a since-removed form was open would otherwise
     // hang here forever: the dev server and nginx both answer an unknown
@@ -558,19 +559,11 @@ function onDecisionNext(go: boolean) {
   color: var(--invulhulp-color-text-subtle);
 }
 
+/* nldd-banner's host is width: 100%; with the margins on top it ran past the
+   pane and pushed its close button out of view. */
 .assessment-shell__prefill {
+  inline-size: auto;
   margin: var(--primitives-space-16) var(--primitives-space-24) 0;
-}
-
-.assessment-shell__prefill-row {
-  display: flex;
-  align-items: center;
-  gap: var(--primitives-space-16);
-  flex-wrap: wrap;
-}
-
-.assessment-shell__prefill-row > span {
-  flex: 1 1 20rem;
 }
 
 .assessment-shell__main {
