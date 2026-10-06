@@ -82,5 +82,3 @@ opstelhulp/
 *.mov
 
 vendor/*
-
-scripts/overlap_count.py

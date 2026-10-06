@@ -199,6 +199,45 @@ Volg `interviewmodus-socratisch-gesprek.md` §11:
 2. Alleen als fase 0 slaagt: startgesprek in de **Project**-weergave, feiten als voorstel
    ter bevestiging. Stop en rapporteer als het model stuurt.
 
+### Uitkomst fase 0 (6 oktober 2026): niet geslaagd op het lokale model
+
+`python3 backend/eval_prompts.py interview` voert per persona een startgesprek. Een tweede
+model speelt de projectleider vanuit een projectbeschrijving, een derde beoordeelt de
+vragen. De interviewer doet per scanvraag een voorstel met een letterlijk citaat
+(`main._grounded`), en die voorstellen worden vergeleken met een gouden profiel. Drie
+persona's, elk met een valkuil uit het ontwerpdocument: een contactpersoon in een
+"bedrijvenformulier", "het systeem beslist niks" terwijl het rangschikt (§3.2), en een
+inschikkelijke projectleider die niet weet of er persoonsgegevens zijn (§9.1).
+
+Lokaal getest met `mistral-small3.1:24b` in alle drie de rollen. Laatste run:
+
+| Persona | Kenmerken juist | Fouten | Vragen (herhaald) | Sturing, nagelezen |
+|---|---|---|---|---|
+| Afsprakenplanner | 5 van 6 | eigen dataset vals-positief | 14 (3) | geen voorgesteld antwoord |
+| Bezwaarprioritering | 5 van 6 | **externe werking vals-negatief** | 13 (0) | geen |
+| Opslagmigratie | 4 van 6 | twee gemist | 14 (4) | vijf keer "Weet je dat nu wel?" na "weet ik niet" |
+
+- **Sturing in de zin van §9.1** (zelf een antwoord voorstellen) kwam in geen van de
+  101 vragen over vier runs voor. Wel drong de interviewer aan na "weet ik
+  niet", en dat ondermijnt `onbekend` net zo.
+- **Convergentie** haalt het niet. De zwaarste fout: bij de bezwaarprioritering vroeg hij
+  wie de tool *gebruikt* in plaats van wie er iets van *merkt*, en kwam uit op alleen
+  medewerkers. Een run eerder, met dezelfde opzet, waren twee van deze persona's
+  foutloos: de uitkomst wisselt per run.
+- **Een letterlijk citaat bewijst niet dat het voorstel klopt.** Meermaals hing een
+  voorstel aan een zin die over iets anders ging ("Het systeem beslist niets" als bewijs
+  voor *gedrag: geen*). `_grounded` controleert dat de woorden gezegd zijn, niet dat ze
+  het antwoord dragen; §8 stap 2 dicht dat gat dus niet.
+- **Lussen**: dezelfde vraag tot vijf keer toe, en nooit afronden vóór het budget. Een
+  gesprek kostte 13 à 14 vragen voor zes scanvragen die in de scan zes klikken zijn.
+- **De automatische beoordelaar is niet betrouwbaar** met dit model: hij markeerde open
+  vragen als sturend, met redenen die nergens op sloegen. Nalezen blijft nodig.
+
+**Besluit:** fase 1 (startgesprek in de Project-weergave) niet bouwen op basis van deze
+uitkomst. §9.4 waarschuwt dat een lokale test weinig zegt over de productiebackend
+(Azure). De suite draait ongewijzigd tegen Azure (`AZURE_OPENAI_ENDPOINT` gezet); die run
+is de echte beslissing, en daarbij gaat alleen verzonnen projectinhoud naar Azure.
+
 ## 8. Niet doen (bevriezen)
 
 - Nieuwe formulieren of placeholders uitwerken.
@@ -225,4 +264,4 @@ beslissen of de richting klopt; doe ze parallel aan stap 0–1:
 | 1 | Oriëntatie in Overzicht | 0 |
 | 2 | Kenmerkvragen + voorblad voorinvullen, ontbrekende mappings | 0, open beslissing §5 |
 | 3 | Herkomst: geparkeerd, wordt een loggingstap ([`herkomst-en-logging.md`](herkomst-en-logging.md)) | 2 |
-| 4 | Gesprek: spike, daarna Project-weergave | 2 (fase 0 kan direct) |
+| 4 | Gesprek: spike niet geslaagd op het lokale model; Azure-run beslist | 2 (fase 0 kan direct) |
