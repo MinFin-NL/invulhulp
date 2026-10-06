@@ -114,6 +114,16 @@ AI-Modus en formulier openen.
 **Klaar als:** een nieuw dossier na alleen de toepassingsscan een volledige lijst toont
 van wat geldt, waarom, en voor wie.
 
+**Bijgesteld (6 oktober 2026).** Na een kritische blik op Overzicht is de opbouw van boven
+naar beneden: *Begin hier* (de intake gaat voor), *Vul alle formulieren in met AI*, *Open
+vragen* (één regel per beslissende vraag, niet per formulier) en *Wat geldt voor dit
+project*, met de scan als kop. De lijst is een checklist met status per formulier, in vier
+groepen: geldt voor dit project, geldt voor elk IV-verzoek, nog onbekend, en geldt niet
+(ingeklapt). Een reden die voor een hele groep gelijk is, staat er één keer boven. Een
+eigenaar staat er alleen als hij bekend is, en de omschrijving per formulier staat op de
+kaarten in Formulieren. De losse scantegel en de fasebalk zijn uit Overzicht; badges en
+scan gebruiken nu overal dezelfde woorden (geldt, nog onbekend, geldt niet).
+
 ## 5. Stap 2 — Eén keer uitleggen (laag 2)
 
 Volg fase 0 en 1 uit `systeemprofiel-feitenbasis.md` §10, met deze eerste winst:

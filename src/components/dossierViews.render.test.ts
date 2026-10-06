@@ -76,10 +76,12 @@ describe('dossier views render', () => {
     expect(html).not.toContain('Sleep je documenten hierheen')
   })
 
-  it('overzicht: once something is there, the phase rail and the scan tile', async () => {
+  it('overzicht: once something is there, what applies — no scan tile, no phase rail', async () => {
     const html = await render('overzicht', withDocument)
-    expect(html).toContain('phase-rail')
-    expect(html).toContain('scan-tile')
+    expect(html).toContain('Wat geldt voor dit project')
+    expect(html).toContain('Start toepassingsscan')
+    expect(html).not.toContain('scan-tile')
+    expect(html).not.toContain('phase-rail')
     expect(html).not.toContain('Begin bij je project')
   })
 

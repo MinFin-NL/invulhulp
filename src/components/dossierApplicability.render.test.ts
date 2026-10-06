@@ -1,10 +1,12 @@
 /**
  * Render test for the orientation list on the dossier overview (werkplan-kompas
  * §4, "klaar als"): a new dossier that has only had the toepassingsscan shows
- * every built form as geldt / nog onbekend / geldt niet, with why and for whom.
+ * every built form once — geldt voor dit project / voor elk IV-verzoek / nog
+ * onbekend / geldt niet — with why, for whom where known, and how far along;
+ * and the open points once per question that decides them.
  *
- * Runs on the real public/forms/index.json, so a form added without an owner
- * or a rule without a reason shows up here. SSR keeps it dependency-free.
+ * Runs on the real public/forms files, so a rule without a reason shows up
+ * here. SSR keeps it dependency-free.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { readFileSync } from 'node:fs'
@@ -14,6 +16,7 @@ import { renderToString } from 'vue/server-renderer'
 import { createPinia, setActivePinia } from 'pinia'
 import DossierApplicability from './DossierApplicability.vue'
 import { refreshDossierForms } from '../composables/useDossierForms'
+import { useFormProgress } from '../composables/useFormProgress'
 import { useAssessmentStore, type Dossier } from '../stores/assessmentStore'
 import { SCAN_VERSION, deriveKenmerken, type ScanAnswers } from '../utils/toepassingsscan'
 
@@ -24,18 +27,28 @@ const indexJson = readFileSync(
 const registry: { forms: { id: string; title: string; placeholder?: string }[] } = JSON.parse(indexJson)
 const built = registry.forms.filter((f) => !f.placeholder)
 
+const publicDir = fileURLToPath(new URL('../../public', import.meta.url))
 const realFetch = globalThis.fetch
-beforeAll(() => {
-  globalThis.fetch = (async (input: RequestInfo | URL) =>
-    String(input).endsWith('/forms/index.json')
-      ? new Response(indexJson, { status: 200 })
-      : new Response('', { status: 404 })) as typeof fetch
+beforeAll(async () => {
+  globalThis.fetch = (async (input: RequestInfo | URL) => {
+    try {
+      return new Response(readFileSync(publicDir + String(input), 'utf8'), { status: 200 })
+    } catch {
+      return new Response('', { status: 404 })
+    }
+  }) as typeof fetch
+  // Progress loads once per module, in the background: wait for it, so the
+  // status tags are there from the first test on.
+  setActivePinia(createPinia())
+  const { progressFor } = useFormProgress()
+  const probe = { forms: {} } as Dossier
+  for (let i = 0; i < 200 && !progressFor(probe, 'intake'); i++) await new Promise((r) => setTimeout(r, 10))
 })
 afterAll(() => {
   globalThis.fetch = realFetch
 })
 
-async function render(answers: ScanAnswers | null) {
+async function render(answers: ScanAnswers | null, intakeAnswers: Record<string, string> = {}) {
   const pinia = createPinia()
   setActivePinia(pinia)
   const dossier: Dossier = {
@@ -48,7 +61,7 @@ async function render(answers: ScanAnswers | null) {
     forms: answers
       ? {
           intake: {
-            answers: {},
+            answers: intakeAnswers,
             answerSources: {},
             attachments: {},
             currentView: 'home',
@@ -97,12 +110,10 @@ describe('orientation list', () => {
     doelgroep: ['intern'],
   }
 
-  it('lists every built form once, with a reason and an owner', async () => {
+  it('lists every built form exactly once', async () => {
     const html = await render(scan)
     for (const form of built) {
-      const row = rowOf(html, form.title)
-      expect(row, `${form.id}: no reason`).toContain('Waarom')
-      expect(row, `${form.id}: no owner`).toContain('Eigenaar')
+      expect(html.split(`>${form.title}<`).length - 1, `${form.id} not listed exactly once`).toBe(1)
     }
     // Placeholders are announced, not fillable: they stay out of this list.
     for (const form of registry.forms.filter((f) => f.placeholder)) {
@@ -110,42 +121,58 @@ describe('orientation list', () => {
     }
   })
 
-  it('makes "geldt voor elk IV-verzoek" explicit and shows a recorded owner', async () => {
+  it('says "voor elk IV-verzoek" once, in the group, and shows a recorded owner', async () => {
     const html = await render(scan)
+    expect(html).toContain('Geldt voor elk IV-verzoek (')
+    expect(html).not.toContain('Geldt voor elk IV-verzoek.')
     const intake = rowOf(html, 'Intakeformulier')
-    expect(intake).toContain('Geldt voor elk IV-verzoek.')
+    expect(intake).not.toContain('Waarom')
     expect(intake).toContain('Intakeboard')
   })
 
-  it('says so when no owner is recorded, instead of guessing', async () => {
+  it('leaves an unknown owner out instead of guessing', async () => {
     const html = await render(scan)
-    expect(rowOf(html, 'DPIA')).toContain('nog niet vastgelegd')
+    expect(html).not.toContain('nog niet vastgelegd')
+    expect(rowOf(html, 'DPIA')).not.toContain('Eigenaar')
   })
 
-  it('rules forms out with the reason, and keeps an unknown out of "geldt niet"', async () => {
+  it('rules forms out with the reason, folded away, and keeps an unknown out of "geldt niet"', async () => {
     const html = await render(scan)
     expect(html).toContain('Geldt niet (')
+    const details = html.indexOf('<details')
+    expect(details).toBeGreaterThan(-1)
+    expect(html.indexOf('>DPIA<')).toBeGreaterThan(details)
     expect(rowOf(html, 'DPIA')).toContain('Dit dossier heeft geen persoonsgegevens.')
     // AI is ruled out, so the IAMA is n.v.t. even though "besluit" is unknown.
     expect(rowOf(html, 'IAMA')).toContain('Dit dossier heeft geen algoritme of AI.')
   })
 
-  it('names the scan question that decides an open point', async () => {
+  it('gathers open points per deciding question, with one button each', async () => {
     // The behaviour question has no "weet ik niet"; left unanswered, AI stays unknown.
     const { gedrag: _unanswered, ...withoutBehaviour } = scan
     const html = await render(withoutBehaviour)
-    expect(html).toContain('Nog onbekend (')
-    // Unknown behaviour leaves the Model Card open; the behaviour question decides it.
-    const modelcard = rowOf(html, 'AI-systeemregistratie (Model Card)')
-    expect(modelcard).toContain('Beslist door')
-    expect(modelcard).toContain('de scanvraag over algoritme of AI')
+    expect(html).toContain('id="open-questions-title"')
+    // Several forms hang on the behaviour question; it is asked once.
+    expect(html.split('>Wat doet het systeem?<').length - 1).toBe(1)
+    const open = html.slice(html.indexOf('id="open-questions-title"'), html.indexOf('id="applicability-title"'))
+    expect(open).toContain('AI-systeemregistratie (Model Card)')
+    expect(open).toContain('Beantwoorden')
   })
 
-  it('before any scan, points every conditional form at its deciding question', async () => {
+  it('shows how far each form is', async () => {
+    const html = await render(scan, { 'intake_a.contactpersoon': 'J. Jansen' })
+    expect(rowOf(html, 'Intakeformulier')).toMatch(/Bezig \(0\/\d+\)/)
+    expect(rowOf(html, 'PSA')).toContain('Niet gestart')
+  })
+
+  it('before any scan, offers the scan instead of open questions', async () => {
     const html = await render(null)
     expect(html).toContain('Er is nog geen toepassingsscan gedaan.')
+    expect(html).toContain('Start toepassingsscan')
+    expect(html).not.toContain('id="open-questions-title"')
     expect(html).not.toContain('Geldt niet (')
-    expect(rowOf(html, 'Verwerkingsregister (AVG art. 30)')).toContain('de scanvraag over persoonsgegevens')
-    expect(rowOf(html, 'EU AI Act Compliance Checklist')).toContain('de Beslishulp AI-verordening')
+    expect(html).toContain('Nog onbekend (')
+    // The head says there is no scan; the rows don't repeat it.
+    expect(html).not.toContain('Nog geen toepassingsscan gedaan.')
   })
 })

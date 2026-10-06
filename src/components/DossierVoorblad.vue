@@ -25,22 +25,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useFeiten } from '../composables/useFeiten'
-import { loadFormRegistry } from '../services/formLoader'
+import { useFormTitles } from '../composables/useFormTitles'
 import { asAnswerHtml } from '../utils/crossFormCopy'
 import { feitTekst, type Feit } from '../facts/resolveFeiten'
 
 const store = useAssessmentStore()
 const feiten = useFeiten()
 
-// Titles for the help text; the registry has them without loading every form.
-const titles = ref<Map<string, string>>(new Map())
-onMounted(async () => {
-  titles.value = new Map((await loadFormRegistry()).map((f) => [f.id, f.title]))
-})
-const title = (formId: string) => titles.value.get(formId) ?? formId
+const title = useFormTitles()
 
 function list(names: string[]): string {
   return names.length > 1 ? `${names.slice(0, -1).join(', ')} en ${names[names.length - 1]}` : names.join('')

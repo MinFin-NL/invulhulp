@@ -40,7 +40,10 @@ describe('toepassingsscan components render', () => {
       counts: { verplicht: 3, mogelijk: 2, nvt: 4 },
     })
     expect(html).toContain('persoonsgegevens')
-    expect(html).toContain('niet van toepassing')
+    // The overview's words: "gelden voor dit project", "nog onbekend", "gelden niet".
+    expect(html).toContain('3 gelden voor dit project')
+    expect(html).toContain('2 nog onbekend')
+    expect(html).toContain('4 gelden niet')
   })
 
   it('modal', async () => {

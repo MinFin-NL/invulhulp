@@ -79,7 +79,7 @@
           v-if="status"
           class="form-card__status"
           size="sm"
-          :color="statusColor(status.status)"
+          :color="formStatusColor(status.status)"
           :text="formStatusLabel(status)"
         />
         <!-- Secundair, bewust. Een fasetijdlijn met twaalf primaire knoppen
@@ -117,7 +117,7 @@
 import { computed } from 'vue'
 import AiModeToggle from './AiModeToggle.vue'
 import type { FormIndexEntry, FormPlaceholder } from '../services/formLoader'
-import { formStatusLabel, type FormProgress } from '../utils/formProgress'
+import { formStatusColor, formStatusLabel, type FormProgress } from '../utils/formProgress'
 import { applicabilityLabel, type ApplicabilityVerdict } from '../utils/toepassingsscan'
 
 /**
@@ -184,7 +184,7 @@ function domainLabel(domain: string): string {
   return DOMAIN_LABELS[domain] ?? domain
 }
 
-/** Beslishulp tone / voortgangsstatus -> nldd-tag kleurnaam. Deze kaart
+/** Beslishulp tone -> nldd-tag kleurnaam. Deze kaart
  *  introduceert geen eigen kleuren: alles komt uit de semantische set. */
 function verdictColor(tone: string): string {
   switch (tone) {
@@ -192,15 +192,6 @@ function verdictColor(tone: string): string {
     case 'warning': return 'warning'
     case 'error': return 'critical'
     default: return 'accent'
-  }
-}
-
-function statusColor(status: string): string {
-  switch (status) {
-    case 'bezig': return 'accent'
-    case 'onvolledig': return 'warning'
-    case 'afgerond': return 'success'
-    default: return 'neutral'
   }
 }
 

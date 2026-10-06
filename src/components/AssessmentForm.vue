@@ -201,13 +201,14 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import { loadForm, getCachedForm, loadFormRegistry } from '../services/formLoader'
+import { loadForm } from '../services/formLoader'
 import { prefillCopyAnswers, type PrefillSummary } from '../composables/useCrossFormPrefill'
 import { computeNavOrder } from '../utils/formProgress'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAuthStore } from '../stores/authStore'
 import { useAiMode } from '../composables/useAiMode'
 import { useAppHistory } from '../composables/useAppHistory'
+import { useFormTitles } from '../composables/useFormTitles'
 import type { FormConfig, NavStepSubsections, NavStepSpecialView, Section } from '../models/Assessment'
 import AppHeader from './AppHeader.vue'
 import DossierList from './DossierList.vue'
@@ -230,9 +231,7 @@ const { aiModeActive, aiModeProgress, aiModePhase, cancelAiMode } = useAiMode()
 useAppHistory()
 const formConfig = ref<FormConfig | null>(null)
 const prefill = ref<PrefillSummary | null>(null)
-// The short names from index.json ("Intakeformulier"): the banner names its
-// sources in one sentence, where a form's own long title doesn't fit.
-const registryTitles = ref(new Map<string, string>())
+const formTitle = useFormTitles()
 const PREFILL_BANNER_TRANSLATIONS = {
   'components.banner.dismiss-action': 'Melding over overgenomen antwoorden sluiten',
 }
@@ -240,7 +239,7 @@ const PREFILL_BANNER_TRANSLATIONS = {
 const prefillMessage = computed(() => {
   const p = prefill.value
   if (!p) return ''
-  const namen = p.sourceFormIds.map((id) => registryTitles.value.get(id) ?? getCachedForm(id)?.title ?? id)
+  const namen = p.sourceFormIds.map(formTitle)
   if (p.fromScan) namen.push('de toepassingsscan')
   const bronnen = namen.length > 1 ? `${namen.slice(0, -1).join(', ')} en ${namen[namen.length - 1]}` : namen.join('')
   const vragen = p.count === 1 ? '1 vraag is' : `${p.count} vragen zijn`
@@ -313,10 +312,7 @@ async function loadActiveForm() {
     // Take over the answers this form shares verbatim with an earlier form
     // (Intake → Aanbiedingsformulier and friends) before the user sees it.
     const summary = await prefillCopyAnswers(formConfig.value)
-    if (summary.count > 0) {
-      registryTitles.value = new Map((await loadFormRegistry()).map((f) => [f.id, f.title]))
-      prefill.value = summary
-    }
+    if (summary.count > 0) prefill.value = summary
   } catch (err) {
     // A dossier persisted while a since-removed form was open would otherwise
     // hang here forever: the dev server and nginx both answer an unknown

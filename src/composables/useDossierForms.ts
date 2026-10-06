@@ -122,12 +122,6 @@ export function useDossierForms() {
     ),
   )
 
-  // The rail is the lifecycle, so the `onbekend` bucket — which is a symptom of a
-  // typo in index.json, not a track — stays out of it. It is still rendered as a
-  // section in the timeline. Intake en aanbieding staan er wél in: ze zijn geen
-  // fase, maar wel een stap die de gebruiker doorloopt.
-  const railGroups = computed(() => trackGroups.value.filter((g) => g.track !== 'onbekend'))
-
   /** Marker state on the spine: filled+check when the phase is finished, a solid
    *  dot while it is under way, an outline when nothing has been started, and a
    *  dashed outline for a phase that has no forms yet (`beheer`). */
@@ -181,15 +175,21 @@ export function useDossierForms() {
 
     const notStarted = withStatus.filter((f) => f.progress?.status !== 'afgerond')
     if (notStarted.length === 0) return null
-    // Verplicht volgens de toepassingsscan gaat voor; anders gewoon de eerste in
-    // de fasevolgorde.
+    // De intake is het formele startpunt van elk IV-verzoek en gaat voor. Daarna
+    // wat de toepassingsscan verplicht stelt, en anders de eerste in de
+    // fasevolgorde.
+    const intake = notStarted.find((f) => f.form.track === 'intake')
     const required = notStarted.find((f) => verdictFor(f.form.id).status === 'verplicht')
-    const target = required ?? notStarted[0]
+    const target = intake ?? required ?? notStarted[0]
+    const verdict = verdictFor(target.form.id)
     return {
       form: target.form,
       kind: 'start',
       eyebrow: 'Begin hier',
-      reason: verdictFor(target.form.id).reason || target.form.shortDescription || 'Nog niet gestart.',
+      // "Geldt voor elk IV-verzoek" zegt niet wat je gaat doen; de omschrijving wel.
+      reason:
+        (verdict.status === 'altijd' ? target.form.shortDescription || verdict.reason : verdict.reason || target.form.shortDescription) ||
+        'Nog niet gestart.',
       cta: 'Openen',
     }
   })
@@ -230,7 +230,6 @@ export function useDossierForms() {
     preludeForms,
     preludeCount,
     timelineGroups,
-    railGroups,
     trackCount,
     markerState,
     allFormsDone,

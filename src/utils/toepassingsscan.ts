@@ -431,11 +431,14 @@ export function evaluateApplicability(
   }
 }
 
+// The words of the dossier overview's groups, so a badge on a form card says
+// what the overview says: "geldt", "nog onbekend" (never "geldt niet" for a
+// question nobody answered), "geldt niet".
 const STATUS_LABEL: Record<ApplicabilityStatus, string> = {
   altijd: '',
-  verplicht: 'Van toepassing',
-  mogelijk: 'Mogelijk relevant',
-  nvt: 'Niet van toepassing',
+  verplicht: 'Geldt',
+  mogelijk: 'Nog onbekend',
+  nvt: 'Geldt niet',
   onbepaald: '',
 }
 

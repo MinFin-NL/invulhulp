@@ -97,7 +97,7 @@
       </nldd-banner>
 
       <nldd-text size="sm" color="secondary" class="scan__note">
-        Advies, geen juridisch oordeel: leg een "niet van toepassing" voor aan de FG, privacy
+        Advies, geen juridisch oordeel: leg een "geldt niet" voor aan de FG, privacy
         officer of CISO.
       </nldd-text>
     </section>
@@ -176,11 +176,12 @@ const tally = computed(() => {
   if (consequences.value.length === 0) return ''
   const count = (status: ApplicabilityStatus) =>
     consequences.value.filter((row) => row.status === status).length
-  return `${count('verplicht')} van toepassing, ${count('mogelijk')} mogelijk relevant, ${count('nvt')} niet van toepassing.`
+  const n = (status: ApplicabilityStatus) => count(status) === 1 ? '1 geldt' : `${count(status)} gelden`
+  return `${n('verplicht')} voor dit project, ${count('mogelijk')} nog onbekend, ${n('nvt')} niet.`
 })
 
 /** Stock nldd-tag colours, so the scan introduces none of its own.
- *  "Van toepassing" stays the neutral default — it is the ordinary case; the
+ *  "Geldt" stays the neutral default — it is the ordinary case; the
  *  one state worth noticing gets the warning treatment, and "niet van
  *  toepassing" recedes into the secondary channel. */
 function tagColor(status: ApplicabilityStatus): string {

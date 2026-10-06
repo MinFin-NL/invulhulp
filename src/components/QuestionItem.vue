@@ -198,6 +198,7 @@ import { getCachedForm } from '../services/formLoader'
 import { useCollab } from '../collab/useCollab'
 import { useAiBusy } from '../collab/useAiBusy'
 import { useFeiten } from '../composables/useFeiten'
+import { useFormTitles } from '../composables/useFormTitles'
 import { isVoorstel, voorstelVoor } from '../facts/resolveFeiten'
 import { withChecked } from '../utils/checkedList'
 
@@ -212,6 +213,7 @@ const emit = defineEmits<{
 
 const store = useAssessmentStore()
 const feiten = useFeiten()
+const formTitle = useFormTitles()
 
 const feitHerkomst = computed(() => {
   const formId = store.activeFormId
@@ -219,8 +221,7 @@ const feitHerkomst = computed(() => {
   const voorstel = voorstelVoor(feiten.value, formId, props.question.id)
   if (!voorstel || !isVoorstel(voorstel, props.modelValue)) return ''
   if (voorstel.herkomst.soort === 'scan') return 'Afgeleid uit de toepassingsscan.'
-  const bron = getCachedForm(voorstel.herkomst.formId)?.title ?? voorstel.herkomst.formId
-  return `Overgenomen uit het voorblad van dit dossier, zoals ingevuld in ${bron}.`
+  return `Overgenomen uit het voorblad van dit dossier, zoals ingevuld in ${formTitle(voorstel.herkomst.formId)}.`
 })
 const mappings = useCrossFormMappings()
 

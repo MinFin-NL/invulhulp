@@ -40,9 +40,6 @@
             />
           </div>
         </div>
-        <nldd-text size="sm" color="inherit" class="dossier-header__desc">
-          Dit dossier groepeert de brondocumenten en formulierantwoorden voor één project of systeem.
-        </nldd-text>
         <nldd-banner
           variant="accent"
           size="sm"
@@ -363,11 +360,6 @@ async function onDeleteConfirmed() {
   color: var(--semantics-content-accent-color);
   margin: 0;
   overflow-wrap: anywhere;
-}
-
-.dossier-header__desc {
-  color: var(--invulhulp-color-text-subtle);
-  margin: var(--primitives-space-4) 0 0;
 }
 
 .dossier-actions {

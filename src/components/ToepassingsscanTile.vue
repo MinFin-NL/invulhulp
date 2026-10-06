@@ -1,7 +1,7 @@
 <template>
   <!-- Dossier-level, above the phases: which forms apply is a property of the
        dossier, not of any one form (docs §5.1). The kenmerk tags are the
-       visible explanation for every "Van toepassing" and "Niet van toepassing"
+       visible explanation for every "Geldt" and "Geldt niet"
        badge further down the page.
 
        Stock NLDD: a card frame like the form cards, nldd-tag for the
@@ -35,8 +35,8 @@
           De scan stelde geen van de kenmerken vast.
         </nldd-text>
         <nldd-text line-height="snug" size="sm" color="secondary" class="scan-tile__line">
-          {{ counts.verplicht }} van toepassing · {{ counts.mogelijk }} mogelijk relevant ·
-          {{ counts.nvt }} niet van toepassing ·
+          {{ counts.verplicht }} {{ counts.verplicht === 1 ? 'geldt' : 'gelden' }} voor dit project ·
+          {{ counts.mogelijk }} nog onbekend · {{ counts.nvt }} {{ counts.nvt === 1 ? 'geldt' : 'gelden' }} niet ·
           gescand op {{ completedOn }}<template v-if="run.completedBy"> door {{ run.completedBy }}</template>
         </nldd-text>
         <nldd-text line-height="snug" size="sm" color="secondary" class="scan-tile__line" v-if="unknowns.length > 0">

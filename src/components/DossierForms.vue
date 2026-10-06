@@ -106,7 +106,7 @@
                form from here still works — the scan advises, the user decides. -->
           <details v-if="nvtForms(group).length > 0" class="invulhulp-disclosure nvt-group">
             <summary class="invulhulp-text--sm">
-              Niet van toepassing in dit dossier ({{ nvtForms(group).length }})
+              Geldt niet in dit dossier ({{ nvtForms(group).length }})
             </summary>
             <div class="invulhulp-disclosure__details">
               <ul class="invulhulp-item-list nvt-list">

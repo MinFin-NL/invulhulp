@@ -155,3 +155,13 @@ export function formStatusLabel(p: FormProgress): string {
   if (p.status === 'bezig') return `Bezig (${p.completed}/${p.total})`
   return 'Niet gestart'
 }
+
+/** The nldd-tag colour for a status, from the semantic set only. */
+export function formStatusColor(status: FormProgressStatus): string {
+  switch (status) {
+    case 'bezig': return 'accent'
+    case 'onvolledig': return 'warning'
+    case 'afgerond': return 'success'
+    default: return 'neutral'
+  }
+}
