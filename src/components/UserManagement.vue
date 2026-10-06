@@ -152,7 +152,7 @@
                       :label="role.title"
                       :checked="u.scopeRoles.includes(role.id)"
                       :disabled="busy"
-                      @change="toggleScopeRole(u, role.id)"
+                      @change="setScopeRole(u, role.id, $event.detail.checked)"
                     />
                   </div>
                   <span v-if="u.scopeRoles.length === 0" class="user-mgmt__all-forms">
@@ -239,6 +239,7 @@
 import { computed, onMounted, ref } from 'vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 import { loadFormRoles, type FormRole } from '../services/formLoader'
+import { withChecked } from '../utils/checkedList'
 
 interface ManagedUser {
   id: string
@@ -387,10 +388,13 @@ function toggleFormScopeRole(roleId: string, checked: boolean) {
   else if (!checked && at !== -1) roles.splice(at, 1)
 }
 
-function toggleScopeRole(u: ManagedUser, roleId: string) {
-  const wanted = u.scopeRoles.includes(roleId)
-    ? u.scopeRoles.filter((r) => r !== roleId)
-    : [...u.scopeRoles, roleId]
+/** Sets the state the checkbox reports (see withChecked). The second `change`
+ *  event of the same click finds the request already running and stops there,
+ *  instead of sending the same PUT twice. */
+function setScopeRole(u: ManagedUser, roleId: string, checked: boolean) {
+  if (busy.value) return
+  const wanted = withChecked(u.scopeRoles, roleId, checked)
+  if (wanted === u.scopeRoles) return
   run(async () => {
     await api(`/${u.id}`, { method: 'PUT', body: JSON.stringify({ scopeRoles: wanted }) })
     // De rollen zitten in de sessiecookie, dus de wijziging telt pas na een

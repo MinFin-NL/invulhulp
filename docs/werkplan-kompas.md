@@ -48,8 +48,9 @@ Oriëntatie gaat vóór ontdubbeling, en ontdubbeling vóór meer AI.
   export, ongewijzigd herkenbaar (feitenbasis §5).
 - **Feiten worden afgeleid, niet opgeslagen** (feitenbasis §6–9): puur, synchroon, geen
   CRDT-migratie.
-- **Herkomst altijd zichtbaar**: zelfverklaard / afgeleid / vastgesteld, en mens- vs.
-  modeltekst tot in de Word-export.
+- **Herkomst zichtbaar in de app**: zelfverklaard / afgeleid / vastgesteld. Niet in de
+  Word-export; hoe herkomst wordt vastgelegd, volgt uit een loggingstap die nog moet worden
+  uitgedacht ([`herkomst-en-logging.md`](herkomst-en-logging.md)).
 - **Niet uitbreiden** wat het probleem niet raakt: geen nieuwe formulieren, geen nieuwe
   AI-Modus-features. Niets verwijderen zonder aparte opdracht.
 - NLDD-checklist uit `CLAUDE.md` bij elke UI-wijziging; `npm run build` en de tests
@@ -130,11 +131,55 @@ Volg fase 0 en 1 uit `systeemprofiel-feitenbasis.md` §10, met deze eerste winst
 4. Draai `python3 scripts/overlap_count.py main` vóór en na en zet de cijfers in dit
    document.
 
-**Open beslissing (vraag de gebruiker):** op branch `feat/kernvragen` vervangen de
-kernvragen de toepassingsscan, maar die branch loopt 24 commits achter op main. Kies vóór
-fase 0: scan uitbreiden tot kernvragen op main, of de branch bijwerken.
+**Besloten (6 oktober 2026):** de toepassingsscan op main blijft de basis. Op
+`feat/kernvragen` vervangen de kernvragen de scan, maar die branch liep inmiddels 28
+commits achter, waarvan 21 dezelfde bestanden raken. Onderdelen ervan (`kernvragen.json`,
+de 81 kernvragen-mappings, de kernvragen als AI-bron) worden later gericht overgenomen;
+de branch wordt niet gemerged.
+
+### Uitkomst
+
+Gebouwd: een feitenlaag (`src/facts/`, fase 0) met de scankenmerken en vijf
+voorbladfeiten. Bij het openen van een formulier vult hij lege vragen eerst uit de feiten,
+daarna uit de copy-mappings. Onder een voorgevuld antwoord staat de herkomst ("Afgeleid uit
+de toepassingsscan" of "Overgenomen uit het voorblad"), zolang niemand het antwoord heeft
+veranderd. Het voorblad staat in de weergave Project en wordt opgeslagen in het formulier
+waar het vandaan komt. Er zijn acht copy-mappings bijgekomen; voor de grondslag vertaalt
+een `optionMap` de opties van de prescan naar die van het verwerkingsregister.
+
+Met de regel "alleen hetzelfde feit" bleef er minder over dan de telling in §1 deed
+verwachten:
+
+- Van de vragen over persoonsgegevens stellen er twee precies de scanvraag met een kale
+  Ja/Nee (`quickscan` qs_d.persoonsgegevens, `aiia` 5.2.2). De rest vraagt iets anders:
+  welke gegevens, bijzondere of strafrechtelijke gegevens, of alleen de dataset ze bevat.
+  De vraag in het Algoritmeregister kent twee soorten "Ja" waar de scan niet tussen kan
+  kiezen; de prescan vraagt naar "gewone" persoonsgegevens, wat smaller is.
+- Voor AI, gebruikersinterface, eigen dataset en besluit over personen stelt geen enkel
+  formulier dezelfde vraag als de scan. Cloud is geen scankenmerk.
+- De omvang (datakwaliteit vraagt ook de actualiteit) en de persoonsgegevens in de dataset
+  (andere opties: gepseudonimiseerd apart, geen "onbekend") zijn geen identieke paren en
+  zijn niet gekoppeld.
+
+Telling (`python3 scripts/overlap_count.py main` tegenover de werkboom na stap 2):
+
+| Projecttype | Voor te vullen vóór | na | waarvan letterlijk vóór | na |
+|---|---|---|---|---|
+| IT zonder persoonsgegevens/AI (9 formulieren, 380 vragen) | 54 (14%) | 55 (14%) | 26 (7%) | 27 (7%) |
+| IT met persoonsgegevens (13, 567) | 85 (15%) | 87 (15%) | 36 (6%) | 38 (7%) |
+| AI-systeem dat over burgers beslist (20, 924) | 207 (22%) | 213 (23%) | 44 (5%) | 52 (6%) |
+
+De quickscan ging van 0 naar 1 voor te vullen vraag. Veel voorbladvelden waren al via een
+copy-mapping gekoppeld; de feiten maken ze vooral in alle richtingen en vanuit het
+dossier bruikbaar. Een deel van die copy-mappings is nu dubbel met een feit; ze zijn
+blijven staan, omdat verwijderen een aparte opdracht vraagt.
 
 ## 6. Stap 3 — Herkomst zichtbaar (beschermt laag 3)
+
+**Geparkeerd (6 oktober 2026).** De herkomst van antwoorden komt niet in de Word-export.
+Op termijn komt er een loggingstap; die is uitgewerkt als idee voor een brainstorm in
+[`herkomst-en-logging.md`](herkomst-en-logging.md). De oorspronkelijke opdracht, ter
+referentie:
 
 1. Elk antwoord dat (deels) uit een voorstel komt, draagt zijn herkomst: scan, ander
    formulier, document (met citaat) of model.
@@ -179,5 +224,5 @@ beslissen of de richting klopt; doe ze parallel aan stap 0–1:
 | 0 | Dossierpagina in vier weergaven | — |
 | 1 | Oriëntatie in Overzicht | 0 |
 | 2 | Kenmerkvragen + voorblad voorinvullen, ontbrekende mappings | 0, open beslissing §5 |
-| 3 | Herkomst zichtbaar tot in export | 2 |
+| 3 | Herkomst: geparkeerd, wordt een loggingstap ([`herkomst-en-logging.md`](herkomst-en-logging.md)) | 2 |
 | 4 | Gesprek: spike, daarna Project-weergave | 2 (fase 0 kan direct) |

@@ -47,9 +47,22 @@ export type ChangeListener = (payload: DossierPayload, origin: unknown) => void
 
 export class DossierDoc {
   readonly doc: Y.Doc
+  // False while a connected doc waits for its stored (IndexedDB) and remote
+  // (room) state; seedFrom ends the wait. A write in that window would create
+  // the `forms` map, or a form's map, in a doc that doesn't have them *yet* —
+  // and the incoming state brings its own under the same key. Yjs keeps one of
+  // two concurrent values per map key, chosen by client id, so on about half
+  // the reloads the stored answers lost to an empty map (a bound editor asks
+  // for its fragment on mount). Writes made while waiting are queued and
+  // replayed after the seed instead.
+  private ready: boolean
+  private queued: (() => void)[] = []
 
-  constructor(doc?: Y.Doc) {
+  /** `awaitSync`: the doc is about to be filled by connectDossier, so hold
+   *  writes until seedFrom runs (see `ready`). */
+  constructor(doc?: Y.Doc, { awaitSync = false } = {}) {
     this.doc = doc ?? new Y.Doc()
+    this.ready = !awaitSync
   }
 
   /** A live doc populated from a stored dossier (local, no-transport path). */
@@ -63,9 +76,20 @@ export class DossierDoc {
   }
 
   /** Seed from stored JSON iff not already seeded — the first peer into an
-   *  empty collab room. Tagged SEED_ORIGIN so opening isn't treated as an edit. */
+   *  empty collab room. Tagged SEED_ORIGIN so opening isn't treated as an edit.
+   *  Then replays the writes held back while the doc was waiting. */
   seedFrom(payload: DossierPayload): void {
     seedDoc(this.doc, payload, SEED_ORIGIN)
+    this.ready = true
+    const queued = this.queued
+    this.queued = []
+    for (const fn of queued) fn()
+  }
+
+  /** Run a mutation now, or after seedFrom while the doc is still waiting. */
+  private whenReady(fn: () => void): void {
+    if (this.ready) fn()
+    else this.queued.push(fn)
   }
 
   /** Current state as the plain JSON envelope (for Pinia, persistence, export). */
@@ -80,8 +104,8 @@ export class DossierDoc {
   }
 
   /** Get the form's Y.Map, creating the forms map and/or the form itself if
-   *  absent. Tolerates an unseeded doc: a bound editor may need a text answer's
-   *  form before the (deferred) seed runs. The additive seed fills the rest. */
+   *  absent. Only call it from inside whenReady: before that, creating either
+   *  map races the stored state (see `ready`). */
   private ensureForm(formId: string): Y.Map<unknown> {
     let forms = this.root().get(FORMS_KEY) as Y.Map<Y.Map<unknown>> | undefined
     if (!forms) {
@@ -106,7 +130,7 @@ export class DossierDoc {
    *  coalesce into this outer transaction, so peers see the whole batch land
    *  together, it's a single undo step, and the mirror fires once. */
   transact(fn: () => void): void {
-    this.doc.transact(fn, LOCAL_ORIGIN)
+    this.whenReady(() => this.doc.transact(fn, LOCAL_ORIGIN))
   }
 
   /** Set a whole answer, dispatching to the right CRDT bucket by value shape —
@@ -118,79 +142,93 @@ export class DossierDoc {
    *  back "<p>Ja</p>" — breaking every `visibleIf` that compares to the option
    *  label, and flattening the follow-up separator to " --- ". */
   setAnswer(formId: string, questionId: string, value: string | string[], opaque = false): void {
-    const f = this.ensureForm(formId)
-    const text = f.get(FORM_TEXT) as Y.Map<number>
-    const list = f.get(FORM_LIST) as Y.Map<Y.Array<string>>
-    const raw = f.get(FORM_RAW) as Y.Map<string>
+    this.whenReady(() => {
+      const f = this.ensureForm(formId)
+      const text = f.get(FORM_TEXT) as Y.Map<number>
+      const list = f.get(FORM_LIST) as Y.Map<Y.Array<string>>
+      const raw = f.get(FORM_RAW) as Y.Map<string>
 
-    this.doc.transact(() => {
-      if (Array.isArray(value)) {
-        // Checkbox. Clear any stale entry in the other buckets (type changed).
-        text.delete(questionId)
-        raw.delete(questionId)
-        let arr = list.get(questionId)
-        if (!arr) {
-          arr = new Y.Array<string>()
-          list.set(questionId, arr)
+      this.doc.transact(() => {
+        if (Array.isArray(value)) {
+          // Checkbox. Clear any stale entry in the other buckets (type changed).
+          text.delete(questionId)
+          raw.delete(questionId)
+          let arr = list.get(questionId)
+          if (!arr) {
+            arr = new Y.Array<string>()
+            list.set(questionId, arr)
+          }
+          arr.delete(0, arr.length)
+          arr.push([...value])
+        } else if (opaque || isVerbatimString(value)) {
+          // Table / radio / opaque JSON string — stored whole (v1 last-write-wins).
+          text.delete(questionId)
+          list.delete(questionId)
+          raw.set(questionId, value)
+        } else {
+          // Rich text — diff into the shared top-level fragment (a bound editor
+          // keeps its identity and sees a minimal delta). Index it in FORM_TEXT.
+          list.delete(questionId)
+          raw.delete(questionId)
+          text.set(questionId, 1)
+          writeTextFragment(getTextFragment(this.doc, formId, questionId), value)
         }
-        arr.delete(0, arr.length)
-        arr.push([...value])
-      } else if (opaque || isVerbatimString(value)) {
-        // Table / radio / opaque JSON string — stored whole (v1 last-write-wins).
-        text.delete(questionId)
-        list.delete(questionId)
-        raw.set(questionId, value)
-      } else {
-        // Rich text — diff into the shared top-level fragment (a bound editor
-        // keeps its identity and sees a minimal delta). Index it in FORM_TEXT.
-        list.delete(questionId)
-        raw.delete(questionId)
-        text.set(questionId, 1)
-        writeTextFragment(getTextFragment(this.doc, formId, questionId), value)
-      }
-    }, LOCAL_ORIGIN)
+      }, LOCAL_ORIGIN)
+    })
   }
 
   /** The shared top-level rich-text fragment for one answer — what a Tiptap
    *  Collaboration editor binds to. Ensures the form + text index exist so the
-   *  answer round-trips through the codec even before anything is typed. */
+   *  answer round-trips through the codec even before anything is typed. The
+   *  fragment is top-level, so it is safe to hand out (and type into) while
+   *  the doc is still waiting; only the index entry waits for the seed. */
   textFragment(formId: string, questionId: string): Y.XmlFragment {
-    const text = this.ensureForm(formId).get(FORM_TEXT) as Y.Map<number>
-    if (text.get(questionId) === undefined) {
-      this.doc.transact(() => text.set(questionId, 1), LOCAL_ORIGIN)
-    }
+    this.whenReady(() => {
+      const text = this.ensureForm(formId).get(FORM_TEXT) as Y.Map<number>
+      if (text.get(questionId) === undefined) {
+        this.doc.transact(() => text.set(questionId, 1), LOCAL_ORIGIN)
+      }
+    })
     return getTextFragment(this.doc, formId, questionId)
   }
 
   private setMeta(formId: string, key: string, value: unknown): void {
-    const meta = this.ensureForm(formId).get(FORM_META) as Y.Map<unknown>
-    this.doc.transact(() => meta.set(key, value), LOCAL_ORIGIN)
+    this.whenReady(() => {
+      const meta = this.ensureForm(formId).get(FORM_META) as Y.Map<unknown>
+      this.doc.transact(() => meta.set(key, value), LOCAL_ORIGIN)
+    })
   }
 
   /** Replace one question's answer-source citation metadata. */
   setAnswerSources(formId: string, questionId: string, value: AnswerSourceMeta): void {
-    const meta = this.ensureForm(formId).get(FORM_META) as Y.Map<unknown>
-    const current = { ...((meta.get('answerSources') as Record<string, AnswerSourceMeta>) ?? {}) }
-    current[questionId] = value
-    this.setMeta(formId, 'answerSources', current)
+    this.whenReady(() => {
+      const meta = this.ensureForm(formId).get(FORM_META) as Y.Map<unknown>
+      const current = { ...((meta.get('answerSources') as Record<string, AnswerSourceMeta>) ?? {}) }
+      current[questionId] = value
+      this.setMeta(formId, 'answerSources', current)
+    })
   }
 
   /** Clear the hallucination warning on a question (grounded -> true), keeping
    *  its citations. No-op if there's no source metadata. */
   markGrounded(formId: string, questionId: string): void {
-    const meta = this.ensureForm(formId).get(FORM_META) as Y.Map<unknown>
-    const sources = (meta.get('answerSources') as Record<string, AnswerSourceMeta>) ?? {}
-    const existing = sources[questionId]
-    if (!existing || existing.grounded) return
-    this.setAnswerSources(formId, questionId, { ...existing, grounded: true })
+    this.whenReady(() => {
+      const meta = this.ensureForm(formId).get(FORM_META) as Y.Map<unknown>
+      const sources = (meta.get('answerSources') as Record<string, AnswerSourceMeta>) ?? {}
+      const existing = sources[questionId]
+      if (!existing || existing.grounded) return
+      this.setAnswerSources(formId, questionId, { ...existing, grounded: true })
+    })
   }
 
   /** Replace one question's attachment list (add/remove/caption all funnel here). */
   setAttachments(formId: string, questionId: string, list: QuestionAttachment[]): void {
-    const meta = this.ensureForm(formId).get(FORM_META) as Y.Map<unknown>
-    const current = { ...((meta.get('attachments') as Record<string, QuestionAttachment[]>) ?? {}) }
-    current[questionId] = list
-    this.setMeta(formId, 'attachments', current)
+    this.whenReady(() => {
+      const meta = this.ensureForm(formId).get(FORM_META) as Y.Map<unknown>
+      const current = { ...((meta.get('attachments') as Record<string, QuestionAttachment[]>) ?? {}) }
+      current[questionId] = list
+      this.setMeta(formId, 'attachments', current)
+    })
   }
 
   setRiskLevel(formId: string, level: RiskLevelValue): void {
@@ -220,23 +258,27 @@ export class DossierDoc {
 
   /** Add a section id to completedSections (idempotent), mirroring the store. */
   markSectionCompleted(formId: string, sectionId: string): void {
-    const meta = this.ensureForm(formId).get(FORM_META) as Y.Map<unknown>
-    const current = (meta.get('completedSections') as string[] | undefined) ?? []
-    if (current.includes(sectionId)) return
-    this.setMeta(formId, 'completedSections', [...current, sectionId])
+    this.whenReady(() => {
+      const meta = this.ensureForm(formId).get(FORM_META) as Y.Map<unknown>
+      const current = (meta.get('completedSections') as string[] | undefined) ?? []
+      if (current.includes(sectionId)) return
+      this.setMeta(formId, 'completedSections', [...current, sectionId])
+    })
   }
 
   /** Reset a form to blank (all buckets emptied), mirroring initialFormState. */
   resetForm(formId: string): void {
-    const forms = this.root().get(FORMS_KEY) as Y.Map<Y.Map<unknown>>
-    this.doc.transact(() => {
-      forms.set(formId, newFormMap())
-    }, LOCAL_ORIGIN)
+    this.whenReady(() => {
+      const forms = this.root().get(FORMS_KEY) as Y.Map<Y.Map<unknown>>
+      this.doc.transact(() => {
+        forms.set(formId, newFormMap())
+      }, LOCAL_ORIGIN)
+    })
   }
 
   /** Which form the dossier has open. Part of the synced envelope. */
   setActiveFormId(formId: string | null): void {
-    this.doc.transact(() => this.root().set('activeFormId', formId), LOCAL_ORIGIN)
+    this.whenReady(() => this.doc.transact(() => this.root().set('activeFormId', formId), LOCAL_ORIGIN))
   }
 
   // --- observation & sync ---------------------------------------------------

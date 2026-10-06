@@ -58,6 +58,21 @@ describe('crossFormMappings.json', () => {
     expect(bad).toEqual([])
   })
 
+  it('only maps options that exist on both sides, and only in copy mode', () => {
+    const bad: string[] = []
+    for (const m of mappings) {
+      if (!m.optionMap) continue
+      if (m.mode !== 'copy') bad.push(`${label(m)}: optionMap without copy mode`)
+      const source = questions.get(m.sourceFormId)?.get(m.sourceQuestionIds[0])
+      const target = questions.get(m.targetFormId)?.get(m.targetQuestionId)
+      for (const [from, to] of Object.entries(m.optionMap)) {
+        if (!source?.options?.includes(from)) bad.push(`${label(m)}: bron kent "${from}" niet`)
+        if (!target?.options?.includes(to)) bad.push(`${label(m)}: doel kent "${to}" niet`)
+      }
+    }
+    expect(bad).toEqual([])
+  })
+
   it('has no duplicate mapping (same source questions onto the same target)', () => {
     const seen = new Set<string>()
     const dupes: string[] = []

@@ -5,8 +5,11 @@ import {
   KENMERK_IDS,
   SCAN_QUESTIONS,
   activeKenmerken,
+  decidersFor,
   deriveKenmerken,
   evaluateApplicability,
+  nextMultiChoice,
+  orientationOf,
   unknownKenmerken,
   type ApplicabilityRule,
   type Kenmerken,
@@ -16,7 +19,7 @@ import type { BeslishulpRun } from './beslishulp'
 
 // The real registry, not a fixture: these tests are the guard rail on the
 // applicability rules in index.json — the one place kenmerk names live as data.
-const index: { forms: { id: string; applicability?: ApplicabilityRule }[] } = JSON.parse(
+const index: { forms: { id: string; placeholder?: string; owner?: string; applicability?: ApplicabilityRule }[] } = JSON.parse(
   readFileSync(fileURLToPath(new URL('../../public/forms/index.json', import.meta.url)), 'utf8'),
 )
 
@@ -46,6 +49,12 @@ describe('index.json applicability rules', () => {
     for (const form of index.forms) {
       if (!form.applicability) continue
       expect(form.applicability.reason, `${form.id} has no reason`).toBeTruthy()
+    }
+  })
+
+  it('give every form an owner, or an explicit TODO — never a silent gap', () => {
+    for (const form of index.forms) {
+      expect(form.owner, `${form.id} has no owner field`).toBeTruthy()
     }
   })
 })
@@ -243,5 +252,80 @@ describe('the matrix in docs §5.4', () => {
     for (const id of ['ppm', 'psa', 'aanbiedingsformulier', 'restrisico']) {
       expect(s[id], `${id} should not be gated by the scan`).toBe('altijd')
     }
+  })
+})
+
+describe('orientation for the dossier overview', () => {
+  it('folds the five statuses into geldt / onbekend / geldt niet', () => {
+    expect(orientationOf('altijd')).toBe('geldt')
+    expect(orientationOf('verplicht')).toBe('geldt')
+    expect(orientationOf('nvt')).toBe('geldt-niet')
+    // Unknown is never "geldt niet": not before the scan, not after a "weet ik niet".
+    expect(orientationOf('mogelijk')).toBe('onbekend')
+    expect(orientationOf('onbepaald')).toBe('onbekend')
+  })
+
+  it('says a form without a rule applies to every IV-verzoek', () => {
+    expect(evaluateApplicability(undefined, null).reason).toBe('Geldt voor elk IV-verzoek.')
+  })
+})
+
+describe('decidersFor', () => {
+  const rule = (allOf: ApplicabilityRule['allOf'], advisory = false): ApplicabilityRule => ({ allOf, reason: 'r', advisory })
+
+  it('points at the scan question behind every kenmerk before a scan', () => {
+    const d = decidersFor(rule([['algoritme_of_ai'], ['raakt_burgers', 'besluit_over_personen']]), null)
+    expect(d.map((x) => x.kind === 'scan' && x.questionId)).toEqual(['gedrag', 'doelgroep', 'besluit'])
+  })
+
+  it('names only what is still open after a scan', () => {
+    const d = decidersFor(
+      rule([['algoritme_of_ai'], ['raakt_burgers', 'besluit_over_personen']]),
+      kenmerken({ algoritme_of_ai: true, raakt_burgers: 'onbekend', besluit_over_personen: false }),
+    )
+    expect(d).toEqual([{ kind: 'scan', questionId: 'doelgroep', kenmerk: 'raakt_burgers' }])
+  })
+
+  it('has nothing to decide once a group holds, or for an advisory rule that holds', () => {
+    expect(decidersFor(rule([['persoonsgegevens']]), kenmerken({ persoonsgegevens: true }))).toEqual([])
+    expect(decidersFor(rule([['persoonsgegevens']], true), kenmerken({ persoonsgegevens: true }))).toEqual([])
+    expect(decidersFor(undefined, null)).toEqual([])
+  })
+
+  it('sends the AI-verordening to the beslishulp, and to the behaviour question while AI is unknown', () => {
+    const verordening = rule([['ai_verordening_in_scope']])
+    expect(decidersFor(verordening, null)).toEqual([
+      { kind: 'scan', questionId: 'gedrag', kenmerk: 'algoritme_of_ai' },
+      { kind: 'beslishulp', kenmerk: 'ai_verordening_in_scope' },
+    ])
+    // AI is known to be there: only the beslishulp can settle it now.
+    expect(decidersFor(verordening, kenmerken({ algoritme_of_ai: true }))).toEqual([
+      { kind: 'beslishulp', kenmerk: 'ai_verordening_in_scope' },
+    ])
+  })
+
+  it('can name a decider for every rule in the real index.json', () => {
+    for (const form of index.forms) {
+      if (!form.applicability) continue
+      expect(decidersFor(form.applicability, null).length, `${form.id} has no decider`).toBeGreaterThan(0)
+    }
+  })
+})
+
+describe('nextMultiChoice', () => {
+  const gedrag = SCAN_QUESTIONS.find((q) => q.id === 'gedrag')!
+
+  it('survives the double change event a single click produces', () => {
+    const once = nextMultiChoice(gedrag, [], 'genereert', true)
+    const twice = nextMultiChoice(gedrag, once, 'genereert', true)
+    expect(once).toEqual(['genereert'])
+    expect(twice).toEqual(['genereert'])
+    const off = nextMultiChoice(gedrag, twice, 'genereert', false)
+    expect(nextMultiChoice(gedrag, off, 'genereert', false)).toEqual([])
+  })
+
+  it('lets "geen van deze" clear the rest, and anything else clear it', () => {
+    expect(nextMultiChoice(gedrag, ['genereert', 'leert'], 'geen', true)).toEqual(['geen'])
+    expect(nextMultiChoice(gedrag, ['geen'], 'leert', true)).toEqual(['leert'])
   })
 })

@@ -23,7 +23,7 @@
         <nldd-checkbox-field
           :checked="visible[cat.key]"
           :accessible-label="cat.label"
-          @change="toggle(cat.key)"
+          @change="visible[cat.key] = $event.detail.checked"
         />
         <span
           class="entity-graph__swatch"
@@ -97,9 +97,6 @@ const visible = reactive<Record<CategoryKey, boolean>>({
   datasoorten: true,
 })
 
-function toggle(key: CategoryKey) {
-  visible[key] = !visible[key]
-}
 
 const graphContainer = ref<HTMLDivElement | null>(null)
 let network: Network | null = null

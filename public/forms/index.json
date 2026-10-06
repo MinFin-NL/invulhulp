@@ -34,7 +34,8 @@
       "domains": [
         "project"
       ],
-      "shortDescription": "Registreer een nieuw IV-verzoek: doelstelling, doelgroep, urgentie en benodigde resources."
+      "shortDescription": "Registreer een nieuw IV-verzoek: doelstelling, doelgroep, urgentie en benodigde resources.",
+      "owner": "Intakeboard"
     },
     {
       "id": "aanbiedingsformulier",
@@ -46,7 +47,8 @@
       "domains": [
         "project"
       ],
-      "shortDescription": "Bouw de business case op: nut, noodzaak, baten, risico's en kostenraming voor portfolioafweging."
+      "shortDescription": "Bouw de business case op: nut, noodzaak, baten, risico's en kostenraming voor portfolioafweging.",
+      "owner": "TODO"
     },
     {
       "id": "ppm",
@@ -58,7 +60,8 @@
       "domains": [
         "project"
       ],
-      "shortDescription": "Stel het projectplan op: scope, aanpak, organisatie, afhankelijkheden en fasering."
+      "shortDescription": "Stel het projectplan op: scope, aanpak, organisatie, afhankelijkheden en fasering.",
+      "owner": "TODO"
     },
     {
       "id": "psa",
@@ -72,7 +75,8 @@
         "beveiliging",
         "data"
       ],
-      "shortDescription": "Beschrijf de architectuurkaders, gegevensstromen en niet-functionele eisen voor het project."
+      "shortDescription": "Beschrijf de architectuurkaders, gegevensstromen en niet-functionele eisen voor het project.",
+      "owner": "Architectuurboard Financiën en MT CDIO"
     },
     {
       "id": "quickscan",
@@ -84,7 +88,8 @@
       "domains": [
         "beveiliging"
       ],
-      "shortDescription": "Classificeer de informatie op beschikbaarheid, integriteit en vertrouwelijkheid, beoordeel de quantumveiligheid en bepaal welke BIO2-maatregelen van toepassing zijn."
+      "shortDescription": "Classificeer de informatie op beschikbaarheid, integriteit en vertrouwelijkheid, beoordeel de quantumveiligheid en bepaal welke BIO2-maatregelen van toepassing zijn.",
+      "owner": "TODO"
     },
     {
       "id": "prescandpia",
@@ -97,6 +102,7 @@
         "privacy"
       ],
       "shortDescription": "Scan op basis van AP/EDPB-criteria of een volledige DPIA verplicht is.",
+      "owner": "TODO",
       "applicability": {
         "allOf": [
           [
@@ -117,6 +123,7 @@
         "privacy"
       ],
       "shortDescription": "Voer een volledige Data Protection Impact Assessment uit conform het Model DPIA Rijksdienst.",
+      "owner": "TODO",
       "applicability": {
         "allOf": [
           [
@@ -140,6 +147,7 @@
         "privacy"
       ],
       "shortDescription": "Beoordeel de impact van een AI-systeem op grondrechten, proportionaliteit en beveiliging.",
+      "owner": "TODO",
       "applicability": {
         "allOf": [
           [
@@ -166,6 +174,7 @@
         "ai"
       ],
       "shortDescription": "Doorloop het officiële Impact Assessment Mensenrechten en Algoritmes (MinBZK) voor de grondrechtentoets van een algoritme of AI-systeem.",
+      "owner": "TODO",
       "applicability": {
         "allOf": [
           [
@@ -190,6 +199,7 @@
         "ai"
       ],
       "shortDescription": "Classificeer een AI-systeem onder de AI-verordening en loop cumulatief de verplichtingen na, inclusief de EU-conformiteitsverklaring (bijlage V).",
+      "owner": "TODO",
       "applicability": {
         "allOf": [
           [
@@ -211,6 +221,7 @@
         "privacy"
       ],
       "shortDescription": "Toets een gegevensverwerking op respect voor personen, baten versus schade en rechtvaardigheid (Belmont-principes).",
+      "owner": "TODO",
       "applicability": {
         "allOf": [
           [
@@ -232,7 +243,8 @@
         "data",
         "project"
       ],
-      "shortDescription": "Breng in beeld wat de applicatie of het systeem betekent voor duurzaam toegankelijke overheidsinformatie: afspraken, metadata, bewaren, migreren, vernietigen en toegang (Archiefwet en DUTO)."
+      "shortDescription": "Breng in beeld wat de applicatie of het systeem betekent voor duurzaam toegankelijke overheidsinformatie: afspraken, metadata, bewaren, migreren, vernietigen en toegang (Archiefwet en DUTO).",
+      "owner": "CDIO, afdeling Informatiehuishouding"
     },
     {
       "id": "cloudtoets",
@@ -245,7 +257,8 @@
         "beveiliging",
         "project"
       ],
-      "shortDescription": "Weeg af of een clouddienst is toegestaan onder het Rijksbrede cloudbeleid: risicoafweging, datalocatie, afhankelijkheid en exitstrategie."
+      "shortDescription": "Weeg af of een clouddienst is toegestaan onder het Rijksbrede cloudbeleid: risicoafweging, datalocatie, afhankelijkheid en exitstrategie.",
+      "owner": "Adviescommissie Cloudgebruik"
     },
     {
       "id": "bia",
@@ -258,7 +271,8 @@
         "project"
       ],
       "placeholder": "onzeker",
-      "shortDescription": "Business Impact Analyse: bepaal per bedrijfsproces de gevolgen van uitval en de bijbehorende hersteltijden (RTO/RPO)."
+      "shortDescription": "Business Impact Analyse: bepaal per bedrijfsproces de gevolgen van uitval en de bijbehorende hersteltijden (RTO/RPO).",
+      "owner": "TODO"
     },
     {
       "id": "datakwaliteit",
@@ -271,6 +285,7 @@
         "data"
       ],
       "shortDescription": "Beoordeel een dataset op volledigheid, uniciteit, tijdigheid, validiteit, juistheid en consistentie, met regels, meting en verbeteracties.",
+      "owner": "TODO",
       "applicability": {
         "allOf": [
           [
@@ -292,6 +307,7 @@
         "privacy"
       ],
       "shortDescription": "Registreer een dataset: herkomst, inhoud, grondslag, classificatie, bewaartermijn en gebruiksvoorwaarden — de datakant van de Model Card.",
+      "owner": "TODO",
       "applicability": {
         "allOf": [
           [
@@ -313,6 +329,7 @@
         "data"
       ],
       "shortDescription": "Registreer een AI-systeem centraal: doel, data, model, beperkingen, bias en compliance-status voor governance en audit.",
+      "owner": "TODO",
       "applicability": {
         "allOf": [
           [
@@ -333,6 +350,7 @@
         "ai"
       ],
       "shortDescription": "Bereid de publicatie in het Algoritmeregister voor: doel, grondslag, werking, data, menselijk toezicht en meldroute, in begrijpelijke taal.",
+      "owner": "TODO",
       "applicability": {
         "allOf": [
           [
@@ -357,6 +375,7 @@
         "data"
       ],
       "shortDescription": "Leg de verplichte registratie-elementen van artikel 30 AVG vast: doeleinden, categorieën, ontvangers, doorgifte, bewaartermijnen en beveiliging.",
+      "owner": "TODO",
       "applicability": {
         "allOf": [
           [
@@ -377,6 +396,7 @@
         "project"
       ],
       "shortDescription": "Bereid de wettelijk verplichte toegankelijkheidsverklaring voor: onderzoek, nalevingsstatus, knelpunten, alternatieven en verbetermaatregelen.",
+      "owner": "TODO",
       "applicability": {
         "allOf": [
           [
@@ -398,7 +418,8 @@
         "privacy",
         "beveiliging"
       ],
-      "shortDescription": "Bundel de restrisico's uit DPIA, AIIA, IAMA en BIO-quickscan en leg per risico een expliciet acceptatiebesluit vast."
+      "shortDescription": "Bundel de restrisico's uit DPIA, AIIA, IAMA en BIO-quickscan en leg per risico een expliciet acceptatiebesluit vast.",
+      "owner": "Opdrachtgever of proceseigenaar"
     },
     {
       "id": "voortgangsrapportage",
@@ -410,7 +431,8 @@
         "project"
       ],
       "placeholder": "onzeker",
-      "shortDescription": "Periodieke rapportage over voortgang, planning, budget, risico's en bijsturing tijdens de uitvoering."
+      "shortDescription": "Periodieke rapportage over voortgang, planning, budget, risico's en bijsturing tijdens de uitvoering.",
+      "owner": "TODO"
     },
     {
       "id": "afwijkingsformulier",
@@ -422,7 +444,8 @@
         "project"
       ],
       "placeholder": "onzeker",
-      "shortDescription": "Leg vast wanneer het project afwijkt van scope, planning of budget, met onderbouwing en het besluit dat daarop volgt."
+      "shortDescription": "Leg vast wanneer het project afwijkt van scope, planning of budget, met onderbouwing en het besluit dat daarop volgt.",
+      "owner": "TODO"
     },
     {
       "id": "evaluatie",
@@ -434,7 +457,8 @@
         "project"
       ],
       "placeholder": "gepland",
-      "shortDescription": "Evalueer bij afronding wat is opgeleverd, of de baten zijn gehaald en welke lessen meegaan naar volgende projecten."
+      "shortDescription": "Evalueer bij afronding wat is opgeleverd, of de baten zijn gehaald en welke lessen meegaan naar volgende projecten.",
+      "owner": "TODO"
     },
     {
       "id": "risicoimpact",
@@ -447,7 +471,8 @@
         "beveiliging"
       ],
       "placeholder": "onzeker",
-      "shortDescription": "Beoordeel bij overdracht welke restrisico's meegaan naar de beheerorganisatie en wat de impact daarvan is."
+      "shortDescription": "Beoordeel bij overdracht welke restrisico's meegaan naar de beheerorganisatie en wat de impact daarvan is.",
+      "owner": "TODO"
     }
   ]
 }

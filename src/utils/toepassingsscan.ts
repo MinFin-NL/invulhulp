@@ -246,6 +246,25 @@ export const TOEPASSINGSSCAN_HOST_FORM_ID = 'intake'
 /** Answers as persisted: question id → chosen option ids (one for 'single'). */
 export type ScanAnswers = Record<string, string[]>
 
+/**
+ * The chosen options of a multi-select question after one checkbox reports its
+ * new state. Idempotent on purpose: nldd-checkbox-field fires `change` twice
+ * per click (its own event plus the inner nldd-checkbox's, bubbling up), so a
+ * toggle would undo itself. "Nee, geen van deze" (exclusief) contradicts every
+ * other option: ticking it clears the rest, and ticking anything else clears it.
+ */
+export function nextMultiChoice(
+  question: ScanQuestion,
+  current: string[],
+  optionId: string,
+  checked: boolean,
+): string[] {
+  if (!checked) return current.filter((id) => id !== optionId)
+  if (current.includes(optionId)) return current
+  const isExclusive = (id: string) => question.opties.find((o) => o.id === id)?.exclusief === true
+  return isExclusive(optionId) ? [optionId] : [...current.filter((id) => !isExclusive(id)), optionId]
+}
+
 /** What we persist on the dossier once the scan has been run. */
 export interface ToepassingsscanRun {
   /** SCAN_VERSION at the time of answering. */
@@ -375,7 +394,9 @@ export function evaluateApplicability(
   kenmerken: Kenmerken | null,
 ): ApplicabilityVerdict {
   if (!rule) {
-    return { status: 'altijd', reason: 'Dit formulier hoort bij elk dossier.', kenmerken: [] }
+    // Explicit rather than silent: without a rule the form applies everywhere,
+    // and the overview has to say so (werkplan-kompas §4.3).
+    return { status: 'altijd', reason: 'Geldt voor elk IV-verzoek.', kenmerken: [] }
   }
   if (!kenmerken) {
     return { status: 'onbepaald', reason: 'Nog geen toepassingsscan gedaan.', kenmerken: [] }
@@ -420,4 +441,69 @@ const STATUS_LABEL: Record<ApplicabilityStatus, string> = {
 
 export function applicabilityLabel(status: ApplicabilityStatus): string {
   return STATUS_LABEL[status]
+}
+
+// ---------------------------------------------------------------------------
+// Orientation: the three states the dossier overview speaks in
+// ---------------------------------------------------------------------------
+
+/**
+ * What the dossier overview says per form (werkplan-kompas §4): it applies,
+ * it does not, or it cannot be said yet. `mogelijk` and `onbepaald` both land
+ * on `onbekend` — never on "geldt niet", because a question nobody answered
+ * is not a "nee".
+ */
+export type Orientation = 'geldt' | 'onbekend' | 'geldt-niet'
+
+export function orientationOf(status: ApplicabilityStatus): Orientation {
+  if (status === 'altijd' || status === 'verplicht') return 'geldt'
+  if (status === 'nvt') return 'geldt-niet'
+  return 'onbekend'
+}
+
+/** What settles an open point about a form: one of the scan questions, or the
+ *  beslishulp for the kenmerk that comes from there (KENMERK_SOURCE). */
+export type Decider =
+  | { kind: 'scan'; questionId: string; kenmerk: KenmerkId }
+  | { kind: 'beslishulp'; kenmerk: KenmerkId }
+
+/**
+ * What still decides whether a form applies, in rule order and without
+ * duplicates. Empty when nothing is open — including the advisory case, where
+ * the condition holds and another instrument decides (its reason says which).
+ */
+export function decidersFor(rule: ApplicabilityRule | undefined, kenmerken: Kenmerken | null): Decider[] {
+  if (!rule) return []
+  const open = kenmerken
+    ? rule.allOf
+        .filter((group) => !group.some((k) => kenmerken[k] === true))
+        .flat()
+        .filter((k) => kenmerken[k] === 'onbekend')
+    : rule.allOf.flat()
+
+  const deciders: Decider[] = []
+  const seen = new Set<string>()
+  const addQuestionFor = (k: KenmerkId) => {
+    const question = SCAN_QUESTIONS.find((q) => q.bepaalt.includes(k))
+    if (question && !seen.has(question.id)) {
+      seen.add(question.id)
+      deciders.push({ kind: 'scan', questionId: question.id, kenmerk: k })
+    }
+  }
+
+  for (const k of open) {
+    if (KENMERK_SOURCE[k] !== 'beslishulp') {
+      addQuestionFor(k)
+      continue
+    }
+    // No AI at all already rules the verordening out (deriveKenmerken), so
+    // while that is unknown the scan question about the system's behaviour
+    // decides too — and it is the quicker of the two.
+    if (!kenmerken || kenmerken.algoritme_of_ai === 'onbekend') addQuestionFor('algoritme_of_ai')
+    if (!seen.has('beslishulp')) {
+      seen.add('beslishulp')
+      deciders.push({ kind: 'beslishulp', kenmerk: k })
+    }
+  }
+  return deciders
 }

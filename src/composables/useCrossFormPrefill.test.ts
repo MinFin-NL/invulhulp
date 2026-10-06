@@ -34,6 +34,7 @@ vi.stubGlobal('fetch', async (url: string) => {
 const { prefillCopyAnswers } = await import('./useCrossFormPrefill')
 const { loadForm } = await import('../services/formLoader')
 const { useAssessmentStore } = await import('../stores/assessmentStore')
+const { deriveKenmerken, SCAN_VERSION } = await import('../utils/toepassingsscan')
 
 describe('prefillCopyAnswers: intake → aanbiedingsformulier', () => {
   beforeEach(() => setActivePinia(createPinia()))
@@ -64,7 +65,7 @@ describe('prefillCopyAnswers: intake → aanbiedingsformulier', () => {
     expect(answers['aa_b.aanleiding']).toBe('<p>Verplichting uit de Wet open overheid.</p>')
     expect(answers['aa_b.doelstelling']).toBe('<p>Documenten sneller vindbaar maken.</p>')
     expect(answers['aa_c.afhankelijkheden']).toBe('<p>Afhankelijk van het DMS-project.</p>')
-    expect(summary).toEqual({ count: 5, sourceFormIds: ['intake'] })
+    expect(summary).toEqual({ count: 5, sourceFormIds: ['intake'], fromScan: false })
   })
 
   it('leaves questions the intake never asked empty', async () => {
@@ -87,7 +88,7 @@ describe('prefillCopyAnswers: intake → aanbiedingsformulier', () => {
 
   it('does nothing when the intake is still empty', async () => {
     const { summary } = await openPafAfterIntake({})
-    expect(summary).toEqual({ count: 0, sourceFormIds: [] })
+    expect(summary).toEqual({ count: 0, sourceFormIds: [], fromScan: false })
   })
 
   it('does not write into a dossier the user may only read', async () => {
@@ -100,5 +101,51 @@ describe('prefillCopyAnswers: intake → aanbiedingsformulier', () => {
     const summary = await prefillCopyAnswers(await loadForm('aanbiedingsformulier'))
     expect(summary.count).toBe(0)
     expect(store.forms.aanbiedingsformulier.answers['aa_b.aanleiding']).toBeUndefined()
+  })
+})
+
+describe('prefillCopyAnswers: facts before mappings', () => {
+  beforeEach(() => setActivePinia(createPinia()))
+
+  it('answers the same-fact question from the toepassingsscan, and says so', async () => {
+    const store = useAssessmentStore()
+    store.ensureDossier()
+    store.setToepassingsscanRun({
+      scanVersion: SCAN_VERSION,
+      answers: { pg: ['ja'] },
+      kenmerken: deriveKenmerken({ pg: ['ja'] }),
+      completedAt: 0,
+    })
+    store.setActiveForm('quickscan')
+    const summary = await prefillCopyAnswers(await loadForm('quickscan'))
+
+    expect(store.forms.quickscan.answers['qs_d.persoonsgegevens']).toBe('Ja')
+    // Only the question that asks exactly this fact: not the one about
+    // special categories, which the scan does not establish.
+    expect(store.forms.quickscan.answers['qs_d.bijzondere_persoonsgegevens'] ?? '').toBe('')
+    expect(summary.fromScan).toBe(true)
+  })
+
+  it('carries a voorblad field to every form that asks it again', async () => {
+    const store = useAssessmentStore()
+    store.ensureDossier()
+    store.setAnswerForForm('intake', 'intake_a.naam_opdrachtgever', '<p>Mr. A. Opdrachtgever</p>')
+    store.setActiveForm('ihhtoets')
+    const summary = await prefillCopyAnswers(await loadForm('ihhtoets'))
+
+    expect(store.forms.ihhtoets.answers['ihh_a.opdrachtgever']).toBe('<p>Mr. A. Opdrachtgever</p>')
+    expect(summary.sourceFormIds).toContain('intake')
+    expect(summary.fromScan).toBe(false)
+  })
+
+  it('never overwrites an answer that is already there', async () => {
+    const store = useAssessmentStore()
+    store.ensureDossier()
+    store.setAnswerForForm('intake', 'intake_a.naam_opdrachtgever', '<p>Uit de intake</p>')
+    store.setAnswerForForm('ihhtoets', 'ihh_a.opdrachtgever', '<p>Zelf ingevuld</p>')
+    store.setActiveForm('ihhtoets')
+    await prefillCopyAnswers(await loadForm('ihhtoets'))
+
+    expect(store.forms.ihhtoets.answers['ihh_a.opdrachtgever']).toBe('<p>Zelf ingevuld</p>')
   })
 })

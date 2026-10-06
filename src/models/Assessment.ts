@@ -275,6 +275,13 @@ export interface CrossFormMapping {
   sourceQuestionIds: string[]
   synthesisHint: string
   mode?: CrossFormMode
+  /**
+   * Copy mode only: source option → target option, for two choice questions
+   * that ask the same fact in different words (the prescan's "Rechtsgrond
+   * toestemming" is the verwerkingsregister's "Toestemming (art. 6 lid 1 sub
+   * a)"). An option without an entry is copied only if the target has it as is.
+   */
+  optionMap?: Record<string, string>
 }
 
 export type AssessmentData = Pick<FormConfig, 'version' | 'title' | 'sections'>

@@ -76,7 +76,8 @@
       <DossierOverview
         v-if="store.dossierView === 'overzicht'"
         @open="$emit('open', $event)"
-        @scan="scanModal?.open()"
+        @scan="scanModal?.open($event)"
+        @beslishulp="beslishulpModal?.open()"
       />
       <DossierProject v-else-if="store.dossierView === 'project'" @scan="scanModal?.open()" />
       <DossierForms

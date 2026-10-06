@@ -22,6 +22,7 @@ import {
   connectDossier,
   disconnectAll,
   getProvider,
+  isStoredStateOrigin,
   purgeDossierLocalState,
 } from '../collab/dossierTransport'
 import type { DossierPayload } from '../collab/ydocCodec'
@@ -780,7 +781,8 @@ export const useAssessmentStore = defineStore('assessment', {
       // Empty doc: it's seeded either from the room (a peer already opened it)
       // or, if the room is empty, from our own JSON — the seed-once pattern that
       // avoids two peers independently building (and duplicating) the tree.
-      const doc = new DossierDoc()
+      // Writes wait for that seed (awaitSync), so they land in the stored tree.
+      const doc = new DossierDoc(undefined, { awaitSync: true })
       // onChange fires for the seed, local edits, and synced remote merges.
       doc.onChange((payload, origin) => {
         const d = this.dossiers[payload.id]
@@ -803,8 +805,9 @@ export const useAssessmentStore = defineStore('assessment', {
           target.beslishulp = incoming.beslishulp
           target.toepassingsscan = incoming.toepassingsscan
         }
-        // Seeding (opening) is not an edit — don't bump updatedAt or persist.
-        if (origin === SEED_ORIGIN) return
+        // Seeding and restoring the IndexedDB copy (opening) are not edits —
+        // don't bump updatedAt or persist.
+        if (origin === SEED_ORIGIN || isStoredStateOrigin(payload.id, origin)) return
         // A peer's edit arrives with the provider as its origin. Everything else
         // is a local edit — whether via setAnswer (LOCAL_ORIGIN) or the bound
         // editor typing directly into the fragment (y-prosemirror's own origin).
@@ -825,9 +828,9 @@ export const useAssessmentStore = defineStore('assessment', {
       } else {
         connectDossier(doc.doc, dossierId, () => {
           doc.seedFrom(payloadOf(dossier))
-          // Push once after seeding: any edits made before the (deferred) seed
-          // completed were captured in Pinia by the seed's mirror run but under
-          // SEED_ORIGIN, which doesn't push. This persists fast typing on open.
+          // Push once after seeding: neither the seed nor the IndexedDB restore
+          // pushes, yet both can carry edits the server hasn't seen (typing
+          // into a bound editor before the seed, an offline session).
           this.schedulePush(dossierId)
         })
       }

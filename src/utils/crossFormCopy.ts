@@ -21,7 +21,7 @@ function escapeHtml(text: string): string {
 }
 
 /** Wrap plain text as the paragraph HTML a Tiptap answer is stored as. */
-function asAnswerHtml(text: string): string {
+export function asAnswerHtml(text: string): string {
   return text
     .split(/\n+/)
     .filter((line) => line.trim().length > 0)
@@ -106,6 +106,8 @@ export function copyValueFor(
   if (values.length === 0) return null
 
   const options = targetOptions ?? targetQuestion.options ?? []
+  // Same fact, different wording: translate the option before the check below.
+  const translate = (option: string) => mapping.optionMap?.[option] ?? option
 
   switch (targetQuestion.type) {
     case 'checkbox': {
@@ -113,7 +115,7 @@ export function copyValueFor(
       // invent a selection the user never made in either form.
       if (values.length > 1) return null
       const raw = values[0].value
-      const picked = (Array.isArray(raw) ? raw : [radioScalar(raw)]).filter((v) =>
+      const picked = (Array.isArray(raw) ? raw : [radioScalar(raw)]).map(translate).filter((v) =>
         options.includes(v),
       )
       return picked.length > 0 ? picked : null
@@ -123,7 +125,7 @@ export function copyValueFor(
       if (values.length > 1) return null
       const raw = values[0].value
       if (Array.isArray(raw)) return null
-      const scalar = radioScalar(raw)
+      const scalar = translate(radioScalar(raw))
       if (!options.includes(scalar)) return null
       // Carry the follow-up along only when the target asks for one too.
       const followUp = raw.split('\n---\n')[1] ?? ''

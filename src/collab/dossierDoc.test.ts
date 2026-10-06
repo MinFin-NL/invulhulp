@@ -197,6 +197,48 @@ describe('DossierDoc convergence', () => {
   })
 })
 
+describe('reopening a stored dossier', () => {
+  // What a previous session left behind in IndexedDB and the room.
+  function storedState(): Uint8Array {
+    const before = new DossierDoc()
+    before.doc.clientID = 1_000
+    before.seedFrom(payload())
+    before.setAnswer('aiia', 'q_radio', 'Ja', true)
+    return before.encodeState()
+  }
+
+  // Yjs keeps one of two concurrent values per map key, picked by client id,
+  // so the old race lost the stored answers only for a higher id than the
+  // previous session's. Both orders have to hold.
+  for (const clientID of [1, 2 ** 31]) {
+    it(`keeps stored answers when the editor mounts before the state arrives (client id ${clientID})`, () => {
+      const d = new DossierDoc(undefined, { awaitSync: true })
+      d.doc.clientID = clientID
+      // On open: a bound editor asks for its fragment, the user clicks, and
+      // only then do IndexedDB and the room deliver the stored state.
+      d.textFragment('aiia', 'q_new')
+      d.setAnswer('aiia', 'q_choice', ['b'])
+      d.applyUpdate(storedState())
+      d.seedFrom(payload())
+
+      const answers = d.toPayload().forms.aiia.answers
+      expect(answers.q_radio).toBe('Ja')
+      expect(answers.q_text).toBe('<p>Begin.</p>')
+      expect(answers.q_choice).toEqual(['b'])
+      expect(answers).toHaveProperty('q_new')
+    })
+  }
+
+  it('holds writes until the seed and replays them after it', () => {
+    const d = new DossierDoc(undefined, { awaitSync: true })
+    d.setAnswer('aiia', 'q_radio', 'Nee', true)
+    expect(d.seeded).toBe(false)
+    expect(d.doc.getMap('dossier').size).toBe(0)
+    d.seedFrom(payload())
+    expect(d.toPayload().forms.aiia.answers.q_radio).toBe('Nee')
+  })
+})
+
 describe('LOCAL_ORIGIN', () => {
   it('is the origin stamped on through-the-doc writes', () => {
     const d = DossierDoc.fromPayload(payload())

@@ -27,8 +27,8 @@
                  van deze lijst bestaat niet en er was nergens een eerste
                  instructie. Bij één ongebruikt dossier staat die hier. -->
             <nldd-text size="sm" color="inherit" class="dossier-list__desc" v-if="isFirstVisit">
-              Open je dossier en upload je eerste document — daarna vult FinDocs de formulieren
-              voor je in, met een bronverwijzing per antwoord.
+              Open je dossier en beantwoord de toepassingsscan: dan zie je welke formulieren voor
+              je project gelden, waarom, en voor wie.
             </nldd-text>
             <nldd-text size="sm" color="inherit" class="dossier-list__desc" v-else>
               Een dossier groepeert brondocumenten en formulierantwoorden rond één project of systeem.

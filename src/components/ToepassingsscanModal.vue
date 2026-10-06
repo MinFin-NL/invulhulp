@@ -4,6 +4,7 @@
     title="Toepassingsscan"
     supporting-text="Wat doet en levert dit project? Daarmee bepalen we welke formulieren hier gelden."
     width="800"
+    @open="onWindowOpen"
   >
     <!-- Six independent questions, so they go on one page: a wizard would
          add eight screens of chrome around forty words of question. Each is
@@ -12,7 +13,9 @@
     <ol class="scan__questions">
       <li v-for="question in SCAN_QUESTIONS" :key="question.id">
         <div v-if="question.type === 'single'" class="scan__fieldset">
-          <p :id="`${question.id}-label`" class="scan__legend">
+          <!-- tabindex -1: the dossier overview can open the scan on this
+               question, and focus has to land on the question itself. -->
+          <p :id="`${question.id}-label`" class="scan__legend" tabindex="-1">
             <span class="scan__question">{{ question.vraag }}</span>
           </p>
           <p v-if="question.toelichting" class="scan__explanation">
@@ -34,7 +37,7 @@
         </div>
 
         <fieldset v-else class="scan__fieldset">
-          <legend class="scan__legend">
+          <legend :id="`${question.id}-label`" class="scan__legend" tabindex="-1">
             <span class="scan__question">{{ question.vraag }}</span>
           </legend>
           <p v-if="question.toelichting" class="scan__explanation">
@@ -48,7 +51,7 @@
               :name="question.id"
               :value="option.id"
               :checked="isChosen(question.id, option.id)"
-              @change="toggleMulti(question.id, option.id)"
+              @change="setMulti(question.id, option.id, $event.detail.checked)"
             />
           </div>
         </fieldset>
@@ -134,6 +137,7 @@ import {
   applicabilityLabel,
   deriveKenmerken,
   evaluateApplicability,
+  nextMultiChoice,
   type ApplicabilityStatus,
   type ScanAnswers,
 } from '../utils/toepassingsscan'
@@ -203,18 +207,14 @@ function chooseSingle(questionId: string, optionId: string) {
   savedNotice.value = ''
 }
 
-function toggleMulti(questionId: string, optionId: string) {
+/** Sets the state the checkbox reports rather than toggling: every click
+ *  arrives as two `change` events (see nextMultiChoice). */
+function setMulti(questionId: string, optionId: string, checked: boolean) {
   const q = SCAN_QUESTIONS.find((question) => question.id === questionId)
   if (!q) return
   const current = answers.value[q.id] ?? []
-  const isExclusive = (id: string) => q.opties.find((o) => o.id === id)?.exclusief === true
-  // "Nee, geen van deze" contradicts every other option, so ticking it clears
-  // the rest — and ticking anything else clears it.
-  const chosen = current.includes(optionId)
-    ? current.filter((id) => id !== optionId)
-    : isExclusive(optionId)
-      ? [optionId]
-      : [...current.filter((id) => !isExclusive(id)), optionId]
+  const chosen = nextMultiChoice(q, current, optionId, checked)
+  if (chosen === current) return
   answers.value = { ...answers.value, [q.id]: chosen }
   savedNotice.value = ''
 }
@@ -243,12 +243,33 @@ function save() {
 }
 
 // ---- Open / close ---------------------------------------------------------
-function open() {
+// The question to land on, set by open() and used once the window is open.
+let focusQuestionId: string | null = null
+
+/** Open the scan, optionally on one question: the dossier overview links each
+ *  open point straight to the question that decides it. */
+function open(questionId?: string) {
   savedNotice.value = ''
   // Reopen on the stored answers so "bijwerken" is an edit, not a redo.
   const run = store.toepassingsscanRun
   if (run && Object.keys(answers.value).length === 0) answers.value = { ...run.answers }
+  focusQuestionId = questionId ?? null
   win.value?.show()
+}
+
+/** nldd-window moves focus into itself when it opens; only after that can the
+ *  focus go to the requested question without being taken back. */
+function onWindowOpen() {
+  const id = focusQuestionId
+  focusQuestionId = null
+  if (!id) return
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      const label = document.getElementById(`${id}-label`)
+      label?.scrollIntoView({ block: 'start' })
+      label?.focus({ preventScroll: true })
+    }),
+  )
 }
 
 defineExpose({ open })
@@ -290,6 +311,18 @@ defineExpose({ open })
 .scan__legend {
   padding: 0;
   margin: 0 0 var(--primitives-space-4);
+  /* Opened on this question from the overview: land below the window's sticky
+     title bar, which nldd-page publishes as --context-inset-top. */
+  scroll-margin-block-start: calc(var(--context-inset-top, 0px) + var(--primitives-space-16));
+}
+
+.scan__legend:focus {
+  outline: none;
+}
+
+.scan__legend:focus-visible {
+  border-radius: var(--primitives-corner-radius-sm);
+  box-shadow: var(--semantics-focus-ring-box-shadow);
 }
 
 .scan__question {

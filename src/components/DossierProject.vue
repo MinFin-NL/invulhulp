@@ -1,6 +1,6 @@
 <template>
-  <!-- Project: wat weten we over het project? Nu de toepassingsscan; hier komen
-       later het systeemprofiel (feiten met herkomst) en het gesprek bij. -->
+  <!-- Project: wat weten we over het project? De toepassingsscan en het
+       voorblad; hier komen later het systeemprofiel en het gesprek bij. -->
   <div class="dossier-view">
     <ToepassingsscanTile
       :run="store.toepassingsscanRun"
@@ -8,6 +8,7 @@
       :counts="scanCounts"
       @open="$emit('scan')"
     />
+    <DossierVoorblad />
   </div>
 </template>
 
@@ -15,6 +16,7 @@
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useDossierForms } from '../composables/useDossierForms'
 import ToepassingsscanTile from './ToepassingsscanTile.vue'
+import DossierVoorblad from './DossierVoorblad.vue'
 
 defineEmits<{ scan: [] }>()
 

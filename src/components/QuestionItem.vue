@@ -86,7 +86,7 @@
           :value="option"
           :checked="checkboxValues.includes(option)"
           :disabled="store.readOnly"
-          @change="onCheckboxToggle(option)"
+          @change="onCheckboxChange(option, $event.detail.checked)"
         />
       </div>
     </fieldset>
@@ -116,6 +116,13 @@
         </svg>
       </span>
       AI vond hier geen antwoord — vul deze vraag zelf in.
+    </p>
+
+    <!-- Where a proposal came from, for as long as the answer is still that
+         proposal (werkplan-kompas §5). Derived live, nothing is stored: once
+         someone changes the answer, it is theirs and the note goes. -->
+    <p v-if="feitHerkomst" class="invulhulp-question__provenance" role="note">
+      {{ feitHerkomst }}
     </p>
 
     <!-- Smoothing rewrote this answer to remove repetition; offer the original back -->
@@ -190,6 +197,9 @@ import { mergedOptions, radioScalar } from '../utils/answerRefs'
 import { getCachedForm } from '../services/formLoader'
 import { useCollab } from '../collab/useCollab'
 import { useAiBusy } from '../collab/useAiBusy'
+import { useFeiten } from '../composables/useFeiten'
+import { isVoorstel, voorstelVoor } from '../facts/resolveFeiten'
+import { withChecked } from '../utils/checkedList'
 
 const props = defineProps<{
   question: Question
@@ -201,6 +211,17 @@ const emit = defineEmits<{
 }>()
 
 const store = useAssessmentStore()
+const feiten = useFeiten()
+
+const feitHerkomst = computed(() => {
+  const formId = store.activeFormId
+  if (!formId) return ''
+  const voorstel = voorstelVoor(feiten.value, formId, props.question.id)
+  if (!voorstel || !isVoorstel(voorstel, props.modelValue)) return ''
+  if (voorstel.herkomst.soort === 'scan') return 'Afgeleid uit de toepassingsscan.'
+  const bron = getCachedForm(voorstel.herkomst.formId)?.title ?? voorstel.herkomst.formId
+  return `Overgenomen uit het voorblad van dit dossier, zoals ingevuld in ${bron}.`
+})
 const mappings = useCrossFormMappings()
 
 // Collaborative binding for the main rich-text answer (text questions only).
@@ -338,12 +359,13 @@ const checkboxValues = computed(() =>
   Array.isArray(props.modelValue) ? props.modelValue : [],
 )
 
-function onCheckboxToggle(option: string) {
-  const current = Array.isArray(props.modelValue) ? [...props.modelValue] : []
-  const idx = current.indexOf(option)
-  if (idx === -1) current.push(option)
-  else current.splice(idx, 1)
-  emit('update:modelValue', current)
+/** Sets the state the checkbox reports (see withChecked): a click arrives as
+ *  two `change` events, and a toggle would undo itself. */
+function onCheckboxChange(option: string, checked: boolean) {
+  const current = Array.isArray(props.modelValue) ? props.modelValue : []
+  const next = withChecked(current, option, checked)
+  if (next === current) return
+  emit('update:modelValue', next)
   store.dismissSourceWarning(props.question.id)
   clearUnanswered()
 }
@@ -454,8 +476,10 @@ function onCheckboxToggle(option: string) {
   flex-shrink: 0;
 }
 
-/* Informational, not a warning: quieter than the ai-empty notice above. */
-.invulhulp-question__ai-smoothed {
+/* Informational, not a warning: quieter than the ai-empty notice above. The
+   provenance note shares the look — it says where an answer came from. */
+.invulhulp-question__ai-smoothed,
+.invulhulp-question__provenance {
   display: flex;
   align-items: center;
   gap: var(--primitives-space-8);

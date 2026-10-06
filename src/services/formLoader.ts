@@ -53,7 +53,14 @@ export interface FormIndexEntry {
   // toepassingsscan derives. Absent ⇒ the form always applies. See
   // src/utils/toepassingsscan.ts and docs/toepasselijkheid-van-formulieren.md.
   applicability?: ApplicabilityRule
+  // The department or body this form is for: who assesses, approves or decides
+  // on it. Only filled where the form's own source says so; 'TODO' marks an
+  // owner nobody has confirmed yet (see OWNER_UNKNOWN).
+  owner?: string
 }
+
+/** The placeholder for an owner that is not recorded in any source yet. */
+export const OWNER_UNKNOWN = 'TODO'
 
 /**
  * Een rol die het formulierenaanbod inperkt. De rol-id is de realm-rol in
@@ -84,7 +91,7 @@ async function fetchRegistry(): Promise<FormIndexEntry[]> {
   if (!res.ok) throw new Error('Could not load form index')
   const raw = await res.json() as { forms: FormIndexEntry[]; roles?: FormRole[] }
   rolesCache = raw.roles ?? []
-  return raw.forms.map((f) => ({ id: f.id, urn: f.urn, registryUrn: f.registryUrn, title: f.title ?? f.id, track: f.track, order: f.order, domains: f.domains, shortDescription: f.shortDescription, placeholder: f.placeholder, applicability: f.applicability }))
+  return raw.forms.map((f) => ({ id: f.id, urn: f.urn, registryUrn: f.registryUrn, title: f.title ?? f.id, track: f.track, order: f.order, domains: f.domains, shortDescription: f.shortDescription, placeholder: f.placeholder, applicability: f.applicability, owner: f.owner }))
 }
 
 /**

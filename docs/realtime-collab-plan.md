@@ -224,6 +224,13 @@ story, no sidecar: chosen.
   backchannel (Redis); the single-replica assumption holds for now. (4) **Simultaneous
   first-open** race (two peers seeding a truly-empty room at the same instant) and
   **edit-before-sync** remain edge cases.
+- **Edit-before-sync, resolved 2026-10-06.** It was not rare: a bound editor asks
+  for its fragment on mount, and `ensureForm` then created the `forms` map in the
+  still-empty doc. The stored state brought its own `forms` under the same key, Yjs
+  kept one by client id, and on about half of reloads the stored answers were gone.
+  The IndexedDB restore also counted as a local edit, so the loss was pushed to the
+  server. Now a connected `DossierDoc` (`awaitSync`) queues writes until `seedFrom`,
+  and the mirror ignores the IndexedDB origin (`isStoredStateOrigin`).
 
 ---
 

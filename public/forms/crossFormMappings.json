@@ -2640,5 +2640,101 @@
       "aa_d.start_einddatum"
     ],
     "synthesisHint": "Gebruik de beoogde start- en einddatum uit het aanbiedingsformulier als kader voor de planning per fase."
+  },
+  {
+    "targetFormId": "datasetregistratie",
+    "targetQuestionId": "ds_a.eigenaar",
+    "sourceFormId": "datakwaliteit",
+    "sourceQuestionIds": [
+      "dq_a.eigenaar"
+    ],
+    "synthesisHint": "Dezelfde vraag: de data-eigenaar van de dataset wordt letterlijk overgenomen.",
+    "mode": "copy"
+  },
+  {
+    "targetFormId": "datakwaliteit",
+    "targetQuestionId": "dq_a.eigenaar",
+    "sourceFormId": "datasetregistratie",
+    "sourceQuestionIds": [
+      "ds_a.eigenaar"
+    ],
+    "synthesisHint": "Dezelfde vraag: de data-eigenaar van de dataset wordt letterlijk overgenomen.",
+    "mode": "copy"
+  },
+  {
+    "targetFormId": "datasetregistratie",
+    "targetQuestionId": "ds_a.steward",
+    "sourceFormId": "datakwaliteit",
+    "sourceQuestionIds": [
+      "dq_a.steward"
+    ],
+    "synthesisHint": "Dezelfde vraag: de datasteward of beheerder wordt letterlijk overgenomen.",
+    "mode": "copy"
+  },
+  {
+    "targetFormId": "datakwaliteit",
+    "targetQuestionId": "dq_a.steward",
+    "sourceFormId": "datasetregistratie",
+    "sourceQuestionIds": [
+      "ds_a.steward"
+    ],
+    "synthesisHint": "Dezelfde vraag: de datasteward of beheerder wordt letterlijk overgenomen.",
+    "mode": "copy"
+  },
+  {
+    "targetFormId": "aiia",
+    "targetQuestionId": "4.4.8",
+    "sourceFormId": "psa",
+    "sourceQuestionIds": [
+      "psa_e.logging_monitoring"
+    ],
+    "synthesisHint": "Dezelfde vraag: hoe logging en monitoring zijn ingericht, letterlijk overgenomen uit de PSA.",
+    "mode": "copy"
+  },
+  {
+    "targetFormId": "psa",
+    "targetQuestionId": "psa_e.logging_monitoring",
+    "sourceFormId": "aiia",
+    "sourceQuestionIds": [
+      "4.4.8"
+    ],
+    "synthesisHint": "Dezelfde vraag: hoe logging en monitoring zijn ingericht, letterlijk overgenomen uit de AIIA.",
+    "mode": "copy"
+  },
+  {
+    "targetFormId": "verwerkingsregister",
+    "targetQuestionId": "vr_a.grondslag",
+    "sourceFormId": "prescandpia",
+    "sourceQuestionIds": [
+      "d0.4"
+    ],
+    "synthesisHint": "Dezelfde grondslag (art. 6 AVG), in de woorden van het verwerkingsregister.",
+    "mode": "copy",
+    "optionMap": {
+      "Rechtsgrond toestemming": "Toestemming (art. 6 lid 1 sub a)",
+      "Rechtsgrond noodzakelijk voor de uitvoering van een overeenkoms": "Uitvoering van een overeenkomst (art. 6 lid 1 sub b)",
+      "Rechtsgrond wettelijke verplichting": "Wettelijke verplichting (art. 6 lid 1 sub c)",
+      "Rechtsgrond vitaal belang": "Vitaal belang (art. 6 lid 1 sub d)",
+      "Rechtsgrond taak van algemeen belang": "Vervulling van een taak van algemeen belang of openbaar gezag (art. 6 lid 1 sub e)",
+      "Rechtsgrond gerechtvaardigd belang": "Gerechtvaardigd belang (art. 6 lid 1 sub f)"
+    }
+  },
+  {
+    "targetFormId": "prescandpia",
+    "targetQuestionId": "d0.4",
+    "sourceFormId": "verwerkingsregister",
+    "sourceQuestionIds": [
+      "vr_a.grondslag"
+    ],
+    "synthesisHint": "Dezelfde grondslag (art. 6 AVG), in de woorden van de prescan DPIA.",
+    "mode": "copy",
+    "optionMap": {
+      "Toestemming (art. 6 lid 1 sub a)": "Rechtsgrond toestemming",
+      "Uitvoering van een overeenkomst (art. 6 lid 1 sub b)": "Rechtsgrond noodzakelijk voor de uitvoering van een overeenkoms",
+      "Wettelijke verplichting (art. 6 lid 1 sub c)": "Rechtsgrond wettelijke verplichting",
+      "Vitaal belang (art. 6 lid 1 sub d)": "Rechtsgrond vitaal belang",
+      "Vervulling van een taak van algemeen belang of openbaar gezag (art. 6 lid 1 sub e)": "Rechtsgrond taak van algemeen belang",
+      "Gerechtvaardigd belang (art. 6 lid 1 sub f)": "Rechtsgrond gerechtvaardigd belang"
+    }
   }
 ]

@@ -52,6 +52,22 @@
         text="Alle formulieren die voor dit dossier gelden zijn afgerond."
       />
 
+      <!-- Toepassingsscan: which forms actually apply here. -->
+      <ToepassingsscanTile
+        :run="store.toepassingsscanRun"
+        :kenmerken="store.kenmerken"
+        :counts="scanCounts"
+        @open="$emit('scan')"
+      />
+
+      <!-- Wat geldt, waarom, voor wie — en bij wat nog onbekend is, welke vraag
+           het beslist. -->
+      <DossierApplicability
+        @open="$emit('open', $event)"
+        @scan="$emit('scan', $event)"
+        @beslishulp="$emit('beslishulp')"
+      />
+
       <!-- Phase rail: the whole lifecycle in one row. Each circle fills from the
            bottom with the share of that phase's forms that are afgerond; a step
            opens that phase in the Formulieren view. -->
@@ -88,14 +104,6 @@
           </li>
         </ol>
       </nav>
-
-      <!-- Toepassingsscan: which forms actually apply here. -->
-      <ToepassingsscanTile
-        :run="store.toepassingsscanRun"
-        :kenmerken="store.kenmerken"
-        :counts="scanCounts"
-        @open="$emit('scan')"
-      />
       </template>
   </div>
 </template>
@@ -115,8 +123,9 @@ import { useAssessmentStore } from '../stores/assessmentStore'
 import { useDossierForms } from '../composables/useDossierForms'
 import { trackIcon, type TrackGroup } from '../utils/tracks'
 import ToepassingsscanTile from './ToepassingsscanTile.vue'
+import DossierApplicability from './DossierApplicability.vue'
 
-defineEmits<{ open: [id: string]; scan: [] }>()
+defineEmits<{ open: [id: string]; scan: [questionId?: string]; beslishulp: [] }>()
 
 const store = useAssessmentStore()
 const { scanCounts, nextStep, allFormsDone, primaryAction, railGroups, trackCount, markerState } = useDossierForms()

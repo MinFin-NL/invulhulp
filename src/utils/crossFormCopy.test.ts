@@ -96,6 +96,14 @@ describe('copyValueFor', () => {
     expect(copyValueFor(mapping(['i.radio']), narrower, answers({ 'i.radio': 'Ja' }), sourceForm)).toBeNull()
   })
 
+  it('translates an option through optionMap when the target words it differently', () => {
+    const target = q({ type: 'radio', options: ['Akkoord', 'Niet akkoord'] })
+    const translated = { ...mapping(['i.radio']), optionMap: { Ja: 'Akkoord', Nee: 'Niet akkoord' } }
+    expect(copyValueFor(translated, target, answers({ 'i.radio': 'Nee' }), sourceForm)).toBe('Niet akkoord')
+    // An option the map does not cover still has to exist in the target as is.
+    expect(copyValueFor({ ...translated, optionMap: { Ja: 'Akkoord' } }, target, answers({ 'i.radio': 'Nee' }), sourceForm)).toBeNull()
+  })
+
   it('drops a radio follow-up the target does not ask for', () => {
     const target = q({ type: 'radio', options: ['Ja', 'Nee'] })
     const value = copyValueFor(mapping(['i.radio']), target, answers({ 'i.radio': 'Ja\n---\nomdat het moet' }), sourceForm)

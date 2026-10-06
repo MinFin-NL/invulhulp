@@ -53,6 +53,12 @@ export function getProvider(dossierId: string): Provider | null {
   return providers.get(dossierId) ?? null
 }
 
+/** Whether a transaction came from the dossier's IndexedDB copy: stored state
+ *  restored on open, not an edit. */
+export function isStoredStateOrigin(dossierId: string, origin: unknown): boolean {
+  return origin != null && idbPersistences.get(dossierId) === origin
+}
+
 /** Run `cb` when the dossier's provider exists (immediately if already). */
 export function onProviderReady(dossierId: string, cb: () => void): () => void {
   if (providers.has(dossierId)) cb()

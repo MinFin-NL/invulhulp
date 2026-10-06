@@ -242,7 +242,9 @@ const prefillMessage = computed(() => {
   const p = prefill.value
   if (!p) return ''
   // prefillCopyAnswers loaded every source form, so the cache has their titles.
-  const bronnen = p.sourceFormIds.map((id) => getCachedForm(id)?.title ?? id).join(' en ')
+  const namen = p.sourceFormIds.map((id) => getCachedForm(id)?.title ?? id)
+  if (p.fromScan) namen.push('de toepassingsscan')
+  const bronnen = namen.length > 1 ? `${namen.slice(0, -1).join(', ')} en ${namen[namen.length - 1]}` : namen.join('')
   const vragen = p.count === 1 ? '1 vraag is' : `${p.count} vragen zijn`
   return `${vragen} automatisch overgenomen uit ${bronnen}. Controleer de antwoorden en pas ze aan waar nodig.`
 })
