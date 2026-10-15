@@ -196,6 +196,19 @@
         </nldd-page>
       </nldd-split-view-pane>
     </nldd-navigation-split-view>
+
+    <!-- AI Modus starts from a form card, the form intro, the steps column or
+         the dossier-wide fill; the dialog lives here, in the shell, so it shows
+         whichever of those is on screen. -->
+    <ConfirmDialog
+      ref="aiModeErrorDialog"
+      title="Documenten niet bereikbaar"
+      message="De brondocumenten staan niet meer in de index en konden niet automatisch opnieuw worden ingelezen. Verwijder de documenten en upload ze opnieuw om AI Modus te gebruiken."
+      confirm-label="Sluiten"
+      cancel-label=""
+      @confirm="onAiModeErrorDismissed"
+      @cancel="onAiModeErrorDismissed"
+    />
   </div>
 </template>
 
@@ -222,10 +235,29 @@ import SummaryView from './SummaryView.vue'
 import UserManagement from './UserManagement.vue'
 import DossierFormsNav from './DossierFormsNav.vue'
 import PresenceBar from './PresenceBar.vue'
+import ConfirmDialog from './ConfirmDialog.vue'
 
 const store = useAssessmentStore()
 const auth = useAuthStore()
-const { aiModeActive, aiModeProgress, aiModePhase, cancelAiMode } = useAiMode()
+const { aiModeActive, aiModeProgress, aiModePhase, aiModeError, cancelAiMode, dismissAiModeError } = useAiMode()
+
+const aiModeErrorDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
+const aiModeErrorFormId = ref<string | null>(null)
+
+watch(aiModeError, (errors) => {
+  const formId = Object.keys(errors)[0]
+  if (formId && !aiModeErrorFormId.value) {
+    aiModeErrorFormId.value = formId
+    aiModeErrorDialog.value?.open()
+  }
+}, { deep: true })
+
+function onAiModeErrorDismissed() {
+  if (aiModeErrorFormId.value) {
+    dismissAiModeError(aiModeErrorFormId.value)
+    aiModeErrorFormId.value = null
+  }
+}
 // Koppel de navigatiestatus aan de browserhistory: "vorige" gaat één scherm
 // terug in de app in plaats van de applicatie te verlaten.
 useAppHistory()

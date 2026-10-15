@@ -87,15 +87,6 @@
     </div>
 
     <ConfirmDialog
-      ref="aiModeErrorDialog"
-      title="Documenten niet bereikbaar"
-      message="De brondocumenten zijn niet meer beschikbaar in de index. Verwijder de documenten en upload ze opnieuw om AI Modus te gebruiken."
-      confirm-label="Sluiten"
-      cancel-label=""
-      @confirm="onAiModeErrorDismissed"
-      @cancel="onAiModeErrorDismissed"
-    />
-    <ConfirmDialog
       ref="renameDialog"
       title="Dossier hernoemen"
       kind="prompt"
@@ -132,7 +123,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
-import { useAiMode } from '../composables/useAiMode'
 import { refreshDossierForms } from '../composables/useDossierForms'
 import { serialize } from '../composables/useAppHistory'
 import { DOSSIER_VIEWS, type DossierView } from '../utils/dossierViews'
@@ -149,14 +139,11 @@ import { fetchDossier, saveDossier } from '../services/dossierService'
 defineEmits<{ open: [id: string] }>()
 
 const store = useAssessmentStore()
-const { aiModeError, dismissAiModeError } = useAiMode()
 
 const renameDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const deleteDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const shareDialog = ref<InstanceType<typeof ShareDialog> | null>(null)
 const shareError = ref('')
-const aiModeErrorDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
-const aiModeErrorFormId = ref<string | null>(null)
 const beslishulpModal = ref<InstanceType<typeof BeslishulpModal> | null>(null)
 const scanModal = ref<InstanceType<typeof ToepassingsscanModal> | null>(null)
 
@@ -170,17 +157,6 @@ function viewHref(view: DossierView): string {
     dossierView: view,
   })
 }
-
-// AI Modus can be started from a card (Formulieren) or for the whole dossier
-// (Bronnen); the dialog that reports missing documents lives here so it shows
-// whichever view is open.
-watch(aiModeError, (errors) => {
-  const formId = Object.keys(errors)[0]
-  if (formId && !aiModeErrorFormId.value) {
-    aiModeErrorFormId.value = formId
-    aiModeErrorDialog.value?.open()
-  }
-}, { deep: true })
 
 const deleteMessage = computed(() => {
   const current = store.activeDossierId ? store.dossiers[store.activeDossierId] : null
@@ -246,13 +222,6 @@ onBeforeUnmount(() => {
   viewsObserver?.disconnect()
   viewsObserver = null
 })
-
-function onAiModeErrorDismissed() {
-  if (aiModeErrorFormId.value) {
-    dismissAiModeError(aiModeErrorFormId.value)
-    aiModeErrorFormId.value = null
-  }
-}
 
 function openRenameDialog() {
   if (!store.activeDossierId) return
