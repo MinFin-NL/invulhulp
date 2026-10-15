@@ -12,7 +12,7 @@
         aria-labelledby="prelude-title"
       >
         <div class="prelude__header">
-          <nldd-title size="2"><h2 class="prelude__title" id="prelude-title">Vooraf</h2></nldd-title>
+          <nldd-title size="4"><h2 class="prelude__title" id="prelude-title">Vooraf</h2></nldd-title>
           <nldd-text color="inherit" size="sm" class="prelude__meta">
             Nog geen projectfase<template v-if="preludeCount.total > 0">
               · {{ preludeCount.done }}/{{ preludeCount.total }} afgerond</template>
@@ -69,7 +69,7 @@
               Fase {{ group.phaseNumber }} van {{ group.phaseCount }}
             </p>
             <div class="track-title-row">
-              <nldd-title size="2"><h2 class="track-title" :id="`track-${group.track}-title`">{{ group.label }}</h2></nldd-title>
+              <nldd-title size="4"><h2 class="track-title" :id="`track-${group.track}-title`">{{ group.label }}</h2></nldd-title>
               <span v-if="trackCount(group).total > 0" class="invulhulp-text--sm track-count">
                 {{ trackCount(group).done }}/{{ trackCount(group).total }} afgerond
               </span>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { parseHash, serialize, type AppLocation } from './useAppHistory'
+import { parseHash, serialize, startLocation, type AppLocation } from './useAppHistory'
 
 const base: AppLocation = {
   admin: false,
@@ -51,5 +51,19 @@ describe('useAppHistory locatie-encoding', () => {
     expect(parseHash('#/iets-anders')).toBeNull()
     // Een dossier-hash zonder id is onbruikbaar.
     expect(parseHash('#/dossier')).toBeNull()
+  })
+
+  it('opent zonder hash op het dossieroverzicht, met hash op die plek', () => {
+    // Na inloggen komt de app binnen op de kale URL; de opgeslagen locatie
+    // (midden in een formulier) mag dan niet terugkomen.
+    expect(startLocation('')).toEqual(base)
+    expect(startLocation('#/iets-anders')).toEqual(base)
+    expect(startLocation('#/dossier/d-1/form/intake/summary')).toEqual({
+      ...base,
+      screen: 'dossier',
+      dossierId: 'd-1',
+      formId: 'intake',
+      view: 'summary',
+    })
   })
 })

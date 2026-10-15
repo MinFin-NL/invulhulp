@@ -45,39 +45,30 @@
       <DossierList />
     </main>
 
-    <!-- Inside a dossier: three columns, like a mail client. The first lists
-         every form of the dossier, the second the steps of the open form, the
-         third shows the dossier overview or the step itself. Once the columns
-         stop fitting, NLDD folds them: first the forms list tucks behind the
-         steps' back button, then only one column shows at a time and each
-         column's title bar carries the way back (onPaneBack). -->
+    <!-- Inside a dossier: two columns. The left one is the dossier's
+         navigation (DossierFormsNav): every form on the overview, and only the
+         open form's steps once you are in one — switching goes through its
+         menu, back through the dossier. The right one shows the dossier
+         overview or the step itself. A forms column beside a steps column
+         took 640px from the content.
+         Once the columns stop fitting, only one shows at a time and the
+         content's title bar carries the way back (onPaneBack). -->
     <nldd-navigation-split-view
       v-else
       class="assessment-shell__workspace"
-      primary-sidebar-accessible-label="Formulieren"
       @back="onPaneBack"
     >
-      <nldd-split-view-pane slot="primary-sidebar" has-content>
-        <DossierFormsNav @overview="openOverview" @open="openFormSteps" />
-      </nldd-split-view-pane>
-
-      <!-- The steps column is there for EVERY view of an open form, introductie
+      <!-- The steps are there for EVERY view of an open form, introductie
            included — it is the only place the voortgang and the stappenlijst
-           live, and hiding it on one view reads as "de zijbalk is weg". The
-           nav already highlights "Introductie" when currentView === 'home', so
-           it was always built for this. The pane only waits for the form's
-           config, so it never shows the steps of the previous form. Do not put
-           a v-if on the SectionNav tag itself: sectionNav.contract.test.ts fails if
-           you do. -->
-      <nldd-split-view-pane
-        v-if="formConfig && formConfig.id === store.activeFormId"
-        slot="secondary-sidebar"
-        has-content
-      >
-        <SectionNav
-          :form-config="formConfig"
+           live, and hiding it on one view reads as "de zijbalk is weg". Do not
+           put a v-if on the DossierFormsNav tag: sectionNav.contract.test.ts
+           fails if you do. -->
+      <nldd-split-view-pane slot="primary-sidebar" has-content>
+        <DossierFormsNav
+          :form-config="activeFormConfig"
           :nav-order="navOrder"
-          :back-text="store.activeDossier.name"
+          @overview="openOverview"
+          @open="openFormSteps"
           @navigate="mainOpen = true"
         />
       </nldd-split-view-pane>
@@ -214,7 +205,6 @@ import AppHeader from './AppHeader.vue'
 import DossierList from './DossierList.vue'
 import DossierDetail from './DossierDetail.vue'
 import FormIntro from './FormIntro.vue'
-import SectionNav from './SectionNav.vue'
 import SectionView from './SectionView.vue'
 import RiskClassification from './RiskClassification.vue'
 import DecisionGate from './DecisionGate.vue'
@@ -343,12 +333,18 @@ watch(
 )
 
 // ---- Columns ----------------------------------------------------------------
-// Wide, all three columns show and every choice simply fills the next one.
-// Narrow, the split view shows one column at a time: the third when it has
-// content, else the steps, else the forms. mainOpen is that "has content":
-// picking a form shows its steps first, picking a step (or the overview) shows
-// the step, and a column's back button steps one column back.
+// Wide, both columns show and every choice simply fills the next one.
+// Narrow, the split view shows one column at a time: the content when it has
+// any, else the left column. mainOpen is that "has content": picking a form
+// shows its steps first, picking a step (or the overview) shows the step, and
+// the content's back button returns to the navigation column.
 const mainOpen = ref(true)
+
+// The config the navigation column unfolds: only once it belongs to the open
+// form, so it never shows the steps of the previous one while the next loads.
+const activeFormConfig = computed(() =>
+  formConfig.value && formConfig.value.id === store.activeFormId ? formConfig.value : null,
+)
 
 function openOverview() {
   store.goToPortal()
@@ -374,17 +370,12 @@ function onPaneBack(event: Event) {
   if (!path.some((el) => el.classList?.contains('invulhulp-pane-bar'))) return
   const pane = path.find((el) => el.tagName === 'NLDD-SPLIT-VIEW-PANE')
   const slot = pane?.getAttribute('slot')
-  if (slot === 'main') {
-    mainOpen.value = false
-  } else if (slot === 'secondary-sidebar') {
-    store.goToPortal()
-    mainOpen.value = false
-  }
+  if (slot === 'main') mainOpen.value = false
 }
 
 // NLDD labels a back button with the title of the column it returns to.
 const mainBackText = computed(() =>
-  store.activeFormId !== null ? formConfig.value?.title ?? 'Stappen' : 'Formulieren',
+  (store.activeFormId !== null && activeFormConfig.value?.title) || store.activeDossier.name || 'Dossier',
 )
 
 const mainLabel = computed(() =>

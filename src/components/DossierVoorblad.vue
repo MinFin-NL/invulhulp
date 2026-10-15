@@ -5,7 +5,7 @@
        en elk ander formulier dat het vraagt krijgt het als voorstel. Versie,
        datum en status horen per document en staan hier dus niet. -->
   <section class="voorblad" aria-labelledby="voorblad-title">
-    <nldd-title size="2"><h2 class="voorblad__title" id="voorblad-title">Voorblad</h2></nldd-title>
+    <nldd-title size="4"><h2 class="voorblad__title" id="voorblad-title">Voorblad</h2></nldd-title>
     <nldd-text size="sm" color="inherit" class="voorblad__lead">
       Vul deze gegevens één keer in. Elk formulier dat ze vraagt, krijgt ze als voorstel; wat
       daar al staat, blijft staan.

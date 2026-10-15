@@ -31,19 +31,22 @@ A web application that helps Dutch government employees fill in AI-related compl
 
 ### Screenshots
 
-**Portal: dossier, source documents and form overview**
-![Portal page](docs/screenshots/portal-docs.png)
+**Dossier overview: which forms apply to the project, and AI Mode for all forms**
+![Dossier overview](docs/screenshots/dossier-overview.png)
+
+**Dossier source documents**
+![Source documents](docs/screenshots/portal-docs.png)
 
 **Form introduction page with AI Mode**
 ![Form intro](docs/screenshots/form-intro.png)
 
-**EU AI Act risk classification questionnaire**
+**Risk classification through the Beslishulp AI-verordening (MinBZK)**
 ![Risk classification](docs/screenshots/risk-classification.png)
 
-**Form questions with sidebar navigation and AI text improvement**
+**Form questions with a suggestion extracted from the source documents, including source fragment and grounding check**
 ![Form questions](docs/screenshots/form-questions.png)
 
-**Summary and export**
+**Summary and Word export**
 ![Summary and export](docs/screenshots/summary.png)
 
 ## Gerelateerde tools

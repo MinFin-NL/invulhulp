@@ -3,7 +3,7 @@
        iets beslist, niet per formulier — één antwoord zet vaak twee formulieren
        vast. Alleen na een scan: daarvoor is "Start toepassingsscan" de vraag. -->
   <section v-if="openQuestions.length > 0" class="open-questions" aria-labelledby="open-questions-title">
-    <nldd-title size="2"><h2 class="open-questions__title" id="open-questions-title">
+    <nldd-title size="4"><h2 class="open-questions__title" id="open-questions-title">
       Open vragen
     </h2></nldd-title>
     <nldd-text size="sm" color="inherit" class="open-questions__lead">
@@ -36,7 +36,7 @@
   <section class="applicability" aria-labelledby="applicability-title">
     <div class="applicability__head">
       <div class="applicability__head-text">
-        <nldd-title size="2"><h2 class="applicability__title" id="applicability-title">
+        <nldd-title size="4"><h2 class="applicability__title" id="applicability-title">
           Wat geldt voor dit project
         </h2></nldd-title>
         <nldd-text size="sm" color="inherit" class="applicability__lead">
@@ -104,8 +104,9 @@
             </span>
           </div>
           <nldd-button
-            variant="neutral-transparent"
+            variant="secondary"
             size="sm"
+            end-icon="chevron-right"
             :text="openText(row, group.id)"
             :accessible-label="openLabel(row, group.id)"
             @click="emit('open', row.form.id)"

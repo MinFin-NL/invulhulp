@@ -29,7 +29,7 @@
       <section v-if="nextStep" class="next-step" aria-labelledby="next-step-title">
         <div class="next-step__body">
           <nldd-text size="xs" color="inherit" class="next-step__eyebrow">{{ nextStep.eyebrow }}</nldd-text>
-          <nldd-title size="2"><h2 class="next-step__title" id="next-step-title">
+          <nldd-title size="4"><h2 class="next-step__title" id="next-step-title">
             {{ nextStep.form.title }}
           </h2></nldd-title>
           <nldd-text color="inherit" size="sm" class="next-step__reason">{{ nextStep.reason }}</nldd-text>

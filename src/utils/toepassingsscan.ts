@@ -65,7 +65,7 @@ export const KENMERK_IDS = Object.keys(KENMERK_LABEL) as KenmerkId[]
 /** Where a kenmerk got its value — the distinction in docs §5.3: a scan answer
  *  is a cheap self-declaration, a form outcome is derived evidence. Shown in
  *  the scan summary so nobody mistakes the first for the second. */
-export const KENMERK_SOURCE: Record<KenmerkId, 'scan' | 'beslishulp'> = {
+const KENMERK_SOURCE: Record<KenmerkId, 'scan' | 'beslishulp'> = {
   persoonsgegevens: 'scan',
   besluit_over_personen: 'scan',
   algoritme_of_ai: 'scan',

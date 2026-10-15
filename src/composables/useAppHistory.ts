@@ -46,17 +46,19 @@ export function serialize(loc: AppLocation): string {
   return loc.view ? `${form}/${encodeURIComponent(loc.view)}` : form
 }
 
+const DOSSIER_LIST: AppLocation = {
+  admin: false,
+  screen: 'dossierList',
+  dossierId: null,
+  formId: null,
+  view: null,
+  dossierView: null,
+}
+
 export function parseHash(hash: string): AppLocation | null {
   const parts = hash.replace(/^#\/?/, '').split('/').filter(Boolean).map(decodeURIComponent)
   if (parts.length === 0) return null
-  const empty: AppLocation = {
-    admin: false,
-    screen: 'dossierList',
-    dossierId: null,
-    formId: null,
-    view: null,
-    dossierView: null,
-  }
+  const empty: AppLocation = { ...DOSSIER_LIST }
   if (parts[0] === 'beheer') return { ...empty, admin: true }
   if (parts[0] === 'dossiers') return empty
   if (parts[0] === 'dossier' && parts[1]) {
@@ -71,6 +73,15 @@ export function parseHash(hash: string): AppLocation | null {
     return loc
   }
   return null
+}
+
+/** Waar de app opent. Een bruikbare hash (herladen, gedeelde link) wint;
+ *  zonder hash komt iemand binnen via de kale URL — na het inloggen, of na
+ *  een tijd weg — en begint hij op het dossieroverzicht, niet midden in het
+ *  formulier van de vorige keer. Daar brengt "Verder waar je gebleven bent"
+ *  op de dossierpagina hem terug. */
+export function startLocation(hash: string): AppLocation {
+  return parseHash(hash) ?? { ...DOSSIER_LIST }
 }
 
 function sameLocation(a: AppLocation, b: AppLocation): boolean {
@@ -150,10 +161,10 @@ export function useAppHistory() {
   }
 
   onMounted(() => {
-    // Een hash in de URL (deeplink of herladen) wint van de opgeslagen
-    // navigatiestatus, zodat een gedeelde link op het juiste scherm uitkomt.
-    const fromUrl = parseHash(window.location.hash)
-    if (fromUrl && !sameLocation(fromUrl, current.value)) apply(fromUrl)
+    // De opgeslagen navigatiestatus telt bij het openen niet mee: alleen de
+    // hash in de URL (zie startLocation).
+    const start = startLocation(window.location.hash)
+    if (!sameLocation(start, current.value)) apply(start)
 
     const loc = current.value
     currentEntry = loc

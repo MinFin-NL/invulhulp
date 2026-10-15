@@ -21,7 +21,7 @@
         <nldd-icon class="scan-tile__icon" icon="magnifier" size="24" color="accent" />
         Toepassingsscan
       </nldd-text>
-      <nldd-title size="2"><h2 class="scan-tile__title" id="scan-tile-title">
+      <nldd-title size="4"><h2 class="scan-tile__title" id="scan-tile-title">
         {{ run ? 'Kenmerken van dit dossier' : 'Welke formulieren gelden hier eigenlijk?' }}
       </h2></nldd-title>
 

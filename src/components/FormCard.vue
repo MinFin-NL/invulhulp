@@ -8,8 +8,10 @@
          zichtbaar uitgeschakeld. Een gat in de rij zou de fase onvolledig laten
          lijken. -->
     <article
-      v-if="form.placeholder"
-      class="invulhulp-card form-card form-card--placeholder"
+      class="invulhulp-card form-card"
+      :class="form.placeholder
+        ? 'form-card--placeholder'
+        : { 'form-card--ai-mode': aiActive, 'form-card--paired': paired }"
     >
       <div class="form-card__body">
         <nldd-title size="5"><h3 class="form-card__title">{{ form.title }}</h3></nldd-title>
@@ -20,7 +22,7 @@
         </ul>
         <nldd-text line-height="snug" color="inherit" size="sm" class="form-card__desc">{{ form.shortDescription }}</nldd-text>
       </div>
-      <div class="form-card__actions">
+      <div v-if="form.placeholder" class="form-card__actions">
         <nldd-tag
           class="form-card__status"
           size="sm"
@@ -35,26 +37,7 @@
           disabled
         />
       </div>
-    </article>
-
-    <article
-      v-else
-      class="invulhulp-card form-card"
-      :class="{
-        'form-card--ai-mode': aiActive,
-        'form-card--paired': paired,
-      }"
-    >
-      <div class="form-card__body">
-        <nldd-title size="5"><h3 class="form-card__title">{{ form.title }}</h3></nldd-title>
-        <ul v-if="form.domains?.length" class="form-card__domains">
-          <li v-for="domain in form.domains" :key="domain" class="form-card__domain">
-            {{ domainLabel(domain) }}
-          </li>
-        </ul>
-        <nldd-text line-height="snug" color="inherit" size="sm" class="form-card__desc">{{ form.shortDescription }}</nldd-text>
-      </div>
-      <div class="form-card__actions">
+      <div v-else class="form-card__actions">
         <!-- The beslishulp verdict, echoed on the card it belongs to. -->
         <nldd-tag
           v-if="beslishulpVerdict"

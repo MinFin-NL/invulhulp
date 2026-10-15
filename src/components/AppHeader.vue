@@ -11,20 +11,22 @@
     />
 
     <!-- Inside a dossier the header is an app toolbar, as in the RegelRecht
-         editor: top left the Dossiers | Dossier switch, top right the account.
-         The columns below carry their own title bars, so nothing else goes
-         here. Both tabs are plain hash links (useAppHistory turns the popstate
-         into the store): "Dossiers" to the list, "Dossier" — where you are —
-         to this dossier's overview. It needs the href for its semantics too:
-         in a navigation bar NLDD only puts aria-current="page" on a link. -->
+         editor: top left a home link to the dossier list, top right the
+         account. The columns below carry their own title bars (and the way
+         back to this dossier), so nothing else goes here. The home link is a
+         plain hash link: useAppHistory turns the popstate into the store. -->
     <nldd-container v-if="inDossier" padding="8">
       <nldd-toolbar label="Dossierwerkbalk">
         <nldd-toolbar-item slot="start" priority="1">
-          <nldd-tab-bar navigation accessible-label="Hoofdnavigatie">
-            <nldd-tab-bar-item text="Dossiers" href="#/dossiers" />
-            <nldd-tab-bar-item text="Dossier" :href="dossierHref" current />
-          </nldd-tab-bar>
-          <nldd-menu-item slot="overflow" text="Dossiers" icon="folder" @select="goHome" />
+          <!-- Same face as the website title on the dossier list (the
+               top-navigation-bar's own title tokens), with a house in front.
+               No NLDD component carries that title outside the bar, so this
+               is a plain link on those tokens. -->
+          <a class="invulhulp-header__home" href="#/dossiers" aria-label="FinDocs: naar alle dossiers">
+            <nldd-icon icon="house" size="24" />
+            <span>FinDocs</span>
+          </a>
+          <nldd-menu-item slot="overflow" text="FinDocs" icon="house" @select="goHome" />
         </nldd-toolbar-item>
         <nldd-toolbar-item slot="end">
           <nldd-button
@@ -168,5 +170,24 @@ function goHome() {
   top: 0;
   z-index: 30;
   border-block-end: 1px solid var(--semantics-dividers-color);
+}
+
+.invulhulp-header__home {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--primitives-space-8);
+  min-block-size: var(--semantics-controls-md-min-size);
+  padding-inline: var(--primitives-space-8);
+  border-radius: var(--primitives-corner-radius-xxs);
+  font: var(--components-top-navigation-bar-title-lg-font);
+  color: var(--semantics-content-color);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.invulhulp-header__home:focus-visible {
+  outline: var(--semantics-focus-ring-outline);
+  outline-offset: var(--semantics-focus-ring-outline-offset);
+  box-shadow: var(--semantics-focus-ring-box-shadow);
 }
 </style>

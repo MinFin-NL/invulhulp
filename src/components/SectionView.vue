@@ -25,7 +25,6 @@
 
       <nldd-banner
         variant="warning"
-        size="sm"
         v-if="saveStatus === 'error'"
         role="alert"
         text="Opslaan op de server lukt even niet. Je antwoorden staan wel op dit apparaat bewaard — bij de volgende wijziging probeert de app het opnieuw."

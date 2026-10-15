@@ -6,7 +6,7 @@
       <section class="portal-card" aria-labelledby="docs-title">
         <div class="portal-card__header">
           <div class="docs-title-row">
-            <nldd-title size="2"><h2 class="portal-card__title" id="docs-title">Brondocumenten</h2></nldd-title>
+            <nldd-title size="4"><h2 class="portal-card__title" id="docs-title">Brondocumenten</h2></nldd-title>
             <nldd-tag v-if="store.documents.length > 0" size="sm" color="accent" aria-live="polite">
               {{ store.documents.length }} {{ store.documents.length === 1 ? 'document' : 'documenten' }} beschikbaar
             </nldd-tag>

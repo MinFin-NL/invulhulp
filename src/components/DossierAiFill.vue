@@ -10,7 +10,7 @@
     aria-labelledby="bulk-ai-title"
   >
     <div class="bulk-ai__body">
-      <nldd-title size="2"><h2 class="bulk-ai__title" id="bulk-ai-title">
+      <nldd-title size="5"><h2 class="bulk-ai__title" id="bulk-ai-title">
         Vul alle formulieren in met AI
       </h2></nldd-title>
       <nldd-text color="inherit" size="sm" class="bulk-ai__desc" role="status" aria-live="polite">
@@ -105,14 +105,15 @@ const bulkAiPct = computed(() => {
 <style scoped>
 /* Draagt bewust de AI-Modus-huisstijl (blauw/paars, buiten het NLDD-palet) die
    AiModeToggle en de bannier ook gebruiken — het is dezelfde functie, dus
-   dezelfde taal. Spacing en radii blijven tokens. */
+   dezelfde taal. Spacing en radii blijven tokens. Bewust bescheiden van maat:
+   een aanbod naast de volgende stap, geen tweede hoofdzaak. */
 .bulk-ai {
   display: flex;
   align-items: center;
-  gap: var(--primitives-space-24);
+  gap: var(--primitives-space-16);
   flex-wrap: wrap;
-  margin-block-end: var(--primitives-space-40);
-  padding: var(--primitives-space-24) var(--primitives-space-32);
+  margin-block-end: var(--primitives-space-32);
+  padding: var(--primitives-space-16) var(--primitives-space-24);
   background: linear-gradient(135deg, rgba(15, 45, 92, 0.04), rgba(91, 33, 182, 0.06));
   border: 1px solid rgba(91, 33, 182, 0.2);
   border-radius: var(--primitives-corner-radius-md);
