@@ -14,6 +14,7 @@ Environment variables (can be set via .env file):
 
 import asyncio
 import json
+import logging
 import os
 import re
 import sys
@@ -46,6 +47,8 @@ import pdfextract
 import rag
 import textdedup
 import users
+
+log = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -1192,10 +1195,65 @@ class VerifyDocumentsRequest(BaseModel):
 
 @app.post("/api/documents/verify")
 async def verify_documents(req: VerifyDocumentsRequest, request: Request) -> dict:
-    """Return which doc_ids are actually present in the vector store."""
-    await dossiers.resolve_session_access(request, req.session_id, "viewer")
+    """Return which doc_ids are actually present in the vector store.
+
+    Self-heals first: a document whose chunks are gone from LanceDB but whose
+    text is still in the docstore (Azure Files) is re-indexed from that text,
+    so AI Modus keeps working without the user re-uploading. Only documents
+    that can't be restored that way are reported missing.
+    """
+    owner_sub = await dossiers.resolve_session_access(request, req.session_id, "viewer")
     found = await rag.get_indexed_doc_ids(req.session_id, req.doc_ids)
-    return {"found": found, "missing": [d for d in req.doc_ids if d not in found]}
+    missing = [d for d in req.doc_ids if d not in found]
+    if missing:
+        restored = await _reindex_from_docstore(owner_sub, req.session_id, missing)
+        found = [*found, *restored]
+        missing = [d for d in missing if d not in restored]
+    return {"found": found, "missing": missing}
+
+
+# One re-index per document at a time: AI Modus on several open tabs (or several
+# collaborators) can hit verify together, and they shouldn't all re-embed it.
+_reindex_locks: dict[str, asyncio.Lock] = {}
+
+
+async def _reindex_from_docstore(owner_sub: str, session_id: str, doc_ids: list[str]) -> list[str]:
+    """Rebuild the vector chunks of `doc_ids` from their stored text. Returns
+    the ids that were restored; failures are logged and left missing.
+
+    PDFs were chunked from their structured blocks at upload; only the rendered
+    text is stored, so a restored PDF is chunked as plain text. Tables come back
+    as prose-adjacent chunks and figures lose their image link — good enough to
+    answer from, and a re-upload brings the full structure back.
+    """
+    records = await asyncio.to_thread(docstore.list_documents, owner_sub, session_id)
+    by_id = {r["doc_id"]: r for r in records}
+    restored: list[str] = []
+    for doc_id in doc_ids:
+        record = by_id.get(doc_id)
+        if not record or not (record.get("content") or "").strip():
+            continue
+        lock = _reindex_locks.setdefault(f"{session_id}/{doc_id}", asyncio.Lock())
+        async with lock:
+            # Another request may have restored it while we waited.
+            if await rag.get_indexed_doc_ids(session_id, [doc_id]):
+                restored.append(doc_id)
+                continue
+            try:
+                result = await rag.index_document(
+                    session_id=session_id,
+                    doc_id=doc_id,
+                    doc_name=record.get("name") or doc_id,
+                    chunks=rag.chunk_document(record["content"]),
+                    embed_fn=backend.embed,
+                )
+            except Exception as e:
+                log.warning("re-index of %s (session %s) failed: %s", doc_id, session_id, e)
+                continue
+        if result["chunk_count"] > 0:
+            log.warning("re-indexed %s (session %s) from docstore: %d chunks", doc_id, session_id, result["chunk_count"])
+            restored.append(doc_id)
+    return restored
 
 
 # ---------------------------------------------------------------------------
