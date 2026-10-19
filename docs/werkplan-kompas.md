@@ -287,6 +287,36 @@ de kern:
 - Volgorde: eerst een **eval-poort** in `eval_prompts.py`, pas daarna UI. Zie §11 van het
   ontwerpdocument voor de criteria.
 
+**Eval-poort lokaal (19 oktober 2026).** `python3 backend/eval_prompts.py gap` draait twee
+kandidaatprompts: een uitvoerblok met `<aandachtspunten>` en `<bijna>` naast de gewone
+extractie, en een prompt voor de vervolgvraag. Elke extractiecase loopt twee keer, met en
+zonder paneel. Lokaal, `mistral-small3.1:24b`, 2 runs:
+
+| Criterium | Uitslag |
+|---|---|
+| 1 · geen verborgen antwoord in de aandachtspunten, bijna-citaten letterlijk | 32 van 32 |
+| 2 · vervolgvraag op het goede moment en open | 8 van 10 |
+| 3 · extract-checks met paneel tegen zonder | 28 tegen 28 van 32 |
+
+- Bij criterium 3 is de score gelijk, maar de fouten verschillen. Zonder paneel verzint
+  het model een bewaartermijn op basis van de DPIA (2 van 2 runs). Met paneel weigert
+  het terecht, maar lekt het bij de doelvraag de pilotdatum (2 van 2). De FG-vraag faalt
+  aan beide kanten: het model noemt de privacy officer.
+- Bij criterium 2 blijft één fout over: bij een volledig antwoord over risico's vraagt
+  het model toch om meer risico's, ondanks een regel daartegen. Korte complete
+  antwoorden, vage antwoorden en "weet ik niet" gaan goed, zonder voorgesteld antwoord.
+- **Stand:** lokaal niet geslaagd op criterium 2. Net als bij fase 0 beslist de run tegen
+  Azure.
+
+**Prototype in de browser (19 oktober 2026).** Om het paneel en de vervolgvraag te voelen
+vóór de Azure-run staat er een prototype achter `VITE_GAP_PROTOTYPE=true`. Het paneel
+staat onder elke vraag die AI Modus leeg liet. Voor tekstvragen is er een knop "Laat AI
+meekijken". Een banner telt de open vragen en biedt "Toon alleen open vragen".
+Afwijkingen van het ontwerp: de paneelgegevens zijn per tabblad en worden niet gedeeld
+opgeslagen; afgewezen voorstellen tellen nog niet als gat; verwante dossierantwoorden,
+doorverwijzing naar de toepassingsscan en doorwerking naar andere formulieren zitten er
+niet in.
+
 ## 8. Niet doen (bevriezen)
 
 - Nieuwe formulieren of placeholders uitwerken.

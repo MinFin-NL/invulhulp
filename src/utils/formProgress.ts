@@ -97,6 +97,32 @@ export function missingMandatoryBySubsection(
   return missing
 }
 
+/**
+ * Subsections that count as done without "Volgende": at least one visible
+ * question holds an answer and no visible mandatory question is empty.
+ * Pressing "Volgende" is not the only way through a form — the sidebar jumps
+ * between steps and AI Modus fills them — and a step filled that way used to
+ * stay at 0 in the progress bar however full it was.
+ */
+export function answeredSubsections(config: FormConfig, form?: FormState): Set<string> {
+  const answers = form?.answers ?? {}
+  const getAnswer = (questionId: string) => answers[questionId] ?? ''
+  const open = missingMandatoryBySubsection(config, form)
+  const subsectionById = new Map<string, Subsection>()
+  for (const section of config.sections) {
+    for (const sub of section.subsections) subsectionById.set(sub.id, sub)
+  }
+  const done = new Set<string>()
+  for (const stepId of computeNavOrder(config, form)) {
+    const sub = subsectionById.get(stepId)
+    if (!sub || open.has(sub.id)) continue
+    if (sub.questions.some((q) => isQuestionVisible(q, getAnswer) && isAnswered(answers[q.id]))) {
+      done.add(sub.id)
+    }
+  }
+  return done
+}
+
 /** Total number of visible mandatory questions still without an answer. */
 export function missingMandatoryCount(config: FormConfig, form?: FormState): number {
   let total = 0
@@ -116,7 +142,7 @@ export interface FormProgress {
 
 export function formProgress(config: FormConfig, form?: FormState): FormProgress {
   const stepIds = countableStepIds(config, form)
-  const done = new Set(form?.completedSections ?? [])
+  const done = new Set([...(form?.completedSections ?? []), ...answeredSubsections(config, form)])
   const completed = stepIds.filter((id) => done.has(id)).length
   const total = stepIds.length
   const missingMandatory = missingMandatoryCount(config, form)

@@ -10,6 +10,15 @@ export interface ImproveResponse {
 
 export interface RagExtractResult extends ImproveResponse {
   sources?: AnswerSource[]
+  /** Only with `withPanel` (verdiepingsgesprek prototype). */
+  panel?: GapPanel
+}
+
+/** "Wat kan helpen" next to a question the documents could not answer:
+ *  keywords, never an answer, and quotes that came close (main._parse_panel). */
+export interface GapPanel {
+  aandachtspunten: string[]
+  bijna: { citaat: string; reden: string }[]
 }
 
 export interface SynthesizeRequest {
@@ -365,6 +374,8 @@ export interface RagExtractRequest {
   /** The other questions of the same section: their topics stay out of this
    *  answer (see _scope_block in main.py). */
   relatedQuestions?: string[]
+  /** Also ask for the "Wat kan helpen" panel (prototype, VITE_GAP_PROTOTYPE). */
+  withPanel?: boolean
 }
 
 export async function extractRagStream(
@@ -389,6 +400,7 @@ export async function extractRagStream(
         doc_ids: req.docIds ?? [],
         top_k: req.topK ?? 6,
         related_questions: req.relatedQuestions ?? [],
+        with_panel: req.withPanel ?? false,
       },
       onChunk,
       onDone,
@@ -490,6 +502,9 @@ export interface BulkExtractParams {
   onRetrieved?: (qId: string, sources: AnswerSource[]) => void
   /** Called when the model responded but produced no usable answer for a question. */
   onEmpty?: (qId: string) => void
+  /** Ask for the help panel, and receive it for each question left empty. */
+  withPanel?: boolean
+  onPanel?: (qId: string, panel: GapPanel) => void
   /** A question's call starts (busy) or ends (not busy). Several can be busy at
    *  once. Drives the per-field "AI is aan het nadenken…" bar; skipped questions
    *  never fire it. */
@@ -576,7 +591,7 @@ function getAiLimit(): Promise<Limit> {
 export async function bulkExtractFromDocument(params: BulkExtractParams): Promise<number> {
   const {
     sessionId, docIds, questions, formContext, relatedQuestions, onAnswer, onSources, onRetrieved,
-    onEmpty, onProgress, onQuestionBusy, isCancelled, signal, shouldAnswer,
+    onEmpty, onProgress, onQuestionBusy, isCancelled, signal, shouldAnswer, withPanel, onPanel,
   } = params
   const limit = await getAiLimit()
   let filled = 0
@@ -605,6 +620,7 @@ export async function bulkExtractFromDocument(params: BulkExtractParams): Promis
             columns: question.columns,
             docIds,
             relatedQuestions: relatedQuestions?.[question.id],
+            withPanel,
           },
           () => {},
           (result) => {
@@ -619,6 +635,7 @@ export async function bulkExtractFromDocument(params: BulkExtractParams): Promis
             } else {
               // Model answered but found nothing usable in the documents.
               onEmpty?.(question.id)
+              if (result.panel) onPanel?.(question.id, result.panel)
             }
           },
           (err) => {
@@ -650,4 +667,32 @@ export async function bulkExtractFromDocument(params: BulkExtractParams): Promis
   report()
   await Promise.all(settled.values())
   return filled
+}
+
+/**
+ * "Laat AI meekijken" (verdiepingsgesprek prototype): one open question back
+ * about what the user's own answer still misses, or '' when nothing does. The
+ * model never writes in the answer — the user's text goes in as typed.
+ */
+export function gapFollowup(
+  req: { sessionId: string; question: string; aandachtspunten: string[]; answer: string },
+  signal?: AbortSignal,
+): Promise<string> {
+  return new Promise((resolve, reject) => {
+    void postSse<ImproveResponse>(
+      '/api/gap/followup/stream',
+      {
+        session_id: req.sessionId,
+        question: req.question,
+        aandachtspunten: req.aandachtspunten,
+        answer: req.answer,
+      },
+      () => {},
+      (result) => resolve(result.suggestion.trim()),
+      (message) => reject(new Error(message)),
+      undefined,
+      undefined,
+      { signal },
+    )
+  })
 }

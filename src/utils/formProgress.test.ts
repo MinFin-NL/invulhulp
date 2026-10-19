@@ -8,7 +8,7 @@
  * 'onvolledig' (doorgeklikt, verplichte vragen leeg) and 'afgerond'.
  */
 import { describe, it, expect } from 'vitest'
-import { formProgress, missingMandatoryBySubsection, missingMandatoryCount } from './formProgress'
+import { answeredSubsections, formProgress, missingMandatoryBySubsection, missingMandatoryCount } from './formProgress'
 import type { FormConfig, Question } from '../models/Assessment'
 import type { FormState } from '../stores/assessmentStore'
 
@@ -152,5 +152,31 @@ describe('formProgress', () => {
     expect(formProgress(CONFIG, state()).status).toBe('niet-gestart')
     expect(formProgress(CONFIG, state({ completedSections: ['a1'] })).status).toBe('bezig')
     expect(formProgress(CONFIG, state({ answers: { 'a1-verplicht': 'x' } })).status).toBe('bezig')
+  })
+})
+
+describe('answeredSubsections', () => {
+  // The sidebar jumps between steps and AI Modus fills them: neither presses
+  // "Volgende", and the progress bar stayed at 0/7 for a form full of answers.
+  it('counts a filled step without "Volgende"', () => {
+    const s = state({ answers: { 'a1-verplicht': 'x' } })
+    expect([...answeredSubsections(CONFIG, s)]).toEqual(['a1'])
+    expect(formProgress(CONFIG, s).completed).toBe(1)
+  })
+
+  it('does not count a step with a mandatory question still empty', () => {
+    const s = state({ answers: { 'a1-aanvullend': 'x' } })
+    expect(answeredSubsections(CONFIG, s).size).toBe(0)
+  })
+
+  it('does not count an empty step, nor an answer hidden by visibleIf', () => {
+    expect(answeredSubsections(CONFIG, state()).size).toBe(0)
+    const hidden = state({ answers: { 'a1-conditioneel': 'x', 'a1-keuze': 'Nee', 'a1-verplicht': '' } })
+    expect(answeredSubsections(CONFIG, hidden).size).toBe(0)
+  })
+
+  it('lets a fully filled form read afgerond without clicking through', () => {
+    const p = formProgress(CONFIG, state({ answers: { 'a1-verplicht': 'x', 'a2-verplicht': 'y' } }))
+    expect(p.status).toBe('afgerond')
   })
 })

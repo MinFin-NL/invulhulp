@@ -126,7 +126,7 @@ import { computed, ref } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAiMode } from '../composables/useAiMode'
 import type { FormConfig, NavStepSubsections, NavStepSpecialView, Subsection } from '../models/Assessment'
-import { formProgress, missingMandatoryBySubsection } from '../utils/formProgress'
+import { answeredSubsections, formProgress, missingMandatoryBySubsection } from '../utils/formProgress'
 import AiModeToggle from './AiModeToggle.vue'
 import ConfirmDialog from './ConfirmDialog.vue'
 
@@ -174,8 +174,11 @@ function completionId(step: NavStepSpecialView): string {
 // vinkje in de zijbalk en de voortgangsteller gaan over hetzelfde.
 const openMandatory = computed(() => missingMandatoryBySubsection(props.formConfig, store.activeForm))
 
+// Filled in without pressing "Volgende" (sidebar, AI Modus) counts too.
+const answered = computed(() => answeredSubsections(props.formConfig, store.activeForm))
+
 function isSubsectionDone(subId: string): boolean {
-  return store.isSectionCompleted(subId) && !openMandatory.value.has(subId)
+  return (store.isSectionCompleted(subId) || answered.value.has(subId)) && !openMandatory.value.has(subId)
 }
 
 // Doorgeklikt, maar er staan nog verplichte vragen open: geen vinkje, wel de
@@ -261,7 +264,8 @@ function positionAt(idx: number): 'first' | 'between' | 'last' {
 }
 
 const completedCount = computed(
-  () => store.completedSections.filter((id) => !openMandatory.value.has(id)).length,
+  () =>
+    new Set([...store.completedSections, ...answered.value].filter((id) => !openMandatory.value.has(id))).size,
 )
 const totalCount = computed(() => props.navOrder.filter((v) => v !== 'home' && v !== 'summary').length)
 

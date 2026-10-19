@@ -118,6 +118,14 @@
       AI vond hier geen antwoord — vul deze vraag zelf in.
     </p>
 
+    <!-- Verdiepingsgesprek prototype: what can help write the answer. -->
+    <GapHelpPanel
+      v-if="gapPanel"
+      :question="question"
+      :panel="gapPanel"
+      :answer-text="persistedAnswerText"
+    />
+
     <!-- Where a proposal came from, for as long as the answer is still that
          proposal (werkplan-kompas §5). Derived live, nothing is stored: once
          someone changes the answer, it is theirs and the note goes. -->
@@ -175,6 +183,7 @@ import CrossFormSuggestion from './CrossFormSuggestion.vue'
 import DocumentSuggestion from './DocumentSuggestion.vue'
 import SourcePanel from './SourcePanel.vue'
 import DocumentViewerModal from './DocumentViewerModal.vue'
+import GapHelpPanel from './GapHelpPanel.vue'
 import { useCrossFormMappings } from '../composables/useCrossFormMappings'
 import { useAiMode } from '../composables/useAiMode'
 import { useAssessmentStore } from '../stores/assessmentStore'
@@ -217,7 +226,12 @@ const { fragment: collabFragment, provider: collabProvider, user: collabUser } =
 // "AI is aan het nadenken…" for this field — shared over awareness, so a
 // collaborator's run shows here too.
 const { label: aiBusyLabel } = useAiBusy(computed(() => props.question.id))
-const { isAiUnanswered, clearAiUnanswered } = useAiMode()
+const { isAiUnanswered, clearAiUnanswered, gapPanelFor } = useAiMode()
+
+const gapPanel = computed(() => {
+  const formId = store.activeFormId
+  return formId ? gapPanelFor(formId, props.question.id) : undefined
+})
 
 // True while AI Mode flagged this question as unanswerable and the user hasn't
 // filled it in yet.

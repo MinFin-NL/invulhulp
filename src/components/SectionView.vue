@@ -38,8 +38,37 @@
         text="Dit onderdeel wordt door een andere partij ingevuld. AI Modus vult hier niets in — antwoorden komen alleen van de beoordelaar zelf."
       />
 
+      <!-- Verdiepingsgesprek prototype: the questions AI Modus left empty,
+           and a switch to show only those. -->
+      <nldd-banner
+        v-if="openCount > 0"
+        variant="accent"
+        :text="openCount === 1
+          ? 'AI Modus vond voor 1 vraag in dit formulier geen antwoord in de documenten.'
+          : `AI Modus vond voor ${openCount} vragen in dit formulier geen antwoord in de documenten.`"
+        supporting-text="Die vul je zelf in. Bij elke open vraag staat wat kan helpen."
+      >
+        <nldd-button
+          slot="actions"
+          variant="secondary"
+          size="sm"
+          :text="gapFilter ? 'Toon alle vragen' : 'Toon alleen open vragen'"
+          :aria-pressed="gapFilter ? 'true' : 'false'"
+          @click="gapFilter = !gapFilter"
+        />
+      </nldd-banner>
+
+      <nldd-text
+        v-if="filtering && shownSubsections.length === 0"
+        color="inherit"
+        size="sm"
+        class="section-view__subsection-desc"
+      >
+        Geen open vragen in dit onderdeel.
+      </nldd-text>
+
       <!-- Subsections -->
-      <div v-for="subsection in section.subsections" :key="subsection.id" class="invulhulp-column invulhulp-gap--lg">
+      <div v-for="subsection in shownSubsections" :key="subsection.id" class="invulhulp-column invulhulp-gap--lg">
         <div>
           <nldd-title size="2"><h2 class="section-view__subsection-title">
             {{ subsection.title }}
@@ -50,7 +79,7 @@
         </div>
 
         <QuestionItem
-          v-for="question in subsection.questions.filter((q) => isQuestionVisible(q, store.getAnswer))"
+          v-for="question in shownQuestions(subsection)"
           :key="question.id"
           :question="question"
           :modelValue="store.getAnswer(question.id)"
@@ -83,9 +112,10 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Section } from '../models/Assessment'
 import { useAssessmentStore, saveStatus, lastSavedAt } from '../stores/assessmentStore'
+import type { Question, Section, Subsection } from '../models/Assessment'
 import { isQuestionVisible } from '../utils/answerRefs'
+import { useAiMode } from '../composables/useAiMode'
 import QuestionItem from './QuestionItem.vue'
 
 const props = defineProps<{
@@ -102,6 +132,26 @@ const emit = defineEmits<{
 const store = useAssessmentStore()
 
 const nextLabel = computed(() => props.nextLabel ?? 'Volgende')
+
+const { gapFilter, gapPanelFor, gapCount } = useAiMode()
+// Empty unless the prototype flag is on: only then does AI Modus store panels.
+const openCount = computed(() => (store.activeFormId ? gapCount(store.activeFormId) : 0))
+const filtering = computed(() => gapFilter.value && openCount.value > 0)
+
+function shownQuestions(subsection: Subsection): Question[] {
+  const formId = store.activeFormId
+  return subsection.questions.filter(
+    (q) =>
+      isQuestionVisible(q, store.getAnswer) &&
+      (!filtering.value || (!!formId && gapPanelFor(formId, q.id) !== undefined)),
+  )
+}
+
+const shownSubsections = computed(() =>
+  filtering.value
+    ? props.section.subsections.filter((sub) => shownQuestions(sub).length > 0)
+    : props.section.subsections,
+)
 
 // Eyebrow label above the title. Uses the section's own `kicker` when set,
 // otherwise a generic "Deel {part}" (or "Samenvatting" for the summary part).

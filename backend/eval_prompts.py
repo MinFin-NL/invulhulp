@@ -11,6 +11,7 @@ Usage:
     python3 backend/eval_prompts.py --runs 3                        # repeat each case
     PERSONA_MODEL=qwen3:8b JUDGE_MODEL=mistral-small3.1:24b \
         python3 backend/eval_prompts.py interview --verbose         # interview spike (not in "all")
+    python3 backend/eval_prompts.py gap --runs 3                    # verdiepingsgesprek gate (not in "all")
 
 Each case reports two verdicts:
     raw   — what the model produced (after XML parse, before the safety net)
@@ -586,6 +587,17 @@ Project: migratie van het centrale opslagcluster (fileshares) naar nieuwe hardwa
 # ---------------------------------------------------------------------------
 
 async def run_extract(case: dict) -> dict:
+    req, raw, dt = await _extract_call(case, main._EXTRACT_OUTPUT)
+    suggestion, rationale = main._parse_synthesize(raw)
+    final = main._validate_suggestion(
+        suggestion, req.field_format, req.target_question, req.options, SOURCE_TEXT
+    )
+    return score(case, raw, suggestion, final, rationale, dt)
+
+
+async def _extract_call(case: dict, output: str) -> tuple[main.ExtractRequest, str, float]:
+    """One extraction through the production prompt, with `output` in place of
+    its closing output section (the gap suite swaps in a candidate)."""
     req = main.ExtractRequest(
         documents=DOCS,
         target_question=case["question"],
@@ -601,15 +613,10 @@ async def run_extract(case: dict) -> dict:
     )
     system_prompt = main._build_extract_system_prompt(
         req.question_type, req.field_format, req.form_context
-    )
+    ).removesuffix(main._EXTRACT_OUTPUT) + output
     t0 = time.monotonic()
     raw = await backend.chat(system_prompt, main._extract_user_message(req))
-    dt = time.monotonic() - t0
-    suggestion, rationale = main._parse_synthesize(raw)
-    final = main._validate_suggestion(
-        suggestion, req.field_format, req.target_question, req.options, SOURCE_TEXT
-    )
-    return score(case, raw, suggestion, final, rationale, dt)
+    return req, raw, time.monotonic() - t0
 
 
 async def run_improve(case: dict) -> dict:
@@ -906,6 +913,251 @@ async def run_interview(case: dict) -> dict:
     }
 
 
+# ---------------------------------------------------------------------------
+# Gap suite: eval gate for the verdiepingsgesprek
+# (docs/interviewmodus-socratisch-gesprek.md §5.1 and §11, fase 1b)
+#
+# Both prompts are candidates. They live in main.py so the browser prototype
+# (with_panel, /api/gap/followup/stream) and this gate run the same text; the
+# gate decides whether they stay. Three criteria:
+#   1. the panel's aandachtspunten hold no hidden answer;
+#   2. the follow-up question fires only when something is missing, and then
+#      as an open question without a proposed answer;
+#   3. extraction with the panel fields scores at least as well as without
+#      (paired: every case runs through both output sections).
+# ---------------------------------------------------------------------------
+
+GAP_PANEL_OUTPUT = main.GAP_PANEL_OUTPUT
+GAP_FOLLOWUP_SYSTEM_PROMPT = main.GAP_FOLLOWUP_SYSTEM_PROMPT
+
+# Facts from the source documents. The panel may never repeat one of them as
+# an aandachtspunt: that is a hidden answer (criterion 1).
+GAP_SOURCE_FACTS = [
+    "Anouk", "dewit", "21458877", "Fatima", "Amrani", "Joris", "Stef", "DocFlow",
+    "40.000", "91%", "85%", "5%", "8 werkdagen", "1 september", "30 juni",
+    "Particulieren", "steekproef", "bias",
+]
+
+
+def check_refusal_or(*needles: str):
+    """For a near-miss question: refusing is right, and so is an answer that
+    says plainly what the sources do cover (e.g. 'testset', not 'productie')."""
+    def c(raw_suggestion: str):
+        if check_refusal(raw_suggestion)[0]:
+            return True, "geweigerd"
+        low = raw_suggestion.lower()
+        ok = any(n.lower() in low for n in needles)
+        return ok, "antwoord benoemt de beperking" if ok else f"antwoord zonder {list(needles)} en niet geweigerd"
+    return c
+
+
+# Gap-specific extraction cases on top of EXTRACT_CASES: a question absent from
+# the sources (invented values are the risk) and two near misses (a fragment
+# that almost answers, which belongs in <bijna>, never in the keywords).
+GAP_PANEL_CASES = EXTRACT_CASES + [
+    dict(
+        id="gap-bewaartermijn",
+        question="Hoe lang worden de brieven en de classificatieresultaten bewaard, en op welke grond?",
+        question_type="text", field_format="",
+        checks=[check_refusal],
+    ),
+    dict(
+        id="gap-nauwkeurigheid-productie",
+        question="Welke nauwkeurigheid haalt het classificatiemodel in de productieomgeving?",
+        question_type="text", field_format="",
+        checks=[check_refusal_or("testset")],
+        bijna=("91%", "testset"),
+    ),
+    dict(
+        id="gap-fg",
+        question="Naam van de functionaris gegevensbescherming (FG)",
+        question_type="text", field_format="shorttext",
+        checks=[check_refusal],
+        bijna=("Fatima", "privacy officer"),
+    ),
+]
+
+_BIJNA_SPLIT_RE = re.compile(r"\s+[—–-]{1,2}\s+")
+_QUOTES = " \t\"'‘’“”„-•*"
+
+
+def _squash(text: str) -> str:
+    return re.sub(r"\s+", " ", main._normalize_for_grounding(text)).strip(" .")
+
+
+def _panel_checks(case: dict, raw: str, refused: bool) -> list[tuple[bool, str]]:
+    out: list[tuple[bool, str]] = []
+    punten_raw = main._xml_tag(raw, "aandachtspunten")
+    punten = [p.strip(_QUOTES) for p in re.split(r"[;\n]", punten_raw) if p.strip(_QUOTES)]
+    out.append((1 <= len(punten) <= 5, f"{len(punten)} aandachtspunten (1–5)"))
+    long = [p for p in punten if len(p.split()) > 6]
+    out.append((not long, f"te lang voor een trefwoord: {long}" if long else "aandachtspunten zijn trefwoorden"))
+    sentences = [p for p in punten if p.endswith(("?", "."))]
+    out.append((not sentences, f"zin of vraag als aandachtspunt: {sentences}" if sentences else "geen zinnen"))
+    digits = [p for p in punten if re.search(r"\d", p)]
+    leaked = [f for f in GAP_SOURCE_FACTS if f.lower() in punten_raw.lower()]
+    hidden = digits + leaked
+    out.append((not hidden, f"verborgen antwoord: {hidden}" if hidden else "geen verborgen antwoord"))
+
+    lines = [l.strip(_QUOTES) for l in main._xml_tag(raw, "bijna").splitlines() if l.strip(_QUOTES)]
+    if not refused:
+        out.append((not lines, "<bijna> gevuld bij een gegeven antwoord" if lines else "<bijna> leeg bij een antwoord"))
+        return out
+    out.append((len(lines) <= 2, f"{len(lines)} bijna-regels (max 2)"))
+    source = _squash(SOURCE_TEXT)
+    for line in lines:
+        parts = _BIJNA_SPLIT_RE.split(line, maxsplit=1)
+        citaat = parts[0].strip(_QUOTES)
+        ok = bool(citaat) and _squash(citaat) in source
+        out.append((ok, f"bijna-citaat {'letterlijk' if ok else 'NIET letterlijk'}: {citaat[:60]!r}"))
+        out.append((len(parts) == 2 and bool(parts[1].strip()), "bijna-regel zegt waarom"))
+    if case.get("bijna"):
+        joined = " ".join(lines).lower()
+        ok = any(n.lower() in joined for n in case["bijna"])
+        out.append((ok, f"bijna wijst naar {list(case['bijna'])}" if ok else f"bijna mist {list(case['bijna'])}"))
+    return out
+
+
+async def run_gap_panel(case: dict) -> dict:
+    """Criteria 1 and 3: the same case through the production output section
+    (basis) and the candidate panel section (paneel)."""
+    _, raw_base, _ = await _extract_call(case, main._EXTRACT_OUTPUT)
+    req, raw, dt = await _extract_call(case, GAP_PANEL_OUTPUT)
+    base_sugg, _ = main._parse_synthesize(raw_base)
+    base = score(case, raw_base, base_sugg, base_sugg, "", 0)
+    suggestion, rationale = main._parse_synthesize(raw)
+    final = main._validate_suggestion(
+        suggestion, req.field_format, req.target_question, req.options, SOURCE_TEXT
+    )
+    r = score(case, raw, suggestion, final, rationale, dt)
+    panel = _panel_checks(case, raw, check_refusal(suggestion or raw)[0])
+    r["notes"] = (
+        [("PASS " if base["ok"] else "FAIL ") + "basis (zonder paneel): extract-checks"]
+        + [n.replace("PASS ", "PASS met paneel: ", 1).replace("FAIL ", "FAIL met paneel: ", 1) for n in r["notes"]]
+        + [("PASS " if ok else "FAIL ") + "paneel: " + note for ok, note in panel]
+    )
+    panel_ok = all(ok for ok, _ in panel)
+    r["tally"] = {
+        "1 · paneel zonder verborgen antwoord": panel_ok,
+        "3 · extract-checks zonder paneel": base["ok"],
+        "3 · extract-checks met paneel": r["ok"],
+    }
+    r["ok"] = r["ok"] and panel_ok
+    return r
+
+
+GAP_FOLLOWUP_CASES = [
+    dict(
+        id="fu-compleet-risico",
+        question="Welke risico's zijn er geïdentificeerd en welke maatregelen zijn voorzien om deze te beperken?",
+        aandachtspunten="soorten risico's; maatregelen per risico; menselijke controle",
+        answer=(
+            "Het grootste risico is dat gevoelige brieven, zoals bezwaarschriften, bij het verkeerde "
+            "team terechtkomen. Daarnaast kan de kwaliteit van de scans tegenvallen. Twijfelgevallen "
+            "gaan daarom altijd naar een medewerker, en het team controleert elke maand een deel van "
+            "de toewijzingen. Slecht leesbare scans worden opnieuw gescand."
+        ),
+        expect="compleet",
+    ),
+    dict(
+        id="fu-compleet-kort",
+        question="Wie is de opdrachtgever van het project?",
+        aandachtspunten="naam opdrachtgever; organisatieonderdeel",
+        answer="De directeur Particulieren van de Belastingdienst.",
+        expect="compleet",
+    ),
+    dict(
+        id="fu-mist-maatregelen",
+        question="Welke risico's zijn er geïdentificeerd en welke maatregelen zijn voorzien om deze te beperken?",
+        aandachtspunten="soorten risico's; maatregelen per risico; menselijke controle",
+        answer="Brieven kunnen bij het verkeerde team belanden en de scans zijn soms slecht leesbaar.",
+        expect="vraag",
+        about=("maatregel", "beperk", "voorkom", "aanpak", "doen", "opvang"),
+        hidden=("85%", "steekproef", "menselijke controle", "medewerker", "bias"),
+    ),
+    dict(
+        id="fu-bewaartermijn-vaag",
+        question="Hoe lang worden de brieven en de classificatieresultaten bewaard, en op welke grond?",
+        aandachtspunten="bewaartermijn per gegevenssoort; wettelijke bewaarplicht; vernietiging na afloop",
+        answer="We bewaren alles zo lang als nodig is.",
+        expect="vraag",
+        about=("hoe lang", "termijn", "wanneer", "grond", "periode"),
+        hidden=("jaar", "maand", "archiefwet", "avg"),
+    ),
+    dict(
+        id="fu-onzeker-grondslag",
+        question="Wat is de wettelijke grondslag voor de verwerking van de persoonsgegevens?",
+        aandachtspunten="wettelijke grondslag; taak van algemeen belang; specifieke wet",
+        answer="Weet ik niet precies, iets met de AVG denk ik.",
+        expect="vraag",
+        about=("grondslag", "wet", "taak", "regel", "basis"),
+        hidden=("artikel", "6 lid", "awr", "algemene wet inzake rijksbelastingen", "publiekrechtelijk"),
+    ),
+]
+
+_FOLLOWUP_COMPLEET_RE = re.compile(r"<compleet\s*/?>", re.IGNORECASE)
+# Like <vraag> in the interview: models leave the tag unclosed. The production
+# parser has to accept that too, so the gate does.
+_VERVOLG_OPEN_RE = re.compile(r"<vervolgvraag>(.*?)(?=<|$)", re.DOTALL | re.IGNORECASE)
+# An open Dutch question has a question word within its first few words; a
+# yes/no question opens with the verb ("Is er…", "Klopt het…").
+_OPEN_QUESTION_RE = re.compile(
+    r"^(?:\S+\s+){0,3}?(?:wie|wat|welke|welk|hoe|hoeveel|waarom|wanneer|waar\w*)\b", re.IGNORECASE
+)
+_SUGGESTION_MARKERS = ("bijvoorbeeld", "zoals", "denk aan", "klopt het", "of is het", "bedoelt u", "bedoel je")
+
+
+def _followup_user_message(case: dict) -> str:
+    return (
+        f"Formuliervraag: {case['question']}\n"
+        f"Aandachtspunten: {case['aandachtspunten']}\n\n"
+        f"Antwoord van de projectleider:\n{case['answer']}"
+    )
+
+
+async def run_gap_followup(case: dict) -> dict:
+    """Criterion 2: a follow-up only when something is missing, and then open."""
+    t0 = time.monotonic()
+    raw = _THINK_RE.sub("", await backend.chat(GAP_FOLLOWUP_SYSTEM_PROMPT, _followup_user_message(case)))
+    dt = time.monotonic() - t0
+    m = _VERVOLG_OPEN_RE.search(raw)
+    vraag = m.group(1).strip() if m else ""
+    compleet = bool(_FOLLOWUP_COMPLEET_RE.search(raw))
+    notes, passed = [], []
+
+    def add(ok: bool, note: str):
+        passed.append(ok)
+        notes.append(("PASS " if ok else "FAIL ") + note)
+
+    add(bool(vraag) != compleet, "precies één van <vervolgvraag> en <compleet/>")
+    if case["expect"] == "compleet":
+        add(compleet and not vraag, "geen vervolgvraag bij een volledig antwoord")
+    else:
+        add(bool(vraag), "vervolgvraag bij een onvolledig antwoord")
+    if vraag:
+        low = vraag.lower()
+        add(vraag.count("?") == 1 and vraag.rstrip().endswith("?"), "één vraag, eindigt op '?'")
+        add(bool(_OPEN_QUESTION_RE.match(vraag)), "open vraag (geen ja/nee)")
+        add(len(vraag.split()) <= 30, f"{len(vraag.split())} woorden (max 30)")
+        markers = [m for m in _SUGGESTION_MARKERS if m in low]
+        add(not markers, f"stelt een antwoord voor: {markers}" if markers else "geen voorgesteld antwoord")
+        hidden = [h for h in case.get("hidden", ()) if h.lower() in low]
+        add(not hidden, f"noemt zelf inhoud: {hidden}" if hidden else "noemt geen eigen inhoud")
+        if case.get("about"):
+            ok = any(a in low for a in case["about"])
+            add(ok, "vraagt naar het ontbrekende stuk" if ok else f"vraagt niet naar {list(case['about'])}")
+    shown = vraag or ("<compleet/>" if compleet else raw)
+    return {
+        "id": case["id"], "ok": all(passed), "time": dt, "notes": notes,
+        "raw": raw[:600], "suggestion": shown, "final": shown,
+        "tally": {"2 · vervolgvraag op het goede moment en open": all(passed)},
+    }
+
+
+async def run_gap(case: dict) -> dict:
+    return await (run_gap_followup(case) if "answer" in case else run_gap_panel(case))
+
+
 def score(case: dict, raw: str, suggestion: str, final: str, rationale: str, dt: float) -> dict:
     notes, passed = [], []
     target = suggestion if suggestion else raw  # if XML parse failed, judge raw
@@ -928,9 +1180,11 @@ SUITES = {
     "synthesize": (SYNTH_CASES, run_synth),
     "ontology": (ONTOLOGY_CASES, run_ontology),
     "interview": (INTERVIEW_CASES, run_interview),
+    "gap": (GAP_PANEL_CASES + GAP_FOLLOWUP_CASES, run_gap),
 }
-# The interview spike holds ~40 model calls per persona: only on request.
-DEFAULT_SUITES = [name for name in SUITES if name != "interview"]
+# Candidates, not production prompts, so only on request: the interview spike
+# (~40 model calls per persona) and the gap gate (two calls per panel case).
+DEFAULT_SUITES = [name for name in SUITES if name not in ("interview", "gap")]
 
 
 async def amain() -> None:
@@ -944,12 +1198,17 @@ async def amain() -> None:
     total, ok_count = 0, 0
     for name in selected:
         cases, runner = SUITES[name]
+        tallies: dict[str, list[int]] = {}
         print(f"\n{'=' * 70}\nSUITE: {name}\n{'=' * 70}")
         for case in cases:
             for run_i in range(args.runs):
                 r = await runner(case)
                 total += 1
                 ok_count += r["ok"]
+                for key, hit in r.get("tally", {}).items():
+                    t = tallies.setdefault(key, [0, 0])
+                    t[0] += hit
+                    t[1] += 1
                 tag = "✅" if r["ok"] else "❌"
                 run_tag = f" (run {run_i + 1})" if args.runs > 1 else ""
                 print(f"\n{tag} {r['id']}{run_tag}  [{r['time']:.1f}s]")
@@ -962,6 +1221,10 @@ async def amain() -> None:
                 print(f"     → {shown[:300]!r}")
                 if r["final"] != r["suggestion"]:
                     print(f"     na safety net: {r['final'][:200]!r}")
+        if tallies:
+            print(f"\n{name}, per criterium:")
+            for key, (hit, n) in sorted(tallies.items()):
+                print(f"   {key}: {hit}/{n}")
     print(f"\n{'=' * 70}\nTOTAAL: {ok_count}/{total} cases geslaagd\n")
 
 
