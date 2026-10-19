@@ -146,13 +146,6 @@ def check_option_verbatim(options: list[str], expected: list[str]):
     return c
 
 
-def check_max_occurrences(needle: str, n: int):
-    def c(raw_suggestion: str):
-        count = raw_suggestion.lower().count(needle.lower())
-        return count <= n, f"'{needle}' komt {count}x voor (max {n})"
-    return c
-
-
 def check_max_words(n: int):
     def c(raw_suggestion: str):
         words = len(raw_suggestion.split())

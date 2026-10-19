@@ -24,7 +24,7 @@ const EXACT_MATCH_MAX_CHARS = 120
 
 const STOPWORD_MIN_WORD_LENGTH = 4
 
-export function stripHtml(html: string): string {
+function stripHtml(html: string): string {
   const doc = new DOMParser().parseFromString(html, 'text/html')
   return doc.body.textContent ?? ''
 }

@@ -101,7 +101,7 @@
       <p v-if="question.guidance" class="invulhulp-question__guidance">
         {{ question.guidance }}
       </p>
-      <TableQuestion :question="question" v-model="tableModel" />
+      <TableQuestion :question="question" v-model="textModel" />
     </fieldset>
 
     <!-- Image attachments (opt-in per question via the form JSON); embedded
@@ -276,19 +276,8 @@ function showSourceDocument(source: AnswerSource) {
   docViewer.value?.open(source, persistedAnswerText.value)
 }
 
+// Also backs TableQuestion: table answers are one serialized JSON string.
 const textModel = computed({
-  get() {
-    return typeof props.modelValue === 'string' ? props.modelValue : ''
-  },
-  set(val: string) {
-    emit('update:modelValue', val)
-    store.dismissSourceWarning(props.question.id)
-    clearUnanswered()
-  },
-})
-
-// Same contract as textModel: table answers are one serialized JSON string.
-const tableModel = computed({
   get() {
     return typeof props.modelValue === 'string' ? props.modelValue : ''
   },
