@@ -149,7 +149,7 @@ import BeslishulpTile from './BeslishulpTile.vue'
 defineEmits<{ open: [id: string]; beslishulp: [] }>()
 
 const store = useAssessmentStore()
-const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModePhase, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone, hasSmoothingUndo, undoSmoothing } = useAiMode()
+const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone } = useAiMode()
 const {
   verdictFor,
   applicableForms,
@@ -200,8 +200,6 @@ function cardProps(form: FormIndexEntry) {
     aiDoneFilled: aiModeDone.value[form.id] ?? 0,
     aiDoneTotal: aiModeTotal.value[form.id] ?? 0,
     aiProgress: aiModeProgress.value[form.id] ?? null,
-    aiPhase: aiModePhase.value[form.id] ?? null,
-    canUndoSmoothing: hasSmoothingUndo(form.id),
   }
 }
 
@@ -209,7 +207,6 @@ const cardHandlers = {
   activate: startAiMode,
   cancel: cancelAiMode,
   dismiss: dismissAiModeDone,
-  undoSmoothing: undoSmoothing,
 }
 
 /** NLDD's step vocabulary for the vertical spine. `empty` has no counterpart —

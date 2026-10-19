@@ -15,14 +15,14 @@
       </h2></nldd-title>
       <nldd-text color="inherit" size="sm" class="bulk-ai__desc" role="status" aria-live="polite">
         <template v-if="dossierAiRun">
-          Formulier {{ dossierAiRun.current + 1 }} van {{ dossierAiRun.formIds.length }}: {{ runningFormTitle }}<template
-            v-if="runningProgress"
-          > · {{ runningProgress.filled }}/{{ runningProgress.total }} velden</template>
+          {{ dossierAiRun.formIds.length === 1 ? '1 formulier' : `${dossierAiRun.formIds.length} formulieren tegelijk` }}<template
+            v-if="runProgress.total > 0"
+          > · {{ runProgress.done }}/{{ runProgress.total }} vragen</template>
         </template>
         <template v-else-if="readyDocIds.length > 0">
           {{ bulkFillForms.length }}
           {{ bulkFillForms.length === 1 ? 'formulier is' : 'formulieren zijn' }} nog leeg.
-          AI Modus vult ze één voor één in op basis van je {{ readyDocIds.length }}
+          AI Modus vult ze tegelijk in op basis van je {{ readyDocIds.length }}
           brondocument{{ readyDocIds.length === 1 ? '' : 'en' }}. Je controleert daarna elk antwoord —
           met bronverwijzing per vraag.
         </template>
@@ -78,27 +78,25 @@ defineProps<{ uploadHere?: boolean }>()
 
 const store = useAssessmentStore()
 const { aiModeProgress, readyDocIds, dossierAiRun, startDossierAiMode, cancelDossierAiMode } = useAiMode()
-const { forms, bulkFillForms, primaryAction } = useDossierForms()
+const { bulkFillForms, primaryAction } = useDossierForms()
 
-const runningFormTitle = computed(() => {
-  const formId = dossierAiRun.value?.formId
-  if (!formId) return ''
-  return forms.value.find((f) => f.id === formId)?.title ?? formId
+// De formulieren lopen naast elkaar, dus de voortgang is die van alle vragen
+// samen. Een formulier dat zijn vragen nog niet kent telt nog niet mee.
+const runProgress = computed(() => {
+  let done = 0
+  let total = 0
+  for (const formId of dossierAiRun.value?.formIds ?? []) {
+    const p = aiModeProgress.value[formId]
+    if (!p) continue
+    done += p.done
+    total += p.total
+  }
+  return { done, total }
 })
 
-const runningProgress = computed(() => {
-  const formId = dossierAiRun.value?.formId
-  return formId ? aiModeProgress.value[formId] ?? null : null
-})
-
-// Voortgang over de hele rij: afgeronde formulieren plus het deel van het
-// formulier dat nu loopt, zodat de balk ook binnen één lang formulier beweegt.
 const bulkAiPct = computed(() => {
-  const run = dossierAiRun.value
-  if (!run || run.formIds.length === 0) return 0
-  const p = runningProgress.value
-  const within = p && p.total > 0 ? p.filled / p.total : 0
-  return Math.round(((run.current + within) / run.formIds.length) * 100)
+  const { done, total } = runProgress.value
+  return total === 0 ? 0 : Math.round((done / total) * 100)
 })
 </script>
 

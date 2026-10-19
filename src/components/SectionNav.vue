@@ -78,12 +78,9 @@
         :done-filled-count="aiModeDone[formConfig.id] ?? 0"
         :done-total-count="aiModeTotal[formConfig.id] ?? 0"
         :progress="aiModeProgress[formConfig.id] ?? null"
-        :phase="aiModePhase[formConfig.id] ?? null"
-        :can-undo-smoothing="hasSmoothingUndo(formConfig.id)"
         @activate="startAiMode"
         @cancel="cancelAiMode"
         @dismiss="dismissAiModeDone"
-        @undo-smoothing="undoSmoothing"
       />
       <nldd-text line-height="snug" size="xxs" color="inherit" class="invulhulp-nav__ai-hint">
         <template v-if="readyDocIds.length > 0">
@@ -141,7 +138,7 @@ const props = defineProps<{
 const emit = defineEmits<{ navigate: [viewId: string] }>()
 
 const store = useAssessmentStore()
-const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, aiModePhase, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone, hasSmoothingUndo, undoSmoothing } = useAiMode()
+const { aiModeActive, aiModeProgress, aiModeDone, aiModeTotal, readyDocIds, startAiMode, cancelAiMode, dismissAiModeDone } = useAiMode()
 
 const riskLabels: Record<string, string> = {
   onaanvaardbaar: 'Verboden',

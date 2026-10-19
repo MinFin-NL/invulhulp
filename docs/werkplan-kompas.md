@@ -249,10 +249,49 @@ uitkomst. §9.4 waarschuwt dat een lokale test weinig zegt over de productieback
 (Azure). De suite draait ongewijzigd tegen Azure (`AZURE_OPENAI_ENDPOINT` gezet); die run
 is de echte beslissing, en daarbij gaat alleen verzonnen projectinhoud naar Azure.
 
+### Bijsturing (16 oktober 2026): twee trajecten
+
+Het startgesprek wacht op de Azure-run. Intussen is stap 4 opgesplitst in twee trajecten
+die daar niet van afhangen. Aanleiding: de invuller wil dat de AI nadrukkelijk vraagt naar
+wat de brondocumenten missen, en AI-Modus was traag ("stap voor stap en dan er nog een
+keer overheen").
+
+**Traject 1: AI-Modus parallel (gebouwd).**
+
+- Alle vragen van alle formulieren in een dossierrun delen één wachtrij (`createLimit` in
+  `src/services/llmService.ts`). De breedte komt van `GET /api/ai/limits`
+  (`LLM_MAX_CONCURRENCY`, standaard Azure 6, Ollama 1); `llm.LimitedBackend` begrenst
+  dezelfde waarde ook op de server.
+- Een vraag met `visibleIf` wacht op het antwoord van haar stuurvraag; Stoppen breekt
+  lopende verzoeken echt af.
+- De gladstrijkronde is **verwijderd**, met endpoint, prompt en ongedaan-knoppen. In de
+  plaats daarvan krijgt elke extractie van een lange tekstvraag de andere vragen uit
+  dezelfde sectie mee (`_scope_block` in `backend/main.py`): "laat hun onderwerp weg, maar
+  weiger niet om die reden".
+- Eval (extract, lokaal `mistral-small3.1:24b`, 2 runs): zonder het blok lekte de
+  doelvraag in beide runs alle vijf feiten van andere vragen; met het blok één run
+  schoon en één met één gelekt feit. Het helpt duidelijk, het is niet waterdicht.
+  Herhaling tussen antwoorden wordt niet meer gerepareerd; dat verlies is bewust
+  geaccepteerd. Valt het in de praktijk tegen, dan is de terugvaloptie een knop
+  "formulier gladstrijken" die de invuller zelf indrukt.
+
+**Traject 2: verdiepingsgesprek naar voren (niet gebouwd).** Het verdiepingsgesprek uit
+`interviewmodus-socratisch-gesprek.md` §5, losgemaakt van het startgesprek. Ontwerp daar;
+de kern:
+
+- Een **gat** is deterministisch: een vraag die AI-Modus leeg liet of waarvan het
+  voorstel is afgewezen. Geen modeloordeel over wat ontbreekt.
+- Per gat een **leeg echt invoerveld** (tekst, radio, checkbox of tabel) met daarnaast
+  een paneel "Wat kan helpen". **Nooit een conceptantwoord**: de mens houdt de leiding.
+- Getoond als filter "alleen open vragen" in het gewone formulier, met een banner.
+- Volgorde: eerst een **eval-poort** in `eval_prompts.py`, pas daarna UI. Zie §11 van het
+  ontwerpdocument voor de criteria.
+
 ## 8. Niet doen (bevriezen)
 
 - Nieuwe formulieren of placeholders uitwerken.
-- AI-Modus (bulk invullen uit documenten) uitbreiden; het blijft werken zoals het is.
+- AI-Modus (bulk invullen uit documenten) uitbreiden. Uitzondering: traject 1 van §7
+  (parallel en zonder gladstrijken) is gebouwd; verder blijft het zoals het is.
 - RAG-, graaf- en ontologie-uitbreidingen.
 
 ## 9. Buiten Claude Code: de validatie
@@ -275,4 +314,4 @@ beslissen of de richting klopt; doe ze parallel aan stap 0–1:
 | 1 | Oriëntatie in Overzicht | 0 |
 | 2 | Kenmerkvragen + voorblad voorinvullen, ontbrekende mappings | 0, open beslissing §5 |
 | 3 | Herkomst: geparkeerd, wordt een loggingstap ([`herkomst-en-logging.md`](herkomst-en-logging.md)) | 2 |
-| 4 | Gesprek: spike niet geslaagd op het lokale model; Azure-run beslist | 2 (fase 0 kan direct) |
+| 4 | Gesprek: startgesprek wacht op de Azure-run. Traject 1 (AI-Modus parallel) gebouwd; traject 2 (verdiepingsgesprek) wacht op zijn eval-poort | 2 (fase 0 kan direct); traject 2 hangt alleen van AI-Modus af |

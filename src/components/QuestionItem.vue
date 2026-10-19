@@ -125,20 +125,6 @@
       {{ feitHerkomst }}
     </p>
 
-    <!-- Smoothing rewrote this answer to remove repetition; offer the original back -->
-    <p v-if="showAiSmoothed" class="invulhulp-question__ai-smoothed" role="note">
-      <span class="invulhulp-question__ai-smoothed-text">
-        Gladgestreken door AI Modus — herhaling uit andere antwoorden is geschrapt.
-      </span>
-      <nldd-button
-        variant="neutral-transparent"
-        size="sm"
-        text="Herstel origineel"
-        v-if="store.canEdit"
-        @click="restoreBeforeSmoothing"
-      />
-    </p>
-
     <!-- Persisted citations for AI-extracted answers (AI Mode / accepted suggestions) -->
     <SourcePanel
       v-if="sourceMeta"
@@ -231,7 +217,7 @@ const { fragment: collabFragment, provider: collabProvider, user: collabUser } =
 // "AI is aan het nadenken…" for this field — shared over awareness, so a
 // collaborator's run shows here too.
 const { label: aiBusyLabel } = useAiBusy(computed(() => props.question.id))
-const { isAiUnanswered, clearAiUnanswered, isAiSmoothed, clearAiSmoothed, undoSmoothingFor } = useAiMode()
+const { isAiUnanswered, clearAiUnanswered } = useAiMode()
 
 // True while AI Mode flagged this question as unanswerable and the user hasn't
 // filled it in yet.
@@ -244,25 +230,6 @@ const showAiUnanswered = computed(() => {
 function clearUnanswered() {
   const formId = store.activeFormId
   if (formId) clearAiUnanswered(formId, props.question.id)
-}
-
-// True while the smoothing pass's rewrite of this answer still stands.
-const showAiSmoothed = computed(() => {
-  const formId = store.activeFormId
-  return !!formId && isAiSmoothed(formId, props.question.id)
-})
-
-function restoreBeforeSmoothing() {
-  const formId = store.activeFormId
-  if (formId) undoSmoothingFor(formId, props.question.id)
-}
-
-/** The user edited a smoothed answer: the snapshot no longer describes it.
- *  A no-op while the value still equals what smoothing wrote — the editor
- *  echoes that back through v-model when the store write lands. */
-function clearSmoothed(value: string) {
-  const formId = store.activeFormId
-  if (formId) clearAiSmoothed(formId, props.question.id, value)
 }
 
 // Table questions can't be filled by the synthesize flow (it produces free
@@ -303,7 +270,6 @@ const textModel = computed({
     emit('update:modelValue', val)
     store.dismissSourceWarning(props.question.id)
     clearUnanswered()
-    clearSmoothed(val)
   },
 })
 
@@ -353,7 +319,6 @@ function onApplySuggestion(value: string | string[], meta?: AnswerSourceMeta) {
   emit('update:modelValue', value)
   if (meta) store.setAnswerSources(props.question.id, meta)
   clearUnanswered()
-  if (typeof value === 'string') clearSmoothed(value)
 }
 
 const checkboxValues = computed(() =>
@@ -477,9 +442,8 @@ function onCheckboxChange(option: string, checked: boolean) {
   flex-shrink: 0;
 }
 
-/* Informational, not a warning: quieter than the ai-empty notice above. The
-   provenance note shares the look — it says where an answer came from. */
-.invulhulp-question__ai-smoothed,
+/* Informational, not a warning: quieter than the ai-empty notice above. It
+   says where an answer came from. */
 .invulhulp-question__provenance {
   display: flex;
   align-items: center;
@@ -492,9 +456,5 @@ function onCheckboxChange(option: string, checked: boolean) {
   border-radius: var(--primitives-corner-radius-sm);
   font-size: var(--primitives-font-size-90);
   color: var(--semantics-content-secondary-color);
-}
-
-.invulhulp-question__ai-smoothed-text {
-  flex: 1 1 auto;
 }
 </style>

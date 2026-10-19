@@ -678,7 +678,7 @@ export const useAssessmentStore = defineStore('assessment', {
 
     /** Apply several answer mutations to one dossier as a single atomic doc
      *  transaction — collaborators see them land together and it's one undo step
-     *  (e.g. an AI Modus smoothing undo restoring many answers at once). The
+     *  (e.g. restoring many answers at once). The
      *  mirror + server push fire once for the whole batch. */
     batchAnswers(dossierId: DossierId, fn: () => void) {
       const doc = this._docFor(dossierId)
@@ -960,16 +960,6 @@ export const useAssessmentStore = defineStore('assessment', {
       const id = dossierId ?? this.activeDossierId
       if (!id || !this.dossiers[id]) return
       this._docFor(id)?.setAnswerSources(formId, questionId, meta)
-    },
-
-    /** Smoothing rewrote this answer: keep the citations, but record that they
-     *  describe the pre-smoothing text. No-op when there are none. */
-    markAnswerSmoothed(formId: string, questionId: string, dossierId?: DossierId) {
-      const id = dossierId ?? this.activeDossierId
-      if (!id || !this.dossiers[id]) return
-      const meta = this.dossiers[id].forms[formId]?.answerSources?.[questionId]
-      if (!meta) return
-      this._docFor(id)?.setAnswerSources(formId, questionId, { ...meta, smoothedAt: Date.now() })
     },
 
     setAnswerSources(questionId: string, meta: AnswerSourceMeta) {

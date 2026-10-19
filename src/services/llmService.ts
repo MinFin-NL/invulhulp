@@ -49,10 +49,9 @@ async function postJsonOrThrow<T>(url: string, body: unknown): Promise<T> {
   return response.json() as Promise<T>
 }
 
-/** Extra event handlers that only some streams emit, kept out of the positional
- *  callback list. `signal` aborts the request (used to cancel AI Modus). */
+/** Options kept out of the positional callback list. `signal` aborts the
+ *  request (used to cancel AI Modus). */
 interface SseOptions {
-  onBatch?: (data: SmoothBatchEvent) => void
   signal?: AbortSignal
 }
 
@@ -63,7 +62,6 @@ async function parseSseStream<T = RagExtractResult>(
   onError: (message: string) => void,
   onClarification?: (question: string) => void,
   onDiagram?: (mermaid: string) => void,
-  opts: SseOptions = {},
 ): Promise<void> {
   const reader = response.body!.getReader()
   const decoder = new TextDecoder()
@@ -88,7 +86,6 @@ async function parseSseStream<T = RagExtractResult>(
       try {
         const parsed = JSON.parse(data)
         if (eventType === 'chunk') onChunk(parsed.text ?? '')
-        else if (eventType === 'batch') opts.onBatch?.(parsed as SmoothBatchEvent)
         else if (eventType === 'done') onDone(parsed as T)
         else if (eventType === 'clarification') onClarification?.(parsed.question ?? '')
         else if (eventType === 'diagram') onDiagram?.(parsed.mermaid ?? '')
@@ -124,7 +121,7 @@ async function postSse<T>(
     onError(await readErrorDetail(response))
     return
   }
-  await parseSseStream<T>(response, onChunk, onDone, onError, onClarification, onDiagram, opts)
+  await parseSseStream<T>(response, onChunk, onDone, onError, onClarification, onDiagram)
 }
 
 export interface ImproveStreamOptions {
@@ -365,6 +362,9 @@ export interface RagExtractRequest {
   columns?: TableColumn[]
   docIds?: string[]
   topK?: number
+  /** The other questions of the same section: their topics stay out of this
+   *  answer (see _scope_block in main.py). */
+  relatedQuestions?: string[]
 }
 
 export async function extractRagStream(
@@ -372,6 +372,7 @@ export async function extractRagStream(
   onChunk: (text: string) => void,
   onDone: (result: RagExtractResult) => void,
   onError: (message: string) => void,
+  signal?: AbortSignal,
 ): Promise<void> {
   try {
     await postSse(
@@ -387,10 +388,14 @@ export async function extractRagStream(
         columns: req.columns ?? [],
         doc_ids: req.docIds ?? [],
         top_k: req.topK ?? 6,
+        related_questions: req.relatedQuestions ?? [],
       },
       onChunk,
       onDone,
       onError,
+      undefined,
+      undefined,
+      { signal },
     )
   } catch (e) {
     onError(e instanceof Error ? e.message : 'Stream verbroken')
@@ -474,6 +479,8 @@ export interface BulkExtractParams {
   docIds: string[]
   questions: Question[]
   formContext?: string
+  /** Per question id, the other questions of its section (see RagExtractRequest). */
+  relatedQuestions?: Record<string, string[]>
   onAnswer: (qId: string, value: string | string[]) => void
   onSources?: (qId: string, meta: AnswerSourceMeta) => void
   /** All retrieved chunks for an answered question, before the grounding filter
@@ -483,16 +490,19 @@ export interface BulkExtractParams {
   onRetrieved?: (qId: string, sources: AnswerSource[]) => void
   /** Called when the model responded but produced no usable answer for a question. */
   onEmpty?: (qId: string) => void
-  /** The question the model is about to be asked — fires before its call, and
-   *  once with null when the run is done. Drives the per-field "AI is aan het
-   *  nadenken…" bar; skipped questions never fire it. */
-  onQuestionStart?: (qId: string | null) => void
-  onProgress: (filled: number, total: number) => void
+  /** A question's call starts (busy) or ends (not busy). Several can be busy at
+   *  once. Drives the per-field "AI is aan het nadenken…" bar; skipped questions
+   *  never fire it. */
+  onQuestionBusy?: (qId: string, busy: boolean) => void
+  /** Questions handled so far (answered, empty or skipped) out of the total. */
+  onProgress: (done: number, total: number) => void
   isCancelled: () => boolean
+  /** Aborts the calls in flight. */
+  signal?: AbortSignal
   /** Re-evaluated per question, just before its LLM call. Return false to skip
-   *  it (e.g. a `visibleIf` condition unmet by the answers filled so far). The
-   *  flattened question order puts a controlling field before its dependents, so
-   *  by the time a dependent is reached its controller's answer is already set. */
+   *  it (e.g. a `visibleIf` condition unmet by the answers filled so far). A
+   *  question whose controlling question is in the same run waits for that one
+   *  to finish first, so the condition sees the AI's answer. */
   shouldAnswer?: (question: Question) => boolean
 }
 
@@ -522,174 +532,122 @@ function buildAnswerSourceMeta(
   return { sources: supporting, grounded: supporting.length > 0, createdAt: Date.now() }
 }
 
-export async function bulkExtractFromDocument(params: BulkExtractParams): Promise<number> {
-  const { sessionId, docIds, questions, formContext, onAnswer, onSources, onRetrieved, onEmpty, onProgress, onQuestionStart, isCancelled, shouldAnswer } = params
-  let filled = 0
-  let skipped = 0
+type Limit = <T>(task: () => Promise<T>) => Promise<T>
 
-  for (const question of questions) {
-    if (isCancelled()) break
-    // Skip questions currently hidden by an unmet visibleIf — re-checked live so
-    // a question that just became (in)visible is handled correctly. Costs no call.
-    if (shouldAnswer && !shouldAnswer(question)) {
-      skipped++
-      onProgress(filled, questions.length - skipped)
-      continue
+/** Runs at most `max` tasks at once, the rest in arrival order. A finishing
+ *  task hands its slot straight to the next waiter, so a newcomer can't slip in
+ *  between and push the count over `max`. */
+export function createLimit(max: number): Limit {
+  let active = 0
+  const waiting: Array<() => void> = []
+  return async (task) => {
+    if (active < max) active++
+    else await new Promise<void>((resolve) => waiting.push(resolve))
+    try {
+      return await task()
+    } finally {
+      const next = waiting.shift()
+      if (next) next()
+      else active--
     }
-    onProgress(filled, questions.length - skipped)
-    onQuestionStart?.(question.id)
+  }
+}
 
-    await extractRagStream(
-      {
-        sessionId,
-        targetQuestion: question.text,
-        guidance: question.guidance,
-        options: question.options,
-        questionType: question.type,
-        fieldFormat: question.format,
-        formContext,
-        columns: question.columns,
-        docIds,
-      },
-      () => {},
-      (result) => {
-        if (!isCancelled()) {
-          const value = mapSuggestionToAnswer(question, result.suggestion)
-          if (value !== null) {
-            onAnswer(question.id, value)
-            const meta = buildAnswerSourceMeta(result.sources, value, question.type)
-            if (meta) onSources?.(question.id, meta)
-            if (result.sources?.length) onRetrieved?.(question.id, result.sources)
-            filled++
-          } else {
-            // Model answered but found nothing usable in the documents.
-            onEmpty?.(question.id)
-          }
-        }
-      },
-      (err) => {
-        console.warn(`[AI mode] vraag "${question.text}" overgeslagen:`, err)
-      },
-    ).catch((err) => {
-      console.warn(`[AI mode] stream fout bij vraag "${question.text}":`, err)
+// One queue for every AI Modus question in this tab, across forms and runs, so
+// a dossier run filling seven forms side by side still keeps to the backend's
+// limit. The server picks the limit per backend (GET /api/ai/limits).
+let aiLimit: Promise<Limit> | null = null
+
+function getAiLimit(): Promise<Limit> {
+  if (!aiLimit) {
+    aiLimit = fetch('/api/ai/limits', { signal: AbortSignal.timeout(10000) })
+      .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
+      .then((body: { max_concurrency?: number }) => createLimit(Math.max(1, body.max_concurrency ?? 1)))
+      .catch((err) => {
+        // One at a time is always safe; ask again on the next run.
+        console.warn('[AI mode] limiet niet opgehaald, één vraag tegelijk:', err)
+        aiLimit = null
+        return createLimit(1)
+      })
+  }
+  return aiLimit
+}
+
+export async function bulkExtractFromDocument(params: BulkExtractParams): Promise<number> {
+  const {
+    sessionId, docIds, questions, formContext, relatedQuestions, onAnswer, onSources, onRetrieved,
+    onEmpty, onProgress, onQuestionBusy, isCancelled, signal, shouldAnswer,
+  } = params
+  const limit = await getAiLimit()
+  let filled = 0
+  let handled = 0
+  const report = () => onProgress(handled, questions.length)
+
+  async function ask(question: Question): Promise<void> {
+    if (isCancelled()) return
+    // Skip questions currently hidden by an unmet visibleIf — checked once its
+    // controller is settled, so it sees the AI's answer. Costs no call.
+    if (shouldAnswer && !shouldAnswer(question)) return
+
+    await limit(async () => {
+      if (isCancelled()) return
+      onQuestionBusy?.(question.id, true)
+      try {
+        await extractRagStream(
+          {
+            sessionId,
+            targetQuestion: question.text,
+            guidance: question.guidance,
+            options: question.options,
+            questionType: question.type,
+            fieldFormat: question.format,
+            formContext,
+            columns: question.columns,
+            docIds,
+            relatedQuestions: relatedQuestions?.[question.id],
+          },
+          () => {},
+          (result) => {
+            if (isCancelled()) return
+            const value = mapSuggestionToAnswer(question, result.suggestion)
+            if (value !== null) {
+              onAnswer(question.id, value)
+              const meta = buildAnswerSourceMeta(result.sources, value, question.type)
+              if (meta) onSources?.(question.id, meta)
+              if (result.sources?.length) onRetrieved?.(question.id, result.sources)
+              filled++
+            } else {
+              // Model answered but found nothing usable in the documents.
+              onEmpty?.(question.id)
+            }
+          },
+          (err) => {
+            if (!isCancelled()) console.warn(`[AI mode] vraag "${question.text}" overgeslagen:`, err)
+          },
+          signal,
+        )
+      } finally {
+        onQuestionBusy?.(question.id, false)
+      }
     })
   }
 
-  onQuestionStart?.(null)
-  onProgress(filled, questions.length - skipped)
+  // All questions start at once and queue on the shared limit. The flattened
+  // question order puts a controlling field before its dependents, so the
+  // controller's promise already exists when a dependent is scheduled.
+  const settled = new Map<string, Promise<void>>()
+  for (const question of questions) {
+    const controller = question.visibleIf ? settled.get(question.visibleIf.questionId) : undefined
+    const run = (controller ?? Promise.resolve())
+      .then(() => ask(question))
+      .catch((err) => console.warn(`[AI mode] stream fout bij vraag "${question.text}":`, err))
+      .finally(() => {
+        handled++
+        report()
+      })
+    settled.set(question.id, run)
+  }
+  report()
+  await Promise.all(settled.values())
   return filled
-}
-
-export interface SmoothAnswerInput {
-  questionId: string
-  questionText: string
-  /** Plaintext — HTML must be stripped before building the input. */
-  answer: string
-}
-
-export interface SmoothSection {
-  title: string
-  answers: SmoothAnswerInput[]
-}
-
-export interface SmoothBatchEvent {
-  index: number
-  total: number
-  answers: Record<string, string>
-  failed: boolean
-}
-
-interface SmoothFormResult {
-  answers: Record<string, string>
-  batches: number
-}
-
-export interface SmoothFormParams {
-  sections: SmoothSection[]
-  onRewrite: (qId: string, html: string) => void
-  /** Progress in batches, not sections — the server decides how many. */
-  onSectionProgress: (current: number, total: number) => void
-  isCancelled: () => boolean
-}
-
-/** Post-AI-Modus smoothing pass: rewrite the form's longtext answers to remove
- *  duplication across them. The server splits the form into batches that fit
- *  the model and streams each one back as it lands; the final `done` map is
- *  authoritative and reconciled last, so a batch that failed silently keeps its
- *  original text. Returns the number of answers that were rewritten. */
-export async function smoothFormAnswers(params: SmoothFormParams): Promise<number> {
-  const { sections, onRewrite, onSectionProgress, isCancelled } = params
-
-  const originals = new Map<string, string>()
-  for (const section of sections) {
-    for (const a of section.answers) originals.set(a.questionId, a.answer)
-  }
-  // Plaintext currently written to the store, per question.
-  const applied = new Map<string, string>(originals)
-
-  function apply(qId: string, text: string) {
-    const trimmed = text.trim()
-    if (!trimmed || trimmed === applied.get(qId)) return
-    applied.set(qId, trimmed)
-    onRewrite(qId, plainTextToHtml(trimmed))
-  }
-
-  // The whole form streams over one connection, so cancelling means aborting it.
-  const controller = new AbortController()
-  const cancelPoll = setInterval(() => {
-    if (isCancelled()) controller.abort()
-  }, 500)
-
-  const body = {
-    sections: sections.map((s) => ({
-      title: s.title,
-      answers: s.answers.map((a) => ({
-        question_id: a.questionId,
-        question_text: a.questionText,
-        answer: a.answer,
-      })),
-    })),
-  }
-
-  try {
-    await postSse<SmoothFormResult>(
-      '/api/smooth/form/stream',
-      body,
-      () => {},
-      (result) => {
-        if (isCancelled()) return
-        for (const [qId, text] of Object.entries(result.answers ?? {})) {
-          if (originals.has(qId)) apply(qId, text)
-        }
-        onSectionProgress(result.batches, result.batches)
-      },
-      (err) => {
-        console.warn('[AI mode] gladstrijken overgeslagen:', err)
-      },
-      undefined,
-      undefined,
-      {
-        signal: controller.signal,
-        onBatch: (batch) => {
-          if (isCancelled()) return
-          for (const [qId, text] of Object.entries(batch.answers ?? {})) {
-            if (originals.has(qId)) apply(qId, text)
-          }
-          // `current` stays 0-based (the batch just finished), matching what
-          // the banners render as current + 1.
-          onSectionProgress(batch.index - 1, batch.total)
-        },
-      },
-    ).catch((err) => {
-      console.warn('[AI mode] stream fout bij gladstrijken:', err)
-    })
-  } finally {
-    clearInterval(cancelPoll)
-  }
-
-  let rewritten = 0
-  for (const [qId, original] of originals) {
-    if (applied.get(qId) !== original) rewritten++
-  }
-  return rewritten
 }

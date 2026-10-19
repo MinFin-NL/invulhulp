@@ -86,7 +86,14 @@ const presenceRoster = new Map<string, PresentUser[]>()
 // gets (re)published on connect, and what drives the roster while offline.
 const aiBusyCbs = new Map<string, Set<(peers: AiBusyPeer[]) => void>>()
 const aiBusyRoster = new Map<string, AiBusyPeer[]>()
-const localAiBusy = new Map<string, { formId: string; questionId: string } | null>()
+// A list, not one entry: AI Modus asks several questions at once, and a dossier
+// run fills several forms side by side.
+const localAiBusy = new Map<string, AiBusyEntry[]>()
+
+interface AiBusyEntry {
+  formId: string
+  questionId: string
+}
 
 // NLDD categories whose `filled` pair has light content in light mode (and
 // dark in dark mode), so one text token — accent-filled-content — reads on all.
@@ -118,21 +125,42 @@ function applyLocalUser(provider: Provider): void {
 }
 
 function applyLocalAiBusy(dossierId: string, provider: Provider): void {
-  provider.awareness.setLocalStateField('aiBusy', localAiBusy.get(dossierId) ?? null)
+  const entries = localAiBusy.get(dossierId) ?? []
+  provider.awareness.setLocalStateField('aiBusy', entries.length > 0 ? entries : null)
 }
 
-/** Announce which question the local AI Modus run is working on (null when it
- *  isn't). Safe to call before — or entirely without — a live connection. */
-export function setLocalAiBusy(
-  dossierId: string,
-  busy: { formId: string; questionId: string } | null,
-): void {
-  localAiBusy.set(dossierId, busy)
+/** Announce that the local AI Modus run started (busy) or finished (not busy)
+ *  one question. Safe to call before — or entirely without — a live connection. */
+export function setLocalAiBusy(dossierId: string, entry: AiBusyEntry, busy: boolean): void {
+  const others = (localAiBusy.get(dossierId) ?? []).filter(
+    (e) => e.formId !== entry.formId || e.questionId !== entry.questionId,
+  )
+  publishLocalAiBusy(dossierId, busy ? [...others, entry] : others)
+}
+
+/** Drop every question the local run announced in this dossier (or in one form
+ *  of it) — for a run that ends or is cancelled with calls still in flight. */
+export function clearLocalAiBusy(dossierId: string, formId?: string): void {
+  const entries = localAiBusy.get(dossierId) ?? []
+  publishLocalAiBusy(dossierId, formId === undefined ? [] : entries.filter((e) => e.formId !== formId))
+}
+
+function publishLocalAiBusy(dossierId: string, entries: AiBusyEntry[]): void {
+  localAiBusy.set(dossierId, entries)
   const provider = providers.get(dossierId)
   // With a provider the roster is rebuilt from awareness (which includes our own
   // state) via the 'change' handler; without one we are the only client there is.
   if (provider) applyLocalAiBusy(dossierId, provider)
   else recomputeAiBusy(dossierId)
+}
+
+/** A peer's broadcast `aiBusy`: a list, or — from a client on the previous
+ *  version — a single entry. */
+function busyEntries(raw: unknown): AiBusyEntry[] {
+  const list = Array.isArray(raw) ? raw : raw ? [raw] : []
+  return list.filter(
+    (e): e is AiBusyEntry => typeof e?.formId === 'string' && typeof e?.questionId === 'string',
+  )
 }
 
 function recomputeAiBusy(dossierId: string): void {
@@ -141,21 +169,14 @@ function recomputeAiBusy(dossierId: string): void {
   if (provider) {
     const self = provider.awareness.clientID
     for (const [clientId, state] of provider.awareness.getStates()) {
-      const busy = state.aiBusy as { formId?: string; questionId?: string } | null | undefined
-      if (!busy?.formId || !busy.questionId) continue
       const u = state.user as { name?: string } | undefined
-      peers.push({
-        clientId,
-        name: u?.name ?? '',
-        isSelf: clientId === self,
-        formId: busy.formId,
-        questionId: busy.questionId,
-      })
+      for (const busy of busyEntries(state.aiBusy)) {
+        peers.push({ clientId, name: u?.name ?? '', isSelf: clientId === self, ...busy })
+      }
     }
   } else {
     // Solo session, offline, or still connecting: only the local run can exist.
-    const busy = localAiBusy.get(dossierId)
-    if (busy) {
+    for (const busy of localAiBusy.get(dossierId) ?? []) {
       peers.push({ clientId: -1, name: localUser?.name ?? '', isSelf: true, ...busy })
     }
   }

@@ -29,7 +29,7 @@ mentions a limitation, the limitation is deliberate for now.
  ┌────────▼─────────────────────────────────────────────┐
  │ FastAPI  backend/main.py   (global require_user gate)│
  │  auth · dossiers · users · admin_users · collab      │
- │  improve / extract / synthesize / smooth  (SSE)      │
+ │  improve / extract / synthesize  (SSE)               │
  │  documents · images · RAG retrieval                  │
  └──┬──────────┬───────────────┬──────────────┬─────────┘
     │          │               │              │
@@ -76,7 +76,6 @@ questions sent to it one prompt at a time.
 | `backend/llm.py` | LLM backend abstraction (chat, stream, embed) |
 | `backend/rag.py`, `pdfextract.py` | Chunking, LanceDB vector store, ontology extraction; structured PDF parsing |
 | `backend/docstore.py`, `imagestore.py` | File-based document and image stores |
-| `backend/textdedup.py` | Deterministic overlap helpers for the smoothing pass |
 | `backend/eval_prompts.py` | Prompt eval harness |
 | `scripts/` | Build-time converters: vendored YAML → form JSON / beslishulp JSON, plus JSON schema |
 | `vendor/` | Upstream MinBZK sources (par-dpia-form, ai-verordening-beslishulp) with provenance |
@@ -199,8 +198,10 @@ loops:
 - **AI Modus** (`useAiMode.ts`): for each question in the form, call
   `/api/extract/rag/stream`, write the result through `DossierDoc`, record its
   sources, and attach extracted figures. Questions without a grounded answer
-  are marked as unanswered. A final pass (`/api/smooth/form/stream`) removes
-  repetition across answers.
+  are marked as unanswered. The calls run in parallel on one queue per tab,
+  capped by `/api/ai/limits` (`LLM_MAX_CONCURRENCY`, also enforced in
+  `llm.py`); a `visibleIf` question waits for its controller. Each longtext
+  call names the section's other questions so their topics stay out of it.
 - **Verbeter tekst**: `/api/improve/stream` on a single field.
 - **Source highlighting** (`sourceMatching.ts`): fuzzy text matching between an
   answer and its chunks. Below `GROUNDING_THRESHOLD`, a source does not count
@@ -290,7 +291,7 @@ Endpoints (all stream over SSE with `X-Accel-Buffering: no`):
 | `/api/improve/stream` | Rewrite one answer into formal Dutch, with a rationale |
 | `/api/extract/rag/stream` | Retrieve top-k chunks for a question, then extract |
 | `/api/synthesize/stream` | Rewrite source-form answers for a target question |
-| `/api/smooth/form/stream` | Remove repetition across answers (batched on the server) |
+| `/api/ai/limits` | How many AI Modus calls the client may run at once |
 
 The system is built to prefer an empty field over a made-up answer:
 

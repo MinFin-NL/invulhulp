@@ -33,14 +33,6 @@
       <span class="ai-mode-done__text">
         <span class="ai-mode-done__count">{{ doneFilledCount }} ingevuld</span>
         <template v-if="doneSkippedCount > 0"><span class="ai-mode-done__skipped">{{ doneSkippedCount }} zonder antwoord</span></template>
-        <button
-          v-if="canUndoSmoothing"
-          type="button"
-          class="ai-mode-done__undo"
-          @click="$emit('undoSmoothing', formId)"
-        >
-          Gladstrijken ongedaan maken
-        </button>
       </span>
       <nldd-icon-button
         variant="neutral-transparent"
@@ -66,8 +58,7 @@
         </svg>
       </span>
       <span class="ai-mode-active__label">
-        <template v-if="phase"><span class="ai-mode-active__text">Gladstrijken</span><span class="ai-mode-active__progress">{{ Math.min(phase.current + 1, phase.total) }}/{{ phase.total }}</span></template>
-        <template v-else><span class="ai-mode-active__text">AI Modus</span><template v-if="progress"><span class="ai-mode-active__progress">{{ progress.filled }}/{{ progress.total }}</span></template></template>
+        <span class="ai-mode-active__text">AI Modus</span><template v-if="progress"><span class="ai-mode-active__progress">{{ progress.done }}/{{ progress.total }}</span></template>
       </span>
       <!-- Icoonknop, zoals Sluiten in de done-staat: een tekstknop past in een
            formulierkaart niet naast label en teller. De tekst wordt aria-label
@@ -122,11 +113,7 @@ const props = defineProps<{
   isDone: boolean
   doneFilledCount: number
   doneTotalCount: number
-  progress: { filled: number; total: number } | null
-  /** Set during the final smoothing phase (batches done / batches total). */
-  phase?: { current: number; total: number } | null
-  /** Show the "undo smoothing" affordance in the done state. */
-  canUndoSmoothing?: boolean
+  progress: { done: number; total: number } | null
 }>()
 
 // Questions the AI attempted but left without an answer.
@@ -138,7 +125,6 @@ defineEmits<{
   activate: [formId: string]
   cancel: [formId: string]
   dismiss: [formId: string]
-  undoSmoothing: [formId: string]
 }>()
 </script>
 
@@ -334,24 +320,6 @@ defineEmits<{
   font-size: var(--primitives-font-size-80);
   color: var(--invulhulp-color-text-subtle);
 }
-
-.ai-mode-done__undo {
-  align-self: flex-start;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: #0f2d5c;
-  font-size: var(--primitives-font-size-80);
-  text-decoration: underline;
-  cursor: pointer;
-}
-
-.ai-mode-done__undo:hover {
-  color: #5b21b6;
-}
-
-
-
 
 /* ── Empty-result state ──────────────────────────────────────────────────── */
 

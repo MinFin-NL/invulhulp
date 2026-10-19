@@ -1,21 +1,16 @@
 import { ref, computed } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { loadForm, aiFillableQuestions, isAiFillable } from '../services/formLoader'
-import {
-  bulkExtractFromDocument,
-  fetchImageDimensions,
-  smoothFormAnswers,
-  verifyDocuments,
-} from '../services/llmService'
-import type { SmoothSection } from '../services/llmService'
-import { setLocalAiBusy } from '../collab/dossierTransport'
-import { stripHtml } from '../utils/sourceMatching'
+import { bulkExtractFromDocument, fetchImageDimensions, verifyDocuments } from '../services/llmService'
+import { clearLocalAiBusy, setLocalAiBusy } from '../collab/dossierTransport'
 import { isQuestionVisible } from '../utils/answerRefs'
 import type { AnswerSource, FormConfig } from '../models/Assessment'
 
 // Module-level singleton — shared across all component instances
 const aiModeActive = ref<Set<string>>(new Set())
-const aiModeProgress = ref<Record<string, { filled: number; total: number }>>({})
+// Questions handled so far (answered, empty or skipped) — they run in parallel,
+// so this counts finished calls, not the position in the form.
+const aiModeProgress = ref<Record<string, { done: number; total: number }>>({})
 const aiModeDone = ref<Record<string, number>>({})
 // Total questions attempted in the last completed run, per form — used to show
 // how many were left without an answer.
@@ -25,38 +20,41 @@ const aiModeTotal = ref<Record<string, number>>({})
 const aiModeUnanswered = ref<Record<string, Set<string>>>({})
 const aiModeError = ref<Record<string, string>>({})
 const aiModeCancelled: Record<string, boolean> = {}
-// Final AI Modus phase: deduplicating/tightening the filled longtext answers.
-// The server batches them to fit the model, so this counts batches, not
-// sections. Drives the "Antwoorden gladstrijken…" banner text.
-const aiModePhase = ref<Record<string, { current: number; total: number } | null>>({})
-// Pre-smoothing originals per form, session-only — powers both the one-click
-// undo of the whole pass and the per-answer "herstel origineel". The dossier id
-// pins the undo to the dossier the run happened in. Outlives the done banner:
-// per-answer undo lives on the questions themselves, and an entry is dropped
-// once the user edits that answer.
-const aiModePreSmooth = ref<Record<string, { dossierId: string; originals: Record<string, string> }>>({})
-// Answers the smoothing pass rewrote, per form: question id → the HTML it wrote.
-// Drives the per-question "gladgestreken" marker. Transient, like
-// aiModeUnanswered. The text is kept because the editor echoes our own store
-// write back through v-model, which would otherwise read as a user edit and
-// clear the marker the moment it appears.
-const aiModeSmoothed = ref<Record<string, Record<string, string>>>({})
-// A dossier-wide run: the same per-form machinery above, driven over a queue of
-// forms instead of one. Null when no such run is going. The per-form state stays
-// authoritative — this only records where in the queue we are, so the dossier
-// page can show "formulier 3 van 7" while the form's own progress counts fields.
-const dossierAiRun = ref<{
-  dossierId: string
-  formIds: string[]
-  /** Index in formIds of the form being filled. */
-  current: number
-  formId: string | null
-} | null>(null)
-let dossierAiCancelled = false
+// Per running form: aborts its calls in flight, and counts what it filled so a
+// cancelled run can still report it.
+const aiModeAbort: Record<string, AbortController> = {}
+const aiModeFilled: Record<string, number> = {}
+// A dossier-wide run: the per-form machinery above, started for a list of forms
+// at once. Null when no such run is going. The per-form state stays
+// authoritative — this only records which forms belong to the run, so the
+// dossier page can add their progress up.
+const dossierAiRun = ref<{ dossierId: string; formIds: string[] } | null>(null)
 
-// Answers with markup beyond plain paragraphs (lists, bold, …) are usually
-// user-authored; smoothing works on plaintext and would flatten them.
-const RICH_HTML_RE = /<(?!\/?(p|br)\b)[a-z]/i
+// A section's other questions, named in each extraction call so their topics
+// stay out of this answer (main._scope_block). Only for prose: short fields
+// and choices don't wander into a neighbour's topic. Nearest first — the
+// server keeps a dozen.
+const SCOPE_MAX_QUESTIONS = 12
+
+function relatedQuestionsFor(formConfig: FormConfig): Record<string, string[]> {
+  const related: Record<string, string[]> = {}
+  for (const section of formConfig.sections) {
+    const questions = section.subsections
+      .flatMap((ss) => ss.questions)
+      .filter((q) => isAiFillable(q, section))
+    questions.forEach((q, i) => {
+      if (q.type !== 'text' || (q.format && q.format !== 'longtext')) return
+      const others = questions
+        .map((other, j) => ({ other, distance: Math.abs(i - j) }))
+        .filter(({ other }) => other.id !== q.id)
+        .sort((x, y) => x.distance - y.distance)
+        .slice(0, SCOPE_MAX_QUESTIONS)
+        .map(({ other }) => other.text)
+      if (others.length > 0) related[q.id] = others
+    })
+  }
+  return related
+}
 
 // Figure attachments (see attachFigures). A figure travels with the prose
 // around it, so it surfaces for plenty of loosely-related questions; these two
@@ -81,6 +79,9 @@ export function useAiMode() {
     // mid-run and answers must not leak into the newly active one.
     const dossierId = store.activeDossierId
     if (!dossierId) return
+    // Cleared here, not at activation: a Stop pressed during the pre-flight
+    // below must still stop this run.
+    aiModeCancelled[formId] = false
 
     let formConfig
     try {
@@ -110,54 +111,63 @@ export function useAiMode() {
     // the shortlist of places an extracted figure belongs.
     const figureTargets = new Set(questions.filter((q) => q.allowAttachments).map((q) => q.id))
 
+    if (aiModeCancelled[formId]) {
+      delete aiModeCancelled[formId]
+      return
+    }
+
     delete aiModeError.value[formId]
-    aiModeCancelled[formId] = false
+    const abort = new AbortController()
+    aiModeAbort[formId] = abort
+    aiModeFilled[formId] = 0
     aiModeActive.value = new Set([...aiModeActive.value, formId])
-    aiModeProgress.value = { ...aiModeProgress.value, [formId]: { filled: 0, total: questions.length } }
+    aiModeProgress.value = { ...aiModeProgress.value, [formId]: { done: 0, total: questions.length } }
     delete aiModeDone.value[formId]
     aiModeTotal.value = { ...aiModeTotal.value, [formId]: questions.length }
     aiModeUnanswered.value = { ...aiModeUnanswered.value, [formId]: new Set() }
 
-    const filled = await bulkExtractFromDocument({
-      sessionId: store.sessionId,
-      docIds: readyDocIds.value,
-      questions,
-      formContext: formConfig.aiContext,
-      onAnswer: (qId, value) => store.setAnswerForForm(formId, qId, value, dossierId),
-      onSources: (qId, meta) => store.setAnswerSourcesForForm(formId, qId, meta, dossierId),
-      onRetrieved: (qId, sources) => {
-        if (!figureTargets.has(qId)) return
-        // Not awaited: fetching the image only sizes the attachment, and the
-        // next question shouldn't wait on it.
-        void attachFigures(formId, dossierId, qId, sources, usedFigures)
-      },
-      onEmpty: (qId) => {
-        const set = new Set(aiModeUnanswered.value[formId] ?? [])
-        set.add(qId)
-        aiModeUnanswered.value = { ...aiModeUnanswered.value, [formId]: set }
-      },
-      onProgress: (f, t) => {
-        aiModeProgress.value = { ...aiModeProgress.value, [formId]: { filled: f, total: t } }
-      },
-      // Broadcast over Yjs awareness so the question's editor — on every
-      // collaborator's screen, not just the starter's — shows the thinking bar.
-      onQuestionStart: (qId) => {
-        setLocalAiBusy(dossierId, qId ? { formId, questionId: qId } : null)
-      },
-      isCancelled: () => aiModeCancelled[formId] === true,
-      // Re-checked live: don't spend a call on a question hidden by its visibleIf,
-      // and pick up any that became visible once the AI filled its controller.
-      // Reads the run's own dossier (not the active one — the user may switch).
-      shouldAnswer: (q) =>
-        isQuestionVisible(q, (id) => store.dossiers[dossierId]?.forms[formId]?.answers?.[id] ?? ''),
-    })
-
-    // Smoothing works across answers, not on one field — no question owns the
-    // bar during it, so make sure the last one released it.
-    setLocalAiBusy(dossierId, null)
-
-    if (!aiModeCancelled[formId]) {
-      await smoothForm(formId, formConfig, dossierId)
+    let filled = 0
+    try {
+      filled = await bulkExtractFromDocument({
+        sessionId: store.sessionId,
+        docIds: readyDocIds.value,
+        questions,
+        formContext: formConfig.aiContext,
+        relatedQuestions: relatedQuestionsFor(formConfig),
+        onAnswer: (qId, value) => {
+          store.setAnswerForForm(formId, qId, value, dossierId)
+          aiModeFilled[formId] = (aiModeFilled[formId] ?? 0) + 1
+        },
+        onSources: (qId, meta) => store.setAnswerSourcesForForm(formId, qId, meta, dossierId),
+        onRetrieved: (qId, sources) => {
+          if (!figureTargets.has(qId)) return
+          // Not awaited: fetching the image only sizes the attachment, and the
+          // answer shouldn't wait on it.
+          void attachFigures(formId, dossierId, qId, sources, usedFigures)
+        },
+        onEmpty: (qId) => {
+          const set = new Set(aiModeUnanswered.value[formId] ?? [])
+          set.add(qId)
+          aiModeUnanswered.value = { ...aiModeUnanswered.value, [formId]: set }
+        },
+        onProgress: (done, total) => {
+          aiModeProgress.value = { ...aiModeProgress.value, [formId]: { done, total } }
+        },
+        // Broadcast over Yjs awareness so the question's editor — on every
+        // collaborator's screen, not just the starter's — shows the thinking bar.
+        onQuestionBusy: (qId, busy) => setLocalAiBusy(dossierId, { formId, questionId: qId }, busy),
+        isCancelled: () => aiModeCancelled[formId] === true,
+        signal: abort.signal,
+        // Reads the run's own dossier (not the active one — the user may switch),
+        // and is asked only once a question's controller has its AI answer.
+        shouldAnswer: (q) =>
+          isQuestionVisible(q, (id) => store.dossiers[dossierId]?.forms[formId]?.answers?.[id] ?? ''),
+      })
+    } finally {
+      // A cancelled run leaves its aborted calls' bars behind otherwise.
+      clearLocalAiBusy(dossierId, formId)
+      delete aiModeAbort[formId]
+      delete aiModeFilled[formId]
     }
 
     aiModeActive.value = new Set([...aiModeActive.value].filter((id) => id !== formId))
@@ -174,13 +184,13 @@ export function useAiMode() {
   }
 
   /**
-   * Fill a whole queue of forms in one go — the dossier page's "vul dit dossier
-   * in". Sequential on purpose: each form's run is itself a sequential loop over
-   * its questions, and the backend is the bottleneck, so overlapping runs would
-   * only make the progress unreadable without making it faster.
+   * Fill a list of forms in one go — the dossier page's "vul dit dossier in".
+   * The forms run side by side: their questions share one queue in
+   * llmService, which keeps to the backend's limit, so this is as fast as the
+   * backend allows without overloading it.
    *
-   * Callers pass the queue (the dossier page passes the empty, applicable
-   * forms). AI Modus overwrites whatever is in a field, so a bulk action must
+   * Callers pass the forms (the dossier page passes the empty, applicable
+   * ones). AI Modus overwrites whatever is in a field, so a bulk action must
    * never be handed a form somebody already worked in.
    */
   async function startDossierAiMode(formIds: string[]) {
@@ -189,31 +199,16 @@ export function useAiMode() {
     const dossierId = store.activeDossierId
     if (!dossierId) return
 
-    dossierAiCancelled = false
-    dossierAiRun.value = { dossierId, formIds, current: 0, formId: null }
+    dossierAiRun.value = { dossierId, formIds }
     try {
-      for (const [index, formId] of formIds.entries()) {
-        if (dossierAiCancelled) break
-        // Each form's own run pins the dossier it started in, but queueing more
-        // work into a dossier the user has since left is not what they asked
-        // for. Stop at the boundary instead.
-        if (store.activeDossierId !== dossierId) break
-        dossierAiRun.value = { dossierId, formIds, current: index, formId }
-        await startAiMode(formId)
-        // The documents are gone from the index: every remaining form would
-        // fail the same pre-flight, so stop and let the one dialog explain it.
-        if (aiModeError.value[formId]) break
-      }
+      await Promise.all(formIds.map((formId) => startAiMode(formId)))
     } finally {
       dossierAiRun.value = null
-      dossierAiCancelled = false
     }
   }
 
   function cancelDossierAiMode() {
-    dossierAiCancelled = true
-    const formId = dossierAiRun.value?.formId
-    if (formId) cancelAiMode(formId)
+    for (const formId of dossierAiRun.value?.formIds ?? []) cancelAiMode(formId)
   }
 
   /** Attach the figures behind an answer's retrieved chunks to that question.
@@ -263,134 +258,6 @@ export function useAiMode() {
     }
   }
 
-  /** Final AI Modus phase: rewrite the form's longtext answers to remove
-   *  duplication across them. Applies rewrites directly to the store;
-   *  originals are snapshotted for a one-click undo. */
-  async function smoothForm(formId: string, formConfig: FormConfig, dossierId: string) {
-    const answers = store.dossiers[dossierId]?.forms[formId]?.answers ?? {}
-    const originals: Record<string, string> = {}
-    const sections: SmoothSection[] = []
-
-    for (const section of formConfig.sections) {
-      const eligible: SmoothSection['answers'] = []
-      for (const q of section.subsections.flatMap((ss) => ss.questions)) {
-        if (!isAiFillable(q, section)) continue
-        if (q.type !== 'text' || (q.format && q.format !== 'longtext')) continue
-        const value = answers[q.id]
-        if (typeof value !== 'string' || !value.trim()) continue
-        if (RICH_HTML_RE.test(value)) continue
-        const plain = stripHtml(value).trim()
-        if (!plain) continue
-        eligible.push({ questionId: q.id, questionText: q.text, answer: plain })
-        originals[q.id] = value
-      }
-      if (eligible.length > 0) sections.push({ title: section.title, answers: eligible })
-    }
-
-    // A single answer has nothing to be deduplicated against.
-    if (Object.keys(originals).length < 2) return
-
-    aiModePreSmooth.value = { ...aiModePreSmooth.value, [formId]: { dossierId, originals } }
-    aiModeSmoothed.value = { ...aiModeSmoothed.value, [formId]: {} }
-    aiModePhase.value = { ...aiModePhase.value, [formId]: { current: 0, total: sections.length } }
-    let rewritten = 0
-    try {
-      rewritten = await smoothFormAnswers({
-        sections,
-        onRewrite: (qId, html) => {
-          store.setAnswerForForm(formId, qId, html, dossierId)
-          markSmoothed(formId, qId, html)
-          // The citations were matched against the pre-smoothing text, so flag
-          // that the answer has changed since it was extracted.
-          store.markAnswerSmoothed(formId, qId, dossierId)
-        },
-        onSectionProgress: (current, total) => {
-          aiModePhase.value = { ...aiModePhase.value, [formId]: { current, total } }
-        },
-        isCancelled: () => aiModeCancelled[formId] === true,
-      })
-    } finally {
-      const phases = { ...aiModePhase.value }
-      delete phases[formId]
-      aiModePhase.value = phases
-      if (rewritten === 0) clearSmoothingUndo(formId)
-    }
-  }
-
-  function hasSmoothingUndo(formId: string): boolean {
-    return !!aiModePreSmooth.value[formId]
-  }
-
-  function markSmoothed(formId: string, questionId: string, html: string) {
-    const entries = { ...(aiModeSmoothed.value[formId] ?? {}), [questionId]: html }
-    aiModeSmoothed.value = { ...aiModeSmoothed.value, [formId]: entries }
-  }
-
-  /** Whether smoothing rewrote this answer and the user hasn't touched it since.
-   *  Scoped to the dossier the run happened in — the same form in another
-   *  dossier holds different answers. */
-  function isAiSmoothed(formId: string, questionId: string): boolean {
-    if (aiModePreSmooth.value[formId]?.dossierId !== store.activeDossierId) return false
-    return aiModeSmoothed.value[formId]?.[questionId] !== undefined
-  }
-
-  /** Drop the marker and the per-answer undo — called when the user edits the
-   *  answer themselves, at which point the snapshot no longer describes it.
-   *  Passing the current value makes this a no-op while the value is still the
-   *  text smoothing wrote, so the editor echoing it back doesn't count as an
-   *  edit. */
-  function clearAiSmoothed(formId: string, questionId: string, currentValue?: string) {
-    const entries = aiModeSmoothed.value[formId]
-    if (entries?.[questionId] !== undefined) {
-      if (currentValue !== undefined && currentValue === entries[questionId]) return
-      const next = { ...entries }
-      delete next[questionId]
-      aiModeSmoothed.value = { ...aiModeSmoothed.value, [formId]: next }
-    }
-    const snapshot = aiModePreSmooth.value[formId]
-    if (snapshot?.originals[questionId] !== undefined) {
-      const originals = { ...snapshot.originals }
-      delete originals[questionId]
-      if (Object.keys(originals).length > 0) {
-        aiModePreSmooth.value = { ...aiModePreSmooth.value, [formId]: { ...snapshot, originals } }
-      } else {
-        clearSmoothingUndo(formId)
-      }
-    }
-  }
-
-  /** Restore one answer to its pre-smoothing text. */
-  function undoSmoothingFor(formId: string, questionId: string) {
-    const snapshot = aiModePreSmooth.value[formId]
-    const original = snapshot?.originals[questionId]
-    if (!snapshot || original === undefined) return
-    store.setAnswerForForm(formId, questionId, original, snapshot.dossierId)
-    clearAiSmoothed(formId, questionId)
-  }
-
-  /** Restore the pre-smoothing answers of the last AI Modus run. Atomic: all
-   *  answers are restored in one transaction, so a collaborator sees the undo as
-   *  a single coherent change (and it's one server push). */
-  function undoSmoothing(formId: string) {
-    const snapshot = aiModePreSmooth.value[formId]
-    if (!snapshot) return
-    store.batchAnswers(snapshot.dossierId, () => {
-      for (const [qId, value] of Object.entries(snapshot.originals)) {
-        store.setAnswerForForm(formId, qId, value, snapshot.dossierId)
-      }
-    })
-    clearSmoothingUndo(formId)
-  }
-
-  function clearSmoothingUndo(formId: string) {
-    const next = { ...aiModePreSmooth.value }
-    delete next[formId]
-    aiModePreSmooth.value = next
-    const markers = { ...aiModeSmoothed.value }
-    delete markers[formId]
-    aiModeSmoothed.value = markers
-  }
-
   /** Whether the AI looked at this question but couldn't answer it. */
   function isAiUnanswered(formId: string, questionId: string): boolean {
     return aiModeUnanswered.value[formId]?.has(questionId) ?? false
@@ -407,10 +274,12 @@ export function useAiMode() {
 
   function cancelAiMode(formId: string) {
     aiModeCancelled[formId] = true
+    if (!aiModeActive.value.has(formId)) return
+    aiModeAbort[formId]?.abort()
     aiModeActive.value = new Set([...aiModeActive.value].filter((id) => id !== formId))
-    const progress = aiModeProgress.value[formId]
-    if (progress && progress.filled > 0) {
-      aiModeDone.value = { ...aiModeDone.value, [formId]: progress.filled }
+    const filled = aiModeFilled[formId] ?? 0
+    if (filled > 0) {
+      aiModeDone.value = { ...aiModeDone.value, [formId]: filled }
     }
   }
 
@@ -422,8 +291,7 @@ export function useAiMode() {
     delete totals[formId]
     aiModeTotal.value = totals
     // Per-question markers persist until the user fills each question, so they
-    // survive dismissing the banner. The smoothing snapshot stays too: the
-    // per-answer "herstel origineel" lives on the questions, not the banner.
+    // survive dismissing the banner.
   }
 
   function dismissAiModeError(formId: string) {
@@ -439,7 +307,6 @@ export function useAiMode() {
     aiModeTotal,
     aiModeUnanswered,
     aiModeError,
-    aiModePhase,
     readyDocIds,
     startAiMode,
     cancelAiMode,
@@ -450,10 +317,5 @@ export function useAiMode() {
     dismissAiModeError,
     isAiUnanswered,
     clearAiUnanswered,
-    hasSmoothingUndo,
-    undoSmoothing,
-    isAiSmoothed,
-    clearAiSmoothed,
-    undoSmoothingFor,
   }
 }

@@ -31,7 +31,6 @@ import time
 
 import main
 import rag
-import textdedup
 from llm import OllamaBackend, create_backend
 
 backend = create_backend()
@@ -223,6 +222,45 @@ EXTRACT_CASES = [
             check_min_words(40),
         ],
     ),
+    # Scope (AI Modus asks each question alone): the section's other questions
+    # are named, and their topics must stay out of this answer — without the
+    # model refusing the question it was actually asked.
+    dict(
+        id="scope-doel-zonder-risico",
+        question="Omschrijving van het IV-verzoek (doelstelling / noodzaak / probleemstelling)",
+        question_type="text", field_format="",
+        related_questions=[
+            "Welke risico's zijn er geïdentificeerd en welke maatregelen zijn voorzien om deze te beperken?",
+            "Welke persoonsgegevens worden verwerkt?",
+            "Wat is de planning van het project?",
+        ],
+        checks=[
+            check_contains_all("classificat", "brieven"),
+            check_not_contains("85%", "steekproef", "bias", "BSN", "1 september"),
+            check_min_words(25),
+        ],
+    ),
+    dict(
+        id="scope-risico-zonder-doel",
+        question="Welke risico's zijn er geïdentificeerd en welke maatregelen zijn voorzien om deze te beperken?",
+        question_type="text", field_format="",
+        related_questions=[
+            "Omschrijving van het IV-verzoek (doelstelling / noodzaak / probleemstelling)",
+            "Wat is de planning van het project?",
+        ],
+        checks=[
+            check_contains_all("85%", "steekproef"),
+            check_not_contains("8 werkdagen", "40.000", "1 september"),
+            check_min_words(25),
+        ],
+    ),
+    dict(
+        id="scope-absent-blijft-weigeren",
+        question="Hoe is de exitstrategie en contractbeëindiging met de cloudleverancier geregeld?",
+        question_type="text", field_format="",
+        related_questions=["Welke risico's zijn er geïdentificeerd en welke maatregelen zijn voorzien om deze te beperken?"],
+        checks=[check_refusal],
+    ),
     dict(
         id="longtext-absent",
         question="Hoe is de exitstrategie en contractbeëindiging met de cloudleverancier geregeld?",
@@ -332,294 +370,6 @@ SYNTH_CASES = [
         ],
     ),
 ]
-
-SMOOTH_CASES = [
-    dict(
-        id="smooth-dedup",
-        section_title="Doel en aanpak",
-        context_answers=[],
-        answers=[
-            dict(
-                question_id="q1",
-                question_text="Omschrijving van het IV-verzoek",
-                answer=(
-                    "Het project Slimme Documentstromen zet het classificatiemodel "
-                    "DocFlow-ML in om circa 40.000 burgerbrieven per maand automatisch "
-                    "toe te wijzen aan behandelteams. De afhandeling van burgerbrieven "
-                    "duurt nu gemiddeld 8 werkdagen doordat het sorteren handmatig "
-                    "gebeurt; met automatische classificatie wordt de doorlooptijd "
-                    "naar verwachting gehalveerd."
-                ),
-            ),
-            dict(
-                question_id="q2",
-                question_text="Wat is de aanleiding van het project?",
-                answer=(
-                    "De aanleiding is dat de afhandeling van burgerbrieven op dit "
-                    "moment gemiddeld 8 werkdagen duurt, omdat het sorteren en "
-                    "doorzetten van de circa 40.000 brieven per maand handmatig "
-                    "gebeurt. Het project Slimme Documentstromen wil daarom een "
-                    "classificatiemodel inzetten om binnenkomende burgerbrieven "
-                    "automatisch toe te wijzen aan behandelteams, zodat de "
-                    "doorlooptijd wordt gehalveerd."
-                ),
-            ),
-            dict(
-                question_id="q3",
-                question_text="Welke omvang heeft de verwerking?",
-                answer=(
-                    "De verwerking betreft circa 40.000 burgerbrieven per maand die "
-                    "automatisch worden toegewezen aan behandelteams. De afhandeling "
-                    "duurt nu gemiddeld 8 werkdagen en het project verwacht de "
-                    "doorlooptijd met automatische classificatie te halveren."
-                ),
-            ),
-        ],
-        # Every unique fact survives at least once and repetition shrinks. The
-        # volume may legitimately appear twice: q3 asks for it directly, and
-        # q1's project description reasonably states it too. The input has 3.
-        checks_joined=[
-            check_contains_all("40.000", "8 werkdagen"),
-            check_max_occurrences("40.000", 2),
-            check_max_occurrences("gehalveerd", 2),
-            check_not_contains("zie boven", "zoals eerder genoemd"),
-        ],
-    ),
-    dict(
-        id="smooth-no-hallucination",
-        section_title="Risico's",
-        context_answers=[
-            dict(
-                question_id="c1",
-                question_text="Omschrijving van het IV-verzoek",
-                answer=(
-                    "Het project Slimme Documentstromen wijst met het model DocFlow-ML "
-                    "circa 40.000 burgerbrieven per maand automatisch toe aan "
-                    "behandelteams."
-                ),
-            ),
-        ],
-        answers=[
-            dict(
-                question_id="q1",
-                question_text="Welke risico's zijn geïdentificeerd?",
-                answer=(
-                    "De geïdentificeerde risico's zijn verkeerde toewijzing van "
-                    "gevoelige brieven zoals bezwaarschriften, overmatig vertrouwen "
-                    "op het model zonder menselijke controle, en beperkte "
-                    "datakwaliteit van het scanproces. Het model DocFlow-ML wijst "
-                    "circa 40.000 burgerbrieven per maand automatisch toe aan "
-                    "behandelteams."
-                ),
-            ),
-            dict(
-                question_id="q2",
-                question_text="Welke beheersmaatregelen zijn voorzien?",
-                answer=(
-                    "Toewijzingen met minder dan 85% zekerheid gaan naar een "
-                    "medewerker, 5% van alle toewijzingen wordt steekproefsgewijs "
-                    "gecontroleerd en er komt een maandelijkse bias-rapportage."
-                ),
-            ),
-        ],
-        # q1 repeats the context fact and should shrink; q2 is already tight —
-        # ideally omitted (unchanged), but a cosmetic rewrite is acceptable as
-        # long as it keeps every fact and doesn't grow.
-        checks_joined=[
-            check_contains_all("85%", "bezwaarschriften"),
-            check_not_contains("gpt", "95%", "2027", "dpia"),
-        ],
-        expect_tight={"q2": ["85%", "5%", "maandelijkse"]},
-    ),
-    # The failure this pass exists for: a whole paragraph from an earlier
-    # section restated at the tail of two later answers. The duplicated
-    # paragraph must disappear entirely, not be shortened or summarized.
-    # The context answer opens with 500+ chars of unrelated text on purpose —
-    # the repeated paragraph only becomes visible with _SMOOTH_CONTEXT_CHARS
-    # large enough to carry whole paragraphs, which is half of the fix.
-    dict(
-        id="smooth-alinea-dup",
-        section_title="Uitvoering en beheer",
-        context_answers=[
-            dict(
-                question_id="c1",
-                question_text="Omschrijving van het IV-verzoek",
-                answer=(
-                    "Het project Slimme Documentstromen wijst met het model DocFlow-ML "
-                    "circa 40.000 burgerbrieven per maand automatisch toe aan "
-                    "behandelteams. De brieven komen binnen via het centrale "
-                    "scanstraatproces en worden na classificatie in de bestaande "
-                    "zaaksystemen geplaatst, waar behandelaars ze op de gebruikelijke "
-                    "manier afhandelen. Het verzoek betreft uitsluitend de "
-                    "classificatiestap; de opslag, de archivering en de "
-                    "antwoordbrieven blijven ongewijzigd. De verwachte oplevering is "
-                    "het vierde kwartaal, aansluitend op de vervanging van de "
-                    "scanstraat.\n\n"
-                    "De besluitvorming over het project ligt bij de stuurgroep "
-                    "Informatievoorziening, die maandelijks bijeenkomt onder "
-                    "voorzitterschap van de directeur Bedrijfsvoering. De stuurgroep "
-                    "beslist over scope, budget en oplevermomenten en rapporteert per "
-                    "kwartaal aan de Bestuursraad. Wijzigingen in de scope worden pas "
-                    "doorgevoerd nadat de stuurgroep daarover een formeel besluit heeft "
-                    "genomen."
-                ),
-            ),
-        ],
-        answers=[
-            dict(
-                question_id="q1",
-                question_text="Hoe is het project georganiseerd?",
-                answer=(
-                    "Het projectteam bestaat uit een productowner, twee data-engineers "
-                    "en een informatieanalist, en werkt in sprints van twee weken vanuit "
-                    "de afdeling Dienstverlening.\n\n"
-                    "De besluitvorming over het project ligt bij de stuurgroep "
-                    "Informatievoorziening, die maandelijks bijeenkomt onder "
-                    "voorzitterschap van de directeur Bedrijfsvoering. De stuurgroep "
-                    "beslist over scope, budget en oplevermomenten en rapporteert per "
-                    "kwartaal aan de Bestuursraad. Wijzigingen in de scope worden pas "
-                    "doorgevoerd nadat de stuurgroep daarover een formeel besluit heeft "
-                    "genomen."
-                ),
-            ),
-            dict(
-                question_id="q2",
-                question_text="Hoe wordt het beheer na oplevering belegd?",
-                answer=(
-                    "Na oplevering gaat het model in beheer bij het team Applicatiebeheer, "
-                    "dat de modelprestaties bewaakt en jaarlijks een hertraining uitvoert.\n\n"
-                    "De besluitvorming over het project ligt bij de stuurgroep "
-                    "Informatievoorziening, die maandelijks bijeenkomt onder "
-                    "voorzitterschap van de directeur Bedrijfsvoering. De stuurgroep "
-                    "beslist over scope, budget en oplevermomenten en rapporteert per "
-                    "kwartaal aan de Bestuursraad."
-                ),
-            ),
-        ],
-        # The stuurgroep paragraph already stands in the context answer, so it
-        # may not survive anywhere in this section; the unique facts of both
-        # answers must remain.
-        checks_joined=[
-            check_contains_all("productowner", "twee weken", "Applicatiebeheer", "hertraining"),
-            check_not_contains(
-                "voorzitterschap", "Bestuursraad", "formeel besluit", "zie boven",
-            ),
-            check_max_occurrences("stuurgroep", 1),
-            check_max_words(90),
-        ],
-    ),
-]
-
-# The paragraph the smoothing pass has to notice, and two answers that talk
-# about the same project without repeating it.
-_STUURGROEP = (
-    "De besluitvorming over het project ligt bij de stuurgroep Informatievoorziening, "
-    "die maandelijks bijeenkomt onder voorzitterschap van de directeur Bedrijfsvoering. "
-    "De stuurgroep beslist over scope, budget en oplevermomenten en rapporteert per "
-    "kwartaal aan de Bestuursraad."
-)
-_DECOY_A = (
-    "Voor de verwerking is een verwerkersovereenkomst gesloten met de leverancier van "
-    "de scanstraat. De bewaartermijn van gescande brieven bedraagt zeven jaar."
-)
-_DECOY_B = (
-    "De gebruikers zijn behandelaars bij vier regiokantoren. Zij krijgen een training "
-    "van een dagdeel voordat het systeem in gebruik wordt genomen."
-)
-
-
-def _check_selection():
-    batch = ["Het projectteam werkt in sprints van twee weken.\n\n" + _STUURGROEP]
-    candidates = [("d1", _DECOY_A), ("c1", "Inleiding op het verzoek.\n\n" + _STUURGROEP), ("d2", _DECOY_B)]
-    picked = [qid for qid, _ in textdedup.select_context(batch, candidates, 4000, 1000)]
-    return picked == ["c1"], f"context-selectie koos {picked} (verwacht ['c1'])"
-
-
-def _check_extract_keeps_repeat():
-    text = _DECOY_A + "\n\n" + _STUURGROEP
-    targets = [textdedup.shingles(textdedup.normalize_words(_STUURGROEP))]
-    kept = textdedup.extract_paragraphs(text, targets, budget=len(_STUURGROEP) + 20)
-    ok = "Bestuursraad" in kept and "bewaartermijn" not in kept
-    return ok, "paragraaf-extract houdt de herhaalde alinea, niet de kop van de tekst"
-
-
-def _check_scores():
-    near = textdedup.relevance(
-        "De besluitvorming ligt bij de stuurgroep Informatievoorziening, die maandelijks "
-        "bijeenkomt onder voorzitterschap van de directeur Bedrijfsvoering.",
-        [textdedup.shingles(textdedup.normalize_words(_STUURGROEP))],
-    )
-    far = textdedup.relevance(_DECOY_B, [textdedup.shingles(textdedup.normalize_words(_STUURGROEP))])
-    return near > 0.4 and far < 0.1, f"bijna-woordelijk {near:.2f} vs. ongerelateerd {far:.2f}"
-
-
-def _check_budget():
-    candidates = [(f"q{i}", _STUURGROEP + " " + _DECOY_A) for i in range(20)]
-    picked = textdedup.select_context([_STUURGROEP], candidates, 2000, 1000)
-    total = sum(len(t) for _, t in picked)
-    return total <= 2000, f"{total} tekens context (max 2000)"
-
-
-DEDUP_CASES = [
-    dict(id="dedup-selectie", checks=[_check_selection]),
-    dict(id="dedup-extract", checks=[_check_extract_keeps_repeat]),
-    dict(id="dedup-scores", checks=[_check_scores]),
-    dict(id="dedup-budget", checks=[_check_budget]),
-]
-
-
-def _big_section_answers(n: int) -> list[dict]:
-    """A section far larger than one LLM call can take: n answers of ~800 chars,
-    each repeating the same governance paragraph the first answer introduces."""
-    repeated = (
-        "De besluitvorming over het project ligt bij de stuurgroep Informatievoorziening, "
-        "die maandelijks bijeenkomt onder voorzitterschap van de directeur Bedrijfsvoering "
-        "en per kwartaal rapporteert aan de Bestuursraad. "
-    )
-    unique = (
-        "Onderdeel {i} van de uitvoering betreft {topic}. Hiervoor is een werkinstructie "
-        "opgesteld die door het team wordt gevolgd en jaarlijks wordt herzien. De "
-        "verantwoordelijkheid ligt bij de afdeling Dienstverlening, die hierover in het "
-        "kwartaalverslag rapporteert. "
-    )
-    topics = [
-        "de inrichting van de scanstraat", "het beheer van de trainingsdata",
-        "de logging van classificatiebesluiten", "de terugkoppeling aan behandelaars",
-        "het bijhouden van de foutmarge", "de archivering van brieven",
-    ]
-    return [
-        dict(
-            question_id=f"g{i}",
-            question_text=f"Beschrijf onderdeel {i} van de uitvoering.",
-            answer=(unique.format(i=i, topic=topics[i % len(topics)]) * 2 + repeated).strip(),
-        )
-        for i in range(n)
-    ]
-
-
-SMOOTH_FORM_CASES = [
-    # The regression this suite exists for: one call per section made this form
-    # exceed the request cap, so the backend rejected it and the client silently
-    # left every answer untouched.
-    dict(
-        id="smooth-groot",
-        sections=[
-            dict(title="Doel en aanpak", answers=[
-                dict(
-                    question_id="c1",
-                    question_text="Omschrijving van het IV-verzoek",
-                    answer=(
-                        "Het project Slimme Documentstromen wijst met het model DocFlow-ML "
-                        "circa 40.000 burgerbrieven per maand automatisch toe aan behandelteams."
-                    ),
-                ),
-            ]),
-            dict(title="Uitvoering en beheer", answers=_big_section_answers(30)),
-        ],
-        min_batches=4,
-    ),
-]
-
 
 ONTOLOGY_CASES = [
     dict(
@@ -842,6 +592,7 @@ async def run_extract(case: dict) -> dict:
         options=case.get("options", []),
         question_type=case["question_type"],
         field_format=case["field_format"],
+        related_questions=case.get("related_questions", []),
         form_context=(
             "Intake-formulier voor IV-verzoeken bij het Ministerie van Financiën: "
             "beschrijft doel, doelgroep, risico's en benodigde middelen van een "
@@ -881,124 +632,6 @@ async def run_synth(case: dict) -> dict:
     dt = time.monotonic() - t0
     suggestion, rationale = main._parse_synthesize(raw)
     return score(case, raw, suggestion, suggestion, rationale, dt)
-
-
-async def run_smooth(case: dict) -> dict:
-    req = main.SmoothRequest(
-        section_title=case["section_title"],
-        answers=[main.SmoothAnswer(**a) for a in case["answers"]],
-        context_answers=[main.SmoothAnswer(**a) for a in case["context_answers"]],
-    )
-    originals = {a.question_id: a.answer for a in req.answers}
-    t0 = time.monotonic()
-    raw = await backend.chat(main.SMOOTH_SYSTEM_PROMPT, main._smooth_user_message(req))
-    dt = time.monotonic() - t0
-    final = main._parse_smooth(raw, originals)
-
-    notes, passed = [], []
-
-    def add(ok: bool, note: str):
-        passed.append(ok)
-        notes.append(("PASS " if ok else "FAIL ") + note)
-
-    joined = "\n\n".join(final[qid] for qid in originals)
-    for chk in case["checks_joined"]:
-        ok, note = chk(joined)
-        add(ok, note)
-    for qid in originals:
-        add(bool(final[qid].strip()), f"antwoord {qid} niet leeg")
-        add(len(final[qid]) <= 1.5 * len(originals[qid]), f"antwoord {qid} niet gegroeid")
-    for qid, needles in case.get("expect_tight", {}).items():
-        if final[qid] == originals[qid]:
-            add(True, f"antwoord {qid} ongewijzigd (weggelaten)")
-        else:
-            kept = all(n.lower() in final[qid].lower() for n in needles)
-            add(kept and len(final[qid]) <= len(originals[qid]),
-                f"antwoord {qid} herschreven zonder feitverlies of groei")
-    # The suite's dedup goal only counts if something actually changed.
-    add(any(final[qid] != originals[qid] for qid in originals) or not case.get("checks_joined"),
-        "minstens één antwoord herschreven")
-    return {
-        "id": case["id"], "ok": all(passed), "time": dt, "notes": notes,
-        "raw": raw[:600], "suggestion": joined[:600], "final": joined[:600],
-    }
-
-
-async def run_dedup(case: dict) -> dict:
-    """LLM-free: pins the deterministic context selection in textdedup. Runs in
-    milliseconds, so every threshold constant has a regression net."""
-    notes, passed = [], []
-
-    def add(ok: bool, note: str):
-        passed.append(ok)
-        notes.append(("PASS " if ok else "FAIL ") + note)
-
-    t0 = time.monotonic()
-    for check in case["checks"]:
-        ok, note = check()
-        add(ok, note)
-    return {
-        "id": case["id"], "ok": all(passed), "time": time.monotonic() - t0,
-        "notes": notes, "raw": "", "suggestion": "", "final": "",
-    }
-
-
-async def run_smooth_form(case: dict) -> dict:
-    """Whole-form smoothing: batching is asserted directly, then the real run
-    must return every question id it was given."""
-    req = main.SmoothFormRequest(
-        sections=[
-            main.SmoothSectionInput(
-                title=s["title"], answers=[main.SmoothAnswer(**a) for a in s["answers"]]
-            )
-            for s in case["sections"]
-        ]
-    )
-    originals = {a.question_id: a.answer.strip() for s in req.sections for a in s.answers}
-    notes, passed = [], []
-
-    def add(ok: bool, note: str):
-        passed.append(ok)
-        notes.append(("PASS " if ok else "FAIL ") + note)
-
-    batches = main._smooth_batches(req.sections)
-    add(len(batches) >= case["min_batches"],
-        f"{len(batches)} batches (min {case['min_batches']})")
-    oversize = [
-        b for b in batches
-        if len(b.answers) > 1 and sum(len(a.answer) for a in b.answers) > main._SMOOTH_BATCH_CHARS
-    ]
-    add(not oversize, f"{len(oversize)} batches boven het tekenbudget")
-    add(all(len(b.answers) <= main._SMOOTH_MAX_BATCH_ANSWERS for b in batches),
-        "geen batch met te veel antwoorden")
-    batched_ids = {a.question_id for b in batches for a in b.answers}
-    add(batched_ids == set(originals), "elk antwoord zit in een batch")
-
-    t0 = time.monotonic()
-    final = await main._smooth_form(req)
-    dt = time.monotonic() - t0
-
-    add(set(final) == set(originals), "elk vraag-ID staat in het eindresultaat")
-    add(all(final.get(qid, "").strip() for qid in originals), "geen leeg antwoord")
-    add(all(len(final[qid]) <= 1.5 * len(originals[qid]) for qid in originals),
-        "geen antwoord gegroeid")
-    changed = sum(1 for qid in originals if final[qid] != originals[qid])
-    add(changed > 0, f"{changed}/{len(originals)} antwoorden herschreven")
-    # The governance paragraph starts in all 30 answers. Batching removes most
-    # of it (~9 survive), but not down to one: answers in different batches only
-    # see the earliest answers as context, so each batch tends to keep its own
-    # copy. Squeezing that last factor out is the deterministic duplicate map's
-    # job, not batching's — this bar guards the win we actually have.
-    before = sum(a["answer"].lower().count("bestuursraad")
-                 for s in case["sections"] for a in s["answers"])
-    joined = "\n\n".join(final[qid] for qid in originals)
-    after = joined.lower().count("bestuursraad")
-    add(after <= before // 2, f"'Bestuursraad': {before}x → {after}x (max {before // 2})")
-
-    return {
-        "id": case["id"], "ok": all(passed), "time": dt, "notes": notes,
-        "raw": "", "suggestion": joined[:600], "final": joined[:600],
-    }
 
 
 async def run_ontology(case: dict) -> dict:
@@ -1293,9 +926,6 @@ SUITES = {
     "extract": (EXTRACT_CASES, run_extract),
     "improve": (IMPROVE_CASES, run_improve),
     "synthesize": (SYNTH_CASES, run_synth),
-    "smooth": (SMOOTH_CASES, run_smooth),
-    "smoothform": (SMOOTH_FORM_CASES, run_smooth_form),
-    "dedup": (DEDUP_CASES, run_dedup),
     "ontology": (ONTOLOGY_CASES, run_ontology),
     "interview": (INTERVIEW_CASES, run_interview),
 }

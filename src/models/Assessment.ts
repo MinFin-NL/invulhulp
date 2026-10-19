@@ -127,9 +127,10 @@ export interface AnswerSourceMeta {
   // field shows a hallucination warning until the user reviews/edits it.
   grounded: boolean
   createdAt: number
-  // Set when the smoothing pass rewrote the answer after extraction: the
-  // citations below still describe the text as it was extracted, so quotes and
-  // the source highlight may no longer line up with what the field shows.
+  // Set when the (since removed) smoothing pass rewrote the answer after
+  // extraction: the citations still describe the text as it was extracted, so
+  // quotes and the source highlight may not line up with what the field shows.
+  // Nothing writes it any more; stored answers keep it.
   smoothedAt?: number
 }
 

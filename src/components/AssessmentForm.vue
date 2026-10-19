@@ -12,16 +12,10 @@
             </svg>
           </span>
           <div class="ai-banner__body">
-            <template v-if="aiPhase">
-              <span class="ai-banner__title">Antwoorden gladstrijken…</span>
-              <span class="ai-banner__count">stap {{ Math.min(aiPhase.current + 1, aiPhase.total) }} van {{ aiPhase.total }}</span>
-            </template>
-            <template v-else>
-              <span class="ai-banner__title">AI Modus vult dit formulier in…</span>
-              <span v-if="aiProgress" class="ai-banner__count">{{ aiProgress.filled }}/{{ aiProgress.total }} velden</span>
-            </template>
+            <span class="ai-banner__title">AI Modus vult dit formulier in…</span>
+            <span v-if="aiProgress" class="ai-banner__count">{{ aiProgress.done }}/{{ aiProgress.total }} velden</span>
           </div>
-          <div v-if="aiProgress || aiPhase" class="ai-banner__bar" aria-hidden="true">
+          <div v-if="aiProgress" class="ai-banner__bar" aria-hidden="true">
             <div class="ai-banner__bar-fill" :style="{ width: aiProgressPct + '%' }" />
           </div>
           <button
@@ -229,7 +223,7 @@ import ConfirmDialog from './ConfirmDialog.vue'
 
 const store = useAssessmentStore()
 const auth = useAuthStore()
-const { aiModeActive, aiModeProgress, aiModePhase, aiModeError, cancelAiMode, dismissAiModeError } = useAiMode()
+const { aiModeActive, aiModeProgress, aiModeError, cancelAiMode, dismissAiModeError } = useAiMode()
 
 const aiModeErrorDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
 const aiModeErrorFormId = ref<string | null>(null)
@@ -242,9 +236,11 @@ watch(aiModeError, (errors) => {
   }
 }, { deep: true })
 
+// A dossier run checks all its forms at once, and they all fail the same way:
+// one dialog explains it for every one of them.
 function onAiModeErrorDismissed() {
   if (aiModeErrorFormId.value) {
-    dismissAiModeError(aiModeErrorFormId.value)
+    for (const formId of Object.keys(aiModeError.value)) dismissAiModeError(formId)
     aiModeErrorFormId.value = null
   }
 }
@@ -275,23 +271,15 @@ const isAiActive = computed(
 const aiProgress = computed(() =>
   store.activeFormId ? aiModeProgress.value[store.activeFormId] ?? null : null,
 )
-const aiPhase = computed(() =>
-  store.activeFormId ? aiModePhase.value[store.activeFormId] ?? null : null,
-)
 const aiProgressPct = computed(() => {
-  const phase = aiPhase.value
-  if (phase) {
-    return phase.total === 0 ? 0 : Math.round((phase.current / phase.total) * 100)
-  }
   const p = aiProgress.value
   if (!p || p.total === 0) return 0
-  return Math.round((p.filled / p.total) * 100)
+  return Math.round((p.done / p.total) * 100)
 })
 
 // The AI banner parks under the header, so while it is on screen the dossier
 // columns below it have to give up its height too. Its height is not a
-// constant: the label swaps between "invullen" and "gladstrijken" and the body
-// wraps on narrow viewports, so publish the measured height and let
+// constant: the body wraps on narrow viewports, so publish the measured height and let
 // --invulhulp-sticky-offset (main.css) add it to the header height.
 const bannerEl = ref<HTMLElement | null>(null)
 let bannerObserver: ResizeObserver | null = null

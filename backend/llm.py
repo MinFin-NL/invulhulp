@@ -25,10 +25,16 @@ Environment variables:
     OLLAMA_MODEL            — model name (default: mistral)
     OLLAMA_BASE_URL         — Ollama server URL (default: http://localhost:11434)
     OLLAMA_EMBEDDING_MODEL  — embedding model (default: nomic-embed-text)
+
+    # Both backends
+    LLM_MAX_CONCURRENCY     — chat/stream calls in flight at once (default: 6 on
+                              Azure, 1 on Ollama). AI Modus fires its questions in
+                              parallel up to this limit; the server enforces it too.
 """
 
 from __future__ import annotations
 
+import asyncio
 import os
 from collections.abc import AsyncGenerator
 from typing import Protocol
@@ -155,7 +161,7 @@ class AzureBackend:
 
 # num_ctx is not Ollama's default (2048–4096 depending on the model): a longer
 # prompt is silently truncated by the runtime, which cost us whole answers on
-# the smoothing pass. Keep it well above the largest prompt we build.
+# long longtext answers. Keep it well above the largest prompt we build.
 _OLLAMA_OPTIONS = {"temperature": 0.1, "num_ctx": 8192}
 
 
@@ -199,6 +205,38 @@ class OllamaBackend:
         return [list(v) for v in response.embeddings]
 
 
+class LimitedBackend:
+    """Caps how many chat/stream calls run at once. AI Modus asks its questions
+    in parallel and paces itself by `max_concurrency`; this is the server-side
+    net for a client that doesn't (or for two users running AI Modus at once).
+    Embeddings are not limited: a retrieval embeds one short query."""
+
+    def __init__(self, inner: LLMBackend, max_concurrency: int) -> None:
+        self._inner = inner
+        self.max_concurrency = max_concurrency
+        self._slots = asyncio.Semaphore(max_concurrency)
+
+    async def chat(self, system: str, user: str) -> str:
+        async with self._slots:
+            return await self._inner.chat(system, user)
+
+    async def stream(self, system: str, user: str) -> AsyncGenerator[str, None]:
+        async with self._slots:
+            async for chunk in self._inner.stream(system, user):
+                yield chunk
+
+    async def embed(self, texts: list[str]) -> list[list[float]]:
+        return await self._inner.embed(texts)
+
+
+def _max_concurrency(default: int) -> int:
+    raw = os.environ.get("LLM_MAX_CONCURRENCY", "").strip()
+    try:
+        return max(1, int(raw)) if raw else default
+    except ValueError:
+        return default
+
+
 def _env_flag(name: str, default: bool) -> bool:
     raw = os.environ.get(name, "").strip().lower()
     if not raw:
@@ -206,25 +244,35 @@ def _env_flag(name: str, default: bool) -> bool:
     return raw in ("1", "true", "yes", "on")
 
 
-def create_backend() -> LLMBackend:
+def create_backend() -> LimitedBackend:
     azure_endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT", "")
     if azure_endpoint:
-        deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-5.3-chat")
-        api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2025-04-01-preview")
-        return AzureBackend(
-            endpoint=azure_endpoint,
-            api_key=os.environ.get("AZURE_OPENAI_API_KEY", ""),
-            api_version=api_version,
-            deployment=deployment,
-            is_reasoning=_env_flag(
-                "AZURE_OPENAI_REASONING_MODEL",
-                default=deployment.startswith(("o1", "o3", "o4")),
-            ),
-            embedding_endpoint=os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOINT", ""),
-            embedding_api_key=os.environ.get("AZURE_OPENAI_EMBEDDING_API_KEY", ""),
-            embedding_api_version=os.environ.get("AZURE_OPENAI_EMBEDDING_API_VERSION", ""),
-            embedding_deployment=os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", ""),
-        )
+        return LimitedBackend(_azure_backend(azure_endpoint), _max_concurrency(6))
+    # Ollama answers one request at a time unless OLLAMA_NUM_PARALLEL says
+    # otherwise; parallel calls would only queue inside Ollama.
+    return LimitedBackend(_ollama_backend(), _max_concurrency(1))
+
+
+def _azure_backend(azure_endpoint: str) -> AzureBackend:
+    deployment = os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-5.3-chat")
+    api_version = os.environ.get("AZURE_OPENAI_API_VERSION", "2025-04-01-preview")
+    return AzureBackend(
+        endpoint=azure_endpoint,
+        api_key=os.environ.get("AZURE_OPENAI_API_KEY", ""),
+        api_version=api_version,
+        deployment=deployment,
+        is_reasoning=_env_flag(
+            "AZURE_OPENAI_REASONING_MODEL",
+            default=deployment.startswith(("o1", "o3", "o4")),
+        ),
+        embedding_endpoint=os.environ.get("AZURE_OPENAI_EMBEDDING_ENDPOINT", ""),
+        embedding_api_key=os.environ.get("AZURE_OPENAI_EMBEDDING_API_KEY", ""),
+        embedding_api_version=os.environ.get("AZURE_OPENAI_EMBEDDING_API_VERSION", ""),
+        embedding_deployment=os.environ.get("AZURE_OPENAI_EMBEDDING_DEPLOYMENT", ""),
+    )
+
+
+def _ollama_backend() -> OllamaBackend:
     return OllamaBackend(
         host=os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434"),
         model=os.environ.get("OLLAMA_MODEL", "mistral"),

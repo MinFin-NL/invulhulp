@@ -330,7 +330,7 @@ All endpoints live under `/api` and require an authenticated session (except the
 |---|---|---|
 | `/api/improve/stream` | `POST` | Suggest an improved version of a text fragment |
 | `/api/synthesize/stream` | `POST` | Synthesize a DPIA answer from AIIA answers |
-| `/api/smooth/form/stream` | `POST` | Deduplicate a whole form's longtext answers (batched server-side) |
+| `/api/ai/limits` | `GET` | How many AI Modus questions the client may ask at once (`LLM_MAX_CONCURRENCY`) |
 | `/api/extract/rag/stream` | `POST` | Extract an answer grounded in retrieved document chunks (RAG) |
 
 ### Documents and images

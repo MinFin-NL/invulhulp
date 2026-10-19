@@ -93,6 +93,40 @@ het antwoord bestond nog niet toen het formulier werd geschreven.
 
 Fase 1 (§11) bouwt alleen het startgesprek.
 
+### 5.1 Het verdiepingsgesprek, uitgewerkt (oktober 2026)
+
+Het verdiepingsgesprek is naar voren gehaald (§11, fase 1b). Het hangt niet af van het
+startgesprek, en het weet al wat het niet weet. Het is bewust **minder** gesprek dan de
+naam doet vermoeden: de invuller schrijft, de AI wijst richting.
+
+- **Wat een gat is.** Een vraag die AI-Modus leeg liet (de weigerzin of een geblankt
+  voorstel) of waarvan de invuller het voorstel heeft afgewezen. Deterministisch, dus
+  zonder modeloordeel. Het werkt per dossier, maar wordt in de praktijk per formulier
+  gebruikt.
+- **Wat de invuller ziet.** Een filter "alleen open vragen" in het gewone formulier, met
+  een banner. Elk gat toont het **echte, lege invoerelement** van die vraag (tekst,
+  radio, checkbox of tabel), nooit een conceptantwoord.
+- **Het paneel "Wat kan helpen".** Naast het veld:
+  - de aandachtspunten als trefwoorden;
+  - fragmenten die *bijna* antwoord gaven, met waarom ze tekortschoten;
+  - de toelichting uit het formulier;
+  - verwante antwoorden uit het dossier.
+
+  De paneelinhoud komt uit **dezelfde** extractie-aanroep die het gat vond, en wordt
+  gedeeld in het dossier opgeslagen; er is geen tweede aanroep.
+- **Wat de invuller typt, komt letterlijk in het antwoord** (herkomst "zelf ingevuld").
+  Het model herschrijft het niet.
+- **Eén optionele vervolgvraag per tekstvraag**, alleen op verzoek ("Laat AI
+  meekijken"). Het model mag één open vraag terugstellen over wat er nog ontbreekt (de
+  zetten uit §6), geen antwoord. Voor radio, checkbox en tabel is er geen vervolgvraag.
+- **Kenmerkvragen uit de toepassingsscan** worden niet hier gevuld: een gat op zo'n vraag
+  verwijst naar de toepassingsscan, waar het feit thuishoort.
+- **Doorwerking.** Een antwoord gaat als *voorstel* naar gekoppelde vragen in andere
+  formulieren, zoals bij de bestaande cross-form-koppelingen.
+
+Dit sluit §9.1 (sturing) en §9.2 (woorden van het model) grotendeels uit door ontwerp:
+het model levert nooit tekst die in een antwoord belandt.
+
 ## 6. Wat het socratisch maakt: de zettenset
 
 Zonder expliciete zettenset wordt dit een chatbot die formulieren voorleest. De interviewer
@@ -302,11 +336,30 @@ projecten voordat er iets breed wordt uitgerold.
 | **0** | Spike met alleen prompts in `eval_prompts.py`, geen UI: haalt een gesprek met een persona het gouden profiel? | — |
 | **1** | Startgesprek naast de kernvragen; feiten als **voorstel**, bevestiging in de bestaande kernvragen-UI | fase 0 van `systeemprofiel-feitenbasis.md` |
 | **2** | Transcript vervangt het kernvragentranscript als AI-bron | fase 1 |
-| **3** | Verdiepingsgesprek per formulier, na AI-Modus, over wat de documenten niet dekten | fase 1 + RAG |
+| **1b** | Verdiepingsgesprek (§5.1): open vragen na AI-Modus, leeg veld met hulppaneel | AI-Modus + RAG; eigen eval-poort, **niet** fase 0 of 1 |
+| ~~3~~ | ~~Verdiepingsgesprek per formulier~~ (naar voren gehaald als fase 1b) | — |
 | **4** | Herijkingsgesprek en waarnemingsfeiten (de werkings-as) | fase 4 van het feitendocument |
 
-Fase 0 is een spike van een dag of wat en beslist alles. Blijkt daar dat het model stuurt
-(§9.1) of niet convergeert, dan is het antwoord "niet doen" en heeft het niets gekost.
+Fase 0 is een spike van een dag of wat en beslist over het startgesprek. Blijkt daar dat
+het model stuurt (§9.1) of niet convergeert, dan is het antwoord "niet doen" en heeft het
+niets gekost. De uitkomst (6 oktober 2026, lokaal model): niet geslaagd; de Azure-run
+beslist. Zie `werkplan-kompas.md` §7.
+
+**Eval-poort voor fase 1b.** Eerst een suite in `eval_prompts.py`, pas daarna UI. Ze slaagt
+als:
+
+1. de aandachtspunten in het paneel **geen verborgen antwoord** bevatten (trefwoorden,
+   geen feiten die in het antwoord thuishoren);
+2. de vervolgvraag op het goede moment komt: alleen als er echt iets ontbreekt, en dan
+   als open vraag zonder voorgesteld antwoord;
+3. de extractie met de paneelvelden erbij **minstens zo goed** scoort als zonder (raw
+   score van de extract-suite).
+
+Zoals bij fase 0 beslist de run tegen Azure, niet de lokale run.
+
+**Voorwerk, gebouwd (16 oktober 2026).** AI-Modus vraagt nu parallel op één wachtrij en
+de gladstrijkronde is vervangen door afbakening in de extractieprompt (`werkplan-kompas.md`
+§7, traject 1). Dat maakt de lege velden waar fase 1b op rust sneller zichtbaar.
 
 ## 12. Wat dit document niet doet
 

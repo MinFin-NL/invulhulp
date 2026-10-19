@@ -21,7 +21,6 @@ import sys
 import unicodedata
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
-from dataclasses import dataclass
 
 from dotenv import load_dotenv
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -45,7 +44,6 @@ import imagestore
 import llm
 import pdfextract
 import rag
-import textdedup
 import users
 
 log = logging.getLogger(__name__)
@@ -331,65 +329,6 @@ SYNTHESIZE_SYSTEM_PROMPT = (
 )
 
 
-# The smoothing pass runs after AI Modus filled a form: per-question extraction
-# calls are isolated, so answers restate the same facts. Smoothing rewrites one
-# section's longtext answers per call, with earlier (already smoothed) sections
-# passed as read-only context — dedup is one-directional (a fact stays in the
-# earliest answer), so a rewritten answer never needs to grow.
-SMOOTH_SYSTEM_PROMPT = (
-    "Je bent eindredacteur van een ingevuld formulier voor de Nederlandse "
-    "overheid (Ministerie van Financiën - MinFin). Je krijgt de antwoorden van "
-    "één sectie van het formulier, plus ter context antwoorden uit eerdere "
-    "secties. Herschrijf UITSLUITEND de sectie-antwoorden.\n\n"
-    "JOUW BELANGRIJKSTE TAAK: hele zinnen en alinea's die inhoudelijk al in "
-    "een ander antwoord staan, VOLLEDIG SCHRAPPEN. De antwoorden zijn stuk "
-    "voor stuk los van elkaar gegenereerd, dus ze herhalen elkaar vaak bijna "
-    "woordelijk — soms hele alinea's. Dat wegsnijden is verreweg het "
-    "belangrijkste dat je doet; alle andere regels zijn ondergeschikt.\n\n"
-    "Werkwijze per antwoord: loop het zin voor zin en alinea voor alinea na. "
-    "Vraag je bij elk stuk af of diezelfde inhoud al staat in een "
-    "contextantwoord of in een eerder antwoord binnen deze sectie. Zo ja: "
-    "schrap dat stuk in dit latere antwoord helemaal. Niet inkorten, niet "
-    "samenvatten, niet 'kort aanstippen' — weg. Ook als de formulering "
-    "verschilt: gaat het over hetzelfde feit, dezelfde aanleiding, hetzelfde "
-    "doel of dezelfde aanpak, dan is het herhaling. Een antwoord dat na het "
-    "schrappen fors korter is, is precies goed.\n\n"
-    "Harde regels:\n"
-    "1. Schrap alle inhoud die al elders staat (zie hierboven). Een feit hoort "
-    "thuis in het VROEGSTE antwoord waar het past — in een contextantwoord, "
-    "anders in het eerste antwoord van deze sectie. Elk uniek feit blijft "
-    "daardoor precies één keer staan.\n"
-    "2. Schrap alleen echte herhaling: laat inhoud staan die nog nergens "
-    "anders voorkomt, ook als een antwoord daardoor lang blijft. Een vraag die "
-    "expliciet om een gegeven vraagt (bijvoorbeeld naar de omvang) mag dat "
-    "gegeven noemen, ook al staat het terloops al in een eerder antwoord.\n"
-    "3. Voeg NOOIT nieuwe feiten, namen, aantallen of claims toe en verander "
-    "de betekenis niet. Je mag alleen schrappen, inkorten en herformuleren.\n"
-    "4. Elk antwoord blijft zelfstandig leesbaar onder zijn eigen vraag: "
-    "minimaal één volledige zin die de vraag beantwoordt, en verwijs NOOIT "
-    "naar andere antwoorden ('zie boven', 'zoals eerder genoemd bij vraag X'). "
-    "Blijft er na het schrappen te weinig over, houd dan één korte zin over "
-    "die de vraag direct beantwoordt. Geef nooit een leeg antwoord terug.\n"
-    "5. Behoud de formele ambtelijke stijl, de derde persoon en de taal van "
-    "de invoer (bijna altijd Nederlands).\n"
-    "6. Harmoniseer het woordgebruik: worden voor hetzelfde begrip in "
-    "verschillende antwoorden onderling verschillende maar in betekenis "
-    "gelijke woorden gebruikt (bijvoorbeeld 'werkstroom' en 'workflow', of "
-    "'proces' en 'processtroom'), kies dan consequent één term en gebruik die "
-    "overal. Volg daarbij de term die in de contextantwoorden of het vroegste "
-    "antwoord staat. Dit mag de betekenis niet veranderen — het gaat alleen om "
-    "eenduidig taalgebruik.\n"
-    "7. Neem een antwoord ALLEEN op in je uitvoer als je er daadwerkelijk "
-    "herhaling uit schrapt, het duidelijk inkort of woordgebruik harmoniseert "
-    "(regel 6). Herformuleer nooit alleen voor de stijl: een antwoord dat "
-    "niets herhaalt en geen afwijkende termen bevat laat je volledig WEG uit "
-    "je uitvoer.\n\n"
-    "Reageer uitsluitend in dit formaat, één blok per GEWIJZIGD antwoord, met "
-    "exact het vraag-ID uit de invoer en geen tekst buiten de tags:\n"
-    '<antwoord id="VRAAG_ID">de herschreven tekst</antwoord>'
-)
-
-
 class ImproveRequest(BaseModel):
     text: str
     question_context: str = ""
@@ -403,30 +342,6 @@ class SynthesizeRequest(BaseModel):
     source_questions: dict[str, str]
     target_question: str
     synthesis_hint: str = ""
-
-
-class SmoothAnswer(BaseModel):
-    question_id: str
-    question_text: str
-    answer: str  # plaintext, HTML stripped client-side
-
-
-class SmoothRequest(BaseModel):
-    section_title: str = ""
-    answers: list[SmoothAnswer]  # answers of this section — rewrite these
-    context_answers: list[SmoothAnswer] = []  # earlier sections — read-only
-
-
-class SmoothSectionInput(BaseModel):
-    title: str = ""
-    answers: list[SmoothAnswer]
-
-
-class SmoothFormRequest(BaseModel):
-    """Whole-form smoothing: the server splits this into batches that fit the
-    model, so no section can be too large to smooth."""
-
-    sections: list[SmoothSectionInput]
 
 
 class ExtractDocument(BaseModel):
@@ -448,6 +363,7 @@ class ExtractRequest(BaseModel):
     field_format: str = ""
     form_context: str = ""
     columns: list[TableColumn] = []  # table questions only
+    related_questions: list[str] = []  # see _scope_block
 
 
 class IndexDocumentRequest(BaseModel):
@@ -473,6 +389,7 @@ class RagExtractRequest(BaseModel):
     field_format: str = ""
     form_context: str = ""
     columns: list[TableColumn] = []  # table questions only
+    related_questions: list[str] = []  # see _scope_block
     doc_ids: list[str] = []
     top_k: int = 6
 
@@ -485,6 +402,29 @@ def _options_block(options: list[str], question_type: str) -> str:
     kind = "meerdere opties mogelijk" if question_type == "checkbox" else "kies precies één optie"
     return (
         f"\n\nDit is een meerkeuzevraag ({kind}). Beschikbare antwoordopties (kies woordelijk):\n{formatted}"
+    )
+
+
+# AI Modus asks every question in its own call, in parallel, so no call sees
+# the other answers — and the same fact used to land under every question that
+# retrieved it. Naming the section's other questions lets the model leave their
+# topics alone. Capped: a long list drowns the one question that matters.
+_SCOPE_MAX_QUESTIONS = 12
+_SCOPE_MAX_CHARS = 160
+
+
+def _scope_block(related_questions: list[str]) -> str:
+    related = [q.strip()[:_SCOPE_MAX_CHARS] for q in related_questions if q.strip()]
+    if not related:
+        return ""
+    listed = "\n".join(f"- {q}" for q in related[:_SCOPE_MAX_QUESTIONS])
+    return (
+        "\n\n[ANDERE VRAGEN IN DIT ONDERDEEL — die worden apart beantwoord]\n"
+        f"{listed}\n"
+        "Beantwoord alleen de doelvraag. Laat inhoud weg die duidelijk het "
+        "onderwerp van een van deze andere vragen is, ook als die in de "
+        "fragmenten staat. Weiger NIET om die reden: wat de doelvraag zelf "
+        "vraagt, beantwoord je volledig."
     )
 
 
@@ -515,179 +455,6 @@ def _synthesize_user_message(req: SynthesizeRequest) -> str:
     )
 
 
-# Per context answer, the most any single one may occupy. Big enough to carry
-# whole paragraphs: the duplication this pass targets is often a full paragraph
-# restated near the end of an earlier answer, and a shorter cut hid it from the
-# model entirely. Oversize answers are reduced to their most relevant
-# paragraphs, never head-truncated (see textdedup.extract_paragraphs).
-_SMOOTH_CONTEXT_CHARS = 1000
-
-
-def _smooth_user_message(req: SmoothRequest) -> str:
-    def block(entries: list[SmoothAnswer], truncate: int = 0) -> str:
-        parts = []
-        for a in entries:
-            answer = a.answer.strip()
-            if truncate and len(answer) > truncate:
-                answer = answer[:truncate].rstrip() + "…"
-            parts.append(f"[{a.question_id}] Vraag: {a.question_text}\nAntwoord: {answer}")
-        return "\n\n".join(parts)
-
-    context = (
-        block(req.context_answers, truncate=_SMOOTH_CONTEXT_CHARS)
-        if req.context_answers
-        else "(geen)"
-    )
-    section = f"Sectie: {req.section_title}\n\n" if req.section_title.strip() else ""
-    return (
-        "Context — antwoorden uit eerdere secties (NIET herschrijven):\n\n"
-        f"{context}\n\n"
-        f"{section}Te herschrijven antwoorden:\n\n{block(req.answers)}"
-    )
-
-
-_ANTWOORD_RE = re.compile(r'<antwoord id="([^"]+)">(.*?)</antwoord>', re.DOTALL | re.IGNORECASE)
-
-
-def _parse_smooth(raw: str, originals: dict[str, str]) -> dict[str, str]:
-    """Map question id → final answer text. Smoothing may only shrink or keep
-    an answer: any missing, empty, template-echoed, or suspiciously grown
-    rewrite falls back to the original — worst case is a no-op, never data
-    loss. Ids not present in the request are ignored."""
-    result = dict(originals)
-    for m in _ANTWOORD_RE.finditer(raw):
-        qid, text = m.group(1).strip(), m.group(2).strip()
-        original = originals.get(qid)
-        if original is None:
-            continue
-        if not text or text.lower() in ("de herschreven tekst", "vraag_id"):
-            continue
-        if len(text) > 1.5 * len(original):
-            continue
-        result[qid] = text
-    return result
-
-
-# Whole-form smoothing budgets. One call rewrites at most _SMOOTH_BATCH_CHARS
-# of answers alongside _SMOOTH_CONTEXT_BUDGET_CHARS of earlier context; with the
-# ~2.5k system prompt that lands near 13k chars (~3.5k tokens), which every
-# backend handles comfortably. One call per form section did not: AIIA Deel B
-# has 56 longtext questions, so the request was rejected outright and the
-# section silently kept its duplication.
-_SMOOTH_BATCH_CHARS = 6000
-_SMOOTH_MAX_BATCH_ANSWERS = 8
-_SMOOTH_CONTEXT_BUDGET_CHARS = 4000
-_SMOOTH_REQUEST_MAX_CHARS = 300_000
-
-
-@dataclass
-class SmoothBatch:
-    section_title: str
-    answers: list[SmoothAnswer]
-
-
-def _smooth_batches(sections: list[SmoothSectionInput]) -> list[SmoothBatch]:
-    """Split a form into batches that fit a single LLM call. A batch never
-    crosses a section boundary (the section title is part of its context). An
-    answer too large to ever fit is left out of every batch and keeps its
-    original text — degrade, never reject the run."""
-    batches: list[SmoothBatch] = []
-    for section in sections:
-        current: list[SmoothAnswer] = []
-        size = 0
-        for a in section.answers:
-            n = len(a.answer)
-            if n > 2 * _SMOOTH_BATCH_CHARS:
-                continue
-            full = size + n > _SMOOTH_BATCH_CHARS or len(current) >= _SMOOTH_MAX_BATCH_ANSWERS
-            if current and full:
-                batches.append(SmoothBatch(section.title, current))
-                current, size = [], 0
-            current.append(a)
-            size += n
-        if current:
-            batches.append(SmoothBatch(section.title, current))
-    return batches
-
-
-def _smooth_context(batch: SmoothBatch, earlier: list[SmoothAnswer]) -> list[SmoothAnswer]:
-    """Read-only context for one batch: the already-smoothed answers this batch
-    is most likely to be repeating. Sending every earlier answer truncated to a
-    fixed head both blows the budget on a large form and cuts away the tail
-    paragraphs that tend to be the duplicated ones, so overlap decides who gets
-    the space (textdedup.select_context)."""
-    texts = {a.question_id: a.question_text for a in earlier}
-    selected = textdedup.select_context(
-        batch_texts=[a.answer for a in batch.answers],
-        candidates=[(a.question_id, a.answer) for a in earlier],
-        budget_chars=_SMOOTH_CONTEXT_BUDGET_CHARS,
-        per_answer_chars=_SMOOTH_CONTEXT_CHARS,
-    )
-    return [
-        SmoothAnswer(question_id=qid, question_text=texts.get(qid, ""), answer=text)
-        for qid, text in selected
-    ]
-
-
-async def _run_smooth_batch(
-    batch: SmoothBatch, context: list[SmoothAnswer]
-) -> tuple[dict[str, str], bool]:
-    """One batch through the model. Returns (id → final text, failed). A failing
-    batch yields its originals: worst case a no-op, never data loss."""
-    originals = {a.question_id: a.answer.strip() for a in batch.answers}
-    req = SmoothRequest(
-        section_title=batch.section_title, answers=batch.answers, context_answers=context
-    )
-    try:
-        raw = await backend.chat(SMOOTH_SYSTEM_PROMPT, _smooth_user_message(req))
-    except Exception:
-        return originals, True
-    return _parse_smooth(raw, originals), False
-
-
-async def _smooth_form_events(
-    req: SmoothFormRequest,
-) -> AsyncGenerator[tuple[str, dict], None]:
-    """Smooth a whole form batch by batch, yielding ('batch', …) per completed
-    batch and a final ('done', …) carrying every answer — rewritten or not."""
-    ordered = [a for s in req.sections for a in s.answers]
-    final = {a.question_id: a.answer.strip() for a in ordered}
-    batches = _smooth_batches(req.sections)
-    smoothed: set[str] = set()
-
-    for i, batch in enumerate(batches):
-        earlier = [
-            SmoothAnswer(
-                question_id=a.question_id,
-                question_text=a.question_text,
-                answer=final[a.question_id],
-            )
-            for a in ordered
-            if a.question_id in smoothed
-        ]
-        answers, failed = await _run_smooth_batch(batch, _smooth_context(batch, earlier))
-        changed = {qid: text for qid, text in answers.items() if text != final[qid]}
-        final.update(answers)
-        smoothed.update(answers.keys())
-        yield "batch", {
-            "index": i + 1,
-            "total": len(batches),
-            "answers": changed,
-            "failed": failed,
-        }
-
-    yield "done", {"answers": final, "batches": len(batches)}
-
-
-async def _smooth_form(req: SmoothFormRequest) -> dict[str, str]:
-    """Non-streaming core, for the eval harness: question id → final text."""
-    final: dict[str, str] = {}
-    async for event, payload in _smooth_form_events(req):
-        if event == "done":
-            final = payload["answers"]
-    return final
-
-
 def _xml_tag(raw: str, tag: str) -> str:
     """Content of the first <tag>…</tag> block in an LLM response, or ""."""
     m = re.search(rf"<{tag}>(.*?)</{tag}>", raw, re.DOTALL | re.IGNORECASE)
@@ -705,7 +472,8 @@ def _extract_user_message(req: ExtractRequest) -> str:
     ]
     return (
         f"Doelvraag waarvoor een antwoord nodig is:\n{req.target_question}"
-        f"{_options_block(req.options, req.question_type)}\n\n"
+        f"{_options_block(req.options, req.question_type)}"
+        f"{_scope_block(req.related_questions)}\n\n"
         f"Brondocumenten:\n\n" + "\n\n".join(doc_parts)
     )
 
@@ -982,30 +750,6 @@ async def synthesize_stream(req: SynthesizeRequest) -> StreamingResponse:
     )
 
 
-async def _smooth_form_sse_stream(req: SmoothFormRequest) -> AsyncGenerator[str, None]:
-    try:
-        async for event, payload in _smooth_form_events(req):
-            yield f"event: {event}\ndata: {json.dumps(payload, ensure_ascii=False)}\n\n"
-    except Exception as e:
-        yield f"event: error\ndata: {json.dumps({'detail': str(e)}, ensure_ascii=False)}\n\n"
-
-
-@app.post("/api/smooth/form/stream")
-async def smooth_form_stream(req: SmoothFormRequest) -> StreamingResponse:
-    """Whole-form smoothing. Batching happens here, so a section is never too
-    large to smooth."""
-    if not any(s.answers for s in req.sections):
-        raise HTTPException(status_code=400, detail="Geen antwoorden opgegeven.")
-    total_chars = sum(len(a.answer) for s in req.sections for a in s.answers)
-    if total_chars > _SMOOTH_REQUEST_MAX_CHARS:
-        raise HTTPException(status_code=400, detail="Formulier is te groot om gelijk te strijken.")
-    return StreamingResponse(
-        _smooth_form_sse_stream(req),
-        media_type="text/event-stream",
-        headers=_SSE_HEADERS,
-    )
-
-
 # ---------------------------------------------------------------------------
 # RAG endpoints
 # ---------------------------------------------------------------------------
@@ -1170,6 +914,12 @@ async def upload_document(
         # attachment in AI Modus; the rest stay caption-only chunks.
         "stored_figure_count": stored_figures,
     }
+
+
+@app.get("/api/ai/limits")
+async def ai_limits() -> dict:
+    """How many AI Modus questions the client may have in flight at once."""
+    return {"max_concurrency": backend.max_concurrency}
 
 
 @app.get("/api/documents")
@@ -1378,6 +1128,7 @@ def _rag_user_message(
     options: list[str],
     question_type: str,
     chunks: list[dict],
+    related_questions: list[str] | None = None,
 ) -> str:
     # Guidance is shown as an explicit instruction block so the model treats it
     # as a format directive, not as content to copy into the answer.
@@ -1400,7 +1151,8 @@ def _rag_user_message(
         )
 
     return (
-        f"{question_block}{_options_block(options, question_type)}\n\n"
+        f"{question_block}{_options_block(options, question_type)}"
+        f"{_scope_block(related_questions or [])}\n\n"
         f"Relevante passages uit de brondocumenten:\n\n{excerpts_block}"
     )
 
@@ -1422,7 +1174,9 @@ async def extract_rag_stream(req: RagExtractRequest, request: Request) -> Stream
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"Retrieval mislukt: {e}") from e
 
-    user_msg = _rag_user_message(req.target_question, req.guidance, req.options, req.question_type, chunks)
+    user_msg = _rag_user_message(
+        req.target_question, req.guidance, req.options, req.question_type, chunks, req.related_questions
+    )
     system_prompt = _build_extract_system_prompt(
         req.question_type, req.field_format, req.form_context, req.columns
     )

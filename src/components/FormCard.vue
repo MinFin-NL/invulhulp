@@ -84,12 +84,9 @@
           :done-filled-count="aiDoneFilled"
           :done-total-count="aiDoneTotal"
           :progress="aiProgress"
-          :phase="aiPhase"
-          :can-undo-smoothing="canUndoSmoothing"
           @activate="emit('activate', $event)"
           @cancel="emit('cancel', $event)"
           @dismiss="emit('dismiss', $event)"
-          @undo-smoothing="emit('undoSmoothing', $event)"
         />
       </div>
     </article>
@@ -124,9 +121,7 @@ const props = withDefaults(defineProps<{
   aiDone?: boolean
   aiDoneFilled?: number
   aiDoneTotal?: number
-  aiProgress?: { filled: number; total: number } | null
-  aiPhase?: { current: number; total: number } | null
-  canUndoSmoothing?: boolean
+  aiProgress?: { done: number; total: number } | null
 }>(), {
   status: null,
   paired: false,
@@ -138,8 +133,6 @@ const props = withDefaults(defineProps<{
   aiDoneFilled: 0,
   aiDoneTotal: 0,
   aiProgress: null,
-  aiPhase: null,
-  canUndoSmoothing: false,
 })
 
 const emit = defineEmits<{
@@ -147,7 +140,6 @@ const emit = defineEmits<{
   activate: [formId: string]
   cancel: [formId: string]
   dismiss: [formId: string]
-  undoSmoothing: [formId: string]
 }>()
 
 const PLACEHOLDER_LABELS: Record<FormPlaceholder, string> = {

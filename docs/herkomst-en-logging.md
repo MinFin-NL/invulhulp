@@ -22,7 +22,8 @@ antwoord, tot in de export. Dat is van tafel; de vraag erachter blijft.
 - **Brondocumenten**: AI Modus en "AI-suggestie uit documenten" bewaren per vraag
   `answerSources` (`AnswerSourceMeta` in `src/models/Assessment.ts`): de citaten, of het
   antwoord in de bron terug te vinden is (`grounded`) en wanneer het is gemaakt.
-  `SourcePanel` toont dat in de UI. Na gladstrijken staat er `smoothedAt`.
+  `SourcePanel` toont dat in de UI. Antwoorden die vóór oktober 2026 zijn gladgestreken
+  hebben nog `smoothedAt`; het gladstrijken zelf is verwijderd.
 - **Copy-mappings**: bij het openen van een formulier meldt een banner hoeveel vragen zijn
   overgenomen en waaruit. Per vraag wordt niets bewaard.
 
@@ -34,7 +35,6 @@ Op deze plekken komt modeltekst een antwoord binnen zonder spoor:
 |---|---|---|
 | Synthese uit een ander formulier (✦ AI-suggestie) | `CrossFormSuggestion.vue`, `acceptSuggestion` | niets |
 | Verbeter tekst | `TiptapEditor.vue` | niets |
-| Gladstrijken | `useAiMode.ts`, `smoothFormAnswers` | alleen `smoothedAt` als er al citaten waren |
 | AI Modus en documentsuggestie | `llmService.ts`, `DocumentSuggestion.vue` | citaten, maar niet de gegenereerde tekst zelf |
 
 Daardoor is achteraf niet te zeggen of een antwoord nog de tekst is die het model schreef,
