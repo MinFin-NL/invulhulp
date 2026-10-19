@@ -40,7 +40,7 @@
           gescand op {{ completedOn }}<template v-if="run.completedBy"> door {{ run.completedBy }}</template>
         </nldd-text>
         <nldd-text line-height="snug" size="sm" color="secondary" class="scan-tile__line" v-if="unknowns.length > 0">
-          Nog onbekend: {{ unknowns.map((k) => KENMERK_LABEL[k]).join(', ') }}.
+          Nog onbekend: {{ unknownLabels }}.
         </nldd-text>
       </template>
 
@@ -84,6 +84,7 @@ defineEmits<{ open: [] }>()
 
 const tags = computed(() => (props.kenmerken ? activeKenmerken(props.kenmerken) : []))
 const unknowns = computed(() => (props.kenmerken ? unknownKenmerken(props.kenmerken) : []))
+const unknownLabels = computed(() => unknowns.value.map((k) => KENMERK_LABEL[k]).join(', '))
 
 const completedOn = computed(() =>
   props.run
