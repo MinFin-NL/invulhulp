@@ -1,8 +1,7 @@
 import { ref, computed } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { loadForm, aiFillableQuestions, isAiFillable } from '../services/formLoader'
-import { bulkExtractFromDocument, fetchImageDimensions, verifyDocuments, type GapPanel } from '../services/llmService'
-import { GAP_PROTOTYPE } from '../utils/prototypeFlags'
+import { bulkExtractFromDocument, fetchImageDimensions, verifyDocuments } from '../services/llmService'
 import { clearLocalAiBusy, setLocalAiBusy } from '../collab/dossierTransport'
 import { isQuestionVisible } from '../utils/answerRefs'
 import type { AnswerSource, FormConfig } from '../models/Assessment'
@@ -20,14 +19,6 @@ const aiModeTotal = ref<Record<string, number>>({})
 // per-question "AI vond hier geen antwoord" markers. Transient (not persisted).
 const aiModeUnanswered = ref<Record<string, Set<string>>>({})
 const aiModeError = ref<Record<string, string>>({})
-// Verdiepingsgesprek prototype: per form, the "Wat kan helpen" panel of each
-// question the last run left empty. Unlike aiModeUnanswered it survives the
-// user typing — the panel is there to write with. Per tab, not persisted; the
-// design stores it shared in the dossier (interviewmodus §5.1).
-const aiModeGaps = ref<Record<string, Record<string, GapPanel>>>({})
-// "Alleen open vragen": one switch for the whole tab, so it holds while the
-// user moves between sections.
-const gapFilter = ref(false)
 const aiModeCancelled: Record<string, boolean> = {}
 // Per running form: aborts its calls in flight, and counts what it filled so a
 // cancelled run can still report it.
@@ -134,7 +125,6 @@ export function useAiMode() {
     delete aiModeDone.value[formId]
     aiModeTotal.value = { ...aiModeTotal.value, [formId]: questions.length }
     aiModeUnanswered.value = { ...aiModeUnanswered.value, [formId]: new Set() }
-    aiModeGaps.value = { ...aiModeGaps.value, [formId]: {} }
 
     let filled = 0
     try {
@@ -159,13 +149,6 @@ export function useAiMode() {
           const set = new Set(aiModeUnanswered.value[formId] ?? [])
           set.add(qId)
           aiModeUnanswered.value = { ...aiModeUnanswered.value, [formId]: set }
-        },
-        withPanel: GAP_PROTOTYPE,
-        onPanel: (qId, panel) => {
-          aiModeGaps.value = {
-            ...aiModeGaps.value,
-            [formId]: { ...aiModeGaps.value[formId], [qId]: panel },
-          }
         },
         onProgress: (done, total) => {
           aiModeProgress.value = { ...aiModeProgress.value, [formId]: { done, total } }
@@ -289,15 +272,6 @@ export function useAiMode() {
     aiModeUnanswered.value = { ...aiModeUnanswered.value, [formId]: next }
   }
 
-  /** The help panel for a question the last run left empty, if any. */
-  function gapPanelFor(formId: string, questionId: string): GapPanel | undefined {
-    return aiModeGaps.value[formId]?.[questionId]
-  }
-
-  function gapCount(formId: string): number {
-    return Object.keys(aiModeGaps.value[formId] ?? {}).length
-  }
-
   function cancelAiMode(formId: string) {
     aiModeCancelled[formId] = true
     if (!aiModeActive.value.has(formId)) return
@@ -343,8 +317,5 @@ export function useAiMode() {
     dismissAiModeError,
     isAiUnanswered,
     clearAiUnanswered,
-    gapFilter,
-    gapPanelFor,
-    gapCount,
   }
 }

@@ -317,6 +317,10 @@ opgeslagen; afgewezen voorstellen tellen nog niet als gat; verwante dossierantwo
 doorverwijzing naar de toepassingsscan en doorwerking naar andere formulieren zitten er
 niet in.
 
+**Prototype weer verwijderd (22 oktober 2026).** Paneel, vervolgvraag en filter zijn uit de
+app en de backend gehaald. De twee kandidaatprompts staan nu in `eval_prompts.py`, zodat de
+eval-poort (`gap`) blijft draaien.
+
 ## 8. Niet doen (bevriezen)
 
 - Nieuwe formulieren of placeholders uitwerken.

@@ -390,7 +390,6 @@ class RagExtractRequest(BaseModel):
     form_context: str = ""
     columns: list[TableColumn] = []  # table questions only
     related_questions: list[str] = []  # see _scope_block
-    with_panel: bool = False  # verdiepingsgesprek prototype, see _parse_panel
     doc_ids: list[str] = []
     top_k: int = 6
 
@@ -682,7 +681,6 @@ async def _sse_stream(
     allow_clarification: bool = False,
     allow_diagram: bool = False,
     sources: list[dict] | None = None,
-    panel_source: str | None = None,
 ) -> AsyncGenerator[str, None]:
     raw = ""
     try:
@@ -703,8 +701,6 @@ async def _sse_stream(
         done_payload: dict = {"suggestion": suggestion, "rationale": rationale}
         if sources is not None:
             done_payload["sources"] = sources
-        if panel_source is not None:
-            done_payload["panel"] = _parse_panel(raw, panel_source)
         yield f"event: done\ndata: {json.dumps(done_payload, ensure_ascii=False)}\n\n"
     except Exception as e:
         yield f"event: error\ndata: {json.dumps({'detail': str(e)}, ensure_ascii=False)}\n\n"
@@ -918,128 +914,6 @@ async def upload_document(
         # attachment in AI Modus; the rest stay caption-only chunks.
         "stored_figure_count": stored_figures,
     }
-
-
-# ---------------------------------------------------------------------------
-# Verdiepingsgesprek — PROTOTYPE (docs/interviewmodus-socratisch-gesprek.md
-# §5.1). Behind the VITE_GAP_PROTOTYPE flag in the client; the eval gate
-# (eval_prompts.py gap) has not passed yet. Nothing here writes an answer:
-# the panel points the way, the follow-up only asks.
-# ---------------------------------------------------------------------------
-
-GAP_PANEL_OUTPUT = """\
-Reageer uitsluitend in dit XML-formaat (geen markdown, geen tekst buiten de tags):
-<suggestie>jouw antwoord hier</suggestie>
-<toelichting>één zin: welk(e) fragment(en) je gebruikte</toelichting>
-<aandachtspunten>trefwoorden, gescheiden door '; '</aandachtspunten>
-<bijna>citaat — waarom het tekortschiet</bijna>
-
-Over <aandachtspunten>: noem twee tot vier onderwerpen waar een goed antwoord op deze vraag \
-over moet gaan, elk in hoogstens vijf woorden. Ze helpen de invuller het antwoord zelf te \
-schrijven. Voorbeeld bij een vraag over toegang tot een systeem: 'rollen en rechten; wie \
-toegang verleent; vastleggen van inzage'.
-Harde regels voor <aandachtspunten>:
-1. Geef NOOIT het antwoord of een deel ervan: geen namen, getallen, data, percentages, \
-systemen of maatregelen, ook niet als ze in de fragmenten staan.
-2. Alleen trefwoorden: geen zinnen en geen vragen.
-
-Over <bijna>: vul dit ALLEEN als je antwoord 'Onvoldoende informatie in de brondocumenten.' is. \
-Citeer dan per regel één zin uit de fragmenten die bijna antwoord gaf, woord voor woord, \
-gevolgd door ' — ' en in een paar woorden waarom die zin tekortschiet. Hoogstens twee regels. \
-Komt geen zin in de buurt, of heb je de vraag wel beantwoord, laat <bijna> dan leeg."""
-
-GAP_FOLLOWUP_SYSTEM_PROMPT = """\
-Je kijkt mee met een projectleider die zelf een vraag uit een formulier van het Ministerie van \
-Financiën beantwoordt. De brondocumenten gaven hier geen antwoord op; de projectleider schrijft \
-het antwoord zelf. Jij schrijft niets in het antwoord. Je mag hoogstens één vraag terugstellen \
-die helpt het antwoord vollediger te maken.
-
-Werk zo:
-1. Splits de formuliervraag in de deelvragen die erin staan. 'Welke risico's zijn er en welke \
-maatregelen?' heeft er twee; 'Wie is de opdrachtgever?' heeft er één.
-2. De aandachtspunten zijn hulp voor de projectleider, geen eisen. Een antwoord hoeft ze niet \
-te noemen.
-3. Lees het antwoord van de projectleider. Krijgt elke deelvraag een bruikbaar antwoord, ook \
-als het kort is? Zet dan alleen <compleet/>. Dat is de gewone uitkomst.
-4. Alleen als een deelvraag geen antwoord krijgt, of als het antwoord zo vaag is dat een \
-lezer er niets mee kan ('zo lang als nodig', 'weet ik niet'): stel één open vraag over \
-precies dat stuk.
-5. Twijfel je? Kies dan <compleet/>.
-
-Harde regels:
-1. Stel nooit zelf een antwoord voor. Dus geen 'bijvoorbeeld', geen 'zoals', geen 'denk aan', \
-geen 'klopt het dat', en geen namen, getallen, termijnen, wetsartikelen of maatregelen die de \
-projectleider niet zelf noemde.
-2. Een open vraag: begin met wie, wat, welke, hoe, waarom, wanneer of hoeveel. Geen vraag die \
-met ja of nee te beantwoorden is.
-3. Eén vraag, hoogstens 25 woorden, in gewone taal.
-4. Vraag niet naar iets wat de formuliervraag niet vraagt.
-5. Vraag niet om meer van hetzelfde ('welke risico's nog meer?'): heeft een deelvraag een \
-antwoord, dan is die af.
-
-Antwoord precies in één van deze twee vormen:
-<vervolgvraag>je vraag</vervolgvraag>
-of
-<compleet/>"""
-
-_PANEL_QUOTES = " \t\"'‘’“”„-•*"
-_BIJNA_SPLIT_RE = re.compile(r"\s+[—–-]{1,2}\s+")
-_VERVOLG_OPEN_RE = re.compile(r"<vervolgvraag>(.*?)(?=<|$)", re.DOTALL | re.IGNORECASE)
-
-
-def _squash(text: str) -> str:
-    return re.sub(r"\s+", " ", _normalize_for_grounding(text)).strip(" .")
-
-
-def _parse_panel(raw: str, source_text: str) -> dict:
-    """The panel fields, through a deterministic net like _validate_suggestion:
-    a keyword holding a digit or written as a sentence is dropped (a hidden
-    answer, or not a keyword), and a near-miss quote must appear literally in
-    the retrieved passages."""
-    punten = []
-    for p in re.split(r"[;\n]", _xml_tag(raw, "aandachtspunten")):
-        p = p.strip(_PANEL_QUOTES)
-        if p and len(p.split()) <= 6 and not re.search(r"\d", p) and not p.endswith(("?", ".")):
-            punten.append(p)
-    bijna = []
-    source = _squash(source_text)
-    for line in _xml_tag(raw, "bijna").splitlines():
-        parts = _BIJNA_SPLIT_RE.split(line.strip(_PANEL_QUOTES), maxsplit=1)
-        citaat = parts[0].strip(_PANEL_QUOTES)
-        if citaat and _squash(citaat) in source:
-            bijna.append({"citaat": citaat, "reden": parts[1].strip() if len(parts) == 2 else ""})
-    return {"aandachtspunten": punten[:5], "bijna": bijna[:2]}
-
-
-class GapFollowupRequest(BaseModel):
-    session_id: str
-    question: str
-    aandachtspunten: list[str] = []
-    answer: str
-
-
-def _parse_followup(raw: str) -> tuple[str, str]:
-    """The follow-up question, or "" for <compleet/>. Models leave the tag
-    unclosed, so read up to the next tag."""
-    m = _VERVOLG_OPEN_RE.search(raw)
-    return (m.group(1).strip() if m else ""), ""
-
-
-@app.post("/api/gap/followup/stream")
-async def gap_followup_stream(req: GapFollowupRequest, request: Request) -> StreamingResponse:
-    if not req.answer.strip():
-        raise HTTPException(status_code=400, detail="Er is nog geen antwoord om mee te kijken.")
-    await dossiers.resolve_session_access(request, req.session_id, "editor")
-    user_msg = (
-        f"Formuliervraag: {req.question}\n"
-        f"Aandachtspunten: {'; '.join(req.aandachtspunten) or '(geen)'}\n\n"
-        f"Antwoord van de projectleider:\n{req.answer[:4000]}"
-    )
-    return StreamingResponse(
-        _sse_stream(GAP_FOLLOWUP_SYSTEM_PROMPT, user_msg, _parse_followup),
-        media_type="text/event-stream",
-        headers=_SSE_HEADERS,
-    )
 
 
 @app.get("/api/ai/limits")
@@ -1306,16 +1180,11 @@ async def extract_rag_stream(req: RagExtractRequest, request: Request) -> Stream
     system_prompt = _build_extract_system_prompt(
         req.question_type, req.field_format, req.form_context, req.columns
     )
-    if req.with_panel:
-        system_prompt = system_prompt.removesuffix(_EXTRACT_OUTPUT) + GAP_PANEL_OUTPUT
     source_text = "\n".join(c["text"] for c in chunks)
     parse_fn = _extract_parser_for(req, source_text)
     sources = [_source_payload(c) for c in chunks]
     return StreamingResponse(
-        _sse_stream(
-            system_prompt, user_msg, parse_fn, sources=sources,
-            panel_source=source_text if req.with_panel else None,
-        ),
+        _sse_stream(system_prompt, user_msg, parse_fn, sources=sources),
         media_type="text/event-stream",
         headers=_SSE_HEADERS,
     )

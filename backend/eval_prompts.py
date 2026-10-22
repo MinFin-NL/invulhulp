@@ -910,9 +910,8 @@ async def run_interview(case: dict) -> dict:
 # Gap suite: eval gate for the verdiepingsgesprek
 # (docs/interviewmodus-socratisch-gesprek.md §5.1 and §11, fase 1b)
 #
-# Both prompts are candidates. They live in main.py so the browser prototype
-# (with_panel, /api/gap/followup/stream) and this gate run the same text; the
-# gate decides whether they stay. Three criteria:
+# Both prompts are candidates; the browser prototype that ran them was removed,
+# so they live here until the gate passes. Three criteria:
 #   1. the panel's aandachtspunten hold no hidden answer;
 #   2. the follow-up question fires only when something is missing, and then
 #      as an open question without a proposed answer;
@@ -920,8 +919,60 @@ async def run_interview(case: dict) -> dict:
 #      (paired: every case runs through both output sections).
 # ---------------------------------------------------------------------------
 
-GAP_PANEL_OUTPUT = main.GAP_PANEL_OUTPUT
-GAP_FOLLOWUP_SYSTEM_PROMPT = main.GAP_FOLLOWUP_SYSTEM_PROMPT
+GAP_PANEL_OUTPUT = """\
+Reageer uitsluitend in dit XML-formaat (geen markdown, geen tekst buiten de tags):
+<suggestie>jouw antwoord hier</suggestie>
+<toelichting>één zin: welk(e) fragment(en) je gebruikte</toelichting>
+<aandachtspunten>trefwoorden, gescheiden door '; '</aandachtspunten>
+<bijna>citaat — waarom het tekortschiet</bijna>
+
+Over <aandachtspunten>: noem twee tot vier onderwerpen waar een goed antwoord op deze vraag \
+over moet gaan, elk in hoogstens vijf woorden. Ze helpen de invuller het antwoord zelf te \
+schrijven. Voorbeeld bij een vraag over toegang tot een systeem: 'rollen en rechten; wie \
+toegang verleent; vastleggen van inzage'.
+Harde regels voor <aandachtspunten>:
+1. Geef NOOIT het antwoord of een deel ervan: geen namen, getallen, data, percentages, \
+systemen of maatregelen, ook niet als ze in de fragmenten staan.
+2. Alleen trefwoorden: geen zinnen en geen vragen.
+
+Over <bijna>: vul dit ALLEEN als je antwoord 'Onvoldoende informatie in de brondocumenten.' is. \
+Citeer dan per regel één zin uit de fragmenten die bijna antwoord gaf, woord voor woord, \
+gevolgd door ' — ' en in een paar woorden waarom die zin tekortschiet. Hoogstens twee regels. \
+Komt geen zin in de buurt, of heb je de vraag wel beantwoord, laat <bijna> dan leeg."""
+
+GAP_FOLLOWUP_SYSTEM_PROMPT = """\
+Je kijkt mee met een projectleider die zelf een vraag uit een formulier van het Ministerie van \
+Financiën beantwoordt. De brondocumenten gaven hier geen antwoord op; de projectleider schrijft \
+het antwoord zelf. Jij schrijft niets in het antwoord. Je mag hoogstens één vraag terugstellen \
+die helpt het antwoord vollediger te maken.
+
+Werk zo:
+1. Splits de formuliervraag in de deelvragen die erin staan. 'Welke risico's zijn er en welke \
+maatregelen?' heeft er twee; 'Wie is de opdrachtgever?' heeft er één.
+2. De aandachtspunten zijn hulp voor de projectleider, geen eisen. Een antwoord hoeft ze niet \
+te noemen.
+3. Lees het antwoord van de projectleider. Krijgt elke deelvraag een bruikbaar antwoord, ook \
+als het kort is? Zet dan alleen <compleet/>. Dat is de gewone uitkomst.
+4. Alleen als een deelvraag geen antwoord krijgt, of als het antwoord zo vaag is dat een \
+lezer er niets mee kan ('zo lang als nodig', 'weet ik niet'): stel één open vraag over \
+precies dat stuk.
+5. Twijfel je? Kies dan <compleet/>.
+
+Harde regels:
+1. Stel nooit zelf een antwoord voor. Dus geen 'bijvoorbeeld', geen 'zoals', geen 'denk aan', \
+geen 'klopt het dat', en geen namen, getallen, termijnen, wetsartikelen of maatregelen die de \
+projectleider niet zelf noemde.
+2. Een open vraag: begin met wie, wat, welke, hoe, waarom, wanneer of hoeveel. Geen vraag die \
+met ja of nee te beantwoorden is.
+3. Eén vraag, hoogstens 25 woorden, in gewone taal.
+4. Vraag niet naar iets wat de formuliervraag niet vraagt.
+5. Vraag niet om meer van hetzelfde ('welke risico's nog meer?'): heeft een deelvraag een \
+antwoord, dan is die af.
+
+Antwoord precies in één van deze twee vormen:
+<vervolgvraag>je vraag</vervolgvraag>
+of
+<compleet/>"""
 
 # Facts from the source documents. The panel may never repeat one of them as
 # an aandachtspunt: that is a hidden answer (criterion 1).

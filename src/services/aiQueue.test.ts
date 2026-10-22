@@ -123,31 +123,3 @@ describe('bulkExtractFromDocument', () => {
     expect(started.length).toBe(LIMIT)
   })
 })
-
-describe('help panel (verdiepingsgesprek prototype)', () => {
-  it('passes the panel on only for a question left empty', async () => {
-    const panel = { aandachtspunten: ['bewaartermijn'], bijna: [] }
-    globalThis.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
-      if (String(input) === '/api/ai/limits') {
-        return new Response(JSON.stringify({ max_concurrency: LIMIT }), { status: 200 })
-      }
-      const body = JSON.parse(String(init?.body)) as { target_question: string; with_panel: boolean }
-      expect(body.with_panel).toBe(true)
-      const suggestion = body.target_question === 'leeg' ? '' : 'Een antwoord'
-      const payload = `event: done\ndata: ${JSON.stringify({ suggestion, rationale: '', panel })}\n\n`
-      return new Response(payload, { status: 200, headers: { 'Content-Type': 'text/event-stream' } })
-    }) as typeof fetch
-    const panels: Record<string, unknown> = {}
-    await bulkExtractFromDocument({
-      sessionId: 's',
-      docIds: ['d'],
-      questions: [text('leeg'), text('gevuld')],
-      withPanel: true,
-      onPanel: (id, p) => (panels[id] = p),
-      onAnswer: () => {},
-      onProgress: () => {},
-      isCancelled: () => false,
-    })
-    expect(panels).toEqual({ leeg: panel })
-  })
-})
