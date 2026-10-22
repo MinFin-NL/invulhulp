@@ -1,6 +1,6 @@
 # findocs: AI-assisted government compliance forms
 
-> ⚠️ **Proof of concept.** This is an early proof of concept and not ready for production. We're looking for feedback and for people to work with on where it goes next, so get in touch or open an issue if you have ideas.
+> ⚠️ **Proof of concept.** This is an early proof of concept and not ready for production. We're looking for feedback and for people to work with on where it goes next, so get in touch or open an issue if you have ideas. Most of the code is generated with Claude Code; see [DISCLAIMER.md](DISCLAIMER.md).
 
 A web application that helps Dutch government employees fill in AI-related compliance assessments. It walks users through structured forms and uses an LLM (a local Ollama model or Azure OpenAI) to pull answers out of uploaded source documents, improve free text and combine answers across forms.
 
