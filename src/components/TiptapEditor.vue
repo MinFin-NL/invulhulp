@@ -161,7 +161,9 @@ import { useAssessmentStore } from '../stores/assessmentStore'
 let mermaidReady: Promise<typeof import('mermaid')['default']> | null = null
 function loadMermaid() {
   mermaidReady ??= import('mermaid').then(({ default: m }) => {
-    m.initialize({ startOnLoad: false, theme: 'neutral' })
+    // Mermaid 12 defaults to the ELK layout and the 'neo' look; pin the
+    // mermaid-11 rendering so existing diagrams keep their shape.
+    m.initialize({ startOnLoad: false, theme: 'neutral', layout: 'dagre', look: 'classic' })
     return m
   })
   return mermaidReady
