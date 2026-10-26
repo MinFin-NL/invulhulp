@@ -16,7 +16,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@nldd/design-system": "0.8.99",
+    "@nldd/design-system": "0.10.0",
     "@tiptap/extension-collaboration": "~3.32.0",
     "@tiptap/extension-collaboration-caret": "~3.32.0",
     "@tiptap/extension-placeholder": "~3.32.0",
