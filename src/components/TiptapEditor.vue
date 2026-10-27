@@ -148,6 +148,7 @@ import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Collaboration } from '@tiptap/extension-collaboration'
 import { CollaborationCaret } from '@tiptap/extension-collaboration-caret'
+import { ySyncPluginKey } from '@tiptap/y-tiptap'
 import type * as Y from 'yjs'
 import { diffWords } from 'diff'
 import type { Change } from 'diff'
@@ -187,6 +188,11 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]
+  // Fragment-bound editors don't emit update:modelValue, so these tell the
+  // parent who changed the text (for the LJSON export): the user typing here,
+  // or an accepted improve-text suggestion (with the resulting HTML).
+  'local-edit': []
+  'ai-applied': [value: string]
 }>()
 
 const store = useAssessmentStore()
@@ -226,6 +232,8 @@ function buildExtensions(): AnyExtension[] {
 }
 
 const editor = shallowRef<Editor | undefined>()
+// True while an accepted suggestion is written, so onUpdate doesn't take it for typing.
+let applyingSuggestion = false
 
 function createEditor() {
   editor.value?.destroy()
@@ -235,10 +243,17 @@ function createEditor() {
     content: collaborative ? undefined : props.modelValue,
     // Viewers of a shared dossier can read but not type.
     editable: !store.readOnly,
-    onUpdate({ editor: e }) {
+    onUpdate({ editor: e, transaction }) {
       // Fragment-bound: the fragment is the source of truth and the store mirror
       // updates Pinia — don't emit (that would double-write via setAnswer).
-      if (collaborative) return
+      // Only say that the user typed: a change that came in through the
+      // fragment (a collaborator, AI Modus) is the sync plugin's own.
+      if (collaborative) {
+        if (!applyingSuggestion && !ySyncPluginKey.getState(e.state)?.isChangeOrigin && transaction.docChanged) {
+          emit('local-edit')
+        }
+        return
+      }
       // Store HTML so bold/italic survive; an empty doc is stored as '' (never
       // '<p></p>') so empty-answer checks and form progress keep working.
       emit('update:modelValue', e.getText().trim() ? e.getHTML() : '')
@@ -386,10 +401,12 @@ function acceptSuggestion() {
   if (!editor.value || suggestion.value === null) return
   // setContent writes the bound fragment when collaborative (synced to peers);
   // only the classic path needs to emit back to the store.
+  applyingSuggestion = true
   editor.value.commands.setContent(markdownToHtml(suggestion.value))
-  if (!collaborative) {
-    emit('update:modelValue', editor.value.getText().trim() ? editor.value.getHTML() : '')
-  }
+  applyingSuggestion = false
+  const html = editor.value.getText().trim() ? editor.value.getHTML() : ''
+  if (!collaborative) emit('update:modelValue', html)
+  emit('ai-applied', html)
   suggestion.value = null
   rationale.value = ''
   diagramSvg.value = ''

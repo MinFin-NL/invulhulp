@@ -134,6 +134,25 @@ export interface AnswerSourceMeta {
   smoothedAt?: number
 }
 
+// One step in an answer's history: the answer's plain text right after that
+// step and who (or what) took it. Only the LJSON provenance export reads it —
+// diffing consecutive revisions tells which stretch of text came from whom.
+// Consecutive human edits by the same person collapse into one revision.
+export interface AnswerRevision {
+  text: string
+  at: number
+  by: 'human' | 'ai' | 'copied'
+  // human: the person who typed; ai: who started the AI; copied: whose
+  // action copied it (accepting a copy, or opening the form that prefilled).
+  name?: string
+  email?: string
+  // ai only: the backend's model (e.g. "azure/gpt-5.3-chat") and the feature.
+  model?: string
+  trigger?: 'ai-modus' | 'suggestie' | 'tekst-verbeteren'
+  // copied only: where it came from, e.g. the source form's title.
+  source?: string
+}
+
 // An image attached to a question. Only this metadata is persisted client-side
 // (localStorage); the bytes live on the backend under the `id`.
 export interface QuestionAttachment {

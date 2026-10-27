@@ -23,6 +23,8 @@
           :question-context="question.text"
           :ai-busy-label="aiBusyLabel"
           :aria-required="question.importance === 'mandatory' ? 'true' : undefined"
+          @local-edit="store.noteHumanEdit(question.id)"
+          @ai-applied="recordAi($event, 'tekst-verbeteren')"
         />
       </div>
     </template>
@@ -62,6 +64,7 @@
         v-model="followUpModel"
         :placeholder="question.followUp"
         :question-context="question.followUp"
+        @ai-applied="recordAi(`${radioValue}\n---\n${$event}`, 'tekst-verbeteren')"
       />
     </div>
 
@@ -149,7 +152,7 @@
       :target-question-text="question.text"
       :resolved-options="resolvedOptions"
       :current-value="modelValue"
-      @apply-suggestion="onApplySuggestion"
+      @apply-suggestion="(value, how) => onApplyCrossForm(value, how, mapping.sourceFormId)"
     />
 
     <!-- Document extraction panel (only when user has uploaded documents) -->
@@ -181,6 +184,7 @@ import { useAssessmentStore } from '../stores/assessmentStore'
 import { answerPlainText } from '../utils/sourceMatching'
 import { mergedOptions, radioScalar } from '../utils/answerRefs'
 import { getCachedForm } from '../services/formLoader'
+import { getAiModel } from '../services/llmService'
 import { useCollab } from '../collab/useCollab'
 import { useAiBusy } from '../collab/useAiBusy'
 import { useFeiten } from '../composables/useFeiten'
@@ -307,7 +311,26 @@ function onRadioSelect(option: string) {
 function onApplySuggestion(value: string | string[], meta?: AnswerSourceMeta) {
   emit('update:modelValue', value)
   if (meta) store.setAnswerSources(props.question.id, meta)
+  recordAi(value, 'suggestie')
   clearUnanswered()
+}
+
+/** Credit an accepted AI text to the AI, for the LJSON export. */
+async function recordAi(value: string | string[], trigger: 'suggestie' | 'tekst-verbeteren') {
+  const formId = store.activeFormId
+  if (!formId) return
+  const model = await getAiModel()
+  store.recordRevisionForForm(formId, props.question.id, value, { by: 'ai', trigger, model })
+}
+
+function onApplyCrossForm(value: string | string[], how: 'ai' | 'copied', sourceFormId: string) {
+  emit('update:modelValue', value)
+  clearUnanswered()
+  const formId = store.activeFormId
+  if (how === 'ai') recordAi(value, 'suggestie')
+  else if (formId) {
+    store.recordRevisionForForm(formId, props.question.id, value, { by: 'copied', source: formTitle(sourceFormId) })
+  }
 }
 
 const checkboxValues = computed(() =>

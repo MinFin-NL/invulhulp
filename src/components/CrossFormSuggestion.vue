@@ -119,7 +119,8 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  'apply-suggestion': [value: string | string[]]
+  // 'copied' for the source answer as is, 'ai' for an accepted synthesis.
+  'apply-suggestion': [value: string | string[], how: 'ai' | 'copied']
 }>()
 
 const store = useAssessmentStore()
@@ -178,7 +179,7 @@ const alreadyCopied = computed(() => {
 })
 
 function useDirectly() {
-  if (copyValue.value !== null) emit('apply-suggestion', copyValue.value)
+  if (copyValue.value !== null) emit('apply-suggestion', copyValue.value, 'copied')
 }
 
 const suggestion = ref<string | null>(null)
@@ -242,7 +243,7 @@ async function requestSynthesis() {
 
 function acceptSuggestion() {
   if (suggestion.value === null) return
-  emit('apply-suggestion', suggestion.value)
+  emit('apply-suggestion', suggestion.value, 'ai')
   suggestion.value = null
   rationale.value = ''
 }

@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { loadForm, aiFillableQuestions, isAiFillable } from '../services/formLoader'
-import { bulkExtractFromDocument, fetchImageDimensions, verifyDocuments } from '../services/llmService'
+import { bulkExtractFromDocument, fetchImageDimensions, getAiModel, verifyDocuments } from '../services/llmService'
 import { clearLocalAiBusy, setLocalAiBusy } from '../collab/dossierTransport'
 import { isQuestionVisible } from '../utils/answerRefs'
 import type { AnswerSource, FormConfig } from '../models/Assessment'
@@ -126,6 +126,7 @@ export function useAiMode() {
     aiModeTotal.value = { ...aiModeTotal.value, [formId]: questions.length }
     aiModeUnanswered.value = { ...aiModeUnanswered.value, [formId]: new Set() }
 
+    const model = await getAiModel()
     let filled = 0
     try {
       filled = await bulkExtractFromDocument({
@@ -136,6 +137,7 @@ export function useAiMode() {
         relatedQuestions: relatedQuestionsFor(formConfig),
         onAnswer: (qId, value) => {
           store.setAnswerForForm(formId, qId, value, dossierId)
+          store.recordRevisionForForm(formId, qId, value, { by: 'ai', trigger: 'ai-modus', model }, dossierId)
           aiModeFilled[formId] = (aiModeFilled[formId] ?? 0) + 1
         },
         onSources: (qId, meta) => store.setAnswerSourcesForForm(formId, qId, meta, dossierId),

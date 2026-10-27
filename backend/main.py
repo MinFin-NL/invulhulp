@@ -918,8 +918,9 @@ async def upload_document(
 
 @app.get("/api/ai/limits")
 async def ai_limits() -> dict:
-    """How many AI Modus questions the client may have in flight at once."""
-    return {"max_concurrency": backend.max_concurrency}
+    """How many AI Modus questions the client may have in flight at once, and
+    which model answers them (the client records it as the author of AI text)."""
+    return {"max_concurrency": backend.max_concurrency, "model": backend.model_identifier}
 
 
 @app.get("/api/documents")

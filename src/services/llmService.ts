@@ -557,12 +557,16 @@ export function createLimit(max: number): Limit {
 // a dossier run filling seven forms side by side still keeps to the backend's
 // limit. The server picks the limit per backend (GET /api/ai/limits).
 let aiLimit: Promise<Limit> | null = null
+let aiModel = ''
 
 function getAiLimit(): Promise<Limit> {
   if (!aiLimit) {
     aiLimit = fetch('/api/ai/limits', { signal: AbortSignal.timeout(10000) })
       .then((res) => (res.ok ? res.json() : Promise.reject(new Error(`HTTP ${res.status}`))))
-      .then((body: { max_concurrency?: number }) => createLimit(Math.max(1, body.max_concurrency ?? 1)))
+      .then((body: { max_concurrency?: number; model?: string }) => {
+        aiModel = body.model ?? ''
+        return createLimit(Math.max(1, body.max_concurrency ?? 1))
+      })
       .catch((err) => {
         // One at a time is always safe; ask again on the next run.
         console.warn('[AI mode] limiet niet opgehaald, één vraag tegelijk:', err)
@@ -571,6 +575,13 @@ function getAiLimit(): Promise<Limit> {
       })
   }
   return aiLimit
+}
+
+/** The backend's model, e.g. "azure/gpt-5.3-chat" — recorded with every
+ *  AI-written answer for the LJSON export. '' when the server can't be asked. */
+export async function getAiModel(): Promise<string> {
+  await getAiLimit()
+  return aiModel
 }
 
 export async function bulkExtractFromDocument(params: BulkExtractParams): Promise<number> {

@@ -1,9 +1,11 @@
 # Herkomst van antwoorden en logging
 
-> **Status:** idee voor een brainstorm, niets gebouwd. Komt voort uit stap 3 van
+> **Status:** idee voor een brainstorm. Komt voort uit stap 3 van
 > [`werkplan-kompas.md`](werkplan-kompas.md) ("Herkomst zichtbaar"), die op 6 oktober 2026
 > is geparkeerd. Beslissing van toen: de herkomst van antwoorden komt **niet** in de
 > Word-export. Wel komt er op termijn een loggingstap. Hoe die eruitziet, is nog open.
+> Sinds 27 oktober 2026 is er een eerste stap gebouwd: een revisielog per antwoord en een
+> aparte LJSON-export voor de TekstOntleder (zie hieronder).
 
 ## Waar het om gaat
 
@@ -27,18 +29,49 @@ antwoord, tot in de export. Dat is van tafel; de vraag erachter blijft.
 - **Copy-mappings**: bij het openen van een formulier meldt een banner hoeveel vragen zijn
   overgenomen en waaruit. Per vraag wordt niets bewaard.
 
-## Wat er niet wordt vastgelegd
+## Revisielog en LJSON-export (gebouwd 27 oktober 2026)
 
-Op deze plekken komt modeltekst een antwoord binnen zonder spoor:
+Elk antwoord houdt een korte geschiedenis bij (`answerHistory`, `AnswerRevision` in
+`src/models/Assessment.ts`): na elke stap de platte tekst, met wie of wat hem schreef.
 
-| Waar | Code | Wat er nu bewaard wordt |
+| Stap | Waar vastgelegd | Soort |
 |---|---|---|
-| Synthese uit een ander formulier (✦ AI-suggestie) | `CrossFormSuggestion.vue`, `acceptSuggestion` | niets |
-| Verbeter tekst | `TiptapEditor.vue` | niets |
-| AI Modus en documentsuggestie | `llmService.ts`, `DocumentSuggestion.vue` | citaten, maar niet de gegenereerde tekst zelf |
+| Typen (na 1,5 s stilte), radio, checkbox | `assessmentStore.setAnswer`, `TiptapEditor` `local-edit` | `human`, de ingelogde gebruiker |
+| AI Modus | `useAiMode.ts` | `ai`, `ai-modus` |
+| AI-suggestie uit documenten of uit een ander formulier | `QuestionItem.vue` | `ai`, `suggestie` |
+| Verbeter tekst | `TiptapEditor` `ai-applied` | `ai`, `tekst-verbeteren` |
+| Overnemen uit een ander formulier, scan of voorblad | `useCrossFormPrefill.ts`, `QuestionItem.vue` | `copied` |
 
-Daardoor is achteraf niet te zeggen of een antwoord nog de tekst is die het model schreef,
-of dat iemand hem heeft aangepast.
+Opeenvolgende bewerkingen van dezelfde persoon vallen samen tot één revisie; per antwoord
+blijven er hoogstens 50. De log staat in de CRDT-staat, onder één sleutel per vraag
+(`history:<id>` in `meta`), zodat twee mensen die tegelijk verschillende antwoorden
+bewerken elkaars revisies niet overschrijven.
+
+"Download herkomst (LJSON)" op de samenvattingspagina (`src/services/ljsonExport.ts`) zet
+één formulier om naar LJSON 1.0, het formaat van de TekstOntleder. De export vergelijkt
+opeenvolgende revisies woord voor woord: woorden die een revisie overneemt houden hun
+auteur, nieuwe woorden zijn van die revisie. De titel, sectietitels en vragen zijn
+`copied` uit de formulierdefinitie (`/forms/<id>.json`: naam met URN, hash van het bestand,
+plek in het bestand), gekopieerd door "Invulhulp <versie>". Tekst die geen revisie verklaart
+(ingevuld vóór de log bestond) en de systeemnaam krijgen geen span. Het extra veld
+`structure` zegt per stuk tekst of het titel, sectie, vraag of antwoord is; de TekstOntleder
+maakt de tekst daarmee op als koppen en antwoorden. In AI-tekst zoekt de export
+daarnaast naar stukken van minstens acht woorden die letterlijk in een van de geciteerde
+fragmenten (`answerSources`) staan, ongeacht hoofdletters, accenten en leestekens. Zo'n
+stuk wordt een `copied`-span binnen het AI-span, met de documentnaam en de plek in het
+document; ontbreekt de documenttekst, dan de plek binnen het fragment. Een voorbeeld staat in
+[`ljson/ai-belastingtelefoon.ljson`](ljson/ai-belastingtelefoon.ljson); dat bestand wordt
+door `src/services/ljsonExport.demo.test.ts` gemaakt en bewaakt.
+
+Grenzen:
+
+- De naam in een revisie komt van de client. Het is een spoor, geen bewijs: iemand die
+  de client aanpast kan een andere naam meesturen. Een log die als bewijs moet dienen,
+  hoort op de server (vraag 3 hieronder).
+- Typen twee mensen binnen dezelfde 1,5 seconde in hetzelfde antwoord, dan krijgt wie het
+  eerst vastlegt beide stukken.
+- Het model staat erin (`/api/ai/limits` geeft het mee), de prompt niet: `prompt_hash` is
+  "niet vastgelegd" en `parameters` is leeg.
 
 ## Richting: een loggingstap
 

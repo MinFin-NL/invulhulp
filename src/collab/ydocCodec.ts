@@ -34,7 +34,7 @@ import {
 } from 'y-prosemirror'
 import { generateJSON } from '@tiptap/html'
 import type { FormState } from '../stores/assessmentStore'
-import type { Answers } from '../models/Assessment'
+import type { Answers, AnswerRevision } from '../models/Assessment'
 
 // Must mirror the extensions TiptapEditor.vue uses so parse/serialize match the
 // editor exactly. Placeholder is a decoration only (no schema nodes/marks) and
@@ -55,6 +55,9 @@ export const FORM_TEXT = 'text' // questionId -> 1 (index; content is a top-leve
 export const FORM_LIST = 'list' // questionId -> Y.Array<string> (checkbox)
 export const FORM_RAW = 'raw' //  questionId -> string (table/opaque)
 export const FORM_META = 'meta' // answerSources/attachments/non-answer fields
+// Answer history lives in `meta` under one key per question, so two people
+// editing different answers at once don't overwrite each other's revisions.
+export const HISTORY_PREFIX = 'history:'
 
 // Rich-text answers live as TOP-LEVEL Y.XmlFragments, not nested in the form
 // map. Top-level types are keyed by name and shared across peers by that name,
@@ -165,11 +168,20 @@ function decodeForm(doc: Y.Doc, formId: string, f: Y.Map<unknown>): FormState {
   raw.forEach((s, qid) => {
     answers[qid] = s
   })
+  let answerHistory: FormState['answerHistory']
+  meta.forEach((value, key) => {
+    if (!key.startsWith(HISTORY_PREFIX)) return
+    answerHistory ??= {}
+    answerHistory[key.slice(HISTORY_PREFIX.length)] = value as AnswerRevision[]
+  })
 
   return {
     answers,
     answerSources: (meta.get('answerSources') as FormState['answerSources']) ?? {},
     attachments: (meta.get('attachments') as FormState['attachments']) ?? {},
+    // Undefined (not {}) when empty, so the envelope of a dossier nobody has
+    // edited since this field existed stays exactly what it was.
+    answerHistory,
     currentView: (meta.get('currentView') as string) ?? 'home',
     completedSections: (meta.get('completedSections') as string[]) ?? [],
     riskLevel: (meta.get('riskLevel') as FormState['riskLevel']) ?? null,
@@ -247,6 +259,9 @@ export function seedDoc(doc: Y.Doc, payload: DossierPayload, origin?: unknown): 
 
       setIfAbsent(meta, 'answerSources', form.answerSources ?? {})
       setIfAbsent(meta, 'attachments', form.attachments ?? {})
+      for (const [qid, revisions] of Object.entries(form.answerHistory ?? {})) {
+        setIfAbsent(meta, HISTORY_PREFIX + qid, revisions)
+      }
       setIfAbsent(meta, 'currentView', form.currentView)
       setIfAbsent(meta, 'completedSections', [...form.completedSections])
       setIfAbsent(meta, 'riskLevel', form.riskLevel)

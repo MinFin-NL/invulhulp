@@ -64,6 +64,11 @@
           v-if="showLegacyExport"
           @click="exportLegacy"
         />
+        <nldd-button
+          variant="secondary"
+          text="Download herkomst (LJSON)"
+          @click="exportLjson"
+        />
       </div>
 
       <!-- Import -->
@@ -156,6 +161,8 @@ import { exportToWord } from '../services/wordExport'
 import { exportToLegacyDocx } from '../services/legacyDocxExport'
 import { exportPpmToTemplateDocx } from '../services/ppmTemplateExport'
 import { importFromJson } from '../services/dataExport'
+import { buildLjsonDocument, downloadLjson } from '../services/ljsonExport'
+import { isQuestionVisible } from '../utils/answerRefs'
 import type { FormConfig, Question } from '../models/Assessment'
 import { parseTableAnswer, type TableAnswer } from '../utils/tableAnswer'
 import { answerToSafeHtml } from '../utils/answerHtml'
@@ -309,6 +316,36 @@ function exportWord() {
     store.activeForm.attachments ?? {},
     store.sessionId,
   )
+}
+
+// Who wrote which part of each answer — person, AI or copy — in the LJSON
+// format the TekstOntleder reads.
+async function exportLjson() {
+  const name = systemName.value || store.activeDossier.name
+  const { id, urn, version } = props.formConfig
+  // The file as served, so its hash and the copied strings' positions match
+  // what anyone fetching /forms/<id>.json gets.
+  const res = await fetch(`/forms/${id}.json`, { cache: 'no-cache' })
+  const raw = res.ok ? await res.text() : ''
+  const doc = await buildLjsonDocument({
+    formDefinition: raw
+      ? {
+          name: `${props.formConfig.title} (${urn ?? `versie ${version}`}, ${id}.json)`,
+          raw,
+          tool: { name: 'Invulhulp', version: __APP_VERSION__ },
+        }
+      : undefined,
+    documentId: `${store.activeDossierId}:${props.formConfig.id}`,
+    title: props.formConfig.meta.docTitle,
+    subtitle: name || undefined,
+    sections: visibleSections.value,
+    answers: store.answers,
+    history: store.activeForm.answerHistory ?? {},
+    sources: store.activeForm.answerSources ?? {},
+    documents: store.documents,
+    isVisible: (q) => isQuestionVisible(q, (id) => store.answers[id] ?? ''),
+  })
+  downloadLjson(doc, `${props.formConfig.meta.filename.replace(/\.[a-z]+$/i, '')}-herkomst`)
 }
 
 async function handleImport(event: Event) {

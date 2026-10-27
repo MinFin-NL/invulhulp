@@ -1,6 +1,6 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import type { Answers, AnswerSourceMeta, QuestionAttachment, RiskLevelValue } from '../models/Assessment'
+import type { Answers, AnswerRevision, AnswerSourceMeta, QuestionAttachment, RiskLevelValue } from '../models/Assessment'
 import {
   indexDocument,
   uploadPdfDocument,
@@ -17,6 +17,8 @@ import {
   type ServerDossier,
 } from '../services/dossierService'
 import { getCachedForm, flattenFormQuestions } from '../services/formLoader'
+import { answerExportText } from '../services/ljsonExport'
+import { useAuthStore } from './authStore'
 import { DossierDoc, SEED_ORIGIN } from '../collab/dossierDoc'
 import {
   connectDossier,
@@ -46,6 +48,9 @@ export interface FormState {
   // Per-question image attachments (metadata only — bytes live on the backend).
   // Optional: absent in dossiers persisted before this feature existed.
   attachments?: Record<string, QuestionAttachment[]>
+  // Per-question revision log for the LJSON export (see AnswerRevision).
+  // Optional: absent until someone edits an answer after this feature existed.
+  answerHistory?: Record<string, AnswerRevision[]>
   currentView: string
   completedSections: string[]
   riskLevel: RiskLevelValue
@@ -106,6 +111,10 @@ export interface Dossier {
 /** Top-level screen: the dossier overview or a single dossier (whose own
  *  activeFormId decides between the detail page and an open form). */
 export type Screen = 'dossierList' | 'dossier'
+
+// How long typing must pause before it is recorded as a revision (noteHumanEdit).
+const HUMAN_EDIT_SETTLE_MS = 1500
+const humanEditTimers = new Map<string, ReturnType<typeof setTimeout>>()
 
 function initialFormState(): FormState {
   return {
@@ -706,9 +715,13 @@ export const useAssessmentStore = defineStore('assessment', {
       this._docFor(dossier.id)
     },
 
+    // The user's own edit of the open form (AI and copy paths write through
+    // setAnswerForForm and record their own revision).
     setAnswer(questionId: string, value: string | string[]) {
       const formId = this.activeDossier.activeFormId
-      if (formId) this.setAnswerForForm(formId, questionId, value)
+      if (!formId) return
+      this.setAnswerForForm(formId, questionId, value)
+      this.noteHumanEdit(questionId)
     },
 
     setCurrentView(view: string) {
@@ -799,6 +812,7 @@ export const useAssessmentStore = defineStore('assessment', {
           target.answers = incoming.answers
           target.answerSources = incoming.answerSources
           target.attachments = incoming.attachments
+          target.answerHistory = incoming.answerHistory
           target.riskLevel = incoming.riskLevel
           target.goDecision = incoming.goDecision
           target.completedSections = incoming.completedSections
@@ -965,6 +979,46 @@ export const useAssessmentStore = defineStore('assessment', {
     setAnswerSources(questionId: string, meta: AnswerSourceMeta) {
       const id = this.activeDossier.activeFormId
       if (id) this.setAnswerSourcesForForm(id, questionId, meta)
+    },
+
+    /** Record who (or what) just wrote an answer, for the LJSON export. The
+     *  revision's text comes from `value`, in the same form the export reads
+     *  from the stored answer. The signed-in user is the human behind it. */
+    recordRevisionForForm(
+      formId: string,
+      questionId: string,
+      value: string | string[],
+      revision: Pick<AnswerRevision, 'by' | 'model' | 'trigger' | 'source'>,
+      dossierId?: DossierId,
+    ) {
+      const id = dossierId ?? this.activeDossierId
+      if (!id || !this.dossiers[id]) return
+      const user = useAuthStore().user
+      this._docFor(id)?.recordRevision(formId, questionId, {
+        ...revision,
+        text: answerExportText(value),
+        at: Date.now(),
+        ...(user?.name ? { name: user.name } : {}),
+        ...(user?.email ? { email: user.email } : {}),
+      })
+    },
+
+    /** The user changed an answer by hand. Recorded once typing pauses, from
+     *  the answer as stored by then, so a burst of keystrokes is one write. */
+    noteHumanEdit(questionId: string) {
+      const id = this.activeDossierId
+      const formId = this.activeDossier.activeFormId
+      if (!id || !formId || this.readOnly) return
+      const key = `${id}|${formId}|${questionId}`
+      clearTimeout(humanEditTimers.get(key))
+      humanEditTimers.set(
+        key,
+        setTimeout(() => {
+          humanEditTimers.delete(key)
+          const value = this.dossiers[id]?.forms[formId]?.answers[questionId] ?? ''
+          this.recordRevisionForForm(formId, questionId, value, { by: 'human' }, id)
+        }, HUMAN_EDIT_SETTLE_MS),
+      )
     },
 
     // The user touched the answer: the hallucination warning is no longer

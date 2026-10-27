@@ -1,5 +1,5 @@
 import type { FormConfig, Question } from '../models/Assessment'
-import { loadCrossFormMappings, loadForm, flattenFormQuestions } from '../services/formLoader'
+import { getCachedForm, loadCrossFormMappings, loadForm, flattenFormQuestions } from '../services/formLoader'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { copyMappingsFor, copyValueFor, isEmptyAnswer } from '../utils/crossFormCopy'
 import { mergedOptions } from '../utils/answerRefs'
@@ -49,6 +49,10 @@ export async function prefillCopyAnswers(form: FormConfig): Promise<PrefillSumma
     const voorstel = voorstelVoor(feiten, form.id, question.id)
     if (!voorstel) continue
     store.setAnswerForForm(form.id, question.id, voorstel.waarde)
+    const source = voorstel.herkomst.soort === 'scan'
+      ? 'Toepassingsscan'
+      : getCachedForm(voorstel.herkomst.formId)?.title ?? voorstel.herkomst.formId
+    store.recordRevisionForForm(form.id, question.id, voorstel.waarde, { by: 'copied', source })
     if (voorstel.herkomst.soort === 'scan') scanCount++
     else filledFrom.push(voorstel.herkomst.formId)
   }
@@ -86,6 +90,10 @@ export async function prefillCopyAnswers(form: FormConfig): Promise<PrefillSumma
     if (value === null) continue
 
     store.setAnswerForForm(form.id, question.id, value)
+    store.recordRevisionForForm(form.id, question.id, value, {
+      by: 'copied',
+      source: sourceForms.get(mapping.sourceFormId)?.title ?? mapping.sourceFormId,
+    })
     filledFrom.push(mapping.sourceFormId)
   }
 
