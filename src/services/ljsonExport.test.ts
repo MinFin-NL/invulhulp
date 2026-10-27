@@ -124,6 +124,40 @@ describe('buildLjsonDocument', () => {
     expect(doc.provenance_spans).toEqual([])
     expect(doc.document_hash).toMatch(/^[0-9a-f]{64}$/)
   })
+
+  it('markeert de formuliertekst als gekopieerd uit de formulierdefinitie, door de tool', async () => {
+    const raw = JSON.stringify({ title: 'T', sections: [{ title: 'Deel A', q: 'Wat is het doel?' }] }, null, 2)
+    const doc = await buildLjsonDocument({
+      documentId: 'd:f', title: 'T', subtitle: 'Mijn systeem', sections,
+      answers: { q1: 'Ja.' }, history: {},
+      formDefinition: { name: 'Formulier (urn:x, f.json)', raw, tool: { name: 'Invulhulp', version: '1.2.3' } },
+      exportedAt: Date.parse('2026-10-23T12:00:00Z'),
+    })
+    const copied = doc.provenance_spans.filter((s) => s.source_type === 'copied')
+    expect(copied.map((s) => doc.text.slice(s.start_idx, s.end_idx))).toEqual(['T', 'Deel A', 'Wat is het doel?'])
+    for (const span of copied) {
+      if (span.source_type !== 'copied') continue
+      expect(span.metadata.copied_by_name).toBe('Invulhulp 1.2.3')
+      expect(span.metadata.copied_by_email).toBe('invulhulp@1.2.3')
+      expect(span.metadata.timestamp).toBe('2026-10-23T12:00:00.000Z')
+    }
+    const question = copied[2]
+    if (question.source_type !== 'copied') throw new Error('expected copied')
+    expect(raw.slice(question.metadata.original_start_idx)).toMatch(/^Wat is het doel\?/)
+  })
+
+  it('geeft elk stuk tekst zijn rol in het formulier', async () => {
+    const doc = await buildLjsonDocument({
+      documentId: 'd:f', title: 'T', subtitle: 'Mijn systeem', sections, answers: { q1: '<p>Ja.</p>' }, history: {},
+    })
+    expect(doc.structure.map((b) => [b.role, doc.text.slice(b.start_idx, b.end_idx)])).toEqual([
+      ['title', 'T'],
+      ['subtitle', 'Mijn systeem'],
+      ['section', 'Deel A'],
+      ['question', 'Wat is het doel?'],
+      ['answer', 'Ja.'],
+    ])
+  })
 })
 
 const passage = (text: string, chunkIndex = 0): AnswerSource => ({

@@ -45,12 +45,25 @@ interface CopiedSpan {
 
 export type LjsonSpan = HumanSpan | AiSpan | CopiedSpan
 
+// What a stretch of text is in the form, so a viewer can lay the document out
+// as headings, questions and answers instead of one run of text. Not part of
+// LJSON 1.0: a reader that doesn't know the field ignores it. Blocks don't
+// overlap and leave the newlines between them out.
+export type LjsonBlockRole = 'title' | 'subtitle' | 'section' | 'question' | 'answer'
+
+export interface LjsonBlock {
+  start_idx: number
+  end_idx: number
+  role: LjsonBlockRole
+}
+
 export interface LjsonDocument {
   document_id: string
   format_version: 'LJSON_1.0'
   document_hash: string
   text: string
   provenance_spans: LjsonSpan[]
+  structure: LjsonBlock[]
 }
 
 /** The plain text an answer contributes to the export — also what each
@@ -368,11 +381,28 @@ export interface LjsonExportInput {
   documents?: SourceDocumentText[]
   // Questions hidden by an unmet visibleIf are left out, as in the Word export.
   isVisible?: (question: Question) => boolean
+  // Where the title, section titles and question texts come from: the form's
+  // JSON file as served. They become `copied` spans, copied by the tool.
+  formDefinition?: FormDefinitionSource
+  // When the form text was copied into this document (default: now).
+  exportedAt?: number
 }
 
-/** One form as an LJSON document: headings and question texts carry no span
- *  (TekstOntleder shows them as text without origin), answers are split into
- *  spans by the revision that wrote each stretch. */
+export interface FormDefinitionSource {
+  // How the source is named in the span, e.g. "AI Impact Assessment
+  // (urn:nl:minfin:tr:aiia:2.1, aiia.json)".
+  name: string
+  // The file's exact text: hashed, and searched for each copied string.
+  raw: string
+  // The tool that copied it, e.g. { name: 'Invulhulp', version: '1.0.0' }.
+  tool: { name: string; version: string }
+}
+
+/** One form as an LJSON document: title, section titles and question texts
+ *  are copied from the form definition (when given), answers are split into
+ *  spans by the revision that wrote each stretch, and `structure` says which
+ *  stretch is which. The subtitle (the system or dossier name) has no origin:
+ *  the app doesn't record who typed it. */
 export async function buildLjsonDocument(input: LjsonExportInput): Promise<LjsonDocument> {
   let text = ''
   const spans: LjsonSpan[] = []
@@ -410,17 +440,63 @@ export async function buildLjsonDocument(input: LjsonExportInput): Promise<Ljson
     }
   }
 
-  append(input.title + '\n')
-  if (input.subtitle) append(input.subtitle + '\n')
+  const structure: LjsonBlock[] = []
+  const block = (part: string, role: LjsonBlockRole) => {
+    const start = append(part)
+    structure.push({ start_idx: start, end_idx: start + codePoints(part), role })
+    return start
+  }
+
+  const form = input.formDefinition
+  const formHash = form ? await sha256Hex(form.raw) : ''
+  const exportedAt = iso(input.exportedAt ?? Date.now())
+  /** A string from the form definition, as a span copied from that file. */
+  const formText = (part: string, role: LjsonBlockRole) => {
+    const start = block(part, role)
+    if (!form) return
+    // The file holds the string JSON-escaped; find it there to give its place.
+    const at = form.raw.indexOf(JSON.stringify(part).slice(1, -1))
+    spans.push({
+      start_idx: start,
+      end_idx: start + codePoints(part),
+      source_type: 'copied',
+      metadata: {
+        original_doc_name: form.name,
+        original_doc_hash: formHash,
+        original_start_idx: at < 0 ? 0 : codePoints(form.raw.slice(0, at)),
+        copied_by_name: `${form.tool.name} ${form.tool.version}`,
+        // Not an address: the tool's stable identifier, so a viewer that
+        // groups by email keeps it apart from people (and versions apart).
+        copied_by_email: `${form.tool.name.toLowerCase()}@${form.tool.version}`,
+        timestamp: exportedAt,
+      },
+    })
+  }
+
+  formText(input.title, 'title')
+  append('\n')
+  if (input.subtitle) {
+    block(input.subtitle, 'subtitle')
+    append('\n')
+  }
   for (const section of input.sections) {
     const questions = section.subsections
       .flatMap((sub) => sub.questions)
       .filter((q) => (input.isVisible?.(q) ?? true) && answerExportText(input.answers[q.id]) !== '')
     if (questions.length === 0) continue
-    append(`\n${section.title}\n`)
+    append('\n')
+    formText(section.title, 'section')
+    append('\n')
     for (const question of questions) {
-      append(`\n${question.text}\n`)
+      append('\n')
+      formText(question.text, 'question')
+      append('\n')
       const current = answerExportText(input.answers[question.id])
+      structure.push({
+        start_idx: codePoints(text),
+        end_idx: codePoints(text) + codePoints(current),
+        role: 'answer',
+      })
       for (const run of attributeAnswer(input.history[question.id] ?? [], current)) {
         const start = append(run.text)
         if (!run.revision) continue
@@ -442,6 +518,7 @@ export async function buildLjsonDocument(input: LjsonExportInput): Promise<Ljson
     document_hash: await sha256Hex(text),
     text,
     provenance_spans: spans,
+    structure,
   }
 }
 

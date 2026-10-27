@@ -20,7 +20,9 @@ import { buildLjsonDocument, type SourceDocumentText } from './ljsonExport'
 
 const ROOT = resolve(__dirname, '../..')
 const DEMO = resolve(ROOT, 'docs/ljson/ai-belastingtelefoon.ljson')
-const aiia = JSON.parse(readFileSync(resolve(ROOT, 'public/forms/aiia.json'), 'utf-8')) as FormConfig
+const aiiaRaw = readFileSync(resolve(ROOT, 'public/forms/aiia.json'), 'utf-8')
+const aiia = JSON.parse(aiiaRaw) as FormConfig
+const toolVersion = (JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf-8')) as { version: string }).version
 
 const at = (iso: string) => Date.parse(iso)
 const MODEL = 'azure/gpt-5.3-chat'
@@ -195,6 +197,13 @@ describe('LJSON-demo AI Belastingtelefoon', () => {
       history,
       sources,
       documents,
+      // As SummaryView builds it, from the same file it would fetch.
+      formDefinition: {
+        name: `${aiia.title} (${aiia.urn}, aiia.json)`,
+        raw: aiiaRaw,
+        tool: { name: 'Invulhulp', version: toolVersion },
+      },
+      exportedAt: at('2026-10-23T12:00:00Z'),
     })
     const json = JSON.stringify(doc, null, 2) + '\n'
     if (process.env.UPDATE_LJSON_DEMO) {

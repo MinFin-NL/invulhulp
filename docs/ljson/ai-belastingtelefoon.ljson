@@ -5,6 +5,45 @@
   "text": "AI Impact Assessment\nAI Belastingtelefoon (fictief voorbeeld)\n\nDeel A: Afweging\n\nGeef een beknopte beschrijving van het beoogde doel en de verwachte resultaten van het AI-systeem.\nDe AI Belastingtelefoon is een spraakassistent die bellers van de BelastingTelefoon te woord staat. Het systeem herkent de vraag van de beller, beantwoordt veelgestelde vragen over de inkomstenbelasting en betalingsregelingen direct, op basis van goedgekeurde antwoordteksten, en verbindt complexe vragen door naar een medewerker. Verwacht resultaat is een gemiddeld 30% kortere wachttijd en meer tijd voor medewerkers voor ingewikkelde vragen. Het systeem neemt zelf geen besluiten over de belastingzaak van de beller.\n\nWaar in de organisatie wordt het systeem ingezet (afdeling, proces, werkzaamheden)?\nBij de directie Klantinteractie en Dienstverlening, in het eerste contact van de BelastingTelefoon (keuzemenu en wachtrij). Medewerkers in het contactcenter zien een samenvatting van het gesprek wanneer de beller wordt doorverbonden.\n\nWat is de aanleiding voor de inzet van dit AI-systeem?\nRond de aangifte inkomstenbelasting wachten bellers op piekmomenten gemiddeld meer dan twintig minuten. Uit een analyse van 2025 blijkt dat ruim 40% van de gesprekken over dezelfde tien onderwerpen gaat; die vragen lenen zich voor automatische beantwoording.\n\nGeef een beschrijving van het AI-systeem (techniek, data, type algoritme).\nHet systeem combineert drie onderdelen: spraakherkenning, een groot taalmodel dat binnen de eigen Azure-tenant draait en een zoekfunctie over de kennisbank van de BelastingTelefoon (RAG). Spraakherkenning gebeurt met Whisper large-v3, lokaal gehost. Het taalmodel formuleert een antwoord uitsluitend op basis van de gevonden kennisartikelen. Gesprekken worden niet gebruikt om het model te trainen.\n\nWelke alternatieven zijn overwogen (inclusief niet-AI-oplossingen)?\nOverwogen zijn een uitgebreider keuzemenu en terugbelverzoeken. Een keuzemenu helpt bellers niet bij vragen die ze niet in een categorie kunnen plaatsen; terugbellen verschuift de piek alleen. Ook is gekeken naar een chatbot op de website, die als aanvulling blijft bestaan. Een regelgebaseerd spraaksysteem viel af omdat het de variatie in vraagstelling slecht aankan.\n\nWie zijn de gebruikers en betrokkenen (degenen die de output van het systeem ondervinden)?\nGebruikers zijn de medewerkers van de BelastingTelefoon, die doorverbonden gesprekken met een samenvatting ontvangen. Betrokkenen zijn de bellers: burgers en ondernemers, onder wie mensen met beperkte digitale vaardigheden of taalvaardigheid.\n\nWelke stakeholders zijn geconsulteerd bij de ontwikkeling of aanschaf van het systeem?\nHet klantpanel, de ondernemingsraad, de functionaris gegevensbescherming en het CIO-office.\n\nDeel B: Implementatie en gebruik AI-systeem\n\nHoe wordt omgegaan met ongewenste bias (in input, model en output)?\nSpraakherkenning presteert slechter bij dialecten en bij sprekers met een accent. Daarom wordt de herkenning per groep bellers getest, en verbindt het systeem bij lage herkenningszekerheid altijd door naar een medewerker. De antwoorden voor verschillende groepen bellers worden maandelijks vergeleken.\n\nIs de inputdata relevant en representatief voor de beoogde toepassing?\nGedeeltelijk\nDe testset bevat nog te weinig opnames van sprekers met een accent. Aanvullende opnames worden in het eerste kwartaal van 2027 verzameld.\n",
   "provenance_spans": [
     {
+      "start_idx": 0,
+      "end_idx": 20,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "AI Impact Assessment (urn:nl:minfin:tr:aiia:2.1, aiia.json)",
+        "original_doc_hash": "41a5ac59fc4cd5588157f22cfcce2cee1d645f37e71ad12a91bd1cf7dc8d883d",
+        "original_start_idx": 132,
+        "copied_by_name": "Invulhulp 1.0.0",
+        "copied_by_email": "invulhulp@1.0.0",
+        "timestamp": "2026-10-23T12:00:00.000Z"
+      }
+    },
+    {
+      "start_idx": 63,
+      "end_idx": 79,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "AI Impact Assessment (urn:nl:minfin:tr:aiia:2.1, aiia.json)",
+        "original_doc_hash": "41a5ac59fc4cd5588157f22cfcce2cee1d645f37e71ad12a91bd1cf7dc8d883d",
+        "original_start_idx": 4983,
+        "copied_by_name": "Invulhulp 1.0.0",
+        "copied_by_email": "invulhulp@1.0.0",
+        "timestamp": "2026-10-23T12:00:00.000Z"
+      }
+    },
+    {
+      "start_idx": 81,
+      "end_idx": 179,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "AI Impact Assessment (urn:nl:minfin:tr:aiia:2.1, aiia.json)",
+        "original_doc_hash": "41a5ac59fc4cd5588157f22cfcce2cee1d645f37e71ad12a91bd1cf7dc8d883d",
+        "original_start_idx": 5354,
+        "copied_by_name": "Invulhulp 1.0.0",
+        "copied_by_email": "invulhulp@1.0.0",
+        "timestamp": "2026-10-23T12:00:00.000Z"
+      }
+    },
+    {
       "start_idx": 180,
       "end_idx": 406,
       "source_type": "ai",
@@ -113,6 +152,19 @@
       }
     },
     {
+      "start_idx": 701,
+      "end_idx": 784,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "AI Impact Assessment (urn:nl:minfin:tr:aiia:2.1, aiia.json)",
+        "original_doc_hash": "41a5ac59fc4cd5588157f22cfcce2cee1d645f37e71ad12a91bd1cf7dc8d883d",
+        "original_start_idx": 6256,
+        "copied_by_name": "Invulhulp 1.0.0",
+        "copied_by_email": "invulhulp@1.0.0",
+        "timestamp": "2026-10-23T12:00:00.000Z"
+      }
+    },
+    {
       "start_idx": 785,
       "end_idx": 1018,
       "source_type": "human",
@@ -120,6 +172,19 @@
         "author_name": "Anouk Jansen",
         "author_email": "a.jansen@belastingdienst.example",
         "timestamp": "2026-10-20T10:02:00.000Z"
+      }
+    },
+    {
+      "start_idx": 1020,
+      "end_idx": 1074,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "AI Impact Assessment (urn:nl:minfin:tr:aiia:2.1, aiia.json)",
+        "original_doc_hash": "41a5ac59fc4cd5588157f22cfcce2cee1d645f37e71ad12a91bd1cf7dc8d883d",
+        "original_start_idx": 6492,
+        "copied_by_name": "Invulhulp 1.0.0",
+        "copied_by_email": "invulhulp@1.0.0",
+        "timestamp": "2026-10-23T12:00:00.000Z"
       }
     },
     {
@@ -143,6 +208,19 @@
         "author_name": "Fatima El Amrani",
         "author_email": "f.elamrani@belastingdienst.example",
         "timestamp": "2026-10-22T09:30:00.000Z"
+      }
+    },
+    {
+      "start_idx": 1335,
+      "end_idx": 1409,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "AI Impact Assessment (urn:nl:minfin:tr:aiia:2.1, aiia.json)",
+        "original_doc_hash": "41a5ac59fc4cd5588157f22cfcce2cee1d645f37e71ad12a91bd1cf7dc8d883d",
+        "original_start_idx": 7507,
+        "copied_by_name": "Invulhulp 1.0.0",
+        "copied_by_email": "invulhulp@1.0.0",
+        "timestamp": "2026-10-23T12:00:00.000Z"
       }
     },
     {
@@ -244,6 +322,19 @@
       }
     },
     {
+      "start_idx": 1810,
+      "end_idx": 1877,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "AI Impact Assessment (urn:nl:minfin:tr:aiia:2.1, aiia.json)",
+        "original_doc_hash": "41a5ac59fc4cd5588157f22cfcce2cee1d645f37e71ad12a91bd1cf7dc8d883d",
+        "original_start_idx": 8227,
+        "copied_by_name": "Invulhulp 1.0.0",
+        "copied_by_email": "invulhulp@1.0.0",
+        "timestamp": "2026-10-23T12:00:00.000Z"
+      }
+    },
+    {
       "start_idx": 1878,
       "end_idx": 2153,
       "source_type": "human",
@@ -261,6 +352,19 @@
         "author_name": "Anouk Jansen",
         "author_email": "a.jansen@belastingdienst.example",
         "timestamp": "2026-10-23T08:45:00.000Z"
+      }
+    },
+    {
+      "start_idx": 2249,
+      "end_idx": 2339,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "AI Impact Assessment (urn:nl:minfin:tr:aiia:2.1, aiia.json)",
+        "original_doc_hash": "41a5ac59fc4cd5588157f22cfcce2cee1d645f37e71ad12a91bd1cf7dc8d883d",
+        "original_start_idx": 9316,
+        "copied_by_name": "Invulhulp 1.0.0",
+        "copied_by_email": "invulhulp@1.0.0",
+        "timestamp": "2026-10-23T12:00:00.000Z"
       }
     },
     {
@@ -287,6 +391,45 @@
         "copied_by_name": "Ruben de Wit",
         "copied_by_email": "r.dewit@belastingdienst.example",
         "timestamp": "2026-10-21T13:50:00.000Z"
+      }
+    },
+    {
+      "start_idx": 2584,
+      "end_idx": 2670,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "AI Impact Assessment (urn:nl:minfin:tr:aiia:2.1, aiia.json)",
+        "original_doc_hash": "41a5ac59fc4cd5588157f22cfcce2cee1d645f37e71ad12a91bd1cf7dc8d883d",
+        "original_start_idx": 9560,
+        "copied_by_name": "Invulhulp 1.0.0",
+        "copied_by_email": "invulhulp@1.0.0",
+        "timestamp": "2026-10-23T12:00:00.000Z"
+      }
+    },
+    {
+      "start_idx": 2764,
+      "end_idx": 2807,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "AI Impact Assessment (urn:nl:minfin:tr:aiia:2.1, aiia.json)",
+        "original_doc_hash": "41a5ac59fc4cd5588157f22cfcce2cee1d645f37e71ad12a91bd1cf7dc8d883d",
+        "original_start_idx": 15650,
+        "copied_by_name": "Invulhulp 1.0.0",
+        "copied_by_email": "invulhulp@1.0.0",
+        "timestamp": "2026-10-23T12:00:00.000Z"
+      }
+    },
+    {
+      "start_idx": 2809,
+      "end_idx": 2876,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "AI Impact Assessment (urn:nl:minfin:tr:aiia:2.1, aiia.json)",
+        "original_doc_hash": "41a5ac59fc4cd5588157f22cfcce2cee1d645f37e71ad12a91bd1cf7dc8d883d",
+        "original_start_idx": 16041,
+        "copied_by_name": "Invulhulp 1.0.0",
+        "copied_by_email": "invulhulp@1.0.0",
+        "timestamp": "2026-10-23T12:00:00.000Z"
       }
     },
     {
@@ -323,6 +466,19 @@
       }
     },
     {
+      "start_idx": 3180,
+      "end_idx": 3250,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "AI Impact Assessment (urn:nl:minfin:tr:aiia:2.1, aiia.json)",
+        "original_doc_hash": "41a5ac59fc4cd5588157f22cfcce2cee1d645f37e71ad12a91bd1cf7dc8d883d",
+        "original_start_idx": 16384,
+        "copied_by_name": "Invulhulp 1.0.0",
+        "copied_by_email": "invulhulp@1.0.0",
+        "timestamp": "2026-10-23T12:00:00.000Z"
+      }
+    },
+    {
       "start_idx": 3251,
       "end_idx": 3401,
       "source_type": "human",
@@ -331,6 +487,118 @@
         "author_email": "f.elamrani@belastingdienst.example",
         "timestamp": "2026-10-22T11:00:00.000Z"
       }
+    }
+  ],
+  "structure": [
+    {
+      "start_idx": 0,
+      "end_idx": 20,
+      "role": "title"
+    },
+    {
+      "start_idx": 21,
+      "end_idx": 61,
+      "role": "subtitle"
+    },
+    {
+      "start_idx": 63,
+      "end_idx": 79,
+      "role": "section"
+    },
+    {
+      "start_idx": 81,
+      "end_idx": 179,
+      "role": "question"
+    },
+    {
+      "start_idx": 180,
+      "end_idx": 699,
+      "role": "answer"
+    },
+    {
+      "start_idx": 701,
+      "end_idx": 784,
+      "role": "question"
+    },
+    {
+      "start_idx": 785,
+      "end_idx": 1018,
+      "role": "answer"
+    },
+    {
+      "start_idx": 1020,
+      "end_idx": 1074,
+      "role": "question"
+    },
+    {
+      "start_idx": 1075,
+      "end_idx": 1333,
+      "role": "answer"
+    },
+    {
+      "start_idx": 1335,
+      "end_idx": 1409,
+      "role": "question"
+    },
+    {
+      "start_idx": 1410,
+      "end_idx": 1808,
+      "role": "answer"
+    },
+    {
+      "start_idx": 1810,
+      "end_idx": 1877,
+      "role": "question"
+    },
+    {
+      "start_idx": 1878,
+      "end_idx": 2247,
+      "role": "answer"
+    },
+    {
+      "start_idx": 2249,
+      "end_idx": 2339,
+      "role": "question"
+    },
+    {
+      "start_idx": 2340,
+      "end_idx": 2582,
+      "role": "answer"
+    },
+    {
+      "start_idx": 2584,
+      "end_idx": 2670,
+      "role": "question"
+    },
+    {
+      "start_idx": 2671,
+      "end_idx": 2762,
+      "role": "answer"
+    },
+    {
+      "start_idx": 2764,
+      "end_idx": 2807,
+      "role": "section"
+    },
+    {
+      "start_idx": 2809,
+      "end_idx": 2876,
+      "role": "question"
+    },
+    {
+      "start_idx": 2877,
+      "end_idx": 3178,
+      "role": "answer"
+    },
+    {
+      "start_idx": 3180,
+      "end_idx": 3250,
+      "role": "question"
+    },
+    {
+      "start_idx": 3251,
+      "end_idx": 3401,
+      "role": "answer"
     }
   ]
 }

@@ -50,8 +50,12 @@ bewerken elkaars revisies niet overschrijven.
 "Download herkomst (LJSON)" op de samenvattingspagina (`src/services/ljsonExport.ts`) zet
 één formulier om naar LJSON 1.0, het formaat van de TekstOntleder. De export vergelijkt
 opeenvolgende revisies woord voor woord: woorden die een revisie overneemt houden hun
-auteur, nieuwe woorden zijn van die revisie. Koppen, vragen en tekst die geen revisie
-verklaart (ingevuld vóór de log bestond) krijgen geen span. In AI-tekst zoekt de export
+auteur, nieuwe woorden zijn van die revisie. De titel, sectietitels en vragen zijn
+`copied` uit de formulierdefinitie (`/forms/<id>.json`: naam met URN, hash van het bestand,
+plek in het bestand), gekopieerd door "Invulhulp <versie>". Tekst die geen revisie verklaart
+(ingevuld vóór de log bestond) en de systeemnaam krijgen geen span. Het extra veld
+`structure` zegt per stuk tekst of het titel, sectie, vraag of antwoord is; de TekstOntleder
+maakt de tekst daarmee op als koppen en antwoorden. In AI-tekst zoekt de export
 daarnaast naar stukken van minstens acht woorden die letterlijk in een van de geciteerde
 fragmenten (`answerSources`) staan, ongeacht hoofdletters, accenten en leestekens. Zo'n
 stuk wordt een `copied`-span binnen het AI-span, met de documentnaam en de plek in het

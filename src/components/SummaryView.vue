@@ -322,7 +322,19 @@ function exportWord() {
 // format the TekstOntleder reads.
 async function exportLjson() {
   const name = systemName.value || store.activeDossier.name
+  const { id, urn, version } = props.formConfig
+  // The file as served, so its hash and the copied strings' positions match
+  // what anyone fetching /forms/<id>.json gets.
+  const res = await fetch(`/forms/${id}.json`, { cache: 'no-cache' })
+  const raw = res.ok ? await res.text() : ''
   const doc = await buildLjsonDocument({
+    formDefinition: raw
+      ? {
+          name: `${props.formConfig.title} (${urn ?? `versie ${version}`}, ${id}.json)`,
+          raw,
+          tool: { name: 'Invulhulp', version: __APP_VERSION__ },
+        }
+      : undefined,
     documentId: `${store.activeDossierId}:${props.formConfig.id}`,
     title: props.formConfig.meta.docTitle,
     subtitle: name || undefined,
