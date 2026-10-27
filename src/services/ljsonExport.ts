@@ -1,4 +1,4 @@
-import type { Answers, AnswerRevision, Question, Section } from '../models/Assessment'
+import type { Answers, AnswerRevision, AnswerSource, AnswerSourceMeta, Question, Section } from '../models/Assessment'
 import { htmlToPlainText } from '../utils/htmlRuns'
 import { parseTableAnswer, tableAnswerToPlainText } from '../utils/tableAnswer'
 
@@ -243,6 +243,118 @@ async function spanFor(revision: AnswerRevision, start: number, end: number): Pr
   }
 }
 
+// ── Verbatim copies from source documents ────────────────────────────────────
+// AI text is credited to the AI as a whole, but part of it may be lifted word
+// for word from a passage AI Modus retrieved. Those stretches become a
+// `copied` span nested inside the AI span, so a reader sees what the model took
+// from a document and what it wrote itself.
+
+// Shorter shared stretches are stock phrasing ("de verwerking van
+// persoonsgegevens"), not a copy.
+const MIN_COPIED_WORDS = 8
+
+interface Word {
+  // Lowercase, without diacritics or surrounding punctuation: "Wachttijd," and
+  // "wachttijd" are the same word, so a copy survives a changed comma.
+  norm: string
+  // UTF-16 offsets into the string the word came from.
+  start: number
+  end: number
+}
+
+function words(text: string): Word[] {
+  const result: Word[] = []
+  for (const m of text.matchAll(/\S+/gu)) {
+    const norm = m[0]
+      .normalize('NFD')
+      .replace(/\p{M}/gu, '')
+      .toLowerCase()
+      .replace(/^\p{P}+|\p{P}+$/gu, '')
+    if (norm) result.push({ norm, start: m.index, end: m.index + m[0].length })
+  }
+  return result
+}
+
+interface Copy {
+  // UTF-16 offsets into the AI run.
+  start: number
+  end: number
+  source: AnswerSource
+  // UTF-16 offset of the copied passage in the source chunk's text.
+  chunkStart: number
+  wordsInPassage: string[]
+}
+
+/** The longest stretch of words `run` shares with `chunk`, skipping run words
+ *  already claimed by an earlier copy. */
+function longestShared(run: Word[], taken: boolean[], chunk: Word[]): { at: number; from: number; length: number } {
+  let best = { at: 0, from: 0, length: 0 }
+  let prev = new Int32Array(chunk.length + 1)
+  for (let i = 1; i <= run.length; i++) {
+    const row = new Int32Array(chunk.length + 1)
+    if (!taken[i - 1]) {
+      for (let j = 1; j <= chunk.length; j++) {
+        if (run[i - 1].norm !== chunk[j - 1].norm) continue
+        row[j] = prev[j - 1] + 1
+        if (row[j] > best.length) best = { at: i - row[j], from: j - row[j], length: row[j] }
+      }
+    }
+    prev = row
+  }
+  return best
+}
+
+/** Every stretch of at least MIN_COPIED_WORDS words that `runText` shares with
+ *  one of the passages, longest first; each run word belongs to one copy. */
+export function findCopies(runText: string, sources: AnswerSource[]): Copy[] {
+  const run = words(runText)
+  if (run.length < MIN_COPIED_WORDS) return []
+  const chunks = sources.map((source) => ({ source, words: words(source.text) }))
+  const taken = new Array<boolean>(run.length).fill(false)
+  const copies: Copy[] = []
+  for (;;) {
+    let best: { at: number; from: number; length: number; chunk: (typeof chunks)[number] } | null = null
+    for (const chunk of chunks) {
+      const found = longestShared(run, taken, chunk.words)
+      if (found.length > (best?.length ?? 0)) best = { ...found, chunk }
+    }
+    if (!best || best.length < MIN_COPIED_WORDS) break
+    taken.fill(true, best.at, best.at + best.length)
+    copies.push({
+      start: run[best.at].start,
+      end: run[best.at + best.length - 1].end,
+      source: best.chunk.source,
+      chunkStart: best.chunk.words[best.from].start,
+      wordsInPassage: best.chunk.words.slice(best.from, best.from + best.length).map((w) => w.norm),
+    })
+  }
+  return copies.sort((a, b) => a.start - b.start)
+}
+
+export interface SourceDocumentText {
+  id: string
+  name: string
+  // Empty while a PDF is still being extracted, or for a deleted document.
+  content: string
+}
+
+/** Where a copied passage starts in its document, in code points. The chunk
+ *  text may differ from the document in whitespace (the chunker reflows it),
+ *  so the passage is looked up by its words. Falls back to the offset inside
+ *  the passage the model was given when the document text isn't there. */
+function originalStart(copy: Copy, documentWords: Word[] | undefined, content: string): number {
+  const passage = copy.wordsInPassage
+  if (documentWords) {
+    outer: for (let i = 0; i + passage.length <= documentWords.length; i++) {
+      for (let k = 0; k < passage.length; k++) {
+        if (documentWords[i + k].norm !== passage[k]) continue outer
+      }
+      return codePoints(content.slice(0, documentWords[i].start))
+    }
+  }
+  return codePoints(copy.source.text.slice(0, copy.chunkStart))
+}
+
 export interface LjsonExportInput {
   documentId: string
   title: string
@@ -250,6 +362,10 @@ export interface LjsonExportInput {
   sections: Section[]
   answers: Answers
   history: Record<string, AnswerRevision[]>
+  // The passages AI Modus cited per question, searched for verbatim copies in
+  // the AI's text, and the dossier's documents to place them in.
+  sources?: Record<string, AnswerSourceMeta>
+  documents?: SourceDocumentText[]
   // Questions hidden by an unmet visibleIf are left out, as in the Word export.
   isVisible?: (question: Question) => boolean
 }
@@ -266,6 +382,34 @@ export async function buildLjsonDocument(input: LjsonExportInput): Promise<Ljson
     return start
   }
 
+  const documents = new Map((input.documents ?? []).map((d) => [d.id, d]))
+  const documentWords = new Map<string, Word[]>()
+  const wordsOf = (id: string) => {
+    const content = documents.get(id)?.content
+    if (!content) return undefined
+    if (!documentWords.has(id)) documentWords.set(id, words(content))
+    return documentWords.get(id)
+  }
+  const copiedSpan = async (copy: Copy, by: AnswerRevision, start: number, end: number): Promise<CopiedSpan> => {
+    const doc = documents.get(copy.source.docId)
+    const content = doc?.content ?? ''
+    return {
+      start_idx: start,
+      end_idx: end,
+      source_type: 'copied',
+      metadata: {
+        original_doc_name: doc?.name ?? copy.source.docName,
+        original_doc_hash: await sha256Hex(content || copy.source.text),
+        original_start_idx: originalStart(copy, wordsOf(copy.source.docId), content),
+        // The AI did the copying, on behalf of whoever started it; the span
+        // sits inside that AI span.
+        copied_by_name: by.name ?? 'onbekend',
+        copied_by_email: by.email ?? 'onbekend',
+        timestamp: iso(by.at),
+      },
+    }
+  }
+
   append(input.title + '\n')
   if (input.subtitle) append(input.subtitle + '\n')
   for (const section of input.sections) {
@@ -279,7 +423,14 @@ export async function buildLjsonDocument(input: LjsonExportInput): Promise<Ljson
       const current = answerExportText(input.answers[question.id])
       for (const run of attributeAnswer(input.history[question.id] ?? [], current)) {
         const start = append(run.text)
-        if (run.revision) spans.push(await spanFor(run.revision, start, start + codePoints(run.text)))
+        if (!run.revision) continue
+        spans.push(await spanFor(run.revision, start, start + codePoints(run.text)))
+        if (run.revision.by !== 'ai') continue
+        for (const copy of findCopies(run.text, input.sources?.[question.id]?.sources ?? [])) {
+          const copyStart = start + codePoints(run.text.slice(0, copy.start))
+          const copyEnd = copyStart + codePoints(run.text.slice(copy.start, copy.end))
+          spans.push(await copiedSpan(copy, run.revision, copyStart, copyEnd))
+        }
       }
       append('\n')
     }

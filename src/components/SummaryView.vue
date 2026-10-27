@@ -329,6 +329,8 @@ async function exportLjson() {
     sections: visibleSections.value,
     answers: store.answers,
     history: store.activeForm.answerHistory ?? {},
+    sources: store.activeForm.answerSources ?? {},
+    documents: store.documents,
     isVisible: (q) => isQuestionVisible(q, (id) => store.answers[id] ?? ''),
   })
   downloadLjson(doc, `${props.formConfig.meta.filename.replace(/\.[a-z]+$/i, '')}-herkomst`)

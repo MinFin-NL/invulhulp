@@ -51,7 +51,11 @@ bewerken elkaars revisies niet overschrijven.
 één formulier om naar LJSON 1.0, het formaat van de TekstOntleder. De export vergelijkt
 opeenvolgende revisies woord voor woord: woorden die een revisie overneemt houden hun
 auteur, nieuwe woorden zijn van die revisie. Koppen, vragen en tekst die geen revisie
-verklaart (ingevuld vóór de log bestond) krijgen geen span. Een voorbeeld staat in
+verklaart (ingevuld vóór de log bestond) krijgen geen span. In AI-tekst zoekt de export
+daarnaast naar stukken van minstens acht woorden die letterlijk in een van de geciteerde
+fragmenten (`answerSources`) staan, ongeacht hoofdletters, accenten en leestekens. Zo'n
+stuk wordt een `copied`-span binnen het AI-span, met de documentnaam en de plek in het
+document; ontbreekt de documenttekst, dan de plek binnen het fragment. Een voorbeeld staat in
 [`ljson/ai-belastingtelefoon.ljson`](ljson/ai-belastingtelefoon.ljson); dat bestand wordt
 door `src/services/ljsonExport.demo.test.ts` gemaakt en bewaakt.
 

@@ -18,6 +18,32 @@
       }
     },
     {
+      "start_idx": 180,
+      "end_idx": 279,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "Projectplan AI Belastingtelefoon v0.9.pdf",
+        "original_doc_hash": "756edb7883d3e328e66da71eb0ba59b381bb79ab7d455113d84d8e4b3da034fa",
+        "original_start_idx": 69,
+        "copied_by_name": "Anouk Jansen",
+        "copied_by_email": "a.jansen@belastingdienst.example",
+        "timestamp": "2026-10-20T09:12:00.000Z"
+      }
+    },
+    {
+      "start_idx": 292,
+      "end_idx": 405,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "Projectplan AI Belastingtelefoon v0.9.pdf",
+        "original_doc_hash": "756edb7883d3e328e66da71eb0ba59b381bb79ab7d455113d84d8e4b3da034fa",
+        "original_start_idx": 182,
+        "copied_by_name": "Anouk Jansen",
+        "copied_by_email": "a.jansen@belastingdienst.example",
+        "timestamp": "2026-10-20T09:12:00.000Z"
+      }
+    },
+    {
       "start_idx": 406,
       "end_idx": 457,
       "source_type": "human",
@@ -37,6 +63,19 @@
         "invoked_by": "a.jansen@belastingdienst.example",
         "parameters": {},
         "prompt_hash": "niet vastgelegd",
+        "timestamp": "2026-10-20T09:12:00.000Z"
+      }
+    },
+    {
+      "start_idx": 457,
+      "end_idx": 510,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "Projectplan AI Belastingtelefoon v0.9.pdf",
+        "original_doc_hash": "756edb7883d3e328e66da71eb0ba59b381bb79ab7d455113d84d8e4b3da034fa",
+        "original_start_idx": 296,
+        "copied_by_name": "Anouk Jansen",
+        "copied_by_email": "a.jansen@belastingdienst.example",
         "timestamp": "2026-10-20T09:12:00.000Z"
       }
     },
@@ -192,6 +231,19 @@
       }
     },
     {
+      "start_idx": 1660,
+      "end_idx": 1808,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "Projectplan AI Belastingtelefoon v0.9.pdf",
+        "original_doc_hash": "756edb7883d3e328e66da71eb0ba59b381bb79ab7d455113d84d8e4b3da034fa",
+        "original_start_idx": 460,
+        "copied_by_name": "Anouk Jansen",
+        "copied_by_email": "a.jansen@belastingdienst.example",
+        "timestamp": "2026-10-20T09:12:00.000Z"
+      }
+    },
+    {
       "start_idx": 1878,
       "end_idx": 2153,
       "source_type": "human",
@@ -221,6 +273,19 @@
         "invoked_by": "r.dewit@belastingdienst.example",
         "parameters": {},
         "prompt_hash": "niet vastgelegd",
+        "timestamp": "2026-10-21T13:50:00.000Z"
+      }
+    },
+    {
+      "start_idx": 2487,
+      "end_idx": 2582,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "Klantreisanalyse BelastingTelefoon 2025.docx",
+        "original_doc_hash": "d16417657a38957b0b7a79b02c41b211c9988ebff068e3916066078e77f3f6ab",
+        "original_start_idx": 67,
+        "copied_by_name": "Ruben de Wit",
+        "copied_by_email": "r.dewit@belastingdienst.example",
         "timestamp": "2026-10-21T13:50:00.000Z"
       }
     },

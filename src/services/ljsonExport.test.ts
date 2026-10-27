@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import type { AnswerRevision, Section } from '../models/Assessment'
-import { answerExportText, attributeAnswer, buildLjsonDocument } from './ljsonExport'
+import type { AnswerRevision, AnswerSource, Section } from '../models/Assessment'
+import { answerExportText, attributeAnswer, buildLjsonDocument, findCopies } from './ljsonExport'
 
 const ai = (text: string, at = 1): AnswerRevision => ({
   text, at, by: 'ai', trigger: 'ai-modus', model: 'azure/gpt-5.3-chat', name: 'Anouk', email: 'anouk@example.nl',
@@ -123,5 +123,68 @@ describe('buildLjsonDocument', () => {
     expect(doc.text).toBe('T\n\nDeel A\n\nWat is het doel?\nJa.\n')
     expect(doc.provenance_spans).toEqual([])
     expect(doc.document_hash).toMatch(/^[0-9a-f]{64}$/)
+  })
+})
+
+const passage = (text: string, chunkIndex = 0): AnswerSource => ({
+  docId: 'doc1', docName: 'Projectplan.pdf', chunkIndex, text, score: 0.9,
+})
+
+describe('findCopies', () => {
+  const chunk = passage('Inleiding.  De wachttijd liep in maart op tot gemiddeld 24 minuten per beller, vooral rond de aangifte.')
+
+  it('vindt een letterlijk overgenomen stuk, ook met andere hoofdletters en leestekens', () => {
+    const run = 'Volgens het plan: de Wachttijd liep in maart op tot gemiddeld 24 minuten per beller. Dat is te lang.'
+    const [copy, ...rest] = findCopies(run, [chunk])
+    expect(rest).toEqual([])
+    expect(run.slice(copy.start, copy.end)).toBe('de Wachttijd liep in maart op tot gemiddeld 24 minuten per beller.')
+  })
+
+  it('negeert gedeelde stukken korter dan acht woorden', () => {
+    expect(findCopies('De wachttijd liep in maart op, zegt het plan, en dat is lang genoeg.', [chunk])).toEqual([])
+  })
+
+  it('wijst elk woord aan één kopie toe, de langste eerst', () => {
+    const other = passage('Bellers wachten soms lang. De kennisbank wordt elke week bijgewerkt door de redactie van de BelastingTelefoon.', 1)
+    const run = 'De wachttijd liep in maart op tot gemiddeld 24 minuten. De kennisbank wordt elke week bijgewerkt door de redactie.'
+    expect(findCopies(run, [chunk, other]).map((c) => c.source.chunkIndex)).toEqual([0, 1])
+  })
+})
+
+describe('buildLjsonDocument met brondocumenten', () => {
+  const sections: Section[] = [{
+    id: 's1', title: 'Deel A', part: 'A',
+    subsections: [{ id: 'sub', title: 'Doel', questions: [{ id: 'q1', text: 'Waarom?', type: 'text', importance: 'mandatory' }] }],
+  }]
+  const answer = 'Aanleiding is dat de wachttijd in maart opliep tot gemiddeld 24 minuten per beller, vooral rond de aangifte.'
+  const content = 'Projectplan\n\nInleiding.\nDe wachttijd liep in maart op tot gemiddeld 24 minuten per beller, vooral rond de aangifte.'
+
+  it('zet een letterlijke kopie als genest fragment binnen het AI-fragment, met de plek in het document', async () => {
+    const doc = await buildLjsonDocument({
+      documentId: 'd:f', title: 'T', sections,
+      answers: { q1: answer },
+      history: { q1: [ai(answer)] },
+      sources: { q1: { sources: [passage('De wachttijd liep in maart op tot gemiddeld 24 minuten per beller, vooral rond de aangifte.')], grounded: true, createdAt: 1 } },
+      documents: [{ id: 'doc1', name: 'Projectplan.pdf', content }],
+    })
+    const [aiSpan, copied] = doc.provenance_spans
+    expect(aiSpan.source_type).toBe('ai')
+    expect(copied.source_type).toBe('copied')
+    expect(copied.start_idx).toBeGreaterThanOrEqual(aiSpan.start_idx)
+    expect(copied.end_idx).toBeLessThanOrEqual(aiSpan.end_idx)
+    expect(doc.text.slice(copied.start_idx, copied.end_idx)).toBe('tot gemiddeld 24 minuten per beller, vooral rond de aangifte.')
+    if (copied.source_type !== 'copied') throw new Error('expected copied')
+    expect(content.slice(copied.metadata.original_start_idx)).toMatch(/^tot gemiddeld 24 minuten/)
+    expect(copied.metadata.copied_by_email).toBe('anouk@example.nl')
+  })
+
+  it('zoekt alleen in AI-tekst, niet in wat een mens typte', async () => {
+    const doc = await buildLjsonDocument({
+      documentId: 'd:f', title: 'T', sections,
+      answers: { q1: answer },
+      history: { q1: [human(answer, 'Ruben')] },
+      sources: { q1: { sources: [passage(content)], grounded: true, createdAt: 1 } },
+    })
+    expect(doc.provenance_spans.map((s) => s.source_type)).toEqual(['human'])
   })
 })

@@ -8,13 +8,15 @@
  * The dossier is fictitious: an AIIA for an "AI Belastingtelefoon" voice
  * assistant, filled in by three made-up people with AI Modus, an AI
  * suggestion, "Verbeter tekst", a copy from the intake form, and one answer
- * from before revisions were recorded (text without origin).
+ * from before revisions were recorded (text without origin). Two made-up
+ * source documents supply the passages AI Modus cited; where the AI took a
+ * sentence from them word for word, the export nests a copied span.
  */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { dirname, resolve } from 'node:path'
 import { describe, it, expect } from 'vitest'
-import type { AnswerRevision, Answers, FormConfig } from '../models/Assessment'
-import { buildLjsonDocument } from './ljsonExport'
+import type { AnswerRevision, AnswerSourceMeta, Answers, FormConfig } from '../models/Assessment'
+import { buildLjsonDocument, type SourceDocumentText } from './ljsonExport'
 
 const ROOT = resolve(__dirname, '../..')
 const DEMO = resolve(ROOT, 'docs/ljson/ai-belastingtelefoon.ljson')
@@ -36,6 +38,49 @@ const generated = (
   trigger: AnswerRevision['trigger'],
   text: string,
 ): AnswerRevision => ({ ...who, by: 'ai', model: MODEL, trigger, at: at(when), text })
+
+const documents: SourceDocumentText[] = [
+  {
+    id: 'doc-projectplan',
+    name: 'Projectplan AI Belastingtelefoon v0.9.pdf',
+    content:
+      'Projectplan AI Belastingtelefoon\nVersie 0.9, september 2026\n\n' +
+      '1. Doel\nDe AI Belastingtelefoon is een spraakassistent die bellers van de BelastingTelefoon te woord ' +
+      'staat. De assistent herkent de vraag van de beller, beantwoordt veelgestelde vragen over de ' +
+      'inkomstenbelasting en betalingsregelingen en verbindt complexe vragen door naar een medewerker.\n\n' +
+      '2. Oplossing\nDe oplossing bestaat uit spraakherkenning, een taalmodel en een zoekfunctie over de ' +
+      'kennisbank. Het taalmodel formuleert een antwoord uitsluitend op basis van de gevonden ' +
+      'kennisartikelen. Gesprekken worden niet gebruikt om het model te trainen.\n\n' +
+      '3. Risico\'s\nDe kwaliteit van de antwoorden kan per groep bellers verschillen. Dat wordt getoetst ' +
+      'voordat de assistent live gaat.',
+  },
+  {
+    id: 'doc-klantreis',
+    name: 'Klantreisanalyse BelastingTelefoon 2025.docx',
+    content:
+      'Klantreisanalyse BelastingTelefoon 2025\n\nWie belt er?\nBellers zijn burgers en ondernemers, onder ' +
+      'wie mensen met beperkte digitale vaardigheden of taalvaardigheid. Een kwart belt namens een ander, ' +
+      'zoals een ouder of een klant.',
+  },
+]
+
+/** The paragraph of a document that contains `marker`, as a cited passage. */
+function cited(docId: string, marker: string, score: number) {
+  const doc = documents.find((d) => d.id === docId)!
+  const paragraphs = doc.content.split('\n\n')
+  const chunkIndex = paragraphs.findIndex((p) => p.includes(marker))
+  return { docId, docName: doc.name, chunkIndex, text: paragraphs[chunkIndex], score }
+}
+const meta = (...sources: ReturnType<typeof cited>[]): AnswerSourceMeta => ({
+  sources, grounded: true, createdAt: at('2026-10-20T09:12:00Z'),
+})
+const sources: Record<string, AnswerSourceMeta> = {
+  '1.1.1': meta(cited('doc-projectplan', '1. Doel', 0.91)),
+  '1.2.1': meta(cited('doc-projectplan', '2. Oplossing', 0.88)),
+  '1.3.2': meta(cited('doc-klantreis', 'Wie belt er?', 0.84)),
+  // Cited, but the AI paraphrased it: no copied span.
+  '4.1.1': meta(cited('doc-projectplan', "3. Risico's", 0.79)),
+}
 
 const history: Record<string, AnswerRevision[]> = {
   // AI Modus drafts the goal; Anouk sharpens it; Ruben adds a boundary.
@@ -148,6 +193,8 @@ describe('LJSON-demo AI Belastingtelefoon', () => {
       sections: aiia.sections,
       answers,
       history,
+      sources,
+      documents,
     })
     const json = JSON.stringify(doc, null, 2) + '\n'
     if (process.env.UPDATE_LJSON_DEMO) {
