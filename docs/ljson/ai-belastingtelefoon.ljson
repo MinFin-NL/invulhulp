@@ -1,0 +1,271 @@
+{
+  "document_id": "demo-ai-belastingtelefoon:aiia",
+  "format_version": "LJSON_1.0",
+  "document_hash": "fb3702a2f544bc86cca9a368d4aed1a712323fbe915ecb67625a1ad08d70bfd4",
+  "text": "AI Impact Assessment\nAI Belastingtelefoon (fictief voorbeeld)\n\nDeel A: Afweging\n\nGeef een beknopte beschrijving van het beoogde doel en de verwachte resultaten van het AI-systeem.\nDe AI Belastingtelefoon is een spraakassistent die bellers van de BelastingTelefoon te woord staat. Het systeem herkent de vraag van de beller, beantwoordt veelgestelde vragen over de inkomstenbelasting en betalingsregelingen direct, op basis van goedgekeurde antwoordteksten, en verbindt complexe vragen door naar een medewerker. Verwacht resultaat is een gemiddeld 30% kortere wachttijd en meer tijd voor medewerkers voor ingewikkelde vragen. Het systeem neemt zelf geen besluiten over de belastingzaak van de beller.\n\nWaar in de organisatie wordt het systeem ingezet (afdeling, proces, werkzaamheden)?\nBij de directie Klantinteractie en Dienstverlening, in het eerste contact van de BelastingTelefoon (keuzemenu en wachtrij). Medewerkers in het contactcenter zien een samenvatting van het gesprek wanneer de beller wordt doorverbonden.\n\nWat is de aanleiding voor de inzet van dit AI-systeem?\nRond de aangifte inkomstenbelasting wachten bellers op piekmomenten gemiddeld meer dan twintig minuten. Uit een analyse van 2025 blijkt dat ruim 40% van de gesprekken over dezelfde tien onderwerpen gaat; die vragen lenen zich voor automatische beantwoording.\n\nGeef een beschrijving van het AI-systeem (techniek, data, type algoritme).\nHet systeem combineert drie onderdelen: spraakherkenning, een groot taalmodel dat binnen de eigen Azure-tenant draait en een zoekfunctie over de kennisbank van de BelastingTelefoon (RAG). Spraakherkenning gebeurt met Whisper large-v3, lokaal gehost. Het taalmodel formuleert een antwoord uitsluitend op basis van de gevonden kennisartikelen. Gesprekken worden niet gebruikt om het model te trainen.\n\nWelke alternatieven zijn overwogen (inclusief niet-AI-oplossingen)?\nOverwogen zijn een uitgebreider keuzemenu en terugbelverzoeken. Een keuzemenu helpt bellers niet bij vragen die ze niet in een categorie kunnen plaatsen; terugbellen verschuift de piek alleen. Ook is gekeken naar een chatbot op de website, die als aanvulling blijft bestaan. Een regelgebaseerd spraaksysteem viel af omdat het de variatie in vraagstelling slecht aankan.\n\nWie zijn de gebruikers en betrokkenen (degenen die de output van het systeem ondervinden)?\nGebruikers zijn de medewerkers van de BelastingTelefoon, die doorverbonden gesprekken met een samenvatting ontvangen. Betrokkenen zijn de bellers: burgers en ondernemers, onder wie mensen met beperkte digitale vaardigheden of taalvaardigheid.\n\nWelke stakeholders zijn geconsulteerd bij de ontwikkeling of aanschaf van het systeem?\nHet klantpanel, de ondernemingsraad, de functionaris gegevensbescherming en het CIO-office.\n\nDeel B: Implementatie en gebruik AI-systeem\n\nHoe wordt omgegaan met ongewenste bias (in input, model en output)?\nSpraakherkenning presteert slechter bij dialecten en bij sprekers met een accent. Daarom wordt de herkenning per groep bellers getest, en verbindt het systeem bij lage herkenningszekerheid altijd door naar een medewerker. De antwoorden voor verschillende groepen bellers worden maandelijks vergeleken.\n\nIs de inputdata relevant en representatief voor de beoogde toepassing?\nGedeeltelijk\nDe testset bevat nog te weinig opnames van sprekers met een accent. Aanvullende opnames worden in het eerste kwartaal van 2027 verzameld.\n",
+  "provenance_spans": [
+    {
+      "start_idx": 180,
+      "end_idx": 406,
+      "source_type": "ai",
+      "metadata": {
+        "model_identifier": "azure/gpt-5.3-chat",
+        "trigger_agent": "invulhulp/ai-modus",
+        "invoked_by": "a.jansen@belastingdienst.example",
+        "parameters": {},
+        "prompt_hash": "niet vastgelegd",
+        "timestamp": "2026-10-20T09:12:00.000Z"
+      }
+    },
+    {
+      "start_idx": 406,
+      "end_idx": 457,
+      "source_type": "human",
+      "metadata": {
+        "author_name": "Anouk Jansen",
+        "author_email": "a.jansen@belastingdienst.example",
+        "timestamp": "2026-10-20T09:40:00.000Z"
+      }
+    },
+    {
+      "start_idx": 457,
+      "end_idx": 537,
+      "source_type": "ai",
+      "metadata": {
+        "model_identifier": "azure/gpt-5.3-chat",
+        "trigger_agent": "invulhulp/ai-modus",
+        "invoked_by": "a.jansen@belastingdienst.example",
+        "parameters": {},
+        "prompt_hash": "niet vastgelegd",
+        "timestamp": "2026-10-20T09:12:00.000Z"
+      }
+    },
+    {
+      "start_idx": 537,
+      "end_idx": 551,
+      "source_type": "human",
+      "metadata": {
+        "author_name": "Anouk Jansen",
+        "author_email": "a.jansen@belastingdienst.example",
+        "timestamp": "2026-10-20T09:40:00.000Z"
+      }
+    },
+    {
+      "start_idx": 551,
+      "end_idx": 625,
+      "source_type": "ai",
+      "metadata": {
+        "model_identifier": "azure/gpt-5.3-chat",
+        "trigger_agent": "invulhulp/ai-modus",
+        "invoked_by": "a.jansen@belastingdienst.example",
+        "parameters": {},
+        "prompt_hash": "niet vastgelegd",
+        "timestamp": "2026-10-20T09:12:00.000Z"
+      }
+    },
+    {
+      "start_idx": 625,
+      "end_idx": 699,
+      "source_type": "human",
+      "metadata": {
+        "author_name": "Ruben de Wit",
+        "author_email": "r.dewit@belastingdienst.example",
+        "timestamp": "2026-10-21T14:05:00.000Z"
+      }
+    },
+    {
+      "start_idx": 785,
+      "end_idx": 1018,
+      "source_type": "human",
+      "metadata": {
+        "author_name": "Anouk Jansen",
+        "author_email": "a.jansen@belastingdienst.example",
+        "timestamp": "2026-10-20T10:02:00.000Z"
+      }
+    },
+    {
+      "start_idx": 1075,
+      "end_idx": 1179,
+      "source_type": "copied",
+      "metadata": {
+        "original_doc_name": "Intakeformulier nieuwe IV-verzoeken",
+        "original_doc_hash": "a9635dda8fcb525b39b2558344abf9b3adbc74ee7301dcd84243445d68ef1179",
+        "original_start_idx": 0,
+        "copied_by_name": "Anouk Jansen",
+        "copied_by_email": "a.jansen@belastingdienst.example",
+        "timestamp": "2026-10-20T09:05:00.000Z"
+      }
+    },
+    {
+      "start_idx": 1179,
+      "end_idx": 1333,
+      "source_type": "human",
+      "metadata": {
+        "author_name": "Fatima El Amrani",
+        "author_email": "f.elamrani@belastingdienst.example",
+        "timestamp": "2026-10-22T09:30:00.000Z"
+      }
+    },
+    {
+      "start_idx": 1410,
+      "end_idx": 1433,
+      "source_type": "ai",
+      "metadata": {
+        "model_identifier": "azure/gpt-5.3-chat",
+        "trigger_agent": "invulhulp/ai-modus",
+        "invoked_by": "a.jansen@belastingdienst.example",
+        "parameters": {},
+        "prompt_hash": "niet vastgelegd",
+        "timestamp": "2026-10-20T09:12:00.000Z"
+      }
+    },
+    {
+      "start_idx": 1433,
+      "end_idx": 1450,
+      "source_type": "ai",
+      "metadata": {
+        "model_identifier": "azure/gpt-5.3-chat",
+        "trigger_agent": "invulhulp/tekst-verbeteren",
+        "invoked_by": "f.elamrani@belastingdienst.example",
+        "parameters": {},
+        "prompt_hash": "niet vastgelegd",
+        "timestamp": "2026-10-22T10:20:00.000Z"
+      }
+    },
+    {
+      "start_idx": 1450,
+      "end_idx": 1488,
+      "source_type": "ai",
+      "metadata": {
+        "model_identifier": "azure/gpt-5.3-chat",
+        "trigger_agent": "invulhulp/ai-modus",
+        "invoked_by": "a.jansen@belastingdienst.example",
+        "parameters": {},
+        "prompt_hash": "niet vastgelegd",
+        "timestamp": "2026-10-20T09:12:00.000Z"
+      }
+    },
+    {
+      "start_idx": 1488,
+      "end_idx": 1528,
+      "source_type": "human",
+      "metadata": {
+        "author_name": "Fatima El Amrani",
+        "author_email": "f.elamrani@belastingdienst.example",
+        "timestamp": "2026-10-22T10:15:00.000Z"
+      }
+    },
+    {
+      "start_idx": 1528,
+      "end_idx": 1598,
+      "source_type": "ai",
+      "metadata": {
+        "model_identifier": "azure/gpt-5.3-chat",
+        "trigger_agent": "invulhulp/ai-modus",
+        "invoked_by": "a.jansen@belastingdienst.example",
+        "parameters": {},
+        "prompt_hash": "niet vastgelegd",
+        "timestamp": "2026-10-20T09:12:00.000Z"
+      }
+    },
+    {
+      "start_idx": 1598,
+      "end_idx": 1660,
+      "source_type": "human",
+      "metadata": {
+        "author_name": "Fatima El Amrani",
+        "author_email": "f.elamrani@belastingdienst.example",
+        "timestamp": "2026-10-22T10:15:00.000Z"
+      }
+    },
+    {
+      "start_idx": 1660,
+      "end_idx": 1808,
+      "source_type": "ai",
+      "metadata": {
+        "model_identifier": "azure/gpt-5.3-chat",
+        "trigger_agent": "invulhulp/ai-modus",
+        "invoked_by": "a.jansen@belastingdienst.example",
+        "parameters": {},
+        "prompt_hash": "niet vastgelegd",
+        "timestamp": "2026-10-20T09:12:00.000Z"
+      }
+    },
+    {
+      "start_idx": 1878,
+      "end_idx": 2153,
+      "source_type": "human",
+      "metadata": {
+        "author_name": "Ruben de Wit",
+        "author_email": "r.dewit@belastingdienst.example",
+        "timestamp": "2026-10-21T13:30:00.000Z"
+      }
+    },
+    {
+      "start_idx": 2153,
+      "end_idx": 2247,
+      "source_type": "human",
+      "metadata": {
+        "author_name": "Anouk Jansen",
+        "author_email": "a.jansen@belastingdienst.example",
+        "timestamp": "2026-10-23T08:45:00.000Z"
+      }
+    },
+    {
+      "start_idx": 2340,
+      "end_idx": 2582,
+      "source_type": "ai",
+      "metadata": {
+        "model_identifier": "azure/gpt-5.3-chat",
+        "trigger_agent": "invulhulp/suggestie",
+        "invoked_by": "r.dewit@belastingdienst.example",
+        "parameters": {},
+        "prompt_hash": "niet vastgelegd",
+        "timestamp": "2026-10-21T13:50:00.000Z"
+      }
+    },
+    {
+      "start_idx": 2877,
+      "end_idx": 3102,
+      "source_type": "human",
+      "metadata": {
+        "author_name": "Ruben de Wit",
+        "author_email": "r.dewit@belastingdienst.example",
+        "timestamp": "2026-10-21T14:20:00.000Z"
+      }
+    },
+    {
+      "start_idx": 3102,
+      "end_idx": 3148,
+      "source_type": "ai",
+      "metadata": {
+        "model_identifier": "azure/gpt-5.3-chat",
+        "trigger_agent": "invulhulp/ai-modus",
+        "invoked_by": "a.jansen@belastingdienst.example",
+        "parameters": {},
+        "prompt_hash": "niet vastgelegd",
+        "timestamp": "2026-10-20T09:12:00.000Z"
+      }
+    },
+    {
+      "start_idx": 3148,
+      "end_idx": 3178,
+      "source_type": "human",
+      "metadata": {
+        "author_name": "Ruben de Wit",
+        "author_email": "r.dewit@belastingdienst.example",
+        "timestamp": "2026-10-21T14:20:00.000Z"
+      }
+    },
+    {
+      "start_idx": 3251,
+      "end_idx": 3401,
+      "source_type": "human",
+      "metadata": {
+        "author_name": "Fatima El Amrani",
+        "author_email": "f.elamrani@belastingdienst.example",
+        "timestamp": "2026-10-22T11:00:00.000Z"
+      }
+    }
+  ]
+}

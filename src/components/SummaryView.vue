@@ -64,6 +64,11 @@
           v-if="showLegacyExport"
           @click="exportLegacy"
         />
+        <nldd-button
+          variant="secondary"
+          text="Download herkomst (LJSON)"
+          @click="exportLjson"
+        />
       </div>
 
       <!-- Import -->
@@ -156,6 +161,8 @@ import { exportToWord } from '../services/wordExport'
 import { exportToLegacyDocx } from '../services/legacyDocxExport'
 import { exportPpmToTemplateDocx } from '../services/ppmTemplateExport'
 import { importFromJson } from '../services/dataExport'
+import { buildLjsonDocument, downloadLjson } from '../services/ljsonExport'
+import { isQuestionVisible } from '../utils/answerRefs'
 import type { FormConfig, Question } from '../models/Assessment'
 import { parseTableAnswer, type TableAnswer } from '../utils/tableAnswer'
 import { answerToSafeHtml } from '../utils/answerHtml'
@@ -309,6 +316,22 @@ function exportWord() {
     store.activeForm.attachments ?? {},
     store.sessionId,
   )
+}
+
+// Who wrote which part of each answer — person, AI or copy — in the LJSON
+// format the TekstOntleder reads.
+async function exportLjson() {
+  const name = systemName.value || store.activeDossier.name
+  const doc = await buildLjsonDocument({
+    documentId: `${store.activeDossierId}:${props.formConfig.id}`,
+    title: props.formConfig.meta.docTitle,
+    subtitle: name || undefined,
+    sections: visibleSections.value,
+    answers: store.answers,
+    history: store.activeForm.answerHistory ?? {},
+    isVisible: (q) => isQuestionVisible(q, (id) => store.answers[id] ?? ''),
+  })
+  downloadLjson(doc, `${props.formConfig.meta.filename.replace(/\.[a-z]+$/i, '')}-herkomst`)
 }
 
 async function handleImport(event: Event) {

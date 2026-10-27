@@ -197,6 +197,45 @@ describe('DossierDoc convergence', () => {
   })
 })
 
+describe('DossierDoc answer history', () => {
+  const human = (text: string, email: string, at: number) => ({ text, at, by: 'human' as const, email })
+
+  it('collapses one person\'s consecutive edits and appends the next person\'s', () => {
+    const d = DossierDoc.fromPayload(payload())
+    d.recordRevision('aiia', 'q_text', { text: 'Begin', at: 1, by: 'ai', model: 'ollama/mistral' })
+    d.recordRevision('aiia', 'q_text', human('Begin.', 'a@x.nl', 2))
+    d.recordRevision('aiia', 'q_text', human('Begin. Meer.', 'a@x.nl', 3))
+    d.recordRevision('aiia', 'q_text', human('Begin. Meer.', 'b@x.nl', 4)) // nothing changed
+    d.recordRevision('aiia', 'q_text', human('Begin. Meer. Van B.', 'b@x.nl', 5))
+    const log = d.toPayload().forms.aiia.answerHistory!.q_text
+    expect(log.map((r) => [r.by, r.email, r.text])).toEqual([
+      ['ai', undefined, 'Begin'],
+      ['human', 'a@x.nl', 'Begin. Meer.'],
+      ['human', 'b@x.nl', 'Begin. Meer. Van B.'],
+    ])
+  })
+
+  it('keeps both histories when two peers edit different answers at once', () => {
+    const { a, b, sync } = pair()
+    a.recordRevision('aiia', 'q_text', human('Van A.', 'a@x.nl', 1))
+    b.recordRevision('aiia', 'q_table', human('Van B.', 'b@x.nl', 1))
+    sync()
+    for (const d of [a, b]) {
+      const history = d.toPayload().forms.aiia.answerHistory!
+      expect(history.q_text[0].email).toBe('a@x.nl')
+      expect(history.q_table[0].email).toBe('b@x.nl')
+    }
+  })
+
+  it('round-trips through a stored dossier, and is absent when nothing was recorded', () => {
+    expect(DossierDoc.fromPayload(payload()).toPayload().forms.aiia.answerHistory).toBeUndefined()
+    const d = DossierDoc.fromPayload(payload())
+    d.recordRevision('aiia', 'q_text', human('Begin.', 'a@x.nl', 1))
+    const reopened = DossierDoc.fromPayload(d.toPayload())
+    expect(reopened.toPayload().forms.aiia.answerHistory).toEqual(d.toPayload().forms.aiia.answerHistory)
+  })
+})
+
 describe('reopening a stored dossier', () => {
   // What a previous session left behind in IndexedDB and the room.
   function storedState(): Uint8Array {

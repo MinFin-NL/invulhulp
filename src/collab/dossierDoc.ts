@@ -21,6 +21,7 @@ import {
   FORM_LIST,
   FORM_RAW,
   FORM_META,
+  HISTORY_PREFIX,
   dossierToYDoc,
   getTextFragment,
   isDocSeeded,
@@ -31,7 +32,7 @@ import {
   yDocToDossier,
   type DossierPayload,
 } from './ydocCodec'
-import type { AnswerSourceMeta, QuestionAttachment, RiskLevelValue } from '../models/Assessment'
+import type { AnswerRevision, AnswerSourceMeta, QuestionAttachment, RiskLevelValue } from '../models/Assessment'
 import type { BeslishulpRun } from '../utils/beslishulp'
 import type { ToepassingsscanRun } from '../utils/toepassingsscan'
 
@@ -42,6 +43,9 @@ export const LOCAL_ORIGIN = Symbol('dossier-local')
  *  from LOCAL_ORIGIN so the store doesn't treat opening a dossier as an edit
  *  (no updatedAt bump, no push). */
 export const SEED_ORIGIN = Symbol('dossier-seed')
+
+/** Revisions kept per answer — see recordRevision. */
+const MAX_REVISIONS = 50
 
 export type ChangeListener = (payload: DossierPayload, origin: unknown) => void
 
@@ -206,6 +210,29 @@ export class DossierDoc {
       const current = { ...((meta.get('answerSources') as Record<string, AnswerSourceMeta>) ?? {}) }
       current[questionId] = value
       this.setMeta(formId, 'answerSources', current)
+    })
+  }
+
+  /** Append a revision to one answer's history. A human revision that follows
+   *  the same person's previous one replaces it, so a typing session is one
+   *  revision; a revision that changes nothing is dropped. */
+  recordRevision(formId: string, questionId: string, revision: AnswerRevision): void {
+    this.whenReady(() => {
+      const meta = this.ensureForm(formId).get(FORM_META) as Y.Map<unknown>
+      const key = HISTORY_PREFIX + questionId
+      const log = [...((meta.get(key) as AnswerRevision[] | undefined) ?? [])]
+      const last = log[log.length - 1]
+      if (last?.text === revision.text) return
+      if (last && last.by === 'human' && revision.by === 'human' && last.email === revision.email) {
+        log[log.length - 1] = revision
+      } else {
+        log.push(revision)
+      }
+      // Keep the first revision and the latest ones. Text a dropped revision
+      // added is credited to the next one that kept it — an accepted blur for
+      // an answer rewritten this often.
+      if (log.length > MAX_REVISIONS) log.splice(1, log.length - MAX_REVISIONS)
+      this.setMeta(formId, key, log)
     })
   }
 

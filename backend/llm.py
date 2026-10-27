@@ -50,6 +50,9 @@ load_dotenv()
 class LLMBackend(Protocol):
     """Minimal surface the rest of the app programs against."""
 
+    # "<backend>/<model>", recorded as the author of AI-written text.
+    model_identifier: str
+
     async def chat(self, system: str, user: str) -> str:
         """Send a chat message and return the full response content."""
         ...
@@ -81,6 +84,7 @@ class AzureBackend:
             azure_endpoint=endpoint, api_key=api_key, api_version=api_version
         )
         self._deployment = deployment
+        self.model_identifier = f"azure/{deployment}"
         self._is_reasoning = is_reasoning
         # Optimistically send temperature=0; flips to False the first time the
         # deployment rejects the parameter so later calls skip the failed attempt.
@@ -169,6 +173,7 @@ class OllamaBackend:
     def __init__(self, *, host: str, model: str, embedding_model: str) -> None:
         self._client = ollama.AsyncClient(host=host)
         self._model = model
+        self.model_identifier = f"ollama/{model}"
         self._embedding_model = embedding_model
 
     async def chat(self, system: str, user: str) -> str:
@@ -213,6 +218,7 @@ class LimitedBackend:
 
     def __init__(self, inner: LLMBackend, max_concurrency: int) -> None:
         self._inner = inner
+        self.model_identifier = inner.model_identifier
         self.max_concurrency = max_concurrency
         self._slots = asyncio.Semaphore(max_concurrency)
 
