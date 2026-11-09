@@ -37,7 +37,7 @@
       </div>
     </div>
     <nldd-button
-      variant="secondary"
+      appearance="secondary"
       class="bulk-ai__btn"
       text="Stop"
       v-if="dossierAiRun"
@@ -49,13 +49,13 @@
       class="bulk-ai__btn"
       v-else-if="readyDocIds.length === 0 && !uploadHere"
       text="Naar Bronnen"
-      :variant="primaryAction === 'upload' ? 'primary' : 'secondary'"
+      :appearance="primaryAction === 'upload' ? 'primary' : 'secondary'"
       @click="store.setDossierView('bronnen')"
     />
     <nldd-button
       class="bulk-ai__btn"
       v-else
-      :variant="primaryAction === 'bulk-ai' ? 'primary' : 'secondary'"
+      :appearance="primaryAction === 'bulk-ai' ? 'primary' : 'secondary'"
       :disabled="readyDocIds.length === 0"
       @click="startDossierAiMode(bulkFillForms.map((f) => f.id))"
     >

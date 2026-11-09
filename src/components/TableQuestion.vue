@@ -6,7 +6,7 @@
       Een tabel is hier optioneel. Beantwoord de vraag in de toelichting hieronder, of voeg een tabel toe.
     </nldd-text>
     <nldd-button
-      variant="neutral-transparent"
+      appearance="neutral-transparent"
       class="invulhulp-table-question__toggle-btn"
       text="+ Tabel toevoegen"
       v-if="!gridOpen && !store.readOnly"
@@ -88,7 +88,7 @@
             </nldd-cell>
             <nldd-cell class="invulhulp-table-question__actions-cell">
               <nldd-button
-                variant="neutral-transparent"
+                appearance="neutral-transparent"
                 class="invulhulp-table-question__remove-btn"
                 text="✕"
                 v-if="!store.readOnly"
@@ -104,7 +104,7 @@
       <nldd-icon-button
         v-show="overflowing && !atStart"
         class="invulhulp-table-question__scroll-btn invulhulp-table-question__scroll-btn--left"
-        variant="secondary"
+        appearance="secondary"
         size="sm"
         icon="chevron-left"
         text="Toon vorige kolommen"
@@ -113,7 +113,7 @@
       <nldd-icon-button
         v-show="overflowing && !atEnd"
         class="invulhulp-table-question__scroll-btn invulhulp-table-question__scroll-btn--right"
-        variant="secondary"
+        appearance="secondary"
         size="sm"
         icon="chevron-right"
         text="Toon volgende kolommen"
@@ -128,7 +128,7 @@
 
     <div v-if="gridOpen && !store.readOnly" class="invulhulp-table-question__grid-actions">
       <nldd-button
-        variant="neutral-transparent"
+        appearance="neutral-transparent"
         class="invulhulp-table-question__add-btn"
         text="+ Rij toevoegen"
         :disabled="table.rows.length >= maxRows"
@@ -137,7 +137,7 @@
       <!-- Only offered while the grid is still empty: closing it drops the rows,
            and silently discarding typed cells would be a data loss. -->
       <nldd-button
-        variant="neutral-transparent"
+        appearance="neutral-transparent"
         class="invulhulp-table-question__toggle-btn"
         text="Tabel weglaten"
         v-if="optionalTable && !hasRowContent"

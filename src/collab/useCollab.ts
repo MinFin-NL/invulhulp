@@ -30,7 +30,9 @@ export function useCollab(questionId: Ref<string>) {
   onUnmounted(() => unsub?.())
 
   const lu = getLocalUser()
-  const user = lu ? { name: lu.name, color: lu.color } : { name: 'Gebruiker', color: NEUTRAL_USER_COLOR }
+  // sub included: the caret extension broadcasts this object as our awareness
+  // user, and collaborators colour our caret by it (TiptapEditor caretColor).
+  const user = lu ? { sub: lu.sub, name: lu.name, color: lu.color } : { name: 'Gebruiker', color: NEUTRAL_USER_COLOR }
 
   return { fragment, provider, user }
 }

@@ -20,7 +20,7 @@
         />
         <nldd-button
           class="risk-classification__start"
-          variant="primary"
+          appearance="primary"
           start-icon="score-meter"
           text="Beslishulp AI-verordening doorlopen"
           @click="openModal"
@@ -57,12 +57,12 @@
 
         <div class="invulhulp-row invulhulp-gap--md risk-classification__result-actions">
           <nldd-button
-            variant="secondary"
+            appearance="secondary"
             text="Beslishulp bekijken of herzien"
             @click="openModal"
           />
           <nldd-button
-            variant="primary"
+            appearance="primary"
             :text="adopted ? 'Doorgaan →' : 'Overnemen en doorgaan →'"
             @click="onConfirm"
           />

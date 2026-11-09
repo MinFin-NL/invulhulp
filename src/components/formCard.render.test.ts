@@ -34,8 +34,8 @@ describe('FormCard renders', () => {
     expect(html).not.toContain('disabled')
     // Secundair: de ene primaire actie van de dossierpagina staat in de
     // "volgende stap"-band, niet op elk van de twaalf kaarten.
-    expect(html).toContain('variant="secondary"')
-    expect(html).not.toContain('variant="primary"')
+    expect(html).toContain('appearance="secondary"')
+    expect(html).not.toContain('appearance="primary"')
   })
 
   it('an onvolledig form as an amber tag with the open-question count', async () => {

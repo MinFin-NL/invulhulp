@@ -95,20 +95,64 @@ interface AiBusyEntry {
   questionId: string
 }
 
-// NLDD categories whose `filled` pair has light content in light mode (and
-// dark in dark mode), so one text token — accent-filled-content — reads on all.
+// Collaborator colours (presence bar, editor carets): Rijkshuisstijl colours,
+// as NLDD category tokens. In light mode each `filled` background is the step
+// of NLDD's scale closest to the official value (lintblauw #154273, donkerblauw
+// #01689B, hemelblauw #007BC7, …), and each carries a name label in white at
+// ≥ 4.5:1. The light Rijkshuisstijl colours (mintgroen, geel, donkergeel,
+// oranje, roze, lichtblauw) are left out on purpose: white text on them fails
+// that contrast. Source: rijkshuisstijl.nl, Digitale stijlgids, kleuren.
 const USER_CATEGORIES = [
   'lintblauw', 'paars', 'donkergroen', 'robijnrood', 'hemelblauw', 'bruin',
-  'violet', 'mosgroen', 'donkerblauw', 'groen', 'donkerbruin',
+  'violet', 'mosgroen', 'donkerblauw', 'groen', 'donkerbruin', 'rood',
 ]
 
-/** A stable, readable colour from a user id — same person, same colour. It is
- *  a CSS custom-property reference, so it follows the colour scheme; consumers
- *  must use it as a whole value (no hex-alpha suffixes — use color-mix). */
-function colorForUser(sub: string): string {
+const categoryColor = (i: number) => `var(--semantics-categories-${USER_CATEGORIES[i]}-filled-background-color)`
+
+function hashIndex(sub: string): number {
   let h = 0
   for (let i = 0; i < sub.length; i++) h = (h * 31 + sub.charCodeAt(i)) % USER_CATEGORIES.length
-  return `var(--semantics-categories-${USER_CATEGORIES[h]}-filled-background-color)`
+  return h
+}
+
+/** A user's own colour, from their id alone — what they get when nobody else
+ *  holds it. It is a CSS custom-property reference, so it follows the colour
+ *  scheme; consumers must use it as a whole value (no hex-alpha suffixes — use
+ *  color-mix). With others present, use the roster's colour (colorForPeer). */
+export function colorForUser(sub: string): string {
+  return categoryColor(hashIndex(sub))
+}
+
+/** Colours for everyone present at once: each their own colour, unless someone
+ *  earlier in id order holds it, then the next free one. Every client sorts the
+ *  same roster, so all of them show the same person in the same colour; colours
+ *  repeat only beyond USER_CATEGORIES.length people. */
+export function assignUserColors(subs: Iterable<string>): Map<string, string> {
+  const taken = new Set<number>()
+  const out = new Map<string, string>()
+  for (const sub of [...new Set(subs)].sort()) {
+    let i = hashIndex(sub)
+    for (let n = 0; taken.has(i) && n < USER_CATEGORIES.length; n++) i = (i + 1) % USER_CATEGORIES.length
+    if (taken.size >= USER_CATEGORIES.length) i = hashIndex(sub)
+    taken.add(i)
+    out.set(sub, categoryColor(i))
+  }
+  return out
+}
+
+// Per dossier: the colour each present collaborator has right now.
+const rosterColors = new Map<string, Map<string, string>>()
+
+/** A collaborator's colour in this dossier — the same one the presence bar
+ *  shows. Falls back to their own colour before the roster knows them. */
+export function colorForPeer(dossierId: string | null, sub: string): string {
+  return (dossierId && rosterColors.get(dossierId)?.get(sub)) || colorForUser(sub)
+}
+
+/** The text colour that goes on a colorForUser / NEUTRAL_USER_COLOR fill: the
+ *  same category's filled content token, so it flips with the fill in dark mode. */
+export function contentColorOn(fill: string): string {
+  return fill.replace('-filled-background-color)', '-filled-content-color)')
 }
 
 /** Fallback for a peer that broadcast no colour. */
@@ -203,18 +247,17 @@ function wireAwareness(dossierId: string, provider: Provider): void {
     const users: PresentUser[] = []
     const peers = new Set<number>()
     for (const [clientId, state] of provider.awareness.getStates()) {
-      const u = state.user as { sub?: string; name?: string; color?: string } | undefined
-      if (u?.sub) {
-        users.push({
-          clientId,
-          sub: u.sub,
-          name: u.name ?? '',
-          color: u.color ?? NEUTRAL_USER_COLOR,
-          isSelf: clientId === self,
-        })
+      const u = state.user as { sub?: string; name?: string } | undefined
+      if (typeof u?.sub === 'string' && u.sub) {
+        users.push({ clientId, sub: u.sub, name: u.name ?? '', color: '', isSelf: clientId === self })
       }
       if (clientId !== self) peers.add(clientId)
     }
+    // Colours come from the roster, not from what each peer broadcasts, so two
+    // people present at once never share one (see assignUserColors).
+    const colors = assignUserColors(users.map((u) => u.sub))
+    rosterColors.set(dossierId, colors)
+    for (const u of users) u.color = colors.get(u.sub)!
     presenceRoster.set(dossierId, users)
     presenceCbs.get(dossierId)?.forEach((cb) => cb(users))
     recomputeAiBusy(dossierId)
@@ -339,6 +382,7 @@ function disconnectDossier(dossierId: string): Promise<void> {
     p.destroy()
     providers.delete(dossierId)
   }
+  rosterColors.delete(dossierId)
   let closed = Promise.resolve()
   const idb = idbPersistences.get(dossierId)
   if (idb) {

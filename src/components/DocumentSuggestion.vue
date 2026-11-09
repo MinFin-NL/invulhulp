@@ -90,14 +90,14 @@
           />
           <div class="doc-suggestion__actions invulhulp-row invulhulp-gap--xs">
             <nldd-button
-              variant="primary"
+              appearance="primary"
               size="sm"
               :text="isChoiceType ? 'Selecteer deze optie' : 'Overnemen'"
               v-if="!isInsufficient && (!isChoiceType || (matchedOption && !isAlreadySelected))"
               @click="acceptSuggestion"
             />
             <nldd-button
-              variant="secondary"
+              appearance="secondary"
               size="sm"
               :text="isChoiceType && isAlreadySelected ? 'Sluiten' : 'Afwijzen'"
               @click="rejectSuggestion"
@@ -111,7 +111,7 @@
     <div v-if="canSuggest && suggestion === null && !streamingText" class="doc-suggestion__actions">
       <nldd-button
         size="sm"
-        :variant="isActive ? 'primary' : 'neutral-transparent'"
+        :appearance="isActive ? 'primary' : 'neutral-transparent'"
         :disabled="isLoading"
         @click="requestExtraction"
       >

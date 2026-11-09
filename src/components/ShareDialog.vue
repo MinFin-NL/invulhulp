@@ -30,7 +30,7 @@
           </select>
         </nldd-dropdown>
         <nldd-button
-          variant="primary"
+          appearance="primary"
           text="Toevoegen"
           @click="addGrant(user)"
         />
@@ -64,7 +64,7 @@
           </select>
         </nldd-dropdown>
         <nldd-button
-          variant="secondary"
+          appearance="secondary"
           text="Verwijderen"
           :disabled="isLastOwner(grant)"
           :title="isLastOwner(grant) ? 'Minimaal één eigenaar vereist' : undefined"
@@ -85,7 +85,7 @@
 
     <template #footer>
       <nldd-button
-        variant="secondary"
+        appearance="secondary"
         text="Sluiten"
         @click="close"
       />

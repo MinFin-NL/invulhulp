@@ -63,7 +63,7 @@
         @change="onFilesSelected"
       />
       <nldd-button
-        variant="neutral-transparent"
+        appearance="neutral-transparent"
         class="question-attachments__add"
         :disabled="uploading"
         @click="fileInput?.click()"

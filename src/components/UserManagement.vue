@@ -37,13 +37,13 @@
           </div>
           <div class="user-mgmt__temp-pw-actions">
             <nldd-button
-              variant="secondary"
+              appearance="secondary"
               size="sm"
               :text="copied ? 'Gekopieerd' : 'Kopieer'"
               @click="copyTempPassword"
             />
             <nldd-button
-              variant="neutral-transparent"
+              appearance="neutral-transparent"
               size="sm"
               text="Sluiten"
               @click="tempPassword = null"
@@ -107,7 +107,7 @@
           <div>
             <nldd-button
               type="submit"
-              variant="primary"
+              appearance="primary"
               :text="busy ? 'Bezig…' : 'Gebruiker aanmaken'"
               :disabled="busy"
             />
@@ -164,28 +164,28 @@
                 </nldd-cell>
                 <nldd-cell class="user-mgmt__actions">
                   <nldd-button
-                    variant="neutral-transparent"
+                    appearance="neutral-transparent"
                     size="sm"
                     text="Wachtwoord resetten"
                     :disabled="busy"
                     @click="resetPassword(u)"
                   />
                   <nldd-button
-                    variant="neutral-transparent"
+                    appearance="neutral-transparent"
                     size="sm"
                     :text="u.isAdmin ? 'Beheerder afnemen' : 'Beheerder maken'"
                     :disabled="busy || u.isSelf"
                     @click="toggleAdmin(u)"
                   />
                   <nldd-button
-                    variant="neutral-transparent"
+                    appearance="neutral-transparent"
                     size="sm"
                     :text="u.enabled ? 'Deactiveren' : 'Activeren'"
                     :disabled="busy || u.isSelf"
                     @click="toggleEnabled(u)"
                   />
                   <nldd-button
-                    variant="neutral-transparent"
+                    appearance="neutral-transparent"
                     size="sm"
                     class="user-mgmt__danger"
                     text="Verwijderen"

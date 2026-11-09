@@ -35,7 +35,7 @@
             </nldd-text>
           </div>
           <nldd-button
-            variant="primary"
+            appearance="primary"
             text="Nieuw dossier"
             start-icon="plus"
             @click="openCreateDialog"
@@ -149,7 +149,7 @@
               <div v-if="moveModeId === d.id" class="dossier-card__mover">
                 <nldd-icon-button
                   size="sm"
-                  variant="neutral-tinted"
+                  appearance="neutral-tinted"
                   icon="arrow-left"
                   tooltip-timing="never"
                   :disabled="index === 0"
@@ -158,7 +158,7 @@
                 />
                 <nldd-icon-button
                   size="sm"
-                  variant="neutral-tinted"
+                  appearance="neutral-tinted"
                   icon="arrow-up"
                   tooltip-timing="never"
                   :disabled="index === 0"
@@ -167,7 +167,7 @@
                 />
                 <nldd-icon-button
                   size="sm"
-                  variant="neutral-tinted"
+                  appearance="neutral-tinted"
                   icon="arrow-down"
                   tooltip-timing="never"
                   :disabled="index === store.dossierList.length - 1"
@@ -176,7 +176,7 @@
                 />
                 <nldd-icon-button
                   size="sm"
-                  variant="neutral-tinted"
+                  appearance="neutral-tinted"
                   icon="arrow-right"
                   tooltip-timing="never"
                   :disabled="index === store.dossierList.length - 1"
@@ -185,7 +185,7 @@
                 />
                 <nldd-button
                   size="sm"
-                  variant="secondary"
+                  appearance="secondary"
                   text="Klaar"
                   @click="endMoveMode(d.id)"
                 />

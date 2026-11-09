@@ -39,12 +39,12 @@
         class="track-phase"
         :aria-labelledby="`track-${group.track}-title`"
       >
-        <!-- De spine is de verticale tegenhanger van nldd-step-indicator: per
+        <!-- De spine is de verticale tegenhanger van nldd-step-bar: per
              fase een step-cell op de kop, en daaronder een lijn-only cell die
              de baan doortrekt langs de kaarten tot aan de volgende fase.
              Decoratief — "Fase 1 van 3" en de teller staan in de kop. -->
         <div class="track-phase__lane" aria-hidden="true">
-          <nldd-timeline-track-cell
+          <nldd-step-cell
             class="track-phase__step"
             size="md"
             :status="stepStatus(group)"
@@ -54,11 +54,11 @@
           />
           <!-- A line-only row takes the status of the step above it, so the
                track below a finished phase is drawn as covered. -->
-          <nldd-timeline-track-cell
+          <nldd-step-cell
             v-if="phaseIdx < timelineGroups.length - 1"
             class="track-phase__rail"
             size="md"
-            variant="none"
+            level="none"
             :status="stepStatus(group)"
           />
         </div>
@@ -116,7 +116,7 @@
                     <span class="invulhulp-text--sm invulhulp-text--subtle">{{ verdictFor(form.id).reason }}</span>
                   </div>
                   <nldd-button
-                    variant="neutral-transparent"
+                    appearance="neutral-transparent"
                     size="sm"
                     text="Toch openen"
                     @click="$emit('open', form.id)"
@@ -281,7 +281,7 @@ function stepNumber(group: TrackGroup): string {
   list-style: none;
   margin: 0;
   padding: 0;
-  /* The lane is the step marker's own width (nldd-timeline-track-cell,
+  /* The lane is the step marker's own width (nldd-step-cell,
      size="md"); only the gap to the content is ours. */
   --track-gutter: var(--primitives-space-16);
 }

@@ -9,7 +9,7 @@
         ⚠ Niet teruggevonden in de bronnen — controleer dit antwoord
       </span>
       <nldd-button
-        variant="neutral-transparent"
+        appearance="neutral-transparent"
         size="sm"
         class="source-panel__warning-dismiss"
         text="Gecontroleerd"
@@ -48,7 +48,7 @@
             >{{ seg.text }}</span>
           </div>
           <nldd-button
-            variant="neutral-transparent"
+            appearance="neutral-transparent"
             size="sm"
             class="source-panel__show-doc"
             text="Toon in document"

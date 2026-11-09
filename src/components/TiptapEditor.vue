@@ -33,14 +33,14 @@
           />
           <div class="tiptap-suggestion__actions invulhulp-row invulhulp-gap--xs">
             <nldd-button
-              variant="primary"
+              appearance="primary"
               size="sm"
               text="Verstuur"
               :disabled="!clarificationInput.trim()"
               @click="submitClarification"
             />
             <nldd-button
-              variant="secondary"
+              appearance="secondary"
               size="sm"
               text="Annuleer"
               @click="cancelClarification"
@@ -74,13 +74,13 @@
           ></div>
           <div class="tiptap-suggestion__actions invulhulp-row invulhulp-gap--xs">
             <nldd-button
-              variant="primary"
+              appearance="primary"
               size="sm"
               text="Overnemen"
               @click="acceptSuggestion"
             />
             <nldd-button
-              variant="secondary"
+              appearance="secondary"
               size="sm"
               text="Afwijzen"
               @click="rejectSuggestion"
@@ -93,7 +93,7 @@
     <div class="tiptap-toolbar">
       <template v-if="!store.readOnly">
         <nldd-button
-          variant="neutral-transparent"
+          appearance="neutral-transparent"
           size="sm"
           class="tiptap-mark-btn"
           :class="{ 'tiptap-mark-btn--active': editor?.isActive('bold') }"
@@ -108,7 +108,7 @@
           </span>
         </nldd-button>
         <nldd-button
-          variant="neutral-transparent"
+          appearance="neutral-transparent"
           size="sm"
           class="tiptap-mark-btn"
           :class="{ 'tiptap-mark-btn--active': editor?.isActive('italic') }"
@@ -124,7 +124,7 @@
         </nldd-button>
       </template>
       <nldd-button
-        variant="neutral-transparent"
+        appearance="neutral-transparent"
         size="sm"
         v-if="!store.readOnly && suggestion === null && !streamingText && pendingClarification === null"
         :disabled="isLoading || !hasContent"
@@ -156,6 +156,7 @@ import { improveTextStream } from '../services/llmService'
 import { htmlToMarkdown, markdownToHtml } from '../utils/htmlRuns'
 import { streamingTagContent } from '../utils/streamingTag'
 import { useAssessmentStore } from '../stores/assessmentStore'
+import { colorForPeer, contentColorOn, NEUTRAL_USER_COLOR } from '../collab/dossierTransport'
 
 // Mermaid is heavy (~1.5 MB of chunks); load it lazily, only when the model
 // actually returns a diagram.
@@ -180,7 +181,7 @@ const props = defineProps<{
   fragment?: Y.XmlFragment | null
   // y-websocket provider — enables remote cursors (CollaborationCaret).
   provider?: unknown | null
-  user?: { name: string; color: string } | null
+  user?: { sub?: string; name: string; color: string } | null
   // Non-empty while AI Modus is generating this question's answer — shown as a
   // bar above the content. Empty/undefined hides it.
   aiBusyLabel?: string
@@ -200,6 +201,17 @@ const store = useAssessmentStore()
 // Collaborative when bound to a fragment; otherwise the classic v-model editor.
 const collaborative = !!props.fragment
 
+// A collaborator's caret colour: the one the presence bar shows for them in
+// this dossier (colorForPeer). Looked up here because the caret extension
+// blanks any non-hex colour to `transparent` before it reaches
+// render/selectionRender, and it means a colour string sent by a peer is never
+// put into a style.
+function caretColor(user: { sub?: unknown }): string {
+  return typeof user.sub === 'string' && user.sub
+    ? colorForPeer(store.activeDossierId, user.sub)
+    : NEUTRAL_USER_COLOR
+}
+
 function buildExtensions(): AnyExtension[] {
   const placeholder = Placeholder.configure({
     placeholder: props.placeholder ?? 'Vul uw antwoord in…',
@@ -216,11 +228,26 @@ function buildExtensions(): AnyExtension[] {
         CollaborationCaret.configure({
           provider: props.provider as never,
           user: props.user ?? undefined,
-          // The default builder appends hex-alpha (`${color}70`), which is invalid for
-          // our token colours (colorForUser returns a var()). y-tiptap still logs an
+          // Our user colours are tokens (colorForUser returns a var()). Since
+          // 3.32 the extension paints any non-hex colour `transparent`, which
+          // made remote carets and their name labels invisible. So we render
+          // the caret ourselves, coloured by caretColor. y-tiptap logs an
           // "unsupported color format" warning for non-hex colours; harmless.
-          selectionRender: (user: { color: string }) => ({
-            style: `background-color: color-mix(in srgb, ${user.color} 30%, transparent)`,
+          render: (user: { name?: string; sub?: unknown }) => {
+            const color = caretColor(user)
+            const caret = document.createElement('span')
+            caret.classList.add('collaboration-carets__caret')
+            caret.style.borderColor = color
+            const label = document.createElement('div')
+            label.classList.add('collaboration-carets__label')
+            label.style.backgroundColor = color
+            label.style.color = contentColorOn(color)
+            label.textContent = user.name ?? ''
+            caret.append(label)
+            return caret
+          },
+          selectionRender: (user: { sub?: unknown }) => ({
+            style: `background-color: color-mix(in srgb, ${caretColor(user)} 30%, transparent)`,
             class: 'ProseMirror-yjs-selection',
           }),
         }),

@@ -133,12 +133,12 @@
                 </nldd-banner>
                 <div class="invulhulp-row invulhulp-gap--md">
                   <nldd-button
-                    variant="secondary"
+                    appearance="secondary"
                     text="Risicoclassificatie herzien"
                     @click="store.setCurrentView('risk')"
                   />
                   <nldd-button
-                    variant="primary"
+                    appearance="primary"
                     text="Samenvatting bekijken"
                     @click="store.setCurrentView('summary')"
                   />

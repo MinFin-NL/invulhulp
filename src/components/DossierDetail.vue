@@ -13,7 +13,7 @@
           </div>
           <div class="dossier-actions">
             <nldd-button
-              variant="neutral-transparent"
+              appearance="neutral-transparent"
               size="sm"
               class="dossier-actions__share"
               v-if="store.isOwner"
@@ -25,14 +25,14 @@
               </span>
             </nldd-button>
             <nldd-button
-              variant="neutral-transparent"
+              appearance="neutral-transparent"
               size="sm"
               text="Hernoemen"
               v-if="store.canEdit"
               @click="openRenameDialog"
             />
             <nldd-button
-              variant="secondary"
+              appearance="secondary"
               size="sm"
               text="Verwijderen"
               v-if="store.isOwner"

@@ -11,7 +11,7 @@
               {{ store.documents.length }} {{ store.documents.length === 1 ? 'document' : 'documenten' }} beschikbaar
             </nldd-tag>
             <nldd-button
-              variant="secondary"
+              appearance="secondary"
               size="sm"
               class="docs-graph-btn"
               :text="showGraph ? 'Verberg entiteitengrafiek' : 'Toon entiteitengrafiek'"
@@ -42,7 +42,7 @@
           />
           <nldd-button
             class="docs-upload-btn"
-            :variant="primaryAction === 'upload' ? 'primary' : 'secondary'"
+            :appearance="primaryAction === 'upload' ? 'primary' : 'secondary'"
             start-icon="arrow-up-out-bucket"
             :text="isUploading ? 'Bezig met inlezen…' : 'Document(en) uploaden'"
             :loading="isUploading"

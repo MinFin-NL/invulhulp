@@ -50,13 +50,13 @@
           </div>
           <div class="cross-suggestion__actions invulhulp-row invulhulp-gap--xs">
             <nldd-button
-              variant="primary"
+              appearance="primary"
               size="sm"
               text="Overnemen"
               @click="acceptSuggestion"
             />
             <nldd-button
-              variant="secondary"
+              appearance="secondary"
               size="sm"
               text="Afwijzen"
               @click="rejectSuggestion"
@@ -73,14 +73,14 @@
       class="cross-suggestion__actions invulhulp-row invulhulp-gap--xs"
     >
       <nldd-button
-        variant="secondary"
+        appearance="secondary"
         size="sm"
         :text="alreadyCopied ? 'Opnieuw overnemen' : 'Gebruik direct'"
         v-if="canCopy"
         @click="useDirectly"
       />
       <nldd-button
-        variant="primary"
+        appearance="primary"
         size="sm"
         v-if="canSynthesize"
         :disabled="isLoading"

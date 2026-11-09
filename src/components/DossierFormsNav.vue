@@ -19,7 +19,7 @@
       <template v-if="activeEntry">
         <div class="dossier-nav__back">
           <nldd-button
-            variant="neutral-transparent"
+            appearance="neutral-transparent"
             size="sm"
             start-icon="chevron-left"
             :text="dossierName"
@@ -33,7 +33,7 @@
              The title keeps the full width. -->
         <div class="dossier-nav__switch">
           <nldd-button
-            variant="neutral-transparent"
+            appearance="neutral-transparent"
             size="xs"
             expandable
             :text="positionText"
@@ -70,7 +70,7 @@
               <nldd-spacer size="24" />
               <nldd-title size="5" heading-level="3" text="Volgend formulier" />
               <nldd-spacer size="8" />
-              <nldd-list variant="box-tinted" type="navigation" aria-label="Volgend formulier">
+              <nldd-list appearance="box-tinted" type="navigation" aria-label="Volgend formulier">
                 <nldd-list-item size="md" button @click="emit('open', nextForm.form.id)">
                   <nldd-text-cell :text="nextForm.form.title" :supporting-text="nextForm.supportingText" />
                   <nldd-spacer-cell size="8" />
@@ -87,7 +87,7 @@
         <nldd-title id="dossier-nav-title" size="3" heading-level="2" :text="dossierName" />
         <nldd-spacer size="16" />
 
-        <nldd-list variant="simple" type="navigation" aria-label="Dossier">
+        <nldd-list appearance="simple" type="navigation" aria-label="Dossier">
           <nldd-list-item size="md" button current @click="emit('overview')">
             <nldd-icon-cell size="20" icon="folder" />
             <nldd-spacer-cell size="8" />
@@ -101,7 +101,7 @@
           <nldd-spacer size="24" />
           <nldd-title size="5" heading-level="3" :text="group.label" />
           <nldd-spacer size="8" />
-          <nldd-list variant="simple" type="navigation" :aria-label="`Formulieren: ${group.label}`">
+          <nldd-list appearance="simple" type="navigation" :aria-label="`Formulieren: ${group.label}`">
             <nldd-list-item
               v-for="form in group.forms"
               :key="form.id"

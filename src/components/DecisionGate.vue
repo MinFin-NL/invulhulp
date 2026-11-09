@@ -32,12 +32,12 @@
       <!-- Navigation -->
       <div class="invulhulp-row invulhulp-gap--md decision-gate__nav">
         <nldd-button
-          variant="secondary"
+          appearance="secondary"
           text="← Vorige"
           @click="$emit('prev')"
         />
         <nldd-button
-          variant="primary"
+          appearance="primary"
           :text="goAnswer === 'Ja, het systeem wordt ingezet' ? 'Naar Deel B – Implementatie →' : goAnswer === 'Nee, het systeem wordt niet ingezet' ? 'Naar samenvatting →' : 'Volgende →'"
           @click="onNext"
         />

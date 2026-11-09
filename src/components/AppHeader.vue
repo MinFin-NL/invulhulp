@@ -16,7 +16,7 @@
          back to this dossier), so nothing else goes here. The home link is a
          plain hash link: useAppHistory turns the popstate into the store. -->
     <nldd-container v-if="inDossier" padding="8">
-      <nldd-toolbar label="Dossierwerkbalk">
+      <nldd-toolbar accessible-label="Dossierwerkbalk">
         <nldd-toolbar-item slot="start" priority="1">
           <!-- Same face as the website title on the dossier list (the
                top-navigation-bar's own title tokens), with a house in front.
@@ -30,7 +30,7 @@
         </nldd-toolbar-item>
         <nldd-toolbar-item slot="end">
           <nldd-button
-            variant="neutral-transparent"
+            appearance="neutral-transparent"
             start-icon="person"
             :text="userLabel"
             expandable
@@ -179,7 +179,7 @@ function goHome() {
   min-block-size: var(--semantics-controls-md-min-size);
   padding-inline: var(--primitives-space-8);
   border-radius: var(--primitives-corner-radius-xxs);
-  font: var(--components-top-navigation-bar-title-lg-font);
+  font: var(--primitives-font-display-4-sm);
   color: var(--semantics-content-color);
   text-decoration: none;
   white-space: nowrap;

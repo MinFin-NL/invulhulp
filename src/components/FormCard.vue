@@ -30,7 +30,7 @@
           :text="PLACEHOLDER_LABELS[form.placeholder]"
         />
         <nldd-button
-          variant="secondary"
+          appearance="secondary"
           size="sm"
           class="form-card__btn"
           text="Nog niet beschikbaar"
@@ -69,7 +69,7 @@
              wijst nergens heen; de ene primaire actie van de dossierpagina
              staat bovenaan in de "volgende stap"-band. -->
         <nldd-button
-          variant="secondary"
+          appearance="secondary"
           size="sm"
           class="form-card__btn"
           :text="openLabel"

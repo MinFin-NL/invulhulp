@@ -14,7 +14,7 @@
   --invulhulp-color-page-bg: var(--semantics-surfaces-tinted-background-color);
   --invulhulp-color-surface: var(--semantics-surfaces-base-background-color);
   --invulhulp-color-border: var(--semantics-dividers-color);
-  --invulhulp-color-border-strong: var(--semantics-surfaces-base-border-color);
+  --invulhulp-color-border-strong: var(--semantics-surfaces-base-highlight-border-color);
   --invulhulp-color-text: var(--semantics-content-color);
   --invulhulp-color-text-muted: var(--semantics-content-secondary-color);
   --invulhulp-color-text-subtle: var(--semantics-content-secondary-color);
@@ -127,9 +127,9 @@ body {
    a shadow root cannot be reached by that CSS. Those use this instead, built
    on the same card tokens so the two kinds sit side by side without drifting. */
 .invulhulp-card {
-  background: var(--components-card-background-color, var(--semantics-surfaces-base-background-color));
-  border: var(--semantics-surfaces-border-width) solid var(--invulhulp-color-border);
-  border-radius: var(--components-card-corner-radius, var(--primitives-corner-radius-md));
+  background: var(--semantics-surfaces-base-background-color);
+  border: var(--semantics-surfaces-highlight-border-width) solid var(--invulhulp-color-border);
+  border-radius: var(--semantics-surfaces-corner-radius);
   padding: var(--primitives-space-16);
   box-sizing: border-box;
 }

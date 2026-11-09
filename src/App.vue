@@ -27,7 +27,7 @@
           <div class="findocs-hero__cta">
             <nldd-button
               class="findocs-cta-btn"
-              variant="inherit-filled"
+              appearance="inherit-filled"
               size="lg"
               start-icon="arrow-right-in-bucket"
               text="Inloggen met SSO"

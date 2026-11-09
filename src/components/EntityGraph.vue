@@ -10,7 +10,7 @@
         </nldd-text>
       </div>
       <nldd-button
-        variant="secondary"
+        appearance="secondary"
         size="sm"
         text="Sluiten"
         @click="$emit('close')"
@@ -318,7 +318,7 @@ watch(visible, render, { deep: true })
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 1px solid var(--semantics-surfaces-base-border-color);
+  border: 1px solid var(--semantics-surfaces-base-highlight-border-color);
   flex-shrink: 0;
 }
 

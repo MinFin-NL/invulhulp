@@ -54,18 +54,18 @@
       <!-- Export buttons -->
       <div class="invulhulp-row invulhulp-gap--md summary-view__exports">
         <nldd-button
-          variant="primary"
+          appearance="primary"
           text="Download Word rapport"
           @click="exportWord"
         />
         <nldd-button
-          variant="secondary"
+          appearance="secondary"
           text="Download origineel format (Word)"
           v-if="showLegacyExport"
           @click="exportLegacy"
         />
         <nldd-button
-          variant="secondary"
+          appearance="secondary"
           text="Download herkomst (LJSON)"
           @click="exportLjson"
         />
@@ -79,7 +79,7 @@
         <div class="invulhulp-row invulhulp-gap--sm summary-view__import-row">
           <input ref="fileInput" type="file" accept=".json" class="invulhulp-visually-hidden" @change="handleImport" />
           <nldd-button
-            variant="neutral-transparent"
+            appearance="neutral-transparent"
             text="JSON importeren"
             @click="fileInput?.click()"
           />

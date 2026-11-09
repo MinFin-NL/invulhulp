@@ -54,7 +54,7 @@
 
     <div class="scan-tile__actions">
       <nldd-button
-        variant="primary"
+        appearance="primary"
         size="sm"
         :text="run ? 'Scan bekijken of bijwerken' : 'Start toepassingsscan'"
         @click="$emit('open')"

@@ -63,7 +63,7 @@
 
     <nldd-button
       slot="actions"
-      :variant="confirmVariant"
+      :appearance="confirmVariant"
       :text="confirmLabel"
       :disabled="confirmDisabled"
       width="full"
@@ -72,7 +72,7 @@
     <nldd-button
       v-if="cancelLabel"
       slot="actions"
-      variant="secondary"
+      appearance="secondary"
       :text="cancelLabel"
       width="full"
       @click="cancel"

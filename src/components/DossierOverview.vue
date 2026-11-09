@@ -13,7 +13,7 @@
           Beantwoord eerst de toepassingsscan: een paar vragen over wat het project oplevert en
           verwerkt. Daaruit volgt welke formulieren voor dit dossier gelden, en waarom.
         </nldd-text>
-        <nldd-button variant="primary" text="Naar Project" @click="store.setDossierView('project')" />
+        <nldd-button appearance="primary" text="Naar Project" @click="store.setDossierView('project')" />
         <button
           type="button"
           class="invulhulp-linkbutton first-run__skip"
@@ -37,7 +37,7 @@
         <nldd-button
           class="next-step__btn"
           :text="nextStep.cta"
-          :variant="primaryAction === 'resume' ? 'primary' : 'secondary'"
+          :appearance="primaryAction === 'resume' ? 'primary' : 'secondary'"
           @click="$emit('open', nextStep.form.id)"
         />
       </section>

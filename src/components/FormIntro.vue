@@ -52,7 +52,7 @@
 
       <div class="form-intro__actions">
         <nldd-button
-          variant="primary"
+          appearance="primary"
           class="form-intro__cta"
           :text="content.buttonLabel"
           @click="$emit('start')"

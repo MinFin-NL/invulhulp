@@ -163,21 +163,21 @@
       <div class="beslishulp__footer">
         <div class="beslishulp__footer-actions">
           <nldd-button
-            variant="neutral-transparent"
+            appearance="neutral-transparent"
             size="sm"
             text="← Vorige vraag"
             v-if="steps.length > 0"
             @click="back"
           />
           <nldd-button
-            variant="neutral-transparent"
+            appearance="neutral-transparent"
             size="sm"
             text="Opnieuw beginnen"
             v-if="steps.length > 0"
             @click="restart"
           />
           <nldd-button
-            variant="primary"
+            appearance="primary"
             size="sm"
             class="beslishulp__done"
             text="Sluiten"

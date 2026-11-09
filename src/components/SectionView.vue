@@ -61,14 +61,14 @@
       <!-- Navigation -->
       <div class="invulhulp-row invulhulp-gap--md section-view__nav">
         <nldd-button
-          variant="secondary"
+          appearance="secondary"
           text="← Vorige"
           v-if="hasPrev"
           @click="$emit('prev')"
         />
         <div v-else aria-hidden="true"></div>
         <nldd-button
-          variant="primary"
+          appearance="primary"
           @click="onNext"
         >
           <span slot="text">

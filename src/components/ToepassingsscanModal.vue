@@ -106,14 +106,14 @@
       <div class="scan__footer">
         <div class="invulhulp-row invulhulp-gap--sm scan__footer-actions">
           <nldd-button
-            variant="primary"
+            appearance="primary"
             size="sm"
             text="Opslaan in dossier"
             :disabled="!store.canEdit"
             @click="save"
           />
           <nldd-button
-            variant="neutral-transparent"
+            appearance="neutral-transparent"
             size="sm"
             text="Opnieuw beginnen"
             @click="restart"

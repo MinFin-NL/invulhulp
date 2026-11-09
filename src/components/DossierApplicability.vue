@@ -16,7 +16,7 @@
           <span class="invulhulp-text--sm invulhulp-text--subtle">Bepaalt {{ list(q.forms) }}.</span>
         </div>
         <nldd-button
-          variant="secondary"
+          appearance="secondary"
           size="sm"
           :text="q.decider.kind === 'scan' ? 'Beantwoorden' : 'Beslishulp openen'"
           :accessible-label="q.decider.kind === 'scan'
@@ -55,7 +55,7 @@
         </ul>
       </div>
       <nldd-button
-        :variant="run ? 'secondary' : 'primary'"
+        :appearance="run ? 'secondary' : 'primary'"
         size="sm"
         :text="run ? 'Scan bijwerken' : 'Start toepassingsscan'"
         @click="emit('scan')"
@@ -104,7 +104,7 @@
             </span>
           </div>
           <nldd-button
-            variant="secondary"
+            appearance="secondary"
             size="sm"
             end-icon="chevron-right"
             :text="openText(row, group.id)"

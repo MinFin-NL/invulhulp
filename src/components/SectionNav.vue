@@ -18,16 +18,16 @@
     <nldd-spacer size="16" />
 
     <nldd-list
-      variant="simple"
+      appearance="simple"
       type="navigation"
       dividers="never"
       :aria-label="`Stappen van ${formConfig.title}`"
     >
       <template v-for="(row, idx) in rows" :key="row.key">
         <nldd-list-item v-if="row.kind === 'header'" size="sm">
-          <nldd-timeline-track-cell
+          <nldd-step-cell
             size="md"
-            variant="none"
+            level="none"
             :status="statusAt(idx)"
             :position="positionAt(idx)"
           />
@@ -38,7 +38,7 @@
         <!-- A part that opens once a decision allows it: shown, so the length
              of the form is no surprise, but not a link yet. -->
         <nldd-list-item v-else-if="row.kind === 'locked'" size="sm">
-          <nldd-timeline-track-cell size="md" status="future" :position="positionAt(idx)" icon="lock-closed" />
+          <nldd-step-cell size="md" status="future" :position="positionAt(idx)" icon="lock-closed" />
           <nldd-spacer-cell size="12" />
           <nldd-text-cell :text="row.label" :supporting-text="row.supportingText" />
         </nldd-list-item>
@@ -50,7 +50,7 @@
           :current="store.currentView === row.key || undefined"
           @click="navigate(row.key)"
         >
-          <nldd-timeline-track-cell
+          <nldd-step-cell
             size="md"
             :status="statusAt(idx)"
             :position="positionAt(idx)"
@@ -99,7 +99,7 @@
     <div v-if="hasProgress" class="invulhulp-nav__reset">
       <hr class="invulhulp-divider" />
       <nldd-button
-        variant="neutral-transparent"
+        appearance="neutral-transparent"
         size="sm"
         start-icon="arrow-2-counter-clockwise"
         text="Formulier opnieuw beginnen"

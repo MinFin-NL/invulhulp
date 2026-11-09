@@ -13,13 +13,13 @@
       </span>
       <span class="ai-mode-empty__actions">
         <nldd-button
-          variant="primary"
+          appearance="primary"
           size="sm"
           text="Probeer opnieuw"
           @click="$emit('activate', formId)"
         />
         <nldd-button
-          variant="neutral-transparent"
+          appearance="neutral-transparent"
           size="sm"
           text="Sluiten"
           @click="$emit('dismiss', formId)"
@@ -35,7 +35,7 @@
         <template v-if="doneSkippedCount > 0"><span class="ai-mode-done__skipped">{{ doneSkippedCount }} zonder antwoord</span></template>
       </span>
       <nldd-icon-button
-        variant="neutral-transparent"
+        appearance="neutral-transparent"
         size="xs"
         icon="close"
         text="Sluiten"
@@ -64,7 +64,7 @@
            formulierkaart niet naast label en teller. De tekst wordt aria-label
            en tooltip. -->
       <nldd-icon-button
-        variant="neutral-transparent"
+        appearance="neutral-transparent"
         size="xs"
         class="ai-mode-stop-btn"
         icon="stop"
@@ -78,7 +78,7 @@
          achtergrond op de host (de binnenste knop staat transparant). -->
     <div v-else class="ai-mode-idle">
       <nldd-button
-        variant="primary"
+        appearance="primary"
         size="sm"
         class="ai-mode-btn"
         text="AI Modus"
@@ -148,18 +148,19 @@ defineEmits<{
 
 /* De AI-Modus-huisstijl op een systeemknop. `--_background-color` is de enige
    knop waaraan het verloop kan hangen: de binnenste `.button` zet
-   `background-color: var(--_background-color)`, en een `background-color`
+   `background-color: var(--_button-background-color)` (vóór NLDD 0.10:
+   `--_background-color`; een stille hernoeming liet de knop grijs), en een `background-color`
    neemt geen gradiënt. Dus zetten we die op `transparent` en leggen we het
    verloop op de host, die er precies achter ligt. Vorm, hoogte, letterbeeld,
    focusring en disabled-opaciteit blijven zo van NLDD — alleen de kleur is van
    ons, en dat is precies de afgesproken uitzondering. */
 .ai-mode-btn {
-  --_background-color: transparent;
-  --_is-hovered-background-color: transparent;
-  --_is-active-background-color: transparent;
-  --_highlight-border-color: transparent;
-  --_is-hovered-highlight-border-color: transparent;
-  --_is-active-highlight-border-color: transparent;
+  --_button-background-color: transparent;
+  --_button-is-hovered-background-color: transparent;
+  --_button-is-active-background-color: transparent;
+  --_button-highlight-border-color: transparent;
+  --_button-is-hovered-highlight-border-color: transparent;
+  --_button-is-active-highlight-border-color: transparent;
 
   background-image: linear-gradient(135deg, #0f2d5c 0%, #5b21b6 50%, #0ea5e9 100%);
   background-size: 200% 100%;
@@ -169,9 +170,19 @@ defineEmits<{
   transition: box-shadow var(--invulhulp-duration-normal), background-position var(--invulhulp-duration-deliberate) var(--invulhulp-ease);
 }
 
-.ai-mode-btn:hover:not([disabled]) {
+/* AI Modus is de afgesproken uitzondering op het palet en moet opvallen, ook
+   in rust: een ademende gloed in hetzelfde ritme als de actieve formulierkaart
+   en de AI-banner. Hover en toetsenbordfocus geven de volle gloed. Uitgeschakeld
+   gloeit niets: dan valt er niets te starten. */
+.ai-mode-btn:not([disabled]) {
+  animation: ai-btn-glow var(--invulhulp-loop-glow) var(--invulhulp-ease-in-out) infinite;
+}
+
+.ai-mode-btn:not([disabled]):hover,
+.ai-mode-btn:not([disabled]):focus-within {
+  animation: none;
   background-position: 100% 0;
-  box-shadow: 0 0 14px 4px rgba(91, 33, 182, 0.5);
+  box-shadow: 0 0 16px 5px rgba(91, 33, 182, 0.55);
 }
 
 .ai-mode-hint {
@@ -376,6 +387,11 @@ defineEmits<{
   to   { transform: rotate(360deg); }
 }
 
+@keyframes ai-btn-glow {
+  0%, 100% { box-shadow: 0 0 8px 2px rgba(91, 33, 182, 0.35); }
+  50%      { box-shadow: 0 0 16px 5px rgba(14, 165, 233, 0.45); }
+}
+
 @keyframes ai-star-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50%       { opacity: 0.75; transform: scale(1.2); }
@@ -388,6 +404,12 @@ defineEmits<{
 @media (prefers-reduced-motion: reduce) {
   .ai-mode-btn__icon {
     animation: none;
+  }
+
+  /* De gloed blijft, alleen het ademen stopt. */
+  .ai-mode-btn:not([disabled]) {
+    animation: none;
+    box-shadow: 0 0 12px 3px rgba(91, 33, 182, 0.4);
   }
 }
 </style>
