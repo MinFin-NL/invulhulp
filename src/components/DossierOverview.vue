@@ -1,25 +1,87 @@
 <template>
   <!-- Overzicht: wat geldt voor dit project, en wat is de volgende stap? -->
   <div class="dossier-view">
-      <!-- Eerste bezoek aan een leeg dossier: één scherm, één handeling. Wie hier
-           voor het eerst komt heeft nog niets om te overzien; de eerste stap is
-           het project beschrijven, want daaruit volgt welke formulieren gelden. -->
+      <!-- Eerste bezoek aan een leeg dossier: twee stappen op één scherm. Eerst
+           het project beschrijven, want daaruit volgt welke formulieren gelden;
+           dan de brondocumenten uploaden. Beide staan er meteen, zodat wie een
+           dossier aanmaakt direct ziet dat er documenten bij horen — zonder dit
+           scherm wees alleen het tabblad Bronnen ernaar. -->
       <section v-if="isFirstRun" class="first-run" aria-labelledby="first-run-title">
-        <nldd-text size="xs" color="inherit" class="first-run__eyebrow">Eerste stap</nldd-text>
+        <nldd-text size="xs" color="inherit" class="first-run__eyebrow">Aan de slag</nldd-text>
         <nldd-title size="2"><h2 class="first-run__title" id="first-run-title">
-          Begin bij je project
+          Zet je dossier in twee stappen klaar
         </h2></nldd-title>
-        <nldd-text color="inherit" class="first-run__lead">
-          Beantwoord eerst de toepassingsscan: een paar vragen over wat het project oplevert en
-          verwerkt. Daaruit volgt welke formulieren voor dit dossier gelden, en waarom.
-        </nldd-text>
-        <nldd-button appearance="primary" text="Naar Project" @click="store.setDossierView('project')" />
+
+        <nldd-step-bar class="first-run__steps" accessible-label="Voortgang eerste stappen">
+          <nldd-step-bar-item text="Project beschrijven" />
+          <nldd-step-bar-item text="Documenten uploaden" :status="scanDone ? 'current' : undefined" />
+        </nldd-step-bar>
+
+        <div class="first-run__step">
+          <nldd-title size="4"><h3 class="first-run__step-title">1. Beschrijf je project</h3></nldd-title>
+          <template v-if="!scanDone">
+            <nldd-text color="inherit" class="first-run__lead">
+              Beantwoord de toepassingsscan: een paar vragen over wat het project oplevert en
+              verwerkt. Daaruit volgt welke formulieren voor dit dossier gelden, en waarom.
+            </nldd-text>
+            <nldd-button appearance="primary" text="Start de toepassingsscan" @click="$emit('scan')" />
+          </template>
+          <div v-else class="first-run__done">
+            <nldd-icon icon="check-mark-circle" size="20" color="success" class="first-run__done-icon" />
+            <nldd-text color="inherit">De toepassingsscan is ingevuld.</nldd-text>
+          </div>
+        </div>
+
+        <div class="first-run__step">
+          <nldd-title size="4"><h3 class="first-run__step-title">2. Upload je brondocumenten</h3></nldd-title>
+          <nldd-text color="inherit" class="first-run__lead">
+            Upload wat er al ligt: notulen, een projectplan, een brainstorm of een architectuurschets.
+            FinDocs leest ze en vult daarna de formulieren van dit dossier voor je in, elk antwoord met
+            een verwijzing naar de passage waar het vandaan komt. Jij controleert, past aan en stelt vast.
+          </nldd-text>
+
+          <label
+            class="first-run__dropzone"
+            :class="{
+              'first-run__dropzone--over': isDragOver,
+              'first-run__dropzone--busy': isUploading,
+            }"
+            @dragover="onDragOver"
+            @dragleave="onDragLeave"
+            @drop="onDrop"
+          >
+            <input
+              type="file"
+              :accept="UPLOAD_ACCEPT"
+              multiple
+              :disabled="isUploading"
+              class="invulhulp-visually-hidden"
+              @change="onFilesSelected"
+            />
+            <nldd-icon class="first-run__dropzone-icon" icon="arrow-up-out-bucket" size="40" color="accent" />
+            <span class="invulhulp-heading--md first-run__dropzone-title">
+              {{ isUploading ? 'Bezig met inlezen…' : 'Sleep je documenten hierheen' }}
+            </span>
+            <span class="invulhulp-text--sm first-run__dropzone-hint">
+              of klik om ze te kiezen — .docx, .pdf, .xlsx, .pptx, .txt of .md
+            </span>
+          </label>
+
+          <div class="first-run__alerts" role="status" aria-live="polite">
+            <nldd-banner variant="accent" size="sm" v-if="isUploading" :text="uploadingLabel" />
+            <nldd-banner variant="critical" size="sm" v-if="uploadError" :text="uploadError" />
+          </div>
+        </div>
+
         <button
           type="button"
           class="invulhulp-linkbutton first-run__skip"
+          :disabled="isUploading"
           @click="skipFirstRun"
         >
-          Sla over en toon het overzicht
+          {{ store.documents.length > 0
+            ? 'Verder naar het overzicht'
+            : 'Ik heb geen documenten — toon het overzicht' }}
         </button>
       </section>
 
@@ -70,9 +132,9 @@
 <script lang="ts">
 import { ref } from 'vue'
 
-// Sessiegebonden en per dossier: wie de eerste stap overslaat, krijgt hem niet
-// terug zodra hij even naar een andere weergave kijkt. Zodra er een scan,
-// document of antwoord is, komt het scherm sowieso niet meer.
+// Sessiegebonden en per dossier: wie het scherm overslaat, krijgt hem niet
+// terug zodra hij even naar een andere weergave kijkt. Zodra er een document
+// of antwoord is, komen de schermen sowieso niet meer.
 const skippedFirstRun = ref<Set<string>>(new Set())
 </script>
 
@@ -80,6 +142,7 @@ const skippedFirstRun = ref<Set<string>>(new Set())
 import { computed } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useDossierForms } from '../composables/useDossierForms'
+import { useDocumentUpload, UPLOAD_ACCEPT } from '../composables/useDocumentUpload'
 import DossierAiFill from './DossierAiFill.vue'
 import DossierApplicability from './DossierApplicability.vue'
 
@@ -100,14 +163,30 @@ const dossierIsEmpty = computed(() =>
   ),
 )
 
+// ---- Brondocumenten (stap 2) -----------------------------------------------
+const {
+  uploadError,
+  isDragOver,
+  isUploading,
+  uploadingLabel,
+  onFilesSelected,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+} = useDocumentUpload()
+
+const scanDone = computed(() => !!store.toepassingsscanRun)
+
+// Zolang er nog geen document en geen antwoord is. Het scherm blijft staan
+// tijdens het inlezen (het eerste document komt binnen voordat de rest klaar
+// is) en zolang er een foutmelding is, zodat die niet met het scherm verdwijnt.
 const isFirstRun = computed(
   () =>
     store.canEdit &&
     !!store.activeDossierId &&
     !skippedFirstRun.value.has(store.activeDossierId) &&
-    !store.toepassingsscanRun &&
-    store.documents.length === 0 &&
-    dossierIsEmpty.value,
+    dossierIsEmpty.value &&
+    (store.documents.length === 0 || isUploading.value || !!uploadError.value),
 )
 
 function skipFirstRun() {
@@ -139,8 +218,34 @@ function skipFirstRun() {
 
 .first-run__lead {
   color: var(--invulhulp-color-text-subtle);
-  margin: 0 0 var(--primitives-space-24);
+  margin: 0 0 var(--primitives-space-16);
   max-inline-size: 46rem;
+}
+
+.first-run__steps {
+  display: block;
+  max-inline-size: 30rem;
+  margin-block-end: var(--primitives-space-8);
+}
+
+.first-run__step {
+  padding-block: var(--primitives-space-24);
+  border-block-end: 1px solid var(--semantics-dividers-color);
+}
+
+.first-run__step-title {
+  margin: 0 0 var(--primitives-space-8);
+}
+
+.first-run__done {
+  display: flex;
+  align-items: center;
+  gap: var(--primitives-space-8);
+  margin: 0;
+}
+
+.first-run__done-icon {
+  flex-shrink: 0;
 }
 
 .first-run__skip {
@@ -150,6 +255,62 @@ function skipFirstRun() {
   border: none;
   font: inherit;
   cursor: pointer;
+}
+
+.first-run__dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--primitives-space-4);
+  max-inline-size: 46rem;
+  padding: var(--primitives-space-40) var(--primitives-space-24);
+  border: 2px dashed var(--semantics-dividers-color);
+  border-radius: var(--primitives-corner-radius-md);
+  background: var(--semantics-surfaces-tinted-background-color);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color var(--invulhulp-duration-fast), background var(--invulhulp-duration-fast);
+}
+
+.first-run__dropzone:hover,
+.first-run__dropzone--over {
+  border-color: var(--semantics-content-accent-color);
+  background: var(--semantics-surfaces-base-background-color);
+}
+
+/* De input zit visueel verstopt in de label, dus de focusring hoort hier. */
+.first-run__dropzone:focus-within {
+  outline: 2px solid var(--semantics-content-accent-color);
+  outline-offset: 2px;
+}
+
+.first-run__dropzone--busy {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+.first-run__dropzone-icon {
+  margin-block-end: var(--primitives-space-4);
+}
+
+.first-run__dropzone-title {
+  color: var(--semantics-content-accent-color);
+}
+
+.first-run__dropzone-hint {
+  color: var(--invulhulp-color-text-subtle);
+}
+
+.first-run__alerts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--primitives-space-8);
+  max-inline-size: 46rem;
+  margin-block-start: var(--primitives-space-16);
+}
+
+.first-run__alerts:empty {
+  display: none;
 }
 
 /* De ene volgende stap. Neutraal wit met een lintblauwe rand aan de leeskant:

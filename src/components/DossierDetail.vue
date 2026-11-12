@@ -94,39 +94,29 @@
       confirm-label="Opslaan"
       @confirm="onRenameConfirmed"
     />
-    <ConfirmDialog
+    <DossierDeleteDialog
       ref="deleteDialog"
-      title="Dossier definitief verwijderen"
-      :message="deleteMessage"
-      :confirm-phrase="store.activeDossier?.name"
-      confirm-label="Dossier verwijderen"
-      cancel-label="Annuleren"
-      variant="warning"
-      @confirm="onDeleteConfirmed"
-    >
-      <template #danger>
-        <ul class="invulhulp-item-list">
-          <li v-for="line in deleteImpact" :key="line" class="invulhulp-item-list__item">{{ line }}</li>
-        </ul>
-      </template>
-    </ConfirmDialog>
+      @deleted="store.goToDossierList()"
+      @failed="shareError = $event"
+    />
     <ShareDialog
       v-if="store.activeDossierId"
       ref="shareDialog"
       :dossier-id="store.activeDossierId"
     />
     <BeslishulpModal ref="beslishulpModal" />
-    <ToepassingsscanModal ref="scanModal" />
+    <ToepassingsscanModal ref="scanModal" @completed="onScanCompleted" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { refreshDossierForms } from '../composables/useDossierForms'
 import { serialize } from '../composables/useAppHistory'
 import { DOSSIER_VIEWS, type DossierView } from '../utils/dossierViews'
 import ConfirmDialog from './ConfirmDialog.vue'
+import DossierDeleteDialog from './DossierDeleteDialog.vue'
 import ShareDialog from './ShareDialog.vue'
 import BeslishulpModal from './BeslishulpModal.vue'
 import ToepassingsscanModal from './ToepassingsscanModal.vue'
@@ -141,11 +131,18 @@ defineEmits<{ open: [id: string] }>()
 const store = useAssessmentStore()
 
 const renameDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
-const deleteDialog = ref<InstanceType<typeof ConfirmDialog> | null>(null)
+const deleteDialog = ref<InstanceType<typeof DossierDeleteDialog> | null>(null)
 const shareDialog = ref<InstanceType<typeof ShareDialog> | null>(null)
 const shareError = ref('')
 const beslishulpModal = ref<InstanceType<typeof BeslishulpModal> | null>(null)
 const scanModal = ref<InstanceType<typeof ToepassingsscanModal> | null>(null)
+
+/** Na de eerste scan zonder documenten is uploaden de volgende stap (stap 2 op
+ *  Overzicht). Zet de weergave er alvast achter het scanvenster klaar, zodat
+ *  wie het venster sluit daar uitkomt en niet op Project blijft hangen. */
+function onScanCompleted() {
+  if (store.documents.length === 0) store.setDossierView('overzicht')
+}
 
 function viewHref(view: DossierView): string {
   return serialize({
@@ -157,28 +154,6 @@ function viewHref(view: DossierView): string {
     dossierView: view,
   })
 }
-
-const deleteMessage = computed(() => {
-  const current = store.activeDossierId ? store.dossiers[store.activeDossierId] : null
-  if (!current) return ''
-  return `U staat op het punt het dossier "${current.name}" en alle bijbehorende gegevens te verwijderen.`
-})
-
-/** Wat er concreet weg is na het verwijderen — zodat de bevestiging over dit
- *  dossier gaat en niet over "een dossier". */
-const deleteImpact = computed(() => {
-  const current = store.activeDossierId ? store.dossiers[store.activeDossierId] : null
-  if (!current) return []
-  const docs = current.documents.length
-  const filled = Object.values(current.forms).filter(
-    (f) => Object.values(f.answers ?? {}).some((a) => a),
-  ).length
-  return [
-    `${docs} ${docs === 1 ? 'brondocument' : 'brondocumenten'}, inclusief de zoekindex en geüploade afbeeldingen`,
-    `Alle ingevulde antwoorden${filled ? ` (${filled} ${filled === 1 ? 'formulier' : 'formulieren'})` : ''} en de bewerkgeschiedenis`,
-    'De toegang van iedereen met wie dit dossier is gedeeld',
-  ]
-})
 
 onMounted(async () => {
   store.ensureDossier()
@@ -232,7 +207,8 @@ function openRenameDialog() {
 
 function openDeleteDialog() {
   if (!store.activeDossierId) return
-  deleteDialog.value?.open()
+  shareError.value = ''
+  deleteDialog.value?.open(store.activeDossierId)
 }
 
 async function openShareDialog() {
@@ -273,21 +249,6 @@ function onRenameConfirmed(name: string) {
   const trimmed = name.trim()
   if (!trimmed) return
   store.renameDossier(store.activeDossierId, trimmed)
-}
-
-async function onDeleteConfirmed() {
-  if (!store.activeDossierId) return
-  shareError.value = ''
-  try {
-    await store.deleteDossier(store.activeDossierId)
-  } catch (e) {
-    // De server weigerde (bijv. geen eigenaar meer): het dossier blijft staan,
-    // dus blijf hier en zeg waarom in plaats van stil terug te navigeren.
-    shareError.value = `Verwijderen lukt niet: ${e instanceof Error ? e.message : String(e)}`
-    return
-  }
-  // Never land unannounced in whichever dossier became active next
-  store.goToDossierList()
 }
 </script>
 

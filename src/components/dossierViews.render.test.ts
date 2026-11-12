@@ -13,6 +13,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import DossierDetail from './DossierDetail.vue'
 import { useAssessmentStore, type Dossier } from '../stores/assessmentStore'
 import type { DossierView } from '../utils/dossierViews'
+import { SCAN_VERSION, deriveKenmerken } from '../utils/toepassingsscan'
 
 // The views load the form registry; in Node a relative fetch would throw.
 const realFetch = globalThis.fetch
@@ -69,11 +70,40 @@ describe('dossier views render', () => {
     expect(html).toContain('href="#/dossier/d-1/bronnen"')
   })
 
-  it('overzicht: an empty dossier starts at the project, not at an upload', async () => {
+  it('overzicht: a new dossier shows both first steps, the scan and the upload', async () => {
     const html = await render('overzicht')
-    expect(html).toContain('Begin bij je project')
-    expect(html).toContain('Naar Project')
-    expect(html).not.toContain('Sleep je documenten hierheen')
+    expect(html).toContain('<nldd-step-bar')
+    expect(html).toContain('1. Beschrijf je project')
+    expect(html).toContain('Start de toepassingsscan')
+    expect(html).toContain('2. Upload je brondocumenten')
+    expect(html).toContain('Sleep je documenten hierheen')
+    expect(html).toContain('Ik heb geen documenten')
+  })
+
+  it('overzicht: after the scan, step 1 is ticked off and the upload stays', async () => {
+    const scanned = dossier({
+      forms: {
+        intake: {
+          answers: {},
+          answerSources: {},
+          attachments: {},
+          currentView: 'home',
+          completedSections: [],
+          riskLevel: null,
+          goDecision: null,
+          toepassingsscan: {
+            scanVersion: SCAN_VERSION,
+            answers: {},
+            kenmerken: deriveKenmerken({}),
+            completedAt: 0,
+          },
+        },
+      },
+    })
+    const html = await render('overzicht', scanned)
+    expect(html).toContain('De toepassingsscan is ingevuld.')
+    expect(html).not.toContain('Start de toepassingsscan')
+    expect(html).toContain('Sleep je documenten hierheen')
   })
 
   it('overzicht: once something is there, what applies — no scan tile, no phase rail', async () => {
@@ -82,7 +112,7 @@ describe('dossier views render', () => {
     expect(html).toContain('Start toepassingsscan')
     expect(html).not.toContain('scan-tile')
     expect(html).not.toContain('phase-rail')
-    expect(html).not.toContain('Begin bij je project')
+    expect(html).not.toContain('Zet je dossier in twee stappen klaar')
   })
 
   it('project: the toepassingsscan', async () => {

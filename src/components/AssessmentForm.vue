@@ -591,9 +591,7 @@ function onDecisionNext(go: boolean) {
   background: linear-gradient(135deg, #0f2d5c, #5b21b6, #0ea5e9, #5b21b6, #0f2d5c);
   background-size: 200% 100%;
   color: #fff;
-  box-shadow: 0 2px 16px rgba(91, 33, 182, 0.45);
-  animation: ai-banner-shift var(--invulhulp-loop-sheen) var(--invulhulp-ease-linear) infinite,
-    ai-banner-glow var(--invulhulp-loop-glow) var(--invulhulp-ease-in-out) infinite;
+  animation: ai-banner-shift var(--invulhulp-loop-sheen) var(--invulhulp-ease-linear) infinite;
 }
 
 .ai-banner__inner {
@@ -673,34 +671,13 @@ function onDecisionNext(go: boolean) {
   outline-offset: 2px;
 }
 
-/* Subtle glow on the whole shell while AI is working */
-.assessment-shell--ai-active .assessment-shell__main {
-  position: relative;
-}
-.assessment-shell--ai-active .assessment-shell__main::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  box-shadow: inset 0 0 0 2px rgba(91, 33, 182, 0.25);
-  animation: ai-main-glow var(--invulhulp-loop-glow) var(--invulhulp-ease-in-out) infinite;
-}
-
 @keyframes ai-banner-shift {
   0%   { background-position: 0% 50%; }
   100% { background-position: -200% 50%; }
 }
-@keyframes ai-banner-glow {
-  0%, 100% { box-shadow: 0 2px 12px rgba(91, 33, 182, 0.4); }
-  50%      { box-shadow: 0 2px 22px rgba(14, 165, 233, 0.6); }
-}
 @keyframes ai-banner-spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }
-}
-@keyframes ai-main-glow {
-  0%, 100% { box-shadow: inset 0 0 0 2px rgba(91, 33, 182, 0.18); }
-  50%      { box-shadow: inset 0 0 24px 2px rgba(14, 165, 233, 0.22); }
 }
 
 /* Banner enter/leave transition */
@@ -714,12 +691,11 @@ function onDecisionNext(go: boolean) {
   opacity: 0;
 }
 
-/* Schuivende gradiënt en gloed zijn versiering; de voortgang staat er als tekst
-   en als balk naast. De spinner draait wél door — die is voortgangsindicatie en
+/* De schuivende gradiënt is versiering; de voortgang staat er als tekst en als
+   balk naast. De spinner draait wél door — die is voortgangsindicatie en
    daarmee 'essential' onder WCAG 2.2.2, net als in AiModeToggle. */
 @media (prefers-reduced-motion: reduce) {
-  .ai-banner,
-  .assessment-shell--ai-active .assessment-shell__main::before {
+  .ai-banner {
     animation: none;
   }
 }

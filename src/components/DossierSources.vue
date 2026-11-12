@@ -1,6 +1,6 @@
 <template>
   <!-- Bronnen: waar baseren we het op? Brondocumenten met entiteitengrafiek en
-       ontologie, en de AI-vulling van het hele dossier. -->
+       ontologie. De AI-vulling van het hele dossier staat op Overzicht. -->
   <div class="dossier-view">
       <!-- Brondocumenten upload -->
       <section class="portal-card" aria-labelledby="docs-title">
@@ -158,8 +158,6 @@
         </label>
         <nldd-text color="inherit" size="sm" class="docs-empty" v-else-if="!isUploading">Nog geen documenten geüpload.</nldd-text>
       </section>
-
-      <DossierAiFill upload-here />
   </div>
 </template>
 
@@ -170,7 +168,6 @@ import { useDossierForms } from '../composables/useDossierForms'
 import { useDocumentUpload, UPLOAD_ACCEPT } from '../composables/useDocumentUpload'
 import DocumentOntology from './DocumentOntology.vue'
 import EntityGraph from './EntityGraph.vue'
-import DossierAiFill from './DossierAiFill.vue'
 
 const store = useAssessmentStore()
 const { primaryAction } = useDossierForms()

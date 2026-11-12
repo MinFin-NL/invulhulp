@@ -27,7 +27,7 @@
           met bronverwijzing per vraag.
         </template>
         <template v-else>
-          Upload eerst een brondocument {{ uploadHere ? 'hierboven' : 'bij Bronnen' }}; daarna kan AI Modus
+          Upload eerst een brondocument bij Bronnen; daarna kan AI Modus
           {{ bulkFillForms.length === 1 ? 'dit lege formulier' : `deze ${bulkFillForms.length} lege formulieren` }}
           in één keer invullen.
         </template>
@@ -43,11 +43,11 @@
       v-if="dossierAiRun"
       @click="cancelDossierAiMode()"
     />
-    <!-- Buiten Bronnen is uploaden een stap verderop: een knop erheen, geen
-         uitgeschakelde startknop zonder uitweg. -->
+    <!-- Uploaden gebeurt op Bronnen: een knop erheen, geen uitgeschakelde
+         startknop zonder uitweg. -->
     <nldd-button
       class="bulk-ai__btn"
-      v-else-if="readyDocIds.length === 0 && !uploadHere"
+      v-else-if="readyDocIds.length === 0"
       text="Naar Bronnen"
       :appearance="primaryAction === 'upload' ? 'primary' : 'secondary'"
       @click="store.setDossierView('bronnen')"
@@ -72,9 +72,6 @@ import { computed } from 'vue'
 import { useAssessmentStore } from '../stores/assessmentStore'
 import { useAiMode } from '../composables/useAiMode'
 import { useDossierForms } from '../composables/useDossierForms'
-
-/** `uploadHere`: the upload card is on the same page (Bronnen). */
-defineProps<{ uploadHere?: boolean }>()
 
 const store = useAssessmentStore()
 const { aiModeProgress, readyDocIds, dossierAiRun, startDossierAiMode, cancelDossierAiMode } = useAiMode()

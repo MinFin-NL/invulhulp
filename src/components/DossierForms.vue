@@ -2,6 +2,27 @@
   <!-- Formulieren: wat moet ik invullen? De fasen met hun kaarten, AI Modus per
        formulier op de kaart zelf. -->
   <div class="dossier-view">
+      <!-- Inhoud van de pagina. Op een gewoon scherm passen alleen de eerste
+           kaarten boven de vouw, en dan lijkt het dossier maar twee formulieren
+           te hebben. Daarom staat hier wat er is, en de fasen als stappenbalk:
+           dezelfde schijven als de spine eronder, maar dan dwars, en elke stap
+           springt naar zijn fase. -->
+      <div class="forms-jump">
+        <nldd-text size="sm" color="inherit" class="forms-jump__summary">
+          {{ summaryText }}
+        </nldd-text>
+        <nldd-step-bar v-if="jumpTargets.length > 1" accessible-label="Fasen in dit dossier">
+          <nldd-step-bar-item
+            v-for="target in jumpTargets"
+            :key="target.id"
+            button
+            :status="target.status"
+            :text="target.label"
+            @click="jumpTo(target.id)"
+          />
+        </nldd-step-bar>
+      </div>
+
       <!-- Intake en aanbieding gaan aan de fasering vooraf. Ze horen erbij, maar
            als eigen tijdlijnsectie kostten ze een half scherm voor één kaart —
            dus staan ze samen in één platte band boven de spine. -->
@@ -69,7 +90,7 @@
               Fase {{ group.phaseNumber }} van {{ group.phaseCount }}
             </p>
             <div class="track-title-row">
-              <nldd-title size="4"><h2 class="track-title" :id="`track-${group.track}-title`">{{ group.label }}</h2></nldd-title>
+              <nldd-title size="4"><h2 class="track-title" :id="`track-${group.track}-title`" tabindex="-1">{{ group.label }}</h2></nldd-title>
               <span v-if="trackCount(group).total > 0" class="invulhulp-text--sm track-count">
                 {{ trackCount(group).done }}/{{ trackCount(group).total }} afgerond
               </span>
@@ -209,6 +230,58 @@ const cardHandlers = {
   dismiss: dismissAiModeDone,
 }
 
+/** Real forms only: placeholders are not counted (the scan's nvt forms are
+ *  already left out by applicableForms). */
+function countable(forms: FormIndexEntry[]): number {
+  return forms.filter((f) => !f.placeholder).length
+}
+
+/** One step per phase, in page order. Vooraf is not a phase and sits right
+ *  under the bar anyway, so it is only counted in the summary line. */
+const jumpTargets = computed(() => {
+  // NLDD marks one step as current; take the first phase under way, so the bar
+  // never holds two "current" steps.
+  const busy = timelineGroups.value.find((g) => stepStatus(g) === 'current')
+  return timelineGroups.value
+    .filter((g) => !(g.track === 'onbekend' && countable(applicableForms(g)) === 0))
+    .map((group) => {
+      const n = countable(applicableForms(group))
+      const status = stepStatus(group)
+      return {
+        id: `fase-${group.track}`,
+        heading: `track-${group.track}-title`,
+        label: `${group.label} (${n})`,
+        status: status === 'current' && group !== busy ? 'future' : status,
+      }
+    })
+})
+
+const phaseFormCount = computed(() =>
+  timelineGroups.value.reduce((sum, g) => sum + countable(applicableForms(g)), 0),
+)
+
+const summaryText = computed(() => {
+  const prelude = countable(preludeForms.value)
+  const total = prelude + phaseFormCount.value
+  const phases = jumpTargets.value.length
+  const parts = [`${total} ${total === 1 ? 'formulier' : 'formulieren'}`]
+  const where: string[] = []
+  if (prelude > 0) where.push(`${prelude} vooraf`)
+  if (phases > 0) where.push(`${phaseFormCount.value} in ${phases} ${phases === 1 ? 'fase' : 'fasen'}`)
+  return where.length ? `${parts[0]}: ${where.join(' en ')}.` : `${parts[0]}.`
+})
+
+/** Scroll to a block and move focus to its heading, so keyboard and screen
+ *  reader users land where sighted users do. */
+function jumpTo(id: string) {
+  const target = jumpTargets.value.find((t) => t.id === id)
+  const section = document.getElementById(id)
+  if (!target || !section) return
+  const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+  section.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' })
+  document.getElementById(target.heading)?.focus({ preventScroll: true })
+}
+
 /** NLDD's step vocabulary for the vertical spine. `empty` has no counterpart —
  *  a phase without forms reads as `future`, and the empty hint in its body says
  *  why, which keeps that fact out of colour alone. */
@@ -237,6 +310,26 @@ function stepNumber(group: TrackGroup): string {
 </script>
 
 <style scoped>
+/* ---- Spring-naar-balk ------------------------------------------------- */
+
+.forms-jump {
+  display: flex;
+  flex-direction: column;
+  gap: var(--primitives-space-12);
+  margin-block-end: var(--primitives-space-32);
+}
+
+.forms-jump__summary {
+  color: var(--invulhulp-color-text-subtle);
+  margin: 0;
+}
+
+/* Focus lands on a heading after a jump; no ring on a non-control. */
+
+.track-title:focus {
+  outline: none;
+}
+
 /* ---- Vooraf-band ------------------------------------------------------ */
 
 /* Platter dan .portal-card en zonder de blauwe kaartrand bovenaan: de band mag

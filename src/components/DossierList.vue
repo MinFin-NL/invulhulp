@@ -50,9 +50,18 @@
           color="inherit"
           class="dossier-list__hint"
         >
-          Sleep aan het greepje om een dossier te verplaatsen. Of activeer het greepje:
-          dan verschijnen er pijlknoppen en werken ook de pijltjestoetsen.
+          Sleep aan het greepje om een dossier te verplaatsen. Of activeer het greepje en kies
+          Verplaatsen: dan verschijnen er pijlknoppen en werken ook de pijltjestoetsen.
         </nldd-text>
+
+        <nldd-banner
+          v-if="deleteError"
+          variant="critical"
+          size="sm"
+          role="alert"
+          class="dossier-list__error"
+          :text="deleteError"
+        />
 
         <ul
           class="dossier-grid"
@@ -112,25 +121,33 @@
                 </span>
               </button>
 
-              <!-- Het greepje: slepen met muis of vinger, en bij activeren de
-                   verplaatsmodus. Slepen is nooit de énige weg — zie de
-                   knoppenbalk hieronder (WCAG 2.5.7). -->
+              <!-- Het greepje: slepen met muis of vinger, en bij activeren het
+                   actiemenu (Verplaatsen, Verwijderen). Slepen is nooit de énige
+                   weg om te verplaatsen — zie de knoppenbalk hieronder (WCAG
+                   2.5.7). Valt er niets te verplaatsen, dan is het alleen het
+                   menu en tekent het drie puntjes in plaats van een greep. -->
               <button
-                v-if="canReorder"
+                v-if="canReorder || canDelete(d)"
                 type="button"
                 class="dossier-card__handle"
+                :class="{
+                  'dossier-card__handle--moving': moveModeId === d.id,
+                  'dossier-card__handle--menu-only': !canReorder,
+                }"
                 :ref="(el) => setHandle(d.id, el)"
-                :aria-label="`Verplaats ${d.name}, nu positie ${index + 1} van ${store.dossierList.length}`"
-                :aria-pressed="moveModeId === d.id"
-                aria-describedby="dossier-reorder-hint"
+                :aria-label="handleLabel(d, index)"
+                aria-haspopup="menu"
+                :aria-expanded="menuDossierId === d.id"
+                :aria-describedby="canReorder ? 'dossier-reorder-hint' : undefined"
                 @pointerdown="onPointerDown($event, index)"
                 @click="onHandleClick(d.id)"
                 @keydown="onHandleKeydown($event, index)"
               >
+                <nldd-icon v-if="!canReorder" icon="ellipsis" size="20" />
                 <!-- Hetzelfde greepje als nldd-drag-handle-cell tekent: dat
                      component is een lijstcel en past niet in een raster, maar
                      de vorm hoort wél hetzelfde te zijn. -->
-                <svg class="dossier-card__grip" width="10" height="22" viewBox="0 0 10 22"
+                <svg v-else class="dossier-card__grip" width="10" height="22" viewBox="0 0 10 22"
                      xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
                   <circle cx="2" cy="2" r="2" fill="currentColor" />
                   <circle cx="8" cy="2" r="2" fill="currentColor" />
@@ -201,6 +218,37 @@
 
     </div>
 
+    <!-- Eén actiemenu voor alle kaarten, gehangen aan het greepje dat erom
+         vroeg. Zelf geopend (anchorElement), niet via `anchor`: dat attribuut
+         maakt van elke klik op het greepje een toggle, ook aan het eind van
+         een sleep. -->
+    <nldd-menu
+      ref="actionsMenu"
+      accessible-label="Dossieracties"
+      placement="bottom-end"
+      @toggle="onMenuToggle"
+    >
+      <nldd-menu-item
+        v-if="canReorder"
+        text="Verplaatsen"
+        icon="arrow-up-arrow-down"
+        @select="onMenuMove"
+      />
+      <nldd-menu-item
+        v-if="menuDossier && canDelete(menuDossier)"
+        text="Verwijderen"
+        icon="trash"
+        destructive
+        @select="onMenuDelete"
+      />
+    </nldd-menu>
+
+    <DossierDeleteDialog
+      ref="deleteDialog"
+      @deleted="onDossierDeleted"
+      @failed="deleteError = $event"
+    />
+
     <ConfirmDialog
       ref="createDialog"
       title="Nieuw dossier"
@@ -220,6 +268,7 @@ import { useFormProgress } from '../composables/useFormProgress'
 import { TRACK_IDS } from '../utils/tracks'
 import { clampIndex, gridReorderTarget } from '../utils/gridReorder'
 import ConfirmDialog from './ConfirmDialog.vue'
+import DossierDeleteDialog from './DossierDeleteDialog.vue'
 
 const store = useAssessmentStore()
 const { dossierSummary, trackSummary } = useFormProgress()
@@ -356,8 +405,83 @@ function onHandleClick(id: string) {
     suppressClick = false
     return
   }
-  moveModeId.value = moveModeId.value === id ? null : id
-  if (moveModeId.value) announce('Verplaatsmodus aan. Gebruik de pijlknoppen of de pijltjestoetsen.')
+  toggleMenu(id)
+}
+
+/* ---- Actiemenu ------------------------------------------------------- */
+
+type MenuElement = HTMLElement & {
+  anchorElement: Element | null
+  showPopover(): void
+  hidePopover(): void
+}
+const actionsMenu = ref<MenuElement | null>(null)
+const deleteDialog = ref<InstanceType<typeof DossierDeleteDialog> | null>(null)
+const menuDossierId = ref<string | null>(null)
+const deleteError = ref('')
+
+const menuDossier = computed(() =>
+  menuDossierId.value ? store.dossiers[menuDossierId.value] ?? null : null,
+)
+
+/** Alleen de eigenaar mag verwijderen; een dossier zonder rol is nooit
+ *  gedeeld en dus van jezelf (zelfde regel als store.isOwner). */
+function canDelete(d: Dossier): boolean {
+  return d.myRole === undefined || d.myRole === 'owner'
+}
+
+function handleLabel(d: Dossier, index: number): string {
+  if (!canReorder.value) return `Acties voor ${d.name}`
+  return `Acties voor ${d.name}, nu positie ${index + 1} van ${store.dossierList.length}`
+}
+
+async function toggleMenu(id: string) {
+  const menu = actionsMenu.value
+  const handle = handles.get(id)
+  if (!menu || !handle) return
+  if (menuDossierId.value === id) {
+    menu.hidePopover()
+    return
+  }
+  // Een klik op het greepje van een open menu sluit het eerst al via light
+  // dismiss (pointerdown buiten het menu); deze klik mag het niet heropenen.
+  if (lastClosed.id === id && Date.now() - lastClosed.at < 400) return
+  if (menuDossierId.value) menu.hidePopover()
+  menuDossierId.value = id
+  // Eerst de items voor dit dossier laten renderen, dan openen.
+  await nextTick()
+  menu.anchorElement = handle
+  menu.showPopover()
+}
+
+let lastClosed: { id: string | null; at: number } = { id: null, at: 0 }
+
+function onMenuToggle(event: Event) {
+  if ((event as ToggleEvent).newState !== 'closed') return
+  lastClosed = { id: menuDossierId.value, at: Date.now() }
+  menuDossierId.value = null
+}
+
+function onMenuMove() {
+  const id = menuDossierId.value
+  actionsMenu.value?.hidePopover()
+  if (!id) return
+  moveModeId.value = id
+  announce('Verplaatsmodus aan. Gebruik de pijlknoppen of de pijltjestoetsen.')
+  nextTick(() => handles.get(id)?.focus())
+}
+
+function onMenuDelete() {
+  const id = menuDossierId.value
+  actionsMenu.value?.hidePopover()
+  if (!id) return
+  deleteError.value = ''
+  deleteDialog.value?.open(id)
+}
+
+function onDossierDeleted(id: string) {
+  if (moveModeId.value === id) moveModeId.value = null
+  announce('Dossier verwijderd.')
 }
 
 function endMoveMode(id: string) {
@@ -378,6 +502,7 @@ function onHandleKeydown(event: KeyboardEvent, index: number) {
     announce('Verplaatsmodus uit.')
     return
   }
+  if (!canReorder.value) return
   const target = gridReorderTarget(event.key, index, columnCount(), store.dossierList.length)
   if (target === null) return
   // Anders scrollt de pagina mee onder de verplaatsing door.
@@ -558,6 +683,11 @@ onBeforeUnmount(() => {
   margin: 0;
 }
 
+.dossier-list__error {
+  display: block;
+  margin-block-end: var(--primitives-space-16);
+}
+
 .dossier-list__hint {
   color: var(--invulhulp-color-text-subtle);
   margin-block-end: var(--primitives-space-16);
@@ -724,7 +854,13 @@ onBeforeUnmount(() => {
   cursor: grabbing;
 }
 
-.dossier-card__handle[aria-pressed='true'] {
+/* Niets te verplaatsen: dan is het alleen een menuknop, geen greep. */
+.dossier-card__handle--menu-only,
+.dossier-card__handle--menu-only:active {
+  cursor: pointer;
+}
+
+.dossier-card__handle--moving {
   color: var(--semantics-content-accent-color);
 }
 

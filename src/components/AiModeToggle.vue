@@ -170,17 +170,11 @@ defineEmits<{
   transition: box-shadow var(--invulhulp-duration-normal), background-position var(--invulhulp-duration-deliberate) var(--invulhulp-ease);
 }
 
-/* AI Modus is de afgesproken uitzondering op het palet en moet opvallen, ook
-   in rust: een ademende gloed in hetzelfde ritme als de actieve formulierkaart
-   en de AI-banner. Hover en toetsenbordfocus geven de volle gloed. Uitgeschakeld
-   gloeit niets: dan valt er niets te starten. */
-.ai-mode-btn:not([disabled]) {
-  animation: ai-btn-glow var(--invulhulp-loop-glow) var(--invulhulp-ease-in-out) infinite;
-}
-
+/* AI Modus is de afgesproken uitzondering op het palet; de gradiënt laat hem
+   al opvallen. In rust geen gloed: een knipperende schaduw leidde af. Hover en
+   toetsenbordfocus geven wel een gloed. */
 .ai-mode-btn:not([disabled]):hover,
 .ai-mode-btn:not([disabled]):focus-within {
-  animation: none;
   background-position: 100% 0;
   box-shadow: 0 0 16px 5px rgba(91, 33, 182, 0.55);
 }
@@ -387,11 +381,6 @@ defineEmits<{
   to   { transform: rotate(360deg); }
 }
 
-@keyframes ai-btn-glow {
-  0%, 100% { box-shadow: 0 0 8px 2px rgba(91, 33, 182, 0.35); }
-  50%      { box-shadow: 0 0 16px 5px rgba(14, 165, 233, 0.45); }
-}
-
 @keyframes ai-star-pulse {
   0%, 100% { opacity: 1; transform: scale(1); }
   50%       { opacity: 0.75; transform: scale(1.2); }
@@ -404,12 +393,6 @@ defineEmits<{
 @media (prefers-reduced-motion: reduce) {
   .ai-mode-btn__icon {
     animation: none;
-  }
-
-  /* De gloed blijft, alleen het ademen stopt. */
-  .ai-mode-btn:not([disabled]) {
-    animation: none;
-    box-shadow: 0 0 12px 3px rgba(91, 33, 182, 0.4);
   }
 }
 </style>

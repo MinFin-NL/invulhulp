@@ -232,7 +232,7 @@ const openLabel = computed(() => {
 }
 
 
-/* AI Mode active: animated gradient border + pulsing glow */
+/* AI Mode active: animated gradient border (no glow: a pulsing shadow distracted) */
 .form-card--ai-mode {
   border: 2px solid transparent;
   background-image:
@@ -241,8 +241,7 @@ const openLabel = computed(() => {
   background-origin: border-box;
   background-clip: padding-box, border-box;
   background-size: 100%, 300% 100%;
-  animation: ai-border-shift var(--invulhulp-loop-sheen) var(--invulhulp-ease-linear) infinite,
-    ai-card-glow var(--invulhulp-loop-glow) var(--invulhulp-ease-in-out) infinite;
+  animation: ai-border-shift var(--invulhulp-loop-sheen) var(--invulhulp-ease-linear) infinite;
 }
 
 @keyframes ai-border-shift {
@@ -250,12 +249,7 @@ const openLabel = computed(() => {
   100% { background-position: 0 0, 200% 50%; }
 }
 
-@keyframes ai-card-glow {
-  0%, 100% { box-shadow: 0 0 8px 3px rgba(91, 33, 182, 0.2); }
-  50%       { box-shadow: 0 0 22px 7px rgba(14, 165, 233, 0.35); }
-}
-
-/* Rand en gloed zijn decoratief: de AI-Modus-status blijkt ook uit de
+/* De rand is decoratief: de AI-Modus-status blijkt ook uit de
    badge-tekst in de kaartkop. WCAG 2.2.2 — beweging langer dan 5s moet te
    stoppen zijn. De gradiëntrand blijft staan, alleen het schuiven stopt. */
 @media (prefers-reduced-motion: reduce) {
