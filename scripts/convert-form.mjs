@@ -5,7 +5,8 @@
  *   node scripts/convert-form.mjs dpia
  *
  * Reads:
- *   vendor/par-dpia-form/<name>.yaml        (upstream source of truth, pinned)
+ *   vendor/instrument-registry/assessments/<file>.yaml (upstream source of truth, pinned;
+ *                                           form id -> file in scripts/registry-map.json)
  *   scripts/form-overlays/<name>.overlay.json (our presentation + section grouping)
  *   scripts/schemas/findocs-form.schema.json  (our runtime shape, for validation)
  *
@@ -38,7 +39,9 @@ const dropped = []
 const warn = (m) => { warnings.push(m); console.warn('[converter] ' + m) }
 
 // ---------- load inputs ----------
-const yamlPath = path.join(ROOT, 'vendor/par-dpia-form', `${name}.yaml`)
+const registryMap = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/registry-map.json'), 'utf8'))
+if (!registryMap.forms[name]) { console.error(`[converter] ${name} is not in scripts/registry-map.json`); process.exit(1) }
+const yamlPath = path.join(ROOT, 'vendor/instrument-registry/assessments', registryMap.forms[name])
 const overlayPath = path.join(ROOT, 'scripts/form-overlays', `${name}.overlay.json`)
 const doc = YAML.parse(fs.readFileSync(yamlPath, 'utf8'))
 const overlay = JSON.parse(fs.readFileSync(overlayPath, 'utf8'))
@@ -328,7 +331,10 @@ const navigation = [
   ...nonEmpty.map((s) => ({ type: 'subsections', sectionId: s.id })),
   { type: 'specialView', viewId: 'summary', label: 'Naar samenvatting' },
 ]
-const form = { ...overlay.form, navigation, sections: nonEmpty }
+// Identity comes from the registry: its URN and version name the exact
+// instrument these questions were generated from.
+const { id: formId, ...presentation } = overlay.form
+const form = { id: formId, version: String(doc.version), urn: doc.urn, ...presentation, navigation, sections: nonEmpty }
 
 // ---------- validate ----------
 const schema = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/schemas/findocs-form.schema.json'), 'utf8'))

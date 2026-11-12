@@ -1,0 +1,33 @@
+name: Formulieren en tests
+
+# public/forms/*.json is generated from the pinned MinBZK/instrument-registry
+# release (vendor/instrument-registry/) plus scripts/form-overlays/. This job
+# fails when the committed JSON no longer matches what `npm run forms:build`
+# produces (a hand edit, or a sync without a rebuild), and runs the test suite,
+# which the Azure pipeline does not.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Formulieren gelijk aan registry + overlays
+        run: npm run forms:check
+
+      - run: npm test

@@ -77,8 +77,8 @@ questions sent to it one prompt at a time.
 | `backend/rag.py`, `pdfextract.py` | Chunking, LanceDB vector store, ontology extraction; structured PDF parsing |
 | `backend/docstore.py`, `imagestore.py` | File-based document and image stores |
 | `backend/eval_prompts.py` | Prompt eval harness |
-| `scripts/` | Build-time converters: vendored YAML → form JSON / beslishulp JSON, plus JSON schema |
-| `vendor/` | Upstream MinBZK sources (par-dpia-form, ai-verordening-beslishulp) with provenance |
+| `scripts/` | Build-time: registry sync, registry YAML + overlay → form JSON, beslishulp JSON, plus JSON schema |
+| `vendor/` | Pinned upstream MinBZK sources (instrument-registry, ai-verordening-beslishulp) with provenance |
 | `opstelhulp/` | Local helpers for turning `.docx`/`.xlsx` templates into form JSON (not shipped) |
 | `Dockerfile.*`, `nginx.conf`, `docker-compose.yml`, `azure-pipelines.yml` | Containers, local stack, CI/CD to Azure Container Apps |
 
@@ -107,20 +107,23 @@ opened.
 ### Forms are data
 
 Forms are JSON files in `public/forms/`, fetched at runtime by `formLoader.ts`.
-To add a form, add a JSON file and one entry in `index.json`. No rebuild is
-needed. A form entry has:
+Forms are JSON files in `public/forms/`, generated at build time from a pinned
+release of MinBZK/instrument-registry plus a local overlay (`npm run
+forms:build`; see the README). The app loads them at runtime. A form entry in
+`index.json` has:
 
 - **`track`**: the lifecycle phase (`src/utils/tracks.ts`). This is the only
   grouping axis.
 - **`domains`**: privacy, beveiliging, AI, data or project. This is a facet
   shown on the card, never a grouping.
-- **`urn`**: `urn:nl:minfin:tr:<id>:<major.minor>`, plus an optional
-  `registryUrn` pointing at the upstream MinBZK instrument (`formUrn.ts`).
+- **`urn`**: the instrument-registry URN, `urn:nl:<org>:ir:<instrument>:<version>`,
+  plus an optional `registryUrn` pointing at the AI task-registry (`formUrn.ts`).
 - **Role scoping**: `index.json` `roles` limits which forms a realm role sees.
   This only filters the menu; it is not authorization.
 
-Some forms are generated from vendored upstream YAML (`npm run forms:build`,
-using `scripts/convert-form.mjs` and the overlays in `scripts/form-overlays/`).
+All forms are generated from the vendored registry YAML (`npm run forms:build`:
+`scripts/lib/merge-form.mjs` for the MinFin instruments, `scripts/convert-form.mjs`
+for the DPIA, Pre-scan DPIA and IAMA, with the overlays in `scripts/form-overlays/`).
 The AI Act decision tree is built the same way (`npm run beslishulp:build`).
 
 On top of the forms sit three pure engines in `src/utils/`, each with its own

@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/verwerkingsregister.yaml + scripts/form-overlays/verwerkingsregister.overlay.json; niet handmatig bewerken.",
   "id": "verwerkingsregister",
   "version": "1.0",
-  "urn": "urn:nl:minfin:tr:verwerkingsregister:1.0",
+  "urn": "urn:nl:minfin:ir:verwerkingsregister:1.0",
   "title": "Verwerkingsregister (AVG art. 30)",
   "aiContext": "Dit is een registratie voor het verwerkingsregister van het Ministerie van Financiën op grond van artikel 30 AVG. Het legt per verwerking de verplichte registratie-elementen vast: verwerkingsverantwoordelijke en FG, doeleinden, categorieën betrokkenen en persoonsgegevens, ontvangers, doorgiften buiten de EER, bewaartermijnen en een algemene beschrijving van de beveiligingsmaatregelen (art. 32 lid 1). Schrijf beknopt, juridisch nauwkeurig en in AVG-terminologie: het register is een verantwoordingsdocument dat aan de Autoriteit Persoonsgegevens getoond moet kunnen worden, geen beleidstekst. Formuleer per veld feitelijk en volledig, zonder toelichtende betogen.",
   "source": {
@@ -38,11 +39,27 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "vr_a" },
-    { "type": "subsections", "sectionId": "vr_b" },
-    { "type": "subsections", "sectionId": "vr_c" },
-    { "type": "subsections", "sectionId": "vr_d" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "vr_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "vr_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "vr_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "vr_d"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -155,10 +172,28 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "verwerker", "label": "Verwerker" },
-                { "id": "rol", "label": "Wat doet deze partij" },
-                { "id": "overeenkomst", "label": "Verwerkersovereenkomst", "type": "select", "options": ["Ja, gesloten", "Nee, nog niet gesloten", "Niet van toepassing"] },
-                { "id": "locatie", "label": "Land van verwerking" }
+                {
+                  "id": "verwerker",
+                  "label": "Verwerker"
+                },
+                {
+                  "id": "rol",
+                  "label": "Wat doet deze partij"
+                },
+                {
+                  "id": "overeenkomst",
+                  "label": "Verwerkersovereenkomst",
+                  "type": "select",
+                  "options": [
+                    "Ja, gesloten",
+                    "Nee, nog niet gesloten",
+                    "Niet van toepassing"
+                  ]
+                },
+                {
+                  "id": "locatie",
+                  "label": "Land van verwerking"
+                }
               ],
               "notesLabel": "Toelichting op de betrokken verwerkers en subverwerkers"
             }
@@ -211,10 +246,22 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "categorie", "label": "Categorie" },
-                { "id": "gegevens", "label": "Concrete gegevens" },
-                { "id": "betrokkenen", "label": "Van welke betrokkenen" },
-                { "id": "noodzaak", "label": "Waarom noodzakelijk voor het doel" }
+                {
+                  "id": "categorie",
+                  "label": "Categorie"
+                },
+                {
+                  "id": "gegevens",
+                  "label": "Concrete gegevens"
+                },
+                {
+                  "id": "betrokkenen",
+                  "label": "Van welke betrokkenen"
+                },
+                {
+                  "id": "noodzaak",
+                  "label": "Waarom noodzakelijk voor het doel"
+                }
               ],
               "notesLabel": "Aanvullende toelichting op de gegevensspecificatie"
             },
@@ -272,10 +319,29 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "ontvanger", "label": "Categorie ontvanger" },
-                { "id": "doel", "label": "Doel van de verstrekking" },
-                { "id": "grondslag", "label": "Grondslag of wettelijke bepaling" },
-                { "id": "frequentie", "label": "Frequentie", "type": "select", "options": ["Structureel", "Periodiek", "Incidenteel", "Op verzoek"] }
+                {
+                  "id": "ontvanger",
+                  "label": "Categorie ontvanger"
+                },
+                {
+                  "id": "doel",
+                  "label": "Doel van de verstrekking"
+                },
+                {
+                  "id": "grondslag",
+                  "label": "Grondslag of wettelijke bepaling"
+                },
+                {
+                  "id": "frequentie",
+                  "label": "Frequentie",
+                  "type": "select",
+                  "options": [
+                    "Structureel",
+                    "Periodiek",
+                    "Incidenteel",
+                    "Op verzoek"
+                  ]
+                }
               ],
               "notesLabel": "Toelichting op de verstrekkingen"
             },
@@ -339,11 +405,32 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "categorie", "label": "Categorie gegevens" },
-                { "id": "termijn", "label": "Bewaartermijn" },
-                { "id": "startpunt", "label": "Vanaf welk moment" },
-                { "id": "grondslag", "label": "Grondslag van de termijn" },
-                { "id": "daarna", "label": "Daarna", "type": "select", "options": ["Vernietigen", "Overbrengen naar archief", "Anonimiseren"] }
+                {
+                  "id": "categorie",
+                  "label": "Categorie gegevens"
+                },
+                {
+                  "id": "termijn",
+                  "label": "Bewaartermijn"
+                },
+                {
+                  "id": "startpunt",
+                  "label": "Vanaf welk moment"
+                },
+                {
+                  "id": "grondslag",
+                  "label": "Grondslag van de termijn"
+                },
+                {
+                  "id": "daarna",
+                  "label": "Daarna",
+                  "type": "select",
+                  "options": [
+                    "Vernietigen",
+                    "Overbrengen naar archief",
+                    "Anonimiseren"
+                  ]
+                }
               ],
               "notesLabel": "Toelichting op de bewaartermijnen"
             },

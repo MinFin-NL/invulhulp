@@ -1,16 +1,14 @@
 {
-  "_comment": "Hand-authored overlay for the DPIA converter. Carries everything the upstream MinBZK YAML does NOT contain: our presentation (meta/homeContent), AI hints, feature flags, and the mapping of upstream paragraphs (top-level tasks) into our Deel A/B/C/D section structure. scripts/convert-form.mjs merges this with vendor/par-dpia-form/dpia.yaml to emit the generated form.",
+  "_comment": "Hand-authored overlay for the DPIA converter. Carries everything the upstream MinBZK YAML does NOT contain: our presentation (meta/homeContent), AI hints, feature flags, and the mapping of upstream paragraphs (top-level tasks) into our Deel A/B/C/D section structure. scripts/convert-form.mjs merges this with vendor/instrument-registry/assessments/dpia.yaml to emit the generated form.",
   "form": {
     "id": "dpia",
-    "version": "3.0",
-    "urn": "urn:nl:minfin:tr:dpia:3.0",
     "title": "Data Protection Impact Assessment",
     "source": {
-      "instrument": "Model DPIA Rijksdienst (urn:nl:dpia)",
+      "instrument": "Model DPIA Rijksdienst (urn:nl:minbzk:ir:dpia:3.0)",
       "publisher": "Ministerie van Binnenlandse Zaken en Koninkrijksrelaties",
       "version": "3.0",
-      "url": "https://github.com/MinBZK/par-dpia-form",
-      "reference": "vendor/par-dpia-form/dpia.yaml (upstream sources/dpia.yaml, commit 3d76a6d5da166b0dc089ca80740ac7be64fb7ab8)",
+      "url": "https://github.com/MinBZK/instrument-registry",
+      "reference": "vendor/instrument-registry/assessments/dpia.yaml (MinBZK/instrument-registry v0.1.0, zie vendor/instrument-registry/PROVENANCE.md)",
       "derivation": "generated",
       "note": "Gegenereerd met `npm run forms:build`; niet handmatig bewerken. Elke vraag draagt de upstream task-id als officialId. Zie docs/SCHEMA_HARMONIZATION.md."
     },
@@ -45,31 +43,57 @@
       "id": "dpia_a",
       "title": "Deel A: Beschrijving van de gegevensverwerking",
       "part": "A",
-      "paragraphs": ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+      "paragraphs": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
+      ]
     },
     {
       "id": "dpia_b",
       "title": "Deel B: Beoordeling van de rechtmatigheid",
       "part": "B",
-      "paragraphs": ["11", "12", "13", "14", "15"]
+      "paragraphs": [
+        "11",
+        "12",
+        "13",
+        "14",
+        "15"
+      ]
     },
     {
       "id": "dpia_c",
       "title": "Deel C: Beoordeling van de risico's voor betrokkenen",
       "part": "C",
-      "paragraphs": ["16"]
+      "paragraphs": [
+        "16"
+      ]
     },
     {
       "id": "dpia_d",
       "title": "Deel D: Maatregelen",
       "part": "D",
-      "paragraphs": ["17"]
+      "paragraphs": [
+        "17"
+      ]
     },
     {
       "id": "dpia_afronding",
       "title": "Afronding: samenvatting, versiebeheer en ondertekening",
       "part": "summary",
-      "paragraphs": ["18", "19", "20"]
+      "paragraphs": [
+        "18",
+        "19",
+        "20"
+      ]
     }
   ]
 }

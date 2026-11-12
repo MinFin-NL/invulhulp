@@ -1,0 +1,374 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: AI-systeemregistratie (Model Card)
+urn: urn:nl:minfin:ir:modelcard:0.1
+version: '0.1'
+description: >-
+  De AI-systeemregistratie (Model Card) legt de essentiële informatie van een AI-systeem vast: wat het doet, wie het bezit, welke data erin gaat, welk model wordt gebruikt en wat de bekende beperkingen en compliance-status zijn. Gebaseerd op de AI Body of Knowledge (Template 2).
+
+  Bron: AI Body of Knowledge (AI-BOK) — Template 2: AI System Registration / Model Card (Jan Willem van Veen, versie v1.0 (2026)). AI-BOK-templates mogen vrij worden gebruikt en aangepast (p. 204), met bronvermelding.
+tasks:
+- task: Basisinformatie
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 1. Basisinformatie
+    description: Leg de kerngegevens van het AI-systeem vast.
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Systeemnaam
+      description: De naam waaronder het AI-systeem bekend is.
+      id: "1.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: mc_a.systeemnaam
+    - task: Systeem-ID
+      description: >-
+        Uniek registratienummer of referentie waarmee het systeem kan worden geïdentificeerd en getraceerd (bijv. algoritmeregister-ID).
+      id: "1.1.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: mc_a.systeemid
+    - task: Eigenaar (naam + rol)
+      description: De persoon die verantwoordelijk is voor de prestaties en compliance van het systeem (AI Owner).
+      id: "1.1.3"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: mc_a.eigenaar
+    - task: Afdeling / directie
+      id: "1.1.4"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: mc_a.afdeling
+    - task: Risicoclassificatie (AI-verordening)
+      description: >-
+        Het risiconiveau van het systeem onder de EU AI Act. Bepaal dit zo nodig met de EU AI Act Compliance Checklist.
+      id: "1.1.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Minimaal risico
+      - value: Beperkt risico
+      - value: Hoog risico
+      - value: Onaanvaardbaar risico
+      required_status: true
+      references:
+        invulhulp: mc_a.risicoclassificatie
+    - task: Doel — wat doet het systeem?
+      description: Beschrijf beknopt wat het systeem doet en in welke context het wordt ingezet.
+      id: "1.1.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: mc_a.doel
+    - task: Bijlagen
+      id: "1.1.6-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "1.1.6-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+- task: Data
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 2. Data
+    description: Beschrijf welke gegevens het systeem in en uit gaan.
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Inputdata — welke gegevens gaan het systeem in?
+      id: "2.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: mc_b.inputdata
+    - task: Type output
+      id: "2.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Classificatie
+      - value: Tekst
+      - value: Score
+      - value: Besluit
+      - value: Anders
+      required_status: true
+      references:
+        invulhulp: mc_b.outputtype
+    - task: Persoonsgegevens in de input?
+      id: "2.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: mc_b.persoonsgegevens_input
+    - task: Persoonsgegevens in de output?
+      id: "2.1.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: mc_b.persoonsgegevens_output
+- task: Model
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 3. Model
+    description: Beschrijf het onderliggende model en de trainingsdata.
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Type model
+      id: "3.1.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: LLM (taalmodel)
+      - value: Classificatie
+      - value: Regressie
+      - value: Agent
+      - value: Anders
+      required_status: true
+      references:
+        invulhulp: mc_c.modeltype
+    - task: Modelversie
+      id: "3.1.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: mc_c.modelversie
+    - task: Aanbieder (intern / extern — naam)
+      description: 'Wie levert het model? Bij een extern model: de naam van de leverancier.'
+      id: "3.1.3"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: mc_c.aanbieder
+    - task: Trainingsdata — bron
+      id: "3.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: mc_c.trainingsdata_bron
+    - task: Trainingsdata — omvang
+      id: "3.1.5"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: mc_c.trainingsdata_volume
+    - task: Trainingsdata — datum (laatste training / fine-tuning)
+      id: "3.1.6"
+      type:
+      - date
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: mc_c.trainingsdata_datum
+- task: Beperkingen, risico's en compliance
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 4. Beperkingen en risico's
+    description: Beschrijf de bekende beperkingen en bias-risico's van het systeem.
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Bekende beperkingen
+      id: "4.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: mc_d.beperkingen
+    - task: Bias-beoordeling uitgevoerd?
+      id: "4.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: mc_d.bias_uitgevoerd
+    - task: Notities bij de bias-beoordeling
+      id: "4.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: mc_d.bias_notities
+    - task: Fairness-metrieken gedefinieerd?
+      id: "4.1.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: mc_d.fairness_metrics
+    - task: Bekende bias-risico's
+      id: "4.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: mc_d.bias_risicos
+  - task: 5. Compliance
+    description: Leg de compliance- en goedkeuringsstatus vast.
+    id: "4.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: DPIA vereist?
+      id: "4.2.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: mc_d.dpia_vereist
+    - task: DPIA uitgevoerd (datum)
+      id: "4.2.2"
+      type:
+      - date
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: mc_d.dpia_datum
+    - task: Conformiteitsbeoordeling uitgevoerd?
+      description: Alleen van toepassing op hoog-risico AI-systemen (art. 43 AI-verordening).
+      id: "4.2.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Niet van toepassing
+      required_status: false
+      references:
+        invulhulp: mc_d.conformiteit_uitgevoerd
+    - task: Goedkeuringsstatus
+      id: "4.2.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: In behandeling
+      - value: Goedgekeurd
+      - value: Voorwaardelijk goedgekeurd
+      - value: Afgewezen
+      required_status: true
+      references:
+        invulhulp: mc_d.goedkeuringsstatus
+    - task: Goedgekeurd door (naam + datum)
+      id: "4.2.5"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: mc_d.goedgekeurd_door
+    - task: Datum laatste evaluatie
+      id: "4.2.6"
+      type:
+      - date
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: mc_d.laatste_evaluatie
+    - task: Datum volgende evaluatie
+      id: "4.2.7"
+      type:
+      - date
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: mc_d.volgende_evaluatie
+    - task: Opmerkingen
+      id: "4.2.8"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: mc_d.opmerkingen

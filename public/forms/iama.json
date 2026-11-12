@@ -1,15 +1,15 @@
 {
   "id": "iama",
   "version": "2.0",
-  "urn": "urn:nl:minfin:tr:iama:2.0",
+  "urn": "urn:nl:minbzk:ir:iama:2.0",
   "registryUrn": "urn:nl:aivt:tr:iama:1.0",
   "title": "Impact Assessment Mensenrechten en Algoritmes (IAMA)",
   "source": {
-    "instrument": "Impact Assessment Mensenrechten en Algoritmes (IAMA, urn:nl:iama)",
+    "instrument": "Impact Assessment Mensenrechten en Algoritmes (IAMA) (urn:nl:minbzk:ir:iama:2.0)",
     "publisher": "Ministerie van Binnenlandse Zaken en Koninkrijksrelaties",
     "version": "2",
-    "url": "https://github.com/MinBZK/par-dpia-form",
-    "reference": "vendor/par-dpia-form/iama.yaml (upstream sources/iama.yaml, commit 3d76a6d5da166b0dc089ca80740ac7be64fb7ab8)",
+    "url": "https://github.com/MinBZK/instrument-registry",
+    "reference": "vendor/instrument-registry/assessments/iama.yaml (MinBZK/instrument-registry v0.1.0, zie vendor/instrument-registry/PROVENANCE.md)",
     "derivation": "generated",
     "note": "Gegenereerd met `npm run forms:build`; niet handmatig bewerken. Elke vraag draagt de upstream task-id als officialId. Zie docs/SCHEMA_HARMONIZATION.md."
   },

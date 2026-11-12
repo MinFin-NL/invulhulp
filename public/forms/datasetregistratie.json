@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/datasetregistratie.yaml + scripts/form-overlays/datasetregistratie.overlay.json; niet handmatig bewerken.",
   "id": "datasetregistratie",
   "version": "1.0",
-  "urn": "urn:nl:minfin:tr:datasetregistratie:1.0",
+  "urn": "urn:nl:minfin:ir:datasetregistratie:1.0",
   "title": "Dataset-registratie (datasheet)",
   "aiContext": "Dit is een dataset-registratie ofwel datasheet voor het Ministerie van Financiën, afgeleid van DAMA-DMBOK2 hoofdstuk 12 (Metadata Management) en het patroon 'Datasheets for Datasets' (Gebru et al.), uitgelijnd met DCAT-AP-NL en MIM 1.2. Het legt per dataset de identificatie, herkomst, inhoud, juridische grondslag, kwaliteit en gebruiksvoorwaarden vast. Dit is de datakant van de AI Model Card. Schrijf feitelijk en beschrijvend in metadata-termen; vermijd waardeoordelen en houd velden kort en eenduidig zodat ze als metadata herbruikbaar zijn.",
   "source": {
@@ -37,11 +38,27 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "ds_a" },
-    { "type": "subsections", "sectionId": "ds_b" },
-    { "type": "subsections", "sectionId": "ds_c" },
-    { "type": "subsections", "sectionId": "ds_d" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "ds_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ds_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ds_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ds_d"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -238,10 +255,40 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "attribuut", "label": "Attribuut" },
-                { "id": "betekenis", "label": "Betekenis" },
-                { "id": "type", "label": "Datatype", "type": "suggest", "options": ["Tekst", "Getal", "Datum", "Boolean", "Code uit codelijst", "Identificerend nummer", "Geometrie", "Overig"] },
-                { "id": "bijzonder", "label": "Bijzonder?", "type": "select", "options": ["Nee", "Persoonsgegeven", "Bijzonder persoonsgegeven", "Bedrijfsvertrouwelijk"] }
+                {
+                  "id": "attribuut",
+                  "label": "Attribuut"
+                },
+                {
+                  "id": "betekenis",
+                  "label": "Betekenis"
+                },
+                {
+                  "id": "type",
+                  "label": "Datatype",
+                  "type": "suggest",
+                  "options": [
+                    "Tekst",
+                    "Getal",
+                    "Datum",
+                    "Boolean",
+                    "Code uit codelijst",
+                    "Identificerend nummer",
+                    "Geometrie",
+                    "Overig"
+                  ]
+                },
+                {
+                  "id": "bijzonder",
+                  "label": "Bijzonder?",
+                  "type": "select",
+                  "options": [
+                    "Nee",
+                    "Persoonsgegeven",
+                    "Bijzonder persoonsgegeven",
+                    "Bedrijfsvertrouwelijk"
+                  ]
+                }
               ],
               "notesLabel": "Verwijzing naar het volledige gegevenswoordenboek of datamodel"
             },
@@ -319,10 +366,29 @@
               "type": "table",
               "importance": "optional",
               "columns": [
-                { "id": "partij", "label": "Ontvanger" },
-                { "id": "doel", "label": "Doel van het delen" },
-                { "id": "grondslag", "label": "Grondslag of afspraak" },
-                { "id": "vorm", "label": "Vorm", "type": "select", "options": ["Volledige dataset", "Selectie", "Geaggregeerd", "Via bevraging (API)"] }
+                {
+                  "id": "partij",
+                  "label": "Ontvanger"
+                },
+                {
+                  "id": "doel",
+                  "label": "Doel van het delen"
+                },
+                {
+                  "id": "grondslag",
+                  "label": "Grondslag of afspraak"
+                },
+                {
+                  "id": "vorm",
+                  "label": "Vorm",
+                  "type": "select",
+                  "options": [
+                    "Volledige dataset",
+                    "Selectie",
+                    "Geaggregeerd",
+                    "Via bevraging (API)"
+                  ]
+                }
               ],
               "notesLabel": "Toelichting op het delen met derden"
             },

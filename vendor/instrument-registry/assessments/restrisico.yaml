@@ -1,0 +1,654 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: Restrisico-acceptatie
+urn: urn:nl:minfin:ir:restrisico:1.1
+version: '1.1'
+description: >-
+  Elk assessment eindigt met risico's die na de maatregelen overblijven. Dit formulier brengt die restrisico's bij elkaar uit de DPIA, de AI Impact Assessment, de IAMA en de Quick scan BIO, weegt ze afzonderlijk en in samenhang, en legt per risico een expliciet besluit vast. Het resultaat is een ondertekend document waarin staat wie welk risico accepteert, onder welke voorwaarden en tot wanneer.
+
+  Bron: Sluitstuk van de risico-instrumenten: Model DPIA Rijksdienst, AI Impact Assessment, IAMA en Quick scan BIO (Ministerie van Financiën). Roadmap: docs/sporen-en-roadmap.md §4.2 nr. 2. Bestaat om de losse assessments af te hechten: zonder expliciete acceptatie blijven geïdentificeerde restrisico's zonder eigenaar.
+tasks:
+- task: 'Deel A: Context van het besluit'
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Waarover wordt besloten
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Waarover wordt dit acceptatiebesluit genomen?
+      description: >-
+        Benoem het systeem, de verwerking of het project, met de versie of release erbij. Een acceptatie geldt voor een specifieke situatie, niet voor een naam.
+      id: "1.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_a.onderwerp
+    - task: Wat is de aanleiding voor dit besluit?
+      id: "1.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ingebruikname van een nieuw systeem of nieuwe verwerking
+      - value: Wijziging van een bestaand systeem of bestaande verwerking
+      - value: Uitbreiding van het gebruik of de doelgroep
+      - value: Periodieke herbevestiging van een eerdere acceptatie
+      - value: Geconstateerd risico of incident vraagt om een nieuw besluit
+      required_status: true
+      references:
+        invulhulp: rr_a.aanleiding
+    - task: Toelichting
+      description: Licht de aanleiding kort toe.
+      id: "1.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.1.2"
+          operator: any
+        action: show
+    - task: Wat valt binnen en wat valt buiten de reikwijdte van dit besluit?
+      description: >-
+        Wees expliciet over de grenzen. Een acceptatie die 'het hele programma' dekt, dekt in de praktijk niets aantoonbaar.
+      id: "1.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_a.reikwijdte
+  - task: Onderliggende assessments
+    id: "1.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke assessments liggen aan dit besluit ten grondslag?
+      id: "1.2.1"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: DPIA
+      - value: Pre-scan DPIA
+      - value: AI Impact Assessment (AIIA)
+      - value: IAMA
+      - value: EU AI Act Compliance Checklist
+      - value: Quick scan BIO / BBN-bepaling
+      - value: Cloudtoets
+      - value: Datakwaliteit-assessment
+      - value: Data-ethiektoets
+      - value: Beveiligingsonderzoek of penetratietest
+      - value: Anders
+      required_status: true
+      references:
+        invulhulp: rr_a.assessments
+    - task: Wat is de status van de onderliggende assessments?
+      id: "1.2.2"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: rr_a.status
+      tasks:
+      - task: Assessment
+        id: "1.2.2.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_a.status.assessment
+      - task: Status
+        id: "1.2.2.2"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Afgerond en vastgesteld
+        - value: Afgerond, nog niet vastgesteld
+        - value: Concept
+        - value: Niet uitgevoerd
+        references:
+          invulhulp: rr_a.status.status
+      - task: Datum
+        id: "1.2.2.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_a.status.datum
+      - task: Advies van de adviseur (FG, CISO, ethiek)
+        id: "1.2.2.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_a.status.advies
+    - task: Toelichting op de status van de assessments
+      id: "1.2.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Welke adviezen zijn uitgebracht en hoe is daarmee omgegaan?
+      description: >-
+        Noem het advies van de FG (verplicht bij een DPIA, art. 35 lid 2 AVG), de CISO en eventuele andere adviseurs. Als een advies niet is opgevolgd, is de motivering daarvan het belangrijkste onderdeel van dit formulier.
+      id: "1.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_a.adviezen
+    - task: Wordt van een advies afgeweken?
+      id: "1.2.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Nee, alle adviezen worden opgevolgd
+      - value: Ja, gedeeltelijk
+      - value: Ja, een advies wordt niet opgevolgd
+      - value: Er zijn geen adviezen uitgebracht
+      required_status: true
+      references:
+        invulhulp: rr_a.afwijking
+    - task: Toelichting
+      description: Motiveer de afwijking en beschrijf wie daarvan op de hoogte is gesteld.
+      id: "1.2.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.2.4"
+          operator: any
+        action: show
+- task: 'Deel B: De restrisico''s'
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Overzicht
+    description: >-
+      Neem hier de risico's op die ná uitvoering van alle voorgenomen maatregelen overblijven. Risico's die volledig zijn weggenomen horen hier niet thuis; risico's waarvan de maatregel nog niet is uitgevoerd wél — met die kanttekening.
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke restrisico's blijven bestaan?
+      id: "2.1.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: rr_b.risicos
+      tasks:
+      - task: Restrisico
+        id: "2.1.1.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_b.risicos.risico
+      - task: Uit welk assessment
+        id: "2.1.1.2"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: DPIA
+        - value: Pre-scan DPIA
+        - value: AIIA
+        - value: IAMA
+        - value: EU AI Act-checklist
+        - value: Quick scan BIO
+        - value: Datakwaliteit-assessment
+        - value: Data-ethiektoets
+        - value: Overig
+        references:
+          invulhulp: rr_b.risicos.bron
+      - task: Wie wordt geraakt
+        id: "2.1.1.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_b.risicos.wie
+      - task: Kans
+        id: "2.1.1.4"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Hoog
+        - value: Middel
+        - value: Laag
+        references:
+          invulhulp: rr_b.risicos.kans
+      - task: Impact
+        id: "2.1.1.5"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Zeer hoog
+        - value: Hoog
+        - value: Middel
+        - value: Laag
+        references:
+          invulhulp: rr_b.risicos.impact
+      - task: Reeds getroffen maatregelen
+        id: "2.1.1.6"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_b.risicos.maatregelen
+    - task: Toelichting op het risico-overzicht
+      id: "2.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Beschrijf het zwaarste restrisico in detail
+      description: >-
+        Wat kan er concreet misgaan, wie merkt dat, hoe erg is dat voor die persoon of groep, en hoe waarschijnlijk is het? Dit is het risico waarop het besluit uiteindelijk rust.
+      id: "2.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_b.zwaarste
+    - task: Welke restrisico's raken burgers of andere betrokkenen rechtstreeks?
+      description: >-
+        Onderscheid uitdrukkelijk risico's voor de organisatie van risico's voor mensen. Die twee lopen in risicoregisters vaak door elkaar, waardoor de zwaarste risico's voor burgers wegvallen tegen bedrijfsvoeringsrisico's.
+      id: "2.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_b.betrokkenen
+    - task: Zijn er maatregelen die wel zijn afgesproken maar nog niet uitgevoerd?
+      id: "2.1.4"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: rr_b.openstaand
+      tasks:
+      - task: Maatregel
+        id: "2.1.4.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_b.openstaand.maatregel
+      - task: Bijbehorend risico
+        id: "2.1.4.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_b.openstaand.risico
+      - task: Verantwoordelijke
+        id: "2.1.4.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_b.openstaand.verantwoordelijke
+      - task: Uiterlijke termijn
+        id: "2.1.4.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_b.openstaand.termijn
+      - task: Blokkerend voor ingebruikname
+        id: "2.1.4.5"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Ja
+        - value: Nee
+        references:
+          invulhulp: rr_b.openstaand.blokkerend
+    - task: Toelichting op de openstaande maatregelen
+      id: "2.1.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+- task: 'Deel C: Weging'
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Samenhang en bereidheid
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe verhouden de restrisico's zich tot elkaar?
+      description: >-
+        Losse risico's kunnen elk aanvaardbaar zijn terwijl hun samenloop dat niet is: een matige datakwaliteit plus beperkte menselijke controle plus een grote doelgroep is iets anders dan drie losse observaties. Beoordeel het geheel.
+      id: "3.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_c.samenhang
+    - task: Passen deze restrisico's binnen de risicobereidheid van de organisatie?
+      id: "3.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, ruim binnen de bereidheid
+      - value: Ja, aan de grens van wat aanvaardbaar is
+      - value: Nee, hoger dan de vastgestelde risicobereidheid
+      - value: Er is geen vastgestelde risicobereidheid om aan te toetsen
+      required_status: true
+      references:
+        invulhulp: rr_c.bereidheid
+    - task: Toelichting
+      description: Onderbouw het antwoord en verwijs naar het kader waaraan getoetst is.
+      id: "3.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.1.2"
+          operator: any
+        action: show
+    - task: Wat staat tegenover deze risico's?
+      description: >-
+        De baten die de acceptatie rechtvaardigen: welk publiek belang wordt gediend en wat gaat er verloren als niet in gebruik wordt genomen? Zonder deze zijde is er geen afweging, alleen een risicolijst.
+      id: "3.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_c.baten
+    - task: Welk alternatief met een lager restrisico is overwogen?
+      description: >-
+        Bijv. een beperktere scope, een gefaseerde invoering, een pilot met een kleinere doelgroep, of langer met de bestaande werkwijze doorgaan. Beschrijf waarom dat is afgevallen.
+      id: "3.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_c.alternatief
+    - task: Welke aanvullende maatregelen worden bij dit besluit alsnog opgelegd?
+      id: "3.1.5"
+      type:
+      - task_group
+      repeatable: true
+      required_status: false
+      references:
+        invulhulp: rr_c.aanvullend
+      tasks:
+      - task: Aanvullende maatregel
+        id: "3.1.5.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_c.aanvullend.maatregel
+      - task: Welk risico verlaagt dit
+        id: "3.1.5.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_c.aanvullend.doel
+      - task: Verantwoordelijke
+        id: "3.1.5.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_c.aanvullend.verantwoordelijke
+      - task: Termijn
+        id: "3.1.5.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_c.aanvullend.termijn
+    - task: Toelichting op de aanvullende maatregelen
+      id: "3.1.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+  - task: Signalering
+    id: "3.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe wordt bewaakt of een geaccepteerd risico zich daadwerkelijk voordoet?
+      description: >-
+        Benoem per zwaar risico het waarneembare signaal, wie erop let en met welke frequentie. Een geaccepteerd risico zonder signalering is een risico dat pas zichtbaar wordt als het al schade heeft aangericht.
+      id: "3.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_c.monitoring
+    - task: Bij welke ontwikkeling moet het besluit opnieuw worden genomen?
+      description: >-
+        Formuleer concrete grenzen: een aantal incidenten, een uitbreiding van de doelgroep, een wijziging in het model, of een handhavingssignaal. Dit is de trigger die de acceptatie ongeldig maakt.
+      id: "3.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_c.grens
+    - task: Hoe verloopt de escalatie als een risico zich voordoet?
+      description: >-
+        Wie wordt gewaarschuwd, binnen welke termijn, en wie is bevoegd het systeem of de verwerking stil te leggen?
+      id: "3.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_c.escalatie
+- task: 'Deel D: Besluit'
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Acceptatiebesluit
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wat is het besluit?
+      id: "4.1.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: De restrisico's worden geaccepteerd — ingebruikname kan doorgaan
+      - value: De restrisico's worden geaccepteerd onder de hieronder genoemde voorwaarden
+      - value: De restrisico's worden nog niet geaccepteerd — eerst aanvullende maatregelen uitvoeren
+      - value: De restrisico's worden niet geaccepteerd — het systeem of de verwerking gaat niet in gebruik
+      required_status: true
+      references:
+        invulhulp: rr_d.besluit
+    - task: Toelichting
+      description: Motiveer het besluit.
+      id: "4.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.1.1"
+          operator: any
+        action: show
+    - task: Besluit per restrisico
+      description: >-
+        Neem hier dezelfde risico's op als in deel B en geef per risico het besluit. Een globale acceptatie zonder deze uitsplitsing is later niet te herleiden.
+      id: "4.1.2"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: rr_d.perrisico
+      tasks:
+      - task: Restrisico
+        id: "4.1.2.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_d.perrisico.risico
+      - task: Besluit
+        id: "4.1.2.2"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Accepteren
+        - value: Accepteren onder voorwaarden
+        - value: Aanvullend beheersen
+        - value: Niet accepteren
+        references:
+          invulhulp: rr_d.perrisico.besluit
+      - task: Voorwaarde of aanvullende maatregel
+        id: "4.1.2.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_d.perrisico.voorwaarde
+      - task: Risico-eigenaar
+        id: "4.1.2.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: rr_d.perrisico.eigenaar
+    - task: Toelichting op de besluiten per risico
+      id: "4.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Onder welke voorwaarden geldt de acceptatie?
+      description: >-
+        Formuleer de voorwaarden zo dat later objectief vast te stellen is of eraan is voldaan, met een termijn en een verantwoordelijke per voorwaarde.
+      id: "4.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_d.voorwaarden
+    - task: Tot wanneer geldt dit besluit?
+      description: >-
+        Een acceptatie zonder einddatum wordt stilzwijgend eeuwig. Noem een concrete datum of periode; herbevestiging vindt daarna opnieuw plaats.
+      id: "4.1.4"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_d.geldigheid
+  - task: Vaststelling
+    id: "4.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wie neemt dit besluit?
+      description: >-
+        Naam en functie van de bevoegde functionaris — degene die het risico ook daadwerkelijk draagt en de bevoegdheid heeft het te aanvaarden.
+      id: "4.2.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_d.besluitnemer
+    - task: Datum van het besluit
+      id: "4.2.2"
+      type:
+      - date
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_d.datum
+    - task: Wie zijn over dit besluit geïnformeerd?
+      description: >-
+        Bijv. de FG, de CISO, de portefeuillehouder, de ondernemingsraad of de verantwoordelijke lijnmanager. Bij een afwijking van het FG-advies is informeren van het bevoegd gezag aangewezen.
+      id: "4.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_d.geinformeerd
+    - task: Waar wordt dit besluit vastgelegd en bewaard?
+      id: "4.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: rr_d.vastlegging
+    - task: Wanneer en door wie wordt het besluit herbeoordeeld?
+      description: >-
+        Noem de datum van de eerstvolgende herbeoordeling en de verantwoordelijke daarvoor. Sluit aan bij de bewaking uit deel C.
+      id: "4.2.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: rr_d.herbeoordeling

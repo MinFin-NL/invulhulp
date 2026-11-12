@@ -1,0 +1,235 @@
+{
+  "_comment": "Overlay voor aanbiedingsformulier: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/aanbiedingsformulier.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "aanbiedingsformulier",
+    "title": "PPM Aanbiedingsformulier (Outline Businesscase)",
+    "source": {
+      "instrument": "PPM-aanbiedingsformulier (outline business case)",
+      "publisher": "Ministerie van Financiën",
+      "version": "2.0",
+      "reference": "Intern portfoliomanagement-sjabloon voor het portfoliobesluit",
+      "derivation": "original",
+      "note": "Digitalisering van het eigen aanbiedingsformulier; geen extern origineel."
+    },
+    "aiContext": "Dit is een PPM-aanbiedingsformulier dat de outline business case voor een portfoliobesluit bij het Ministerie van Financiën beschrijft: belang, nut en noodzaak, afhankelijkheden, risico's, impact, planning, baten en kosten van een I-projectinitiatief. Schrijf zakelijk en onderbouwend.",
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "Aanbiedingsformulier",
+      "docTitle": "PPM Aanbiedingsformulier – Outline Businesscase",
+      "footerLabel": "Aanbiedingsformulier – MinFin",
+      "filename": "Aanbiedingsformulier.pdf",
+      "systemNamePlaceholder": "Bijv. Vervanging declaratiesysteem",
+      "homeContent": {
+        "notice": "Stuur het ingevulde aanbiedingsformulier naar portfoliomanagement@minfin.nl. Wees zo volledig en concreet mogelijk, geef context waar nodig, verwijs naar eventuele formele besluiten en voorkom afkortingen. Stem het formulier af met de vertegenwoordiger van het organisatieonderdeel in de portfolioboard, de adviesgroep en de opdrachtgever voordat het wordt ingediend.",
+        "description": "Met het PPM Aanbiedingsformulier (outline businesscase) wordt een I-projectinitiatief aangemeld voor opname in het centrale projectenportfolio van het Beleidsdepartement en/of budget aangevraagd voor de start van de initiatiefase.",
+        "steps": [
+          "Algemeen: projectidentificatie, contactgegevens en gevraagd besluit",
+          "Business: belang, nut, noodzaak en toegevoegde waarde",
+          "Afhankelijkheden, risico's en impact",
+          "Planning en benodigde resources",
+          "Budget: baten en kosten"
+        ],
+        "buttonLabel": "Starten met het aanbiedingsformulier"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "aa_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "aa_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "aa_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "aa_d"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "aa_e"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "aa_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "aa_a1",
+            "questions": [
+              {
+                "id": "aa_a.naam_project"
+              },
+              {
+                "id": "aa_a.directie_afdeling"
+              },
+              {
+                "id": "aa_a.contactpersoon"
+              },
+              {
+                "id": "aa_a.email",
+                "format": "email"
+              },
+              {
+                "id": "aa_a.telefoonnummer",
+                "format": "phone"
+              },
+              {
+                "id": "aa_a.datum_aanmelden"
+              },
+              {
+                "id": "aa_a.naam_opdrachtgever"
+              },
+              {
+                "id": "aa_a.naam_projectleider"
+              }
+            ]
+          },
+          {
+            "id": "aa_a2",
+            "questions": [
+              {
+                "id": "aa_a.gevraagd_besluit"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "aa_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "aa_b1",
+            "questions": [
+              {
+                "id": "aa_b.aanleiding"
+              },
+              {
+                "id": "aa_b.doelstelling"
+              },
+              {
+                "id": "aa_b.gevolg_van"
+              },
+              {
+                "id": "aa_b.gevolg_toelichting"
+              },
+              {
+                "id": "aa_b.mogelijke_oplossingen"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "aa_c",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "aa_c1",
+            "questions": [
+              {
+                "id": "aa_c.afhankelijkheden"
+              },
+              {
+                "id": "aa_c.risicos"
+              },
+              {
+                "id": "aa_c.impact_gebruikers"
+              },
+              {
+                "id": "aa_c.impact_techniek"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "aa_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "aa_d1",
+            "questions": [
+              {
+                "id": "aa_d.start_einddatum"
+              },
+              {
+                "id": "aa_d.tijdgevoelig"
+              },
+              {
+                "id": "aa_d.resources",
+                "columns": [
+                  {
+                    "id": "resource"
+                  },
+                  {
+                    "id": "activiteit"
+                  },
+                  {
+                    "id": "uren_week"
+                  },
+                  {
+                    "id": "startdatum"
+                  },
+                  {
+                    "id": "einddatum"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "aa_e",
+        "part": "E",
+        "subsections": [
+          {
+            "id": "aa_e1",
+            "questions": [
+              {
+                "id": "aa_e.kwantitatieve_baten"
+              },
+              {
+                "id": "aa_e.kwalitatieve_baten"
+              }
+            ]
+          },
+          {
+            "id": "aa_e2",
+            "questions": [
+              {
+                "id": "aa_e.budget_initiatiefase"
+              },
+              {
+                "id": "aa_e.raming_projectkosten"
+              },
+              {
+                "id": "aa_e.financiering"
+              },
+              {
+                "id": "aa_e.onderhoudskosten"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

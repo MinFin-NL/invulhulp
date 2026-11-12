@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/algoritmeregister.yaml + scripts/form-overlays/algoritmeregister.overlay.json; niet handmatig bewerken.",
   "id": "algoritmeregister",
   "version": "1.0",
-  "urn": "urn:nl:minfin:tr:algoritmeregister:1.0",
+  "urn": "urn:nl:minfin:ir:algoritmeregister:1.0",
   "title": "Algoritmeregister-publicatie",
   "aiContext": "Dit is de voorbereiding van een publicatie in het Algoritmeregister van de Nederlandse overheid voor het Ministerie van Financiën. Het legt per algoritme of AI-systeem de publicatiegegevens vast: algemene informatie en doel, juridische grondslag en uitgevoerde toetsen, werking en gebruikte data, menselijke tussenkomst en toezicht, en de publicatiestatus. De tekst is bestemd voor een openbaar register en wordt gelezen door burgers, journalisten en volksvertegenwoordigers. Schrijf daarom in begrijpelijk Nederlands op B1-niveau: korte zinnen, geen jargon, geen afkortingen zonder uitleg, en beschrijf wat het algoritme voor mensen betekent in plaats van hoe het technisch werkt.",
   "source": {
@@ -37,11 +38,27 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "ar_a" },
-    { "type": "subsections", "sectionId": "ar_b" },
-    { "type": "subsections", "sectionId": "ar_c" },
-    { "type": "subsections", "sectionId": "ar_d" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "ar_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ar_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ar_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ar_d"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -226,11 +243,52 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "toets", "label": "Toets", "type": "select", "options": ["DPIA", "Pre-scan DPIA", "IAMA", "AI Impact Assessment", "EU AI Act-conformiteitsbeoordeling", "Data-ethiektoets", "Quick scan BIO", "Datakwaliteit-assessment", "Externe audit of second opinion", "Overig"] },
-                { "id": "status", "label": "Status", "type": "select", "options": ["Uitgevoerd", "In uitvoering", "Gepland", "Niet van toepassing"] },
-                { "id": "datum", "label": "Datum" },
-                { "id": "uitkomst", "label": "Kernuitkomst" },
-                { "id": "openbaar", "label": "Openbaar", "type": "select", "options": ["Ja", "Gedeeltelijk", "Nee"] }
+                {
+                  "id": "toets",
+                  "label": "Toets",
+                  "type": "select",
+                  "options": [
+                    "DPIA",
+                    "Pre-scan DPIA",
+                    "IAMA",
+                    "AI Impact Assessment",
+                    "EU AI Act-conformiteitsbeoordeling",
+                    "Data-ethiektoets",
+                    "Quick scan BIO",
+                    "Datakwaliteit-assessment",
+                    "Externe audit of second opinion",
+                    "Overig"
+                  ]
+                },
+                {
+                  "id": "status",
+                  "label": "Status",
+                  "type": "select",
+                  "options": [
+                    "Uitgevoerd",
+                    "In uitvoering",
+                    "Gepland",
+                    "Niet van toepassing"
+                  ]
+                },
+                {
+                  "id": "datum",
+                  "label": "Datum"
+                },
+                {
+                  "id": "uitkomst",
+                  "label": "Kernuitkomst"
+                },
+                {
+                  "id": "openbaar",
+                  "label": "Openbaar",
+                  "type": "select",
+                  "options": [
+                    "Ja",
+                    "Gedeeltelijk",
+                    "Nee"
+                  ]
+                }
               ],
               "notesLabel": "Toelichting op de uitgevoerde toetsen"
             },
@@ -365,10 +423,29 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "bron", "label": "Bron" },
-                { "id": "inhoud", "label": "Welke gegevens" },
-                { "id": "rol", "label": "Gebruikt als", "type": "select", "options": ["Trainingsdata", "Invoerdata tijdens gebruik", "Beide", "Validatie of controle"] },
-                { "id": "houder", "label": "Bronhouder" }
+                {
+                  "id": "bron",
+                  "label": "Bron"
+                },
+                {
+                  "id": "inhoud",
+                  "label": "Welke gegevens"
+                },
+                {
+                  "id": "rol",
+                  "label": "Gebruikt als",
+                  "type": "select",
+                  "options": [
+                    "Trainingsdata",
+                    "Invoerdata tijdens gebruik",
+                    "Beide",
+                    "Validatie of controle"
+                  ]
+                },
+                {
+                  "id": "houder",
+                  "label": "Bronhouder"
+                }
               ],
               "notesLabel": "Toelichting op de gebruikte gegevensbronnen"
             },
@@ -426,9 +503,18 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "risico", "label": "Risico" },
-                { "id": "gevolg", "label": "Mogelijk gevolg voor mensen" },
-                { "id": "maatregel", "label": "Maatregel" }
+                {
+                  "id": "risico",
+                  "label": "Risico"
+                },
+                {
+                  "id": "gevolg",
+                  "label": "Mogelijk gevolg voor mensen"
+                },
+                {
+                  "id": "maatregel",
+                  "label": "Maatregel"
+                }
               ],
               "notesLabel": "Toelichting op het risicobeheer"
             },

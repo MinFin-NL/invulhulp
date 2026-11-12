@@ -1,0 +1,298 @@
+{
+  "_comment": "Overlay voor verwerkingsregister: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/verwerkingsregister.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "verwerkingsregister",
+    "title": "Verwerkingsregister (AVG art. 30)",
+    "aiContext": "Dit is een registratie voor het verwerkingsregister van het Ministerie van Financiën op grond van artikel 30 AVG. Het legt per verwerking de verplichte registratie-elementen vast: verwerkingsverantwoordelijke en FG, doeleinden, categorieën betrokkenen en persoonsgegevens, ontvangers, doorgiften buiten de EER, bewaartermijnen en een algemene beschrijving van de beveiligingsmaatregelen (art. 32 lid 1). Schrijf beknopt, juridisch nauwkeurig en in AVG-terminologie: het register is een verantwoordingsdocument dat aan de Autoriteit Persoonsgegevens getoond moet kunnen worden, geen beleidstekst. Formuleer per veld feitelijk en volledig, zonder toelichtende betogen.",
+    "source": {
+      "instrument": "Algemene verordening gegevensbescherming (AVG / Verordening (EU) 2016/679)",
+      "publisher": "Europese Unie",
+      "version": "Verordening (EU) 2016/679",
+      "url": "https://eur-lex.europa.eu/legal-content/NL/TXT/?uri=CELEX%3A32016R0679",
+      "reference": "artikel 30 lid 1 (registerplicht verwerkingsverantwoordelijke); beveiligingsbeschrijving conform artikel 32 lid 1",
+      "derivation": "derived",
+      "note": "Rechtstreeks afgeleid van de opsomming in art. 30 lid 1 sub a–g; er bestaat geen verplicht landelijk invulmodel. Roadmap: docs/sporen-en-roadmap.md §4.2 nr. 1."
+    },
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "Verwerkingsregister",
+      "docTitle": "Registratie verwerkingsregister (AVG art. 30)",
+      "footerLabel": "Verwerkingsregister – MinFin",
+      "filename": "Verwerkingsregister.pdf",
+      "systemNamePlaceholder": "Bijv. Verwerking klachtafhandeling burgers",
+      "homeContent": {
+        "notice": "Eén registratie beschrijft één verwerking, niet één systeem: een systeem dat drie verschillende doeleinden dient, levert drie registraties op. De registerplicht geldt ongeacht of er een DPIA nodig was — zij is breder dan de DPIA-plicht. Let op — een dossier biedt op dit moment ruimte aan één exemplaar van dit formulier. Kent het project meerdere verwerkingen, registreer dan hier de belangrijkste en neem de overige op als losse bijlage of in een apart dossier.",
+        "description": "Artikel 30 AVG verplicht elke verwerkingsverantwoordelijke een register bij te houden van de verwerkingsactiviteiten onder zijn verantwoordelijkheid. Dit formulier legt de in lid 1 verplicht gestelde elementen vast: verantwoordelijke en FG, doeleinden, categorieën betrokkenen en gegevens, ontvangers, doorgiften buiten de EER, bewaartermijnen en een algemene beschrijving van de beveiligingsmaatregelen. Veel velden zijn af te leiden uit een eerder ingevulde DPIA of intake.",
+        "steps": [
+          "Deel A – Verwerking en verantwoordelijke: naam, doel, grondslag en betrokken partijen",
+          "Deel B – Gegevens en betrokkenen: categorieën betrokkenen, gegevens en bronnen",
+          "Deel C – Ontvangers en doorgifte: met wie gedeeld, en doorgifte buiten de EER",
+          "Deel D – Bewaring en beveiliging: bewaartermijnen, maatregelen en beheer van de registratie"
+        ],
+        "buttonLabel": "Starten met de registratie"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "vr_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "vr_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "vr_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "vr_d"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "vr_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "vra1",
+            "questions": [
+              {
+                "id": "vr_a.naam",
+                "officialId": "art30-1"
+              },
+              {
+                "id": "vr_a.nummer"
+              },
+              {
+                "id": "vr_a.omschrijving"
+              },
+              {
+                "id": "vr_a.doel",
+                "officialId": "art30-1-b"
+              },
+              {
+                "id": "vr_a.grondslag",
+                "followUp": "Noem de concrete wettelijke bepaling of onderbouw de gekozen grondslag."
+              },
+              {
+                "id": "vr_a.bijzonder_grondslag"
+              }
+            ]
+          },
+          {
+            "id": "vra2",
+            "questions": [
+              {
+                "id": "vr_a.verantwoordelijke",
+                "officialId": "art30-1-a"
+              },
+              {
+                "id": "vr_a.proceseigenaar"
+              },
+              {
+                "id": "vr_a.fg"
+              },
+              {
+                "id": "vr_a.gezamenlijk",
+                "followUp": "Noem de andere verantwoordelijke(n) en beschrijf hoe de onderlinge verdeling is vastgelegd."
+              },
+              {
+                "id": "vr_a.verwerkers",
+                "columns": [
+                  {
+                    "id": "verwerker"
+                  },
+                  {
+                    "id": "rol"
+                  },
+                  {
+                    "id": "overeenkomst"
+                  },
+                  {
+                    "id": "locatie"
+                  }
+                ],
+                "notesLabel": "Toelichting op de betrokken verwerkers en subverwerkers"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "vr_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "vrb1",
+            "questions": [
+              {
+                "id": "vr_b.betrokkenen",
+                "officialId": "art30-1-c"
+              },
+              {
+                "id": "vr_b.categorieen",
+                "officialId": "art30-1-c"
+              },
+              {
+                "id": "vr_b.specificatie",
+                "columns": [
+                  {
+                    "id": "categorie"
+                  },
+                  {
+                    "id": "gegevens"
+                  },
+                  {
+                    "id": "betrokkenen"
+                  },
+                  {
+                    "id": "noodzaak"
+                  }
+                ],
+                "notesLabel": "Aanvullende toelichting op de gegevensspecificatie"
+              },
+              {
+                "id": "vr_b.bronnen"
+              },
+              {
+                "id": "vr_b.aantal"
+              },
+              {
+                "id": "vr_b.geautomatiseerd",
+                "followUp": "Beschrijf de logica op hoofdlijnen en de waarborgen die zijn getroffen."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "vr_c",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "vrc1",
+            "questions": [
+              {
+                "id": "vr_c.ontvangers",
+                "officialId": "art30-1-d",
+                "columns": [
+                  {
+                    "id": "ontvanger"
+                  },
+                  {
+                    "id": "doel"
+                  },
+                  {
+                    "id": "grondslag"
+                  },
+                  {
+                    "id": "frequentie"
+                  }
+                ],
+                "notesLabel": "Toelichting op de verstrekkingen"
+              },
+              {
+                "id": "vr_c.geen"
+              }
+            ]
+          },
+          {
+            "id": "vrc2",
+            "questions": [
+              {
+                "id": "vr_c.doorgifte",
+                "officialId": "art30-1-e",
+                "followUp": "Noem het land, de ontvanger en de toegepaste grondslag."
+              },
+              {
+                "id": "vr_c.waarborgen"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "vr_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "vrd1",
+            "questions": [
+              {
+                "id": "vr_d.bewaartermijn",
+                "officialId": "art30-1-f",
+                "columns": [
+                  {
+                    "id": "categorie"
+                  },
+                  {
+                    "id": "termijn"
+                  },
+                  {
+                    "id": "startpunt"
+                  },
+                  {
+                    "id": "grondslag"
+                  },
+                  {
+                    "id": "daarna"
+                  }
+                ],
+                "notesLabel": "Toelichting op de bewaartermijnen"
+              },
+              {
+                "id": "vr_d.verwijdering",
+                "followUp": "Beschrijf hoe de verwijdering plaatsvindt, ook in back-ups en afgeleide bestanden."
+              }
+            ]
+          },
+          {
+            "id": "vrd2",
+            "questions": [
+              {
+                "id": "vr_d.maatregelen",
+                "officialId": "art30-1-g"
+              },
+              {
+                "id": "vr_d.maatregeltypen"
+              },
+              {
+                "id": "vr_d.bbn"
+              }
+            ]
+          },
+          {
+            "id": "vrd3",
+            "questions": [
+              {
+                "id": "vr_d.dpia",
+                "followUp": "Verwijs naar het DPIA-document of de pre-scan en de datum daarvan."
+              },
+              {
+                "id": "vr_d.rechten"
+              },
+              {
+                "id": "vr_d.status"
+              },
+              {
+                "id": "vr_d.actualisatie"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,580 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: Data-ethiektoets
+urn: urn:nl:minfin:ir:dataethiek:1.0
+version: '1.0'
+description: >-
+  De data-ethiektoets beoordeelt een gegevensverwerking langs drie principes uit DAMA-DMBOK, ontleend aan het Belmont-rapport: respect voor personen (weten mensen wat er met hun gegevens gebeurt en hebben ze zeggenschap), weldoen (wegen de baten op tegen de mogelijke schade, en is er een minder ingrijpend alternatief) en rechtvaardigheid (worden groepen ongelijk behandeld, en zijn lasten en baten eerlijk verdeeld). U sluit af met een expliciete afweging en de voorwaarden waaronder de verwerking verantwoord is.
+
+  Bron: DAMA-DMBOK2 — Data Management Body of Knowledge, 2nd Edition (DAMA International, versie 2nd Edition (2017)). DAMA-DMBOK is een referentiekader zonder invul-template; dit formulier is afgeleid van de daarin beschreven ethische principes. Geen tekst overgenomen. Ontwerpspec: docs/DAMA-DMBOK-form-opportunities.md §4E.
+tasks:
+- task: 'Deel A: Context van de verwerking'
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Wat en waarom
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke gegevensverwerking wordt getoetst?
+      description: >-
+        Beschrijf wat er feitelijk gebeurt met welke gegevens: verzamelen, koppelen, analyseren, beslissen. Blijf concreet — een ethische toets op een abstracte beschrijving levert een abstract antwoord op.
+      id: "1.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_a.verwerking
+    - task: Welk publiek belang dient deze verwerking?
+      description: >-
+        Benoem het doel in termen van maatschappelijke opbrengst, niet in termen van organisatiegemak. 'Efficiëntere afhandeling' is een middel; het belang erachter moet expliciet worden.
+      id: "1.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_a.belang
+    - task: Wie worden door deze verwerking geraakt?
+      description: >-
+        Noem alle groepen, ook de indirect geraakte: naast de personen in de data ook hun huisgenoten, hun omgeving, of groepen die met hen worden vergeleken.
+      id: "1.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_a.betrokkenen
+    - task: Raakt de verwerking groepen in een kwetsbare positie?
+      id: "1.1.4"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Kinderen of jongeren
+      - value: Mensen in een afhankelijke positie ten opzichte van de overheid (uitkering, toeslag, vergunning)
+      - value: Mensen met een migratieachtergrond of niet-Nederlandse nationaliteit
+      - value: Mensen met een beperking of chronische aandoening
+      - value: Mensen met schulden of in armoede
+      - value: Mensen met beperkte digitale of taalvaardigheid
+      - value: Andere groep in een kwetsbare positie
+      - value: Nee, geen specifieke kwetsbare groepen
+      required_status: true
+      references:
+        invulhulp: de_a.kwetsbaar
+    - task: Welke gevolgen kan de uitkomst voor een individu hebben?
+      id: "1.1.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: 'Rechtsgevolg: een besluit over recht, plicht, sanctie of toekenning'
+      - value: 'Ingrijpend feitelijk gevolg: bijv. selectie voor controle of onderzoek'
+      - value: 'Beperkt gevolg: prioritering of ondersteuning zonder direct nadeel'
+      - value: 'Geen individueel gevolg: uitsluitend geaggregeerd of beleidsmatig gebruik'
+      required_status: true
+      references:
+        invulhulp: de_a.gevolgen
+    - task: Toelichting
+      description: 'Beschrijf het gevolg concreet: wat merkt de betrokkene ervan?'
+      id: "1.1.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.1.5"
+          operator: any
+        action: show
+- task: 'Deel B: Respect voor personen'
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Transparantie en zeggenschap
+    description: >-
+      Het eerste Belmont-principe: mensen zijn geen datapunten maar personen met eigen oordeelsvermogen. Dat vraagt dat zij weten wat er gebeurt en, waar mogelijk, invloed hebben.
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Weten de betrokkenen dat hun gegevens op deze manier worden gebruikt?
+      id: "2.1.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, zij zijn hierover actief en begrijpelijk geïnformeerd
+      - value: 'Deels: het staat in een algemene privacyverklaring maar wordt niet actief gecommuniceerd'
+      - value: Nee, zij zijn hierover niet geïnformeerd
+      - value: Nee, en informeren is bewust achterwege gelaten
+      required_status: true
+      references:
+        invulhulp: de_b.weten
+    - task: Toelichting
+      description: Licht toe hoe er geïnformeerd wordt, of waarom dat niet gebeurt.
+      id: "2.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.1"
+          operator: any
+        action: show
+    - task: >-
+        Sluit dit gebruik aan bij wat betrokkenen redelijkerwijs konden verwachten toen zij hun gegevens verstrekten?
+      description: >-
+        De kernvraag bij hergebruik. Gegevens die zijn verstrekt voor een aanvraag en later worden gebruikt voor risicoselectie, verschuiven van dienstverlening naar toezicht — een verschuiving die mensen zelden verwachten.
+      id: "2.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, dit gebruik ligt in het verlengde van de oorspronkelijke verstrekking
+      - value: Deels, het gebruik is verbreed maar blijft binnen hetzelfde domein
+      - value: Nee, dit gebruik wijkt wezenlijk af van de oorspronkelijke context
+      - value: Niet van toepassing — de gegevens zijn niet door betrokkenen verstrekt
+      required_status: true
+      references:
+        invulhulp: de_b.verwachting
+    - task: Toelichting
+      description: Onderbouw het antwoord en beschrijf hoe met een eventuele afwijking is omgegaan.
+      id: "2.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.2"
+          operator: any
+        action: show
+    - task: Welke zeggenschap hebben betrokkenen over dit gebruik?
+      description: >-
+        Beschrijf de feitelijke mogelijkheden: bezwaar maken, correctie vragen, uitleg krijgen, of afzien van deelname. Als er bij een wettelijke taak geen keuze is, benoem dat eerlijk en beschrijf wat er wél openstaat.
+      id: "2.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_b.zeggenschap
+    - task: Kan aan een betrokkene worden uitgelegd hoe een uitkomst tot stand is gekomen?
+      id: "2.1.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, in begrijpelijke taal en op individueel niveau
+      - value: Ja, maar alleen technisch of op hoofdlijnen
+      - value: Nee, de werking is niet op individueel niveau uitlegbaar
+      - value: Niet van toepassing
+      required_status: true
+      references:
+        invulhulp: de_b.uitleg
+    - task: Toelichting
+      description: Beschrijf hoe de uitleg eruitziet, of wat de belemmering is.
+      id: "2.1.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.4"
+          operator: any
+        action: show
+    - task: Is er betekenisvolle menselijke tussenkomst voordat de uitkomst gevolgen krijgt?
+      description: >-
+        Betekenisvol wil zeggen: de beoordelaar heeft de bevoegdheid, de informatie en de tijd om af te wijken — en doet dat in de praktijk ook wel eens. Een aftekening zonder afwijkingsmogelijkheid is geen tussenkomst.
+      id: "2.1.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, met aantoonbare ruimte om af te wijken
+      - value: Ja, maar in de praktijk wordt zelden afgeweken
+      - value: Nee, de uitkomst werkt automatisch door
+      - value: Niet van toepassing
+      required_status: true
+      references:
+        invulhulp: de_b.menselijk
+    - task: Toelichting
+      description: Licht toe hoe de tussenkomst is ingericht en geborgd.
+      id: "2.1.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.5"
+          operator: any
+        action: show
+- task: 'Deel C: Weldoen — baten en schade'
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Baten en schade
+    description: >-
+      Het tweede Belmont-principe: maximaliseer de baten en voorkom schade. Dat vraagt beide zijden expliciet te benoemen, niet alleen de bedoelde opbrengst.
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke baten levert deze verwerking op, en voor wie?
+      description: >-
+        Onderscheid baten voor de samenleving, voor de betrokkenen zelf en voor de organisatie. Maak zo concreet mogelijk wat er beter wordt en waaruit dat zou blijken.
+      id: "3.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_c.baten
+    - task: Welke schade kan deze verwerking veroorzaken?
+      id: "3.1.2"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: de_c.schade
+      tasks:
+      - task: Mogelijke schade
+        id: "3.1.2.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: de_c.schade.schade
+      - task: Wie wordt geraakt
+        id: "3.1.2.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: de_c.schade.wie
+      - task: Soort
+        id: "3.1.2.3"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Materieel of financieel
+        - value: 'Immaterieel: stigmatisering of reputatie'
+        - value: Beperking van rechten of toegang
+        - value: Verlies van privacy of autonomie
+        - value: Verlies van vertrouwen in de overheid
+        - value: Overig
+        references:
+          invulhulp: de_c.schade.soort
+      - task: Kans
+        id: "3.1.2.4"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Groot
+        - value: Reëel
+        - value: Klein
+        references:
+          invulhulp: de_c.schade.kans
+      - task: Beperkende maatregel
+        id: "3.1.2.5"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: de_c.schade.maatregel
+    - task: Toelichting op de schade-analyse
+      id: "3.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Welk onbedoeld gebruik of misbruik van deze data of uitkomsten is denkbaar?
+      description: >-
+        Denk aan hergebruik voor een ander doel, aan koppeling met andere bronnen, en aan wat er zou gebeuren als de dataset uitlekt of in andere handen komt. Het gaat om wat mogelijk is, niet om wat bedoeld is.
+      id: "3.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_c.onbedoeld
+    - task: Worden er gegevens verwerkt die voor het doel niet nodig zijn?
+      id: "3.1.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Nee, uitsluitend wat noodzakelijk is
+      - value: Ja, er wordt meer verzameld dan strikt nodig 'voor het geval dat'
+      - value: Ja, omdat de bron niet fijnmaziger geleverd kan worden
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: de_c.dataminimalisatie
+    - task: Toelichting
+      description: Beschrijf welke gegevens het betreft en waarom ze niet worden weggelaten.
+      id: "3.1.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.1.4"
+          operator: any
+        action: show
+  - task: Alternatieven
+    id: "3.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welk minder ingrijpend alternatief is overwogen?
+      description: >-
+        Bijv. minder gegevens, geaggregeerd in plaats van individueel, steekproef in plaats van integraal, of een niet-datagedreven aanpak. Beschrijf wat is overwogen en waarom het is afgevallen.
+      id: "3.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_c.alternatief
+    - task: Wat gebeurt er als deze verwerking niet plaatsvindt?
+      description: >-
+        Het nulalternatief. Als het antwoord hierop weinig concreet is, is dat een signaal dat de noodzaak nog niet scherp is.
+      id: "3.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_c.nietdoen
+    - task: Staat de inbreuk in verhouding tot het te bereiken doel?
+      id: "3.2.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, de inbreuk is beperkt en het belang is zwaarwegend
+      - value: Ja, mits de genoemde maatregelen worden getroffen
+      - value: Twijfelachtig — nadere afweging nodig
+      - value: Nee, de inbreuk weegt niet op tegen het doel
+      required_status: true
+      references:
+        invulhulp: de_c.proportioneel
+    - task: Toelichting
+      description: Onderbouw de proportionaliteitsafweging.
+      id: "3.2.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.2.3"
+          operator: any
+        action: show
+- task: 'Deel D: Rechtvaardigheid en afweging'
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Gelijke behandeling
+    description: >-
+      Het derde Belmont-principe: lasten en baten moeten eerlijk verdeeld zijn, en gelijke gevallen gelijk worden behandeld.
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Leidt de verwerking tot ongelijke behandeling van groepen?
+      id: "4.1.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Nee, er is geen aanwijzing voor onderscheid tussen groepen
+      - value: Ja, maar het onderscheid is objectief gerechtvaardigd en onderbouwd
+      - value: Ja, en de rechtvaardiging is nog niet vastgesteld
+      - value: Onbekend — niet onderzocht
+      required_status: true
+      references:
+        invulhulp: de_d.ongelijk
+    - task: Toelichting
+      description: Beschrijf welk onderscheid ontstaat, tussen welke groepen, en waaruit dat blijkt.
+      id: "4.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.1.1"
+          operator: any
+        action: show
+    - task: >-
+        Bevat de data kenmerken die als indirecte aanduiding (proxy) van een beschermd kenmerk kunnen werken?
+      description: >-
+        Postcode, naam, geboorteland van een ouder, taalvoorkeur en type inkomen kunnen alle als proxy fungeren voor herkomst, etniciteit of sociaal-economische positie. Het weglaten van het beschermde kenmerk zelf haalt het onderscheid er dus niet uit.
+      id: "4.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_d.proxy
+    - task: Is op ongelijke uitkomsten tussen groepen getoetst?
+      id: "4.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, met een kwantitatieve analyse van de uitkomsten per groep
+      - value: Ja, kwalitatief beoordeeld
+      - value: Nee, nog niet getoetst
+      - value: Nee, en toetsing is niet mogelijk omdat de benodigde kenmerken ontbreken
+      required_status: true
+      references:
+        invulhulp: de_d.getoetst
+    - task: Toelichting
+      description: Beschrijf de methode en de uitkomst, of waarom toetsing niet mogelijk is.
+      id: "4.1.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.1.3"
+          operator: any
+        action: show
+    - task: Zijn de lasten en baten eerlijk verdeeld?
+      description: >-
+        Wie draagt het risico van een fout, en wie plukt de vruchten van de verwerking? Als die twee niet dezelfde groep zijn, verdient dat expliciete verantwoording.
+      id: "4.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_d.verdeling
+    - task: Wie draagt de gevolgen van een fout, en hoe wordt die hersteld?
+      description: >-
+        Beschrijf hoe een fout aan het licht komt, hoe snel die wordt hersteld, en of de betrokkene daarvoor zelf in actie moet komen.
+      id: "4.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_d.fout
+  - task: Eindafweging
+    id: "4.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welk dilemma of welke twijfel is bij deze toets blijven staan?
+      description: >-
+        Een toets zonder resterende twijfel is meestal een toets die niet diep genoeg is gegaan. Benoem waar de discussie over ging en welke argumenten tegenover elkaar stonden.
+      id: "4.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_d.dilemma
+    - task: Wie hebben aan deze toets deelgenomen?
+      description: >-
+        Noem rollen en perspectieven. Vermeld ook of betrokkenen of hun vertegenwoordigers zelf zijn geraadpleegd (AVG art. 35 lid 9).
+      id: "4.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_d.deelnemers
+    - task: Onder welke voorwaarden is de verwerking ethisch verantwoord?
+      description: Formuleer de voorwaarden zo dat later controleerbaar is of ze zijn nagekomen.
+      id: "4.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: de_d.voorwaarden
+    - task: Eindoordeel van de data-ethiektoets
+      id: "4.2.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Verantwoord — geen aanvullende voorwaarden
+      - value: Verantwoord onder de genoemde voorwaarden
+      - value: Nog niet verantwoord — eerst aanvullend onderzoek of aanpassing nodig
+      - value: Niet verantwoord — de verwerking moet worden heroverwogen
+      required_status: true
+      references:
+        invulhulp: de_d.oordeel
+    - task: Toelichting
+      description: Onderbouw het eindoordeel en benoem wie het vaststelt.
+      id: "4.2.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.2.4"
+          operator: any
+        action: show
+    - task: Wanneer wordt deze toets opnieuw gedaan?
+      description: >-
+        Noem zowel een termijn als de gebeurtenissen die eerder aanleiding geven: uitbreiding van het gebruik, nieuwe databron, of signalen over ongelijke uitkomsten.
+      id: "4.2.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: de_d.herijking

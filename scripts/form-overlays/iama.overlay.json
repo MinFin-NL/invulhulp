@@ -1,17 +1,15 @@
 {
-  "_comment": "Hand-authored overlay for the IAMA converter. Carries everything the upstream MinBZK YAML does NOT contain: our presentation (meta/homeContent), AI hints, feature flags, and the mapping of the upstream IAMA 'Delen' into our A/B/C/D/summary sections. scripts/convert-form.mjs merges this with vendor/par-dpia-form/iama.yaml (= upstream sources/iama.yaml, Impact Assessment Mensenrechten en Algoritmes v2). NOTE: the IAMA is a NEW, SEPARATE form (id 'iama') that sits ALONGSIDE the hand-written MinFin AIIA (id 'aiia') — it does not replace it. The IAMA is a grondrechten-dialoog instrument; it has no risk-classification or decision-gate, so those bespoke AIIA features (riskClassification/decisionGate/conditionalPartB) are simply not part of this form and are OFF. IAMA 'Deel 0 (Inleiding)' is intentionally omitted (informational only) and its content lives in homeContent. Because IAMA's top level is coarse ('Deel 1-5'), the overlay lists the SECOND-level themes as subsections. See docs/SCHEMA_HARMONIZATION.md.",
+  "_comment": "Hand-authored overlay for the IAMA converter. Carries everything the upstream MinBZK YAML does NOT contain: our presentation (meta/homeContent), AI hints, feature flags, and the mapping of the upstream IAMA 'Delen' into our A/B/C/D/summary sections. scripts/convert-form.mjs merges this with vendor/instrument-registry/assessments/iama.yaml. NOTE: the IAMA is a NEW, SEPARATE form (id 'iama') that sits ALONGSIDE the hand-written MinFin AIIA (id 'aiia') — it does not replace it. The IAMA is a grondrechten-dialoog instrument; it has no risk-classification or decision-gate, so those bespoke AIIA features (riskClassification/decisionGate/conditionalPartB) are simply not part of this form and are OFF. IAMA 'Deel 0 (Inleiding)' is intentionally omitted (informational only) and its content lives in homeContent. Because IAMA's top level is coarse ('Deel 1-5'), the overlay lists the SECOND-level themes as subsections. See docs/SCHEMA_HARMONIZATION.md.",
   "form": {
     "id": "iama",
-    "version": "2.0",
-    "urn": "urn:nl:minfin:tr:iama:2.0",
     "registryUrn": "urn:nl:aivt:tr:iama:1.0",
     "title": "Impact Assessment Mensenrechten en Algoritmes (IAMA)",
     "source": {
-      "instrument": "Impact Assessment Mensenrechten en Algoritmes (IAMA, urn:nl:iama)",
+      "instrument": "Impact Assessment Mensenrechten en Algoritmes (IAMA) (urn:nl:minbzk:ir:iama:2.0)",
       "publisher": "Ministerie van Binnenlandse Zaken en Koninkrijksrelaties",
       "version": "2",
-      "url": "https://github.com/MinBZK/par-dpia-form",
-      "reference": "vendor/par-dpia-form/iama.yaml (upstream sources/iama.yaml, commit 3d76a6d5da166b0dc089ca80740ac7be64fb7ab8)",
+      "url": "https://github.com/MinBZK/instrument-registry",
+      "reference": "vendor/instrument-registry/assessments/iama.yaml (MinBZK/instrument-registry v0.1.0, zie vendor/instrument-registry/PROVENANCE.md)",
       "derivation": "generated",
       "note": "Gegenereerd met `npm run forms:build`; niet handmatig bewerken. Elke vraag draagt de upstream task-id als officialId. Zie docs/SCHEMA_HARMONIZATION.md."
     },
@@ -47,31 +45,61 @@
       "id": "iama_1",
       "title": "Deel 1: Waarom?",
       "part": "A",
-      "paragraphs": ["1.1", "1.2", "1.3", "1.4"]
+      "paragraphs": [
+        "1.1",
+        "1.2",
+        "1.3",
+        "1.4"
+      ]
     },
     {
       "id": "iama_2",
       "title": "Deel 2: Wat?",
       "part": "B",
-      "paragraphs": ["2.1", "2.2A", "2.2B", "2.3", "2.4", "2.5"]
+      "paragraphs": [
+        "2.1",
+        "2.2A",
+        "2.2B",
+        "2.3",
+        "2.4",
+        "2.5"
+      ]
     },
     {
       "id": "iama_3",
       "title": "Deel 3: Hoe?",
       "part": "C",
-      "paragraphs": ["3.1", "3.2", "3.3", "3.4", "3.5"]
+      "paragraphs": [
+        "3.1",
+        "3.2",
+        "3.3",
+        "3.4",
+        "3.5"
+      ]
     },
     {
       "id": "iama_4",
       "title": "Deel 4: Mensenrechten",
       "part": "D",
-      "paragraphs": ["4.1.1", "4.1.2", "4.1.3", "4.2", "4.3", "4.4", "4.5"]
+      "paragraphs": [
+        "4.1.1",
+        "4.1.2",
+        "4.1.3",
+        "4.2",
+        "4.3",
+        "4.4",
+        "4.5"
+      ]
     },
     {
       "id": "iama_5",
       "title": "Deel 5: Afsluiting",
       "part": "summary",
-      "paragraphs": ["5.A", "5.B", "5.C"]
+      "paragraphs": [
+        "5.A",
+        "5.B",
+        "5.C"
+      ]
     }
   ]
 }

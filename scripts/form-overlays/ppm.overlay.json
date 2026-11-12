@@ -1,0 +1,399 @@
+{
+  "_comment": "Overlay voor ppm: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/ppm.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "ppm",
+    "title": "PPM Projectplan",
+    "source": {
+      "instrument": "PPM-Projectplan 2.0",
+      "publisher": "Ministerie van Financiën",
+      "version": "2.0",
+      "reference": "Intern projectmanagement-sjabloon (inleiding & doelstelling, projectresultaat & scope, organisatie & communicatie, projectaanpak, budget, risico's, oplossing, risico- en impactanalyses)",
+      "derivation": "original",
+      "note": "Digitalisering van het eigen projectplansjabloon (versie 2.0); geen extern origineel. De export 'origineel format' vult het Word-sjabloon zelf in."
+    },
+    "aiContext": "Dit is een PPM-projectplan voor het Ministerie van Financiën: het beschrijft aanleiding en doelstelling, projectresultaat en scope, projectorganisatie en communicatie, aanpak en planning, budget, risico's en toleranties, de op te leveren oplossing en de uitgevoerde risico- en impactanalyses. Schrijf in formele projectmanagementtermen.",
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "PPM Projectplan",
+      "docTitle": "PPM Projectplan",
+      "footerLabel": "PPM Projectplan – MinFin",
+      "filename": "PPM-Projectplan.pdf",
+      "systemNamePlaceholder": "Bijv. Vervanging declaratiesysteem",
+      "homeContent": {
+        "notice": "Het projectplan vereist goedkeuring van de opdrachtgever, manager planning resources (business en IT), PSA-architect, informatiebeveiliging (CISO/ISO), privacy officer en controller. Stem de planning af met alle betrokkenen voorafgaand aan indiening bij portfoliomanagement.",
+        "description": "Het PPM Projectplan (versie 2.0) legt vast waarom het project er is, wat het oplevert, hoe het wordt aangepakt en georganiseerd, wat het kost en welke risico's en analyses erbij horen. Het is één van de verplichte documenten bij de start van een project in het projectportfolioproces van MinFin en vormt de basis voor sturing door de stuurgroep.",
+        "steps": [
+          "Voorblad en colofon: projectnaam, versie, auteurs en revisiegegevens",
+          "Inleiding & doelstelling: aanleiding, doelstelling en overwogen opties",
+          "Projectresultaat & scope: resultaat, scope, randvoorwaarden en afhankelijkheden",
+          "Organisatie & communicatie: projectorganisatie, stakeholders, besluitvorming, resources en communicatie",
+          "Projectaanpak: aanpak, fasering, planning en mijlpalen",
+          "Budget: baten en kosten",
+          "Risico's en beheersfactoren: projectrisico's en toleranties",
+          "Omschrijving van de oplossing: eindproduct, maatregelen, impact en exitstrategie",
+          "Risico- en impactanalyses: welke analyses zijn opgesteld, met toelichting"
+        ],
+        "buttonLabel": "Starten met het projectplan"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "ppm_0"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ppm_1"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ppm_2"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ppm_3"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ppm_4"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ppm_5"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ppm_6"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ppm_7"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ppm_8"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "ppm_0",
+        "part": "A",
+        "kicker": "Documentgegevens",
+        "subsections": [
+          {
+            "id": "ppm_0a",
+            "questions": [
+              {
+                "id": "ppm_0.naam_project"
+              },
+              {
+                "id": "ppm_0.versie",
+                "aiFill": false
+              },
+              {
+                "id": "ppm_0.datum",
+                "aiFill": false
+              },
+              {
+                "id": "ppm_0.status",
+                "aiFill": false
+              },
+              {
+                "id": "ppm_0.auteurs",
+                "aiFill": false
+              },
+              {
+                "id": "ppm_0.bijlagen",
+                "aiFill": false
+              },
+              {
+                "id": "ppm_0.inlichtingen",
+                "aiFill": false
+              },
+              {
+                "id": "ppm_0.revisies",
+                "aiFill": false,
+                "columns": [
+                  {
+                    "id": "versie"
+                  },
+                  {
+                    "id": "datum"
+                  },
+                  {
+                    "id": "status"
+                  },
+                  {
+                    "id": "wie"
+                  },
+                  {
+                    "id": "omschrijving"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ppm_1",
+        "part": "A",
+        "kicker": "Hoofdstuk 1",
+        "subsections": [
+          {
+            "id": "ppm_1a",
+            "questions": [
+              {
+                "id": "ppm_a.achtergrond"
+              },
+              {
+                "id": "ppm_a.doelstellingen"
+              },
+              {
+                "id": "ppm_b.overwogen_opties"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ppm_2",
+        "part": "A",
+        "kicker": "Hoofdstuk 2",
+        "subsections": [
+          {
+            "id": "ppm_2a",
+            "questions": [
+              {
+                "id": "ppm_2.projectresultaat"
+              },
+              {
+                "id": "ppm_a.scope"
+              },
+              {
+                "id": "ppm_2.randvoorwaarden"
+              },
+              {
+                "id": "ppm_a.beperkingen"
+              },
+              {
+                "id": "ppm_a.afhankelijkheden"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ppm_3",
+        "part": "A",
+        "kicker": "Hoofdstuk 3",
+        "subsections": [
+          {
+            "id": "ppm_3a",
+            "questions": [
+              {
+                "id": "ppm_d.projectmanagement",
+                "allowAttachments": true
+              },
+              {
+                "id": "ppm_d.stakeholders"
+              },
+              {
+                "id": "ppm_3.besluitvorming"
+              },
+              {
+                "id": "ppm_3.resources",
+                "notesLabel": "Toelichting",
+                "columns": [
+                  {
+                    "id": "rol"
+                  },
+                  {
+                    "id": "soort"
+                  },
+                  {
+                    "id": "herkomst"
+                  },
+                  {
+                    "id": "tijdsindicatie"
+                  }
+                ]
+              },
+              {
+                "id": "ppm_3.communicatie"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ppm_4",
+        "part": "A",
+        "kicker": "Hoofdstuk 4",
+        "subsections": [
+          {
+            "id": "ppm_4a",
+            "questions": [
+              {
+                "id": "ppm_c.gekozen_aanpak"
+              },
+              {
+                "id": "ppm_b.fasering",
+                "allowAttachments": true
+              },
+              {
+                "id": "ppm_4.planning",
+                "allowAttachments": true
+              },
+              {
+                "id": "ppm_a.eindresultaten",
+                "columns": [
+                  {
+                    "id": "milestone"
+                  },
+                  {
+                    "id": "datum"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ppm_5",
+        "part": "A",
+        "kicker": "Hoofdstuk 5",
+        "subsections": [
+          {
+            "id": "ppm_5a",
+            "questions": [
+              {
+                "id": "ppm_5.baten"
+              },
+              {
+                "id": "ppm_5.kosten"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ppm_6",
+        "part": "A",
+        "kicker": "Hoofdstuk 6",
+        "subsections": [
+          {
+            "id": "ppm_6a",
+            "questions": [
+              {
+                "id": "ppm_6.risicos",
+                "notesLabel": "Toelichting",
+                "columns": [
+                  {
+                    "id": "risico"
+                  },
+                  {
+                    "id": "kans"
+                  },
+                  {
+                    "id": "impact"
+                  },
+                  {
+                    "id": "beheersmaatregel"
+                  }
+                ]
+              },
+              {
+                "id": "ppm_6.toleranties",
+                "notesLabel": "Toelichting",
+                "columns": [
+                  {
+                    "id": "aspect"
+                  },
+                  {
+                    "id": "tolerantie"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ppm_7",
+        "part": "A",
+        "kicker": "Hoofdstuk 7",
+        "subsections": [
+          {
+            "id": "ppm_7a",
+            "questions": [
+              {
+                "id": "ppm_e.doel_eindproduct"
+              },
+              {
+                "id": "ppm_7.maatregelen"
+              },
+              {
+                "id": "ppm_7.impact_gebruikers"
+              },
+              {
+                "id": "ppm_7.impact_techniek"
+              },
+              {
+                "id": "ppm_c.beheeromgeving"
+              },
+              {
+                "id": "ppm_7.exitstrategie"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ppm_8",
+        "part": "A",
+        "kicker": "Hoofdstuk 8",
+        "subsections": [
+          {
+            "id": "ppm_8a",
+            "questions": [
+              {
+                "id": "ppm_8.analyses",
+                "minRows": 8,
+                "columns": [
+                  {
+                    "id": "document",
+                    "type": "suggest"
+                  },
+                  {
+                    "id": "wel_niet"
+                  },
+                  {
+                    "id": "verantwoordelijke"
+                  },
+                  {
+                    "id": "conclusie"
+                  }
+                ]
+              },
+              {
+                "id": "ppm_8.toelichting"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

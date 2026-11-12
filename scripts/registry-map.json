@@ -1,0 +1,26 @@
+{
+  "_comment": "Form id (our FormId, never renamed: stored answers are keyed on it) -> file in MinBZK/instrument-registry assessments/. `generated` forms are built by the lossy upstream converter (no references.invulhulp back-links); `merged` forms keep our structure from the overlay and take their content from the registry by references.invulhulp.",
+  "forms": {
+    "intake": "intake.yaml",
+    "aanbiedingsformulier": "aanbiedingsformulier.yaml",
+    "ppm": "ppm.yaml",
+    "psa": "psa.yaml",
+    "quickscan": "quickscan.yaml",
+    "prescandpia": "prescan.yaml",
+    "dpia": "dpia.yaml",
+    "aiia": "aiia_minfin.yaml",
+    "iama": "iama.yaml",
+    "euaiact": "euaiact.yaml",
+    "dataethiek": "dataethiek.yaml",
+    "ihhtoets": "ihhtoets.yaml",
+    "cloudtoets": "cloudtoets.yaml",
+    "datakwaliteit": "datakwaliteit.yaml",
+    "datasetregistratie": "datasetregistratie.yaml",
+    "modelcard": "modelcard.yaml",
+    "algoritmeregister": "algoritmeregister.yaml",
+    "verwerkingsregister": "verwerkingsregister.yaml",
+    "toegankelijkheid": "toegankelijkheid.yaml",
+    "restrisico": "restrisico.yaml"
+  },
+  "generated": ["dpia", "prescandpia", "iama"]
+}

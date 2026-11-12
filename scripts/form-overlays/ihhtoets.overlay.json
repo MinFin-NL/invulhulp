@@ -1,0 +1,229 @@
+{
+  "_comment": "Overlay voor ihhtoets: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/ihhtoets.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "ihhtoets",
+    "title": "IHH-toets",
+    "aiContext": "Dit is de Informatiehuishoudingstoets bij IV-verzoeken (IHH-toets) van het Ministerie van Financiën (CDIO/Informatiehuishouding). De toets brengt in beeld welke maatregelen of functionaliteiten nodig zijn om overheidsinformatie in de beoogde applicatie of het beoogde systeem duurzaam toegankelijk te houden: vindbaar, beschikbaar, leesbaar, interpreteerbaar en betrouwbaar. Het kader is de Archiefwet, RINFIN 2022, NEN-ISO 16175-1:2020 en het DUTO-raamwerk van het Nationaal Archief. Schrijf in termen van informatiebeheer en archivering (selectielijst, bewaartermijn, metadata, migratie, vernietiging, ter beschikking stellen) en niet in privacy- of AI-terminologie. Beschrijf per vraag concreet welke functionaliteit of (werk)afspraak wél of niet aanwezig is; noem waar mogelijk het betrokken proces uit de Selectielijst van het ministerie van Financiën.",
+    "source": {
+      "instrument": "Informatiehuishoudingstoets bij IV-verzoeken (IHH-toets)",
+      "publisher": "Ministerie van Financiën — CDIO, afdeling Informatiehuishouding",
+      "reference": "data/docs/IHH Toets.pdf; gebaseerd op de Archiefwet, RINFIN 2022, NEN-ISO 16175-1:2020 en het DUTO-raamwerk (duurzaam toegankelijke overheidsinformatie) van het Nationaal Archief",
+      "derivation": "harmonized",
+      "note": "Handmatig overgenomen uit het Word/PDF-origineel van CDIO/IHH; de achttien genummerde vragen, hun toelichtingen en de indeling naar DUTO-kernprocessen volgen het origineel woordelijk. De in het origineel dikgedrukte vragen (1, 2, 4, 5, 6, 7, 16 en 17) betreffen functionaliteiten of maatregelen die altijd van belang zijn en staan hier als 'mandatory'. Versie 0.1: nog niet vastgesteld — het origineel draagt zelf geen versienummer, en de toets wordt doorlopen onder begeleiding van een IHH-professional. Het origineel noemt 'NEN-ISO 16715-1:2020'; dat is een verschrijving voor NEN-ISO 16175-1:2020."
+    },
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "IHH-toets",
+      "docTitle": "Informatiehuishoudingstoets bij IV-verzoeken",
+      "footerLabel": "IHH-toets – MinFin",
+      "filename": "IHH-toets.pdf",
+      "systemNamePlaceholder": "Bijv. Zaaksysteem Toeslagen v2",
+      "homeContent": {
+        "notice": "Doorloop deze toets onder begeleiding van een IHH-professional van CDIO/Informatiehuishouding. Niet elke vraag sluit aan op elk IV-verzoek; de IHH-professional helpt bepalen welke vragen van toepassing zijn. De vragen die als verplicht zijn gemarkeerd, betreffen functionaliteiten of maatregelen die altijd van belang zijn voor duurzame toegankelijkheid — daar moet altijd aan worden voldaan.",
+        "description": "Duurzaam toegankelijke overheidsinformatie is onmisbaar voor een betrouwbare en transparante overheid. Duurzame toegankelijkheid betekent dat overheidsinformatie vindbaar, beschikbaar, leesbaar, interpreteerbaar en betrouwbaar blijft, nu en in de toekomst. De IHH-toets brengt aan de hand van concrete vragen in beeld welke maatregelen of functionaliteiten getroffen kunnen of moeten worden om dat in de beoogde applicatie of het beoogde systeem te bevorderen. De toets volgt de kernprocessen van het DUTO-raamwerk van het Nationaal Archief: registreren, bewaren, migreren, vernietigen en ter beschikking stellen.",
+        "steps": [
+          "Deel A – Algemene gegevens: het IV-verzoek, de betrokken processen, bewaartermijnen, archiveringslocatie en rubricering",
+          "Deel B – Omgaan met overheidsinformatie en gebruik van metadata (DUTO: registreren)",
+          "Deel C – Opslaan, archiveren, migreren en vernietigen (DUTO: bewaren, migreren, vernietigen)",
+          "Deel D – Toegang tot overheidsinformatie (DUTO: ter beschikking stellen)"
+        ],
+        "buttonLabel": "Starten met de IHH-toets"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "ihh_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ihh_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ihh_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ihh_d"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "ihh_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "ihha1",
+            "questions": [
+              {
+                "id": "ihh_a.naam_project"
+              },
+              {
+                "id": "ihh_a.topdesk"
+              },
+              {
+                "id": "ihh_a.datum"
+              },
+              {
+                "id": "ihh_a.opdrachtgever"
+              },
+              {
+                "id": "ihh_a.projectleider"
+              }
+            ]
+          },
+          {
+            "id": "ihha2",
+            "questions": [
+              {
+                "id": "ihh_a.processen"
+              },
+              {
+                "id": "ihh_a.bewaartermijn"
+              },
+              {
+                "id": "ihh_a.archiveringslocatie",
+                "followUp": "Licht toe waar de overheidsinformatie/-gegevens, na creatie en/of gebruik, gearchiveerd worden."
+              },
+              {
+                "id": "ihh_a.gerubriceerd",
+                "followUp": "Geef toelichting bij antwoord — om welke rubricering gaat het en welke maatregelen zijn daarvoor voorzien?"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ihh_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "ihhb1",
+            "questions": [
+              {
+                "id": "ihh_b.1",
+                "followUp": "Geef toelichting bij antwoord…"
+              },
+              {
+                "id": "ihh_b.2",
+                "followUp": "Geef toelichting bij antwoord…"
+              }
+            ]
+          },
+          {
+            "id": "ihhb2",
+            "questions": [
+              {
+                "id": "ihh_b.3",
+                "followUp": "Geef toelichting bij antwoord…"
+              },
+              {
+                "id": "ihh_b.4",
+                "followUp": "Geef toelichting bij antwoord…"
+              },
+              {
+                "id": "ihh_b.5",
+                "followUp": "Geef toelichting bij antwoord…"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ihh_c",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "ihhc1",
+            "questions": [
+              {
+                "id": "ihh_b.6",
+                "followUp": "Geef toelichting bij antwoord…"
+              },
+              {
+                "id": "ihh_b.7",
+                "followUp": "Geef toelichting bij antwoord…"
+              },
+              {
+                "id": "ihh_b.8",
+                "followUp": "Geef toelichting bij antwoord…"
+              },
+              {
+                "id": "ihh_b.9",
+                "followUp": "Geef toelichting bij antwoord…"
+              },
+              {
+                "id": "ihh_b.10",
+                "followUp": "Geef toelichting bij antwoord…"
+              }
+            ]
+          },
+          {
+            "id": "ihhc2",
+            "questions": [
+              {
+                "id": "ihh_b.11",
+                "followUp": "Geef toelichting bij antwoord…"
+              },
+              {
+                "id": "ihh_b.12",
+                "followUp": "Geef toelichting bij antwoord…"
+              },
+              {
+                "id": "ihh_b.13",
+                "followUp": "Geef toelichting bij antwoord…"
+              }
+            ]
+          },
+          {
+            "id": "ihhc3",
+            "questions": [
+              {
+                "id": "ihh_b.14",
+                "followUp": "Geef toelichting bij antwoord…"
+              },
+              {
+                "id": "ihh_b.15",
+                "followUp": "Geef toelichting bij antwoord…"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ihh_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "ihhd1",
+            "questions": [
+              {
+                "id": "ihh_b.16",
+                "followUp": "Geef toelichting bij antwoord…"
+              },
+              {
+                "id": "ihh_b.17",
+                "followUp": "Geef toelichting bij antwoord — hoe worden autorisatie- en toegangsbeperkingen toegepast?"
+              },
+              {
+                "id": "ihh_b.18",
+                "followUp": "Geef toelichting bij antwoord…"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

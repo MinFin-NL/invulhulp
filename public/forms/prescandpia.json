@@ -1,14 +1,14 @@
 {
   "id": "prescandpia",
   "version": "2.0",
-  "urn": "urn:nl:minfin:tr:prescandpia:2.0",
+  "urn": "urn:nl:minbzk:ir:prescan:2.0",
   "title": "Pre-scan DPIA",
   "source": {
-    "instrument": "Pre-scan DPIA (urn:nl:prescan)",
+    "instrument": "Pre-scan DPIA (urn:nl:minbzk:ir:prescan:2.0)",
     "publisher": "Ministerie van Binnenlandse Zaken en Koninkrijksrelaties",
     "version": "2.0",
-    "url": "https://github.com/MinBZK/par-dpia-form",
-    "reference": "vendor/par-dpia-form/prescandpia.yaml (upstream sources/prescan.yaml, commit 3d76a6d5da166b0dc089ca80740ac7be64fb7ab8)",
+    "url": "https://github.com/MinBZK/instrument-registry",
+    "reference": "vendor/instrument-registry/assessments/prescan.yaml (MinBZK/instrument-registry v0.1.0, zie vendor/instrument-registry/PROVENANCE.md)",
     "derivation": "generated",
     "note": "Gegenereerd met `npm run forms:build`; niet handmatig bewerken. Elke vraag draagt de upstream task-id als officialId. Zie docs/SCHEMA_HARMONIZATION.md."
   },
@@ -88,7 +88,7 @@
               "text": "Beschrijving van de verwerking",
               "type": "text",
               "importance": "optional",
-              "guidance": "Geef een korte beschrijving van de verwerking of het geheel van verwerkingen: om welk proces/systeem/applicatie gaat het. Besteed daarbij aandacht aan de context waarin de verwerking plaatsvindt, door wie, waar, waarom en hoe. Om wat voor bedrijfsproces(sen) gaat het en om hoeveel gegevens over wie. Deze input kun je hergebruiken voor paragraaf 1 van het Model DPIA Rijksdienst (https://www.kcbr.nl/sites/default/files/2023-09/Model%20DPIA%20Rijksdienst%20v3.0.pdf).\nBeschrijf het proces waar de beoogde verwerkingen van persoonsgegevens deel van uitmaken. Noem daarbij de stappen op hoofdlijnen, betrokken partijen, en welke systemen of applicaties gebruikt zullen worden."
+              "guidance": "Geef een korte beschrijving van de verwerking of het geheel van verwerkingen: om welk proces/systeem/applicatie gaat het. Besteed daarbij aandacht aan de context waarin de verwerking plaatsvindt, door wie, waar, waarom en hoe. Om wat voor bedrijfsproces(sen) gaat het en om hoeveel gegevens over wie. Deze input kun je hergebruiken voor paragraaf 1 van het Model DPIA Rijksdienst (https://www.kcbr.nl/sites/default/files/2026-08/088_T1_20260818%20Model%20DPIA%20Rijksdienst.pdf).\nBeschrijf het proces waar de beoogde verwerkingen van persoonsgegevens deel van uitmaken. Noem daarbij de stappen op hoofdlijnen, betrokken partijen, en welke systemen of applicaties gebruikt zullen worden."
             },
             {
               "id": "d0.3",
@@ -96,7 +96,7 @@
               "text": "Doel gegevensverwerking",
               "type": "text",
               "importance": "optional",
-              "guidance": "Welk doel wil de organisatie bereiken met de gegevensverwerking? Dit kan hergebruikt worden in paragraaf 5 van het Model DPIA Rijksdienst (https://www.kcbr.nl/sites/default/files/2023-09/Model%20DPIA%20Rijksdienst%20v3.0.pdf)."
+              "guidance": "Welk doel wil de organisatie bereiken met de gegevensverwerking? Dit kan hergebruikt worden in paragraaf 5 van het Model DPIA Rijksdienst (https://www.kcbr.nl/sites/default/files/2026-08/088_T1_20260818%20Model%20DPIA%20Rijksdienst.pdf)."
             },
             {
               "id": "d0.4",
@@ -112,7 +112,7 @@
                 "Rechtsgrond gerechtvaardigd belang"
               ],
               "importance": "optional",
-              "guidance": "De grondslag kan gebruikt worden voor paragraaf 11 van het Model DPIA Rijksdienst (https://www.kcbr.nl/sites/default/files/2023-09/Model%20DPIA%20Rijksdienst%20v3.0.pdf)."
+              "guidance": "De grondslag kan gebruikt worden voor paragraaf 11 van het Model DPIA Rijksdienst (https://www.kcbr.nl/sites/default/files/2026-08/088_T1_20260818%20Model%20DPIA%20Rijksdienst.pdf)."
             },
             {
               "id": "d0.5.1",
@@ -231,7 +231,7 @@
               "importance": "optional",
               "visibleIf": {
                 "questionId": "d1.1.2",
-                "equals": "'Categorie gewone persoonsgegevens: Overige'"
+                "equals": "Categorie gewone persoonsgegevens: Overige"
               }
             }
           ]
@@ -341,7 +341,7 @@
               "importance": "optional",
               "visibleIf": {
                 "questionId": "d1.4.1",
-                "equals": "'Categorie betrokkenen: Specificatie categorie betrokkenen (bijv. vanuit uitvoeringswetgeving)'"
+                "equals": "Categorie betrokkenen: Specificatie categorie betrokkenen (bijv. vanuit uitvoeringswetgeving)"
               }
             }
           ],

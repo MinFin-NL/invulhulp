@@ -1,0 +1,381 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: EU AI Act Compliance Checklist
+urn: urn:nl:minfin:ir:euaiact:0.1
+version: '0.1'
+description: >-
+  De EU AI Act Compliance Checklist helpt bij het classificeren van een AI-systeem onder de AI-verordening (Verordening (EU) 2024/1689) en het cumulatief nalopen van de bijbehorende verplichtingen. De checklist is gebaseerd op de AI Body of Knowledge (Template 3, EU AI Act Compliance Checklist) en geharmoniseerd met het EU-conformiteitsverklaring-instrument van het MinBZK task-registry (urn:nl:aivt:tr:ca:1.0).
+
+  Bron: AI Body of Knowledge (AI-BOK) — Template 3: EU AI Act Compliance Checklist (Jan Willem van Veen, versie v1.0 (2026)). https://github.com/MinBZK/task-registry/blob/main/instruments/conformity_assessment_eu_ai_act.yaml AI-BOK-templates mogen vrij worden gebruikt en aangepast (p. 204), met bronvermelding. De velden van de EU-conformiteitsverklaring dragen hun URN als officialId.
+tasks:
+- task: Systeemidentificatie en risicoclassificatie
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 1. Systeem- en organisatiegegevens
+    description: >-
+      Leg de kerngegevens van het AI-systeem en de betrokken partijen vast. Deze gegevens vormen tevens de basis van de EU-conformiteitsverklaring (Deel D, punt 1 en 2).
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Naam en type van het AI-systeem
+      description: >-
+        Vermeld de naam en het type van het AI-systeem, evenals eventuele aanvullende ondubbelzinnige verwijzingen waarmee het systeem kan worden geïdentificeerd en getraceerd (versienummer, referentie). Bron: bijlage V punt 1 AI-verordening.
+      id: "1.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: eaa_a.systeemnaam
+        officialId: urn:nl:aivt:tr:ca:1.0:1.0
+    - task: Naam en adres van de aanbieder (en indien van toepassing de gemachtigde)
+      description: >-
+        De 'aanbieder' (provider) is de partij die het AI-systeem ontwikkelt of laat ontwikkelen en onder eigen naam in de handel brengt. Bron: art. 3 en bijlage V punt 2 AI-verordening.
+      id: "1.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: eaa_a.aanbieder
+        officialId: urn:nl:aivt:tr:ca:1.0:2.0
+    - task: In welke rol vult uw organisatie deze checklist in?
+      description: >-
+        De AI-verordening onderscheidt de aanbieder (provider) en de gebruiksverantwoordelijke (deployer). De verplichtingen verschillen per rol.
+      id: "1.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Aanbieder (provider)
+      - value: Gebruiksverantwoordelijke (deployer)
+      - value: Zowel aanbieder als gebruiksverantwoordelijke
+      - value: Anders / nog te bepalen
+      required_status: true
+      references:
+        invulhulp: eaa_a.rol
+    - task: Beoogd doel en werking van het AI-systeem
+      description: >-
+        Beschrijf beknopt waarvoor het systeem wordt ingezet, welke output het genereert (voorspelling, aanbeveling, besluit) en in welke context.
+      id: "1.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: eaa_a.doel
+    - task: Bijlagen
+      id: "1.1.4-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "1.1.4-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Naam en functie opsteller
+      id: "1.1.5"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: eaa_a.opsteller
+    - task: Datum van de beoordeling
+      id: "1.1.6"
+      type:
+      - date
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: eaa_a.datum
+  - task: 2. Verboden praktijken (onaanvaardbaar risico)
+    description: >-
+      AI-systemen met een onaanvaardbaar risico zijn verboden onder artikel 5 AI-verordening en mogen niet worden ingezet. Controleer eerst of het systeem buiten deze categorie valt.
+    id: "1.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Bevestig dat het systeem geen verboden praktijk toepast (vink aan wat is geverifieerd)
+      description: >-
+        Komt overeen met de items O1–O3 van de AI Body of Knowledge checklist en artikel 5 AI-verordening. Als een van deze praktijken van toepassing is, is het systeem verboden.
+      id: "1.2.1"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: O1 — Geverifieerd dat het systeem geen subliminale of manipulatieve technieken toepast die schade veroorzaken
+      - value: O2 — Geverifieerd dat het systeem geen social scoring door of namens overheden uitvoert
+      - value: O3 — Geverifieerd dat het systeem geen real-time biometrische identificatie op afstand in de openbare ruimte toepast (behoudens een wettelijk toegestane uitzondering, gedocumenteerd met rechtsgrondslag, goedkeuring en beperking in tijd en plaats)
+      required_status: true
+      references:
+        invulhulp: eaa_a.verboden_uitgesloten
+    - task: Toelichting bij de verboden-praktijken-toets
+      description: >-
+        Beschrijf, indien van toepassing, de wettelijke uitzondering en de documentatie (rechtsgrondslag, goedkeuring, beperking in tijd en plaats).
+      id: "1.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: eaa_a.verboden_toelichting
+  - task: 3. Risiconiveau
+    description: >-
+      Bepaal het risiconiveau van het AI-systeem onder de AI-verordening. De hoogte van het niveau bepaalt welke delen van deze checklist van toepassing zijn.
+    id: "1.3"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wat is het risiconiveau van het AI-systeem?
+      description: >-
+        Onaanvaardbaar = verboden (art. 5). Hoog = kritieke domeinen zoals bijlage III (HR-selectie, kredietscoring, medische diagnostiek, rechtshandhaving, onderwijs, toegang tot publieke diensten, biometrie) — strikte vereisten. Beperkt = transparantieverplichtingen (chatbots, emotieherkenning, deepfakes, gegenereerde content). Minimaal = geen bijzonder risico (spamfilters, interne aanbevelingen, vertaalhulp).
+      id: "1.3.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Onaanvaardbaar risico — verboden (stop de inzet)
+      - value: Hoog risico (bijlage III / bijlage I) — Deel B, C en D van toepassing
+      - value: Beperkt risico — transparantieplicht — Deel B van toepassing
+      - value: Minimaal risico — Deel B (minimaal) van toepassing
+      - value: Nader te bepalen
+      required_status: true
+      references:
+        invulhulp: eaa_a.risiconiveau
+    - task: Onderbouwing van de risicoclassificatie
+      description: >-
+        Motiveer waarom het systeem in het gekozen risiconiveau valt, met verwijzing naar de betreffende bijlage of artikelen van de AI-verordening.
+      id: "1.3.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: eaa_a.risiconiveau_onderbouwing
+- task: Basis- en transparantieverplichtingen
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 4. Minimaal risico — basisverplichtingen (M1–M5)
+    description: Van toepassing op alle AI-systemen. Vink de items aan die zijn gerealiseerd.
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Basisverplichtingen (minimaal risico)
+      description: Komt overeen met M1–M5 van de AI Body of Knowledge checklist.
+      id: "2.1.1"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: M1 — Het systeem is geregistreerd in het AI-register van de organisatie
+      - value: M2 — Er is een eigenaar aangewezen die verantwoordelijk is voor het systeem
+      - value: M3 — Basisdocumentatie is opgesteld (doel, werking, beperkingen)
+      - value: M4 — Medewerkers zijn geïnformeerd dat zij met een AI-systeem werken
+      - value: M5 — Er is een procedure voor het melden van incidenten of ongewenste resultaten
+      required_status: true
+      references:
+        invulhulp: eaa_b.minimaal
+    - task: Opmerkingen bij de basisverplichtingen
+      id: "2.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: eaa_b.minimaal_toelichting
+  - task: 5. Beperkt risico — transparantieverplichtingen (B1–B8)
+    description: >-
+      Van toepassing op AI-systemen met transparantieverplichtingen (o.a. chatbots, emotieherkenning, deepfakes, gegenereerde content). Cumulatief: de items uit 'minimaal risico' (M1–M5) gelden ook.
+    id: "2.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Transparantieverplichtingen (beperkt risico)
+      description: >-
+        Komt overeen met B1–B8 van de AI Body of Knowledge checklist en de transparantieplichten van de AI-verordening.
+      id: "2.2.1"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: B1 — Alle items uit 'minimaal risico' (M1–M5) zijn afgerond
+      - value: B2 — Gebruikers worden actief geïnformeerd dat zij met een AI-systeem interacteren
+      - value: B3 — Door AI gegenereerde content is als zodanig herkenbaar gelabeld
+      - value: B4 — Bij emotieherkenning of biometrische categorisering zijn de betrokkenen geïnformeerd
+      - value: B5 — Bij deepfakes of synthetische content is een duidelijke markering aangebracht
+      - value: B6 — Er is een privacybeoordeling uitgevoerd op de gebruikte gegevens
+      - value: B7 — De gedragscode van de organisatie inzake AI is toegepast
+      - value: B8 — Een periodieke evaluatie is ingepland (ten minste jaarlijks)
+      required_status: true
+      references:
+        invulhulp: eaa_b.beperkt
+    - task: Opmerkingen bij de transparantieverplichtingen
+      id: "2.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: eaa_b.beperkt_toelichting
+- task: Hoog-risico verplichtingen
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 6. Hoog risico — verplichtingen (H1–H15)
+    description: >-
+      Van toepassing op hoog-risico AI-systemen (kritieke domeinen zoals bijlage III). Cumulatief: de items uit 'minimaal' en 'beperkt' risico gelden ook. Alleen invullen als het risiconiveau in Deel A op 'hoog risico' is bepaald.
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Verplichtingen voor hoog-risico AI-systemen
+      description: >-
+        Komt overeen met H1–H15 van de AI Body of Knowledge checklist en hoofdstuk III van de AI-verordening.
+      id: "3.1.1"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: H1 — Alle items uit 'minimaal' en 'beperkt' risico (M1–M5, B1–B8) zijn afgerond
+      - value: H2 — Een risicomanagementsysteem is ingericht en gedocumenteerd voor dit specifieke AI-systeem
+      - value: H3 — Een Data Protection Impact Assessment (DPIA) is uitgevoerd
+      - value: 'H4 — Data governance is ingericht: kwaliteit, representativiteit en traceerbaarheid van trainingsdata zijn geborgd'
+      - value: H5 — Technische documentatie is opgesteld conform bijlage IV AI-verordening
+      - value: H6 — Automatische logging is geïmplementeerd (wie, wat, wanneer, welk resultaat)
+      - value: H7 — Transparantie-informatie is beschikbaar voor gebruikers en gebruiksverantwoordelijken
+      - value: H8 — Menselijk toezicht is geïmplementeerd (human-in-the-loop of human-on-the-loop)
+      - value: H9 — Het systeem voldoet aan eisen voor nauwkeurigheid, robuustheid en cyberbeveiliging
+      - value: H10 — Een conformiteitsbeoordeling is uitgevoerd (intern of door een aangemelde instantie)
+      - value: H11 — Het systeem is geregistreerd in de EU-databank voor hoog-risico AI-systemen
+      - value: H12 — Een plan voor post-market monitoring is opgesteld en geactiveerd
+      - value: H13 — Er is een procedure voor het melden van ernstige incidenten aan toezichthouders
+      - value: H14 — Uitlegbaarheid van beslissingen is geborgd (gebruikers kunnen resultaten begrijpen en aanvechten)
+      - value: H15 — Een kwaliteitsmanagementsysteem is ingericht dat alle bovenstaande elementen borgt
+      required_status: true
+      references:
+        invulhulp: eaa_c.hoog
+    - task: Opmerkingen bij de hoog-risico verplichtingen
+      description: >-
+        Verwijs naar de onderliggende documentatie (risicoregister, technische documentatie bijlage IV, DPIA, monitoringplan).
+      id: "3.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: eaa_c.hoog_toelichting
+    - task: Bijlagen
+      id: "3.1.2-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "3.1.2-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+- task: EU-conformiteitsverklaring (hoog-risico)
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 7. EU-conformiteitsverklaring
+    description: >-
+      Alleen voor hoog-risico AI-systemen. De EU-conformiteitsverklaring wordt onder de uitsluitende verantwoordelijkheid van de aanbieder opgesteld en ondertekend voordat het systeem in de handel wordt gebracht of in gebruik wordt gesteld (art. 47 en bijlage V AI-verordening). Geharmoniseerd met MinBZK task-registry instrument urn:nl:aivt:tr:ca:1.0.
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Verklaringen van de aanbieder (bevestig wat van toepassing is)
+      description: >-
+        Komt overeen met de punten 3, 4 en 5 van de EU-conformiteitsverklaring (urn:nl:aivt:tr:ca:1.0:3.0, :4.0, :5.0). De punten 1 en 2 (identificatie systeem en aanbieder) zijn vastgelegd in Deel A.
+      id: "4.1.1"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: De verklaring wordt verstrekt onder de uitsluitende verantwoordelijkheid van de aanbieder (art. 47)
+      - value: Het AI-systeem is in overeenstemming met de AI-verordening en, in voorkomend geval, met andere desbetreffende Uniewetgeving
+      - value: Indien het systeem persoonsgegevens verwerkt, voldoet het aan Verordeningen (EU) 2016/679 en (EU) 2018/1725 en Richtlijn (EU) 2016/680
+      required_status: true
+      references:
+        invulhulp: eaa_d.verklaringen
+    - task: Referenties van gebruikte geharmoniseerde normen of andere gemeenschappelijke specificaties
+      description: >-
+        Vermeld de geharmoniseerde normen of gemeenschappelijke specificaties waarop de conformiteitsverklaring betrekking heeft. Bron: bijlage V punt 6 AI-verordening.
+      id: "4.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: eaa_d.geharmoniseerde_normen
+        officialId: urn:nl:aivt:tr:ca:1.0:6.0
+    - task: Bijlagen
+      id: "4.1.2-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "4.1.2-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Aangemelde instantie en conformiteitsbeoordelingsprocedure
+      description: >-
+        Vermeld, indien van toepassing, de naam en het identificatienummer van de aangemelde instantie, een beschrijving van de uitgevoerde conformiteitsbeoordelingsprocedure en identificatie van het afgegeven certificaat. Bron: bijlage V punt 7 AI-verordening.
+      id: "4.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: eaa_d.aangemelde_instantie
+        officialId: urn:nl:aivt:tr:ca:1.0:7.0
+    - task: Plaats, datum en ondertekening
+      description: >-
+        Vermeld de plaats en datum van afgifte, de naam en functie van de ondertekenaar, en namens welke persoon of organisatie wordt ondertekend. Bron: bijlage V punt 8 AI-verordening.
+      id: "4.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: eaa_d.ondertekening
+        officialId: urn:nl:aivt:tr:ca:1.0:8.0

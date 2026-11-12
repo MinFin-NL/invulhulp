@@ -1,0 +1,724 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: Dataset-registratie (datasheet)
+urn: urn:nl:minfin:ir:datasetregistratie:1.0
+version: '1.0'
+description: >-
+  Deze registratie legt vast wat een dataset is, waar hij vandaan komt, wat erin zit, onder welke grondslag hij verwerkt wordt en onder welke voorwaarden hij gebruikt mag worden. Het is het overheidsequivalent van een 'datasheet for datasets': de documentatie die nodig is om later, door iemand anders, verantwoord met deze data te kunnen werken. De velden zijn uitgelijnd met DCAT-AP-NL zodat de registratie herbruikbaar is als dataset-metadata.
+
+  Bron: DAMA-DMBOK2 — Data Management Body of Knowledge, 2nd Edition (DAMA International, versie 2nd Edition (2017)). DAMA-DMBOK is een referentiekader zonder invul-template; dit formulier is afgeleid van de daarin beschreven metadata-deliverables. Geen tekst overgenomen. Ontwerpspec: docs/DAMA-DMBOK-form-opportunities.md §4C.
+tasks:
+- task: 'Deel A: Identificatie'
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Basisgegevens
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Naam van de dataset
+      description: >-
+        Gebruik een naam die zelfstandig te begrijpen is, inclusief de periode of versie waar dat onderscheidend is.
+      id: "1.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_a.naam
+    - task: Unieke identificatie
+      description: >-
+        De sleutel waaronder deze dataset in de organisatie of in een catalogus bekend staat (URI, registratienummer of catalogus-id). Vul 'nog niet toegekend' in als die er nog niet is.
+      id: "1.1.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ds_a.identifier
+    - task: Korte omschrijving van de dataset
+      description: >-
+        Twee tot vier zinnen: wat zit erin, over welke objecten of personen gaat het, en welke periode beslaat het? Dit is het veld dat in een datacatalogus wordt getoond.
+      id: "1.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_a.omschrijving
+    - task: Waarvoor is deze dataset oorspronkelijk verzameld?
+      description: >-
+        Het oorspronkelijke doel, niet het huidige gebruik. Het verschil tussen die twee is precies waar doelbinding onder druk komt te staan.
+      id: "1.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_a.doel
+    - task: Waarvoor wordt de dataset nu gebruikt?
+      description: >-
+        Noem alle bekende afnemers en toepassingen, inclusief hergebruik voor analyse of AI. Wijkt dit af van het oorspronkelijke doel, beschrijf dan hoe dat is verantwoord.
+      id: "1.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_a.huidiggebruik
+    - task: Onder welk thema valt de dataset?
+      description: Themacategorie zoals gebruikt in dataregisters (DCAT-AP-NL).
+      id: "1.1.6"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Economie en financiën
+      - value: Bestuur en publieke sector
+      - value: Bevolking en maatschappij
+      - value: Justitie, rechtsstelsel en openbare veiligheid
+      - value: Onderwijs, cultuur en sport
+      - value: Milieu
+      - value: Verkeer en vervoer
+      - value: Gezondheid
+      - value: Wetenschap en technologie
+      - value: Internationale kwesties
+      - value: Landbouw, visserij, bosbouw en voeding
+      - value: Energie
+      - value: Regio's en steden
+      required_status: false
+      references:
+        invulhulp: ds_a.thema
+  - task: Verantwoordelijkheid
+    id: "1.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wie is de data-eigenaar?
+      id: "1.2.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_a.eigenaar
+    - task: Wie is de datasteward of beheerder?
+      id: "1.2.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_a.steward
+    - task: Contactadres voor vragen over deze dataset
+      id: "1.2.3"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ds_a.contact
+    - task: Welke organisatie of organisatieonderdeel is de bronhouder?
+      id: "1.2.4"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_a.organisatie
+- task: 'Deel B: Herkomst en samenstelling'
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Herkomst
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Waar komt de data vandaan (lineage)?
+      description: >-
+        Beschrijf de keten van primaire bron tot deze dataset, inclusief tussenliggende systemen en bewerkingen. Wie levert aan, en op welke manier?
+      id: "2.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_b.herkomst
+    - task: Bijlagen
+      id: "2.1.1-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "2.1.1-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Hoe is de data verzameld?
+      id: "2.1.2"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Opgave door burgers of bedrijven (bijv. aangifte, aanvraag, formulier)
+      - value: Registratie door medewerkers tijdens het proces
+      - value: Automatisch vastgelegd door een systeem (log, sensor, transactie)
+      - value: Overgenomen uit een basisregistratie
+      - value: Aangeleverd door een andere overheidsorganisatie
+      - value: Ingekocht bij een externe partij
+      - value: Afgeleid of berekend uit andere datasets
+      - value: Gegenereerd of gesynthetiseerd
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: ds_b.verzamelwijze
+    - task: Welke periode beslaat de dataset en hoe vaak wordt hij bijgewerkt?
+      description: >-
+        Noem de begin- en einddatum van de inhoud en de actualisatiefrequentie (realtime, dagelijks, maandelijks, eenmalig).
+      id: "2.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_b.periode
+    - task: Welke bewerkingen zijn op de ruwe data uitgevoerd?
+      description: >-
+        Bijv. opschonen, ontdubbelen, koppelen, anonimiseren, pseudonimiseren, filteren, aggregeren of hercoderen. Vermeld ook wat er is weggelaten en waarom — dat bepaalt mede wat de dataset nog representeert.
+      id: "2.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_b.voorbewerking
+    - task: Is de ruwe, onbewerkte data nog beschikbaar?
+      id: "2.1.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, volledig beschikbaar
+      - value: Ja, gedeeltelijk
+      - value: Nee
+      - value: Onbekend
+      required_status: false
+      references:
+        invulhulp: ds_b.ruwebewaard
+  - task: Inhoud en structuur
+    id: "2.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wat is de omvang van de dataset?
+      description: >-
+        Aantal records, aantal attributen en de datavolume-orde. Bij groei: het huidige volume en de groei per periode.
+      id: "2.2.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_b.omvang
+    - task: Wat beschrijft één record?
+      description: >-
+        De eenheid van analyse: één persoon, één aanvraag, één transactie, één meting per tijdstip. Zonder dit veld is geen enkele telling in de dataset interpreteerbaar.
+      id: "2.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_b.eenheid
+    - task: Welke kernattributen bevat de dataset?
+      description: >-
+        Beschrijf de belangrijkste velden, niet noodzakelijk alle. Verwijs voor de volledige structuur naar het datamodel of gegevenswoordenboek.
+      id: "2.2.3"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: ds_b.attributen
+      tasks:
+      - task: Attribuut
+        id: "2.2.3.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ds_b.attributen.attribuut
+      - task: Betekenis
+        id: "2.2.3.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ds_b.attributen.betekenis
+      - task: Datatype
+        id: "2.2.3.3"
+        type:
+        - text_input
+        repeatable: false
+        options:
+        - value: Tekst
+        - value: Getal
+        - value: Datum
+        - value: Boolean
+        - value: Code uit codelijst
+        - value: Identificerend nummer
+        - value: Geometrie
+        - value: Overig
+        references:
+          invulhulp: ds_b.attributen.type
+      - task: Bijzonder?
+        id: "2.2.3.4"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Nee
+        - value: Persoonsgegeven
+        - value: Bijzonder persoonsgegeven
+        - value: Bedrijfsvertrouwelijk
+        references:
+          invulhulp: ds_b.attributen.bijzonder
+    - task: Verwijzing naar het volledige gegevenswoordenboek of datamodel
+      id: "2.2.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: In welk formaat en waar is de dataset opgeslagen?
+      description: Bijv. relationele database, parquet-bestanden op objectopslag, CSV-export. Noem systeem en locatie.
+      id: "2.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_b.formaat
+    - task: Is de betekenis van de gegevens vastgelegd in een begrippenkader of informatiemodel?
+      id: "2.2.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, in een informatiemodel volgens MIM
+      - value: Ja, in een eigen gegevenswoordenboek of begrippenlijst
+      - value: Ja, in een sectorale of landelijke standaard
+      - value: Nee, alleen impliciet in de systeemdocumentatie
+      - value: Nee, niet vastgelegd
+      required_status: false
+      references:
+        invulhulp: ds_b.begrippen
+    - task: Toelichting
+      description: Verwijs naar de vindplaats van het model of de begrippenlijst.
+      id: "2.2.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.2.5"
+          operator: any
+        action: show
+- task: 'Deel C: Juridisch kader en classificatie'
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Persoonsgegevens en grondslag
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Bevat de dataset persoonsgegevens?
+      id: "3.1.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, waaronder bijzondere categorieën (art. 9 AVG) of strafrechtelijke gegevens (art. 10 AVG)
+      - value: Ja, gewone persoonsgegevens
+      - value: Ja, gepseudonimiseerde gegevens (nog steeds persoonsgegevens)
+      - value: Nee, geanonimiseerd of geaggregeerd tot niet-herleidbaar niveau
+      - value: Nee, geen gegevens over personen
+      required_status: true
+      references:
+        invulhulp: ds_c.persoonsgegevens
+    - task: Toelichting
+      description: Beschrijf welke categorieën betrokkenen en welke categorieën gegevens het betreft.
+      id: "3.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.1.1"
+          operator: any
+        action: show
+    - task: Op welke grondslag worden deze gegevens verwerkt?
+      description: >-
+        Alleen invullen bij persoonsgegevens. Noem de grondslag uit artikel 6 AVG en, bij bijzondere gegevens, de uitzondering uit artikel 9 of 10, met de wettelijke bepaling erbij.
+      id: "3.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_c.grondslag
+    - task: Is voor de verwerking van deze dataset een DPIA uitgevoerd?
+      id: "3.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, DPIA uitgevoerd
+      - value: Nee, uit de pre-scan bleek dat het niet verplicht is
+      - value: Nee, nog niet uitgevoerd maar wel nodig
+      - value: Niet van toepassing — geen persoonsgegevens
+      required_status: true
+      references:
+        invulhulp: ds_c.dpia
+    - task: Toelichting
+      description: Verwijs naar het betreffende DPIA-document of de pre-scan.
+      id: "3.1.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.1.3"
+          operator: any
+        action: show
+    - task: Wordt de dataset gedeeld met andere partijen?
+      id: "3.1.4"
+      type:
+      - task_group
+      repeatable: true
+      required_status: false
+      references:
+        invulhulp: ds_c.derden
+      tasks:
+      - task: Ontvanger
+        id: "3.1.4.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ds_c.derden.partij
+      - task: Doel van het delen
+        id: "3.1.4.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ds_c.derden.doel
+      - task: Grondslag of afspraak
+        id: "3.1.4.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ds_c.derden.grondslag
+      - task: Vorm
+        id: "3.1.4.4"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Volledige dataset
+        - value: Selectie
+        - value: Geaggregeerd
+        - value: Via bevraging (API)
+        references:
+          invulhulp: ds_c.derden.vorm
+    - task: Toelichting op het delen met derden
+      id: "3.1.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: >-
+        Vindt er doorgifte buiten de EER plaats, inclusief opslag of ondersteuning door partijen van buiten de EER?
+      id: "3.1.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: ds_c.doorgifte
+    - task: Toelichting
+      description: Beschrijf naar welk land, op welke grondslag en welke waarborgen zijn getroffen.
+      id: "3.1.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.1.5"
+          operator: any
+        action: show
+  - task: Classificatie en bewaring
+    id: "3.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe is de dataset gerubriceerd?
+      description: >-
+        Volg de rubriceringssystematiek van de organisatie; sluit aan bij de BBN-bepaling uit de Quick scan BIO.
+      id: "3.2.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Openbaar
+      - value: Intern gebruik
+      - value: Vertrouwelijk
+      - value: Departementaal vertrouwelijk of hoger
+      - value: Nog niet geclassificeerd
+      required_status: true
+      references:
+        invulhulp: ds_c.rubricering
+    - task: Welk beveiligingsniveau (BBN) geldt voor deze dataset?
+      id: "3.2.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: BBN1
+      - value: BBN2
+      - value: BBN3
+      - value: Nog niet bepaald
+      required_status: false
+      references:
+        invulhulp: ds_c.bbn
+    - task: Wie heeft toegang tot de dataset en hoe is die toegang geregeld?
+      description: Beschrijf de rollen, het autorisatiemodel en hoe toegang wordt verleend, herzien en ingetrokken.
+      id: "3.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_c.toegang
+    - task: Wat is de bewaartermijn en wat gebeurt er daarna?
+      description: >-
+        Noem de termijn en de grondslag ervoor (selectielijst Archiefwet, wettelijke bewaarplicht, of de eigen afweging op grond van AVG art. 5 lid 1 sub e), en of er vernietigd of overgebracht wordt.
+      id: "3.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_c.bewaartermijn
+    - task: Is de vernietiging of overbrenging feitelijk ingericht?
+      id: "3.2.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, geautomatiseerd
+      - value: Ja, via een periodieke handmatige procedure
+      - value: Nee, nog niet ingericht
+      - value: Niet van toepassing
+      required_status: false
+      references:
+        invulhulp: ds_c.vernietiging
+- task: 'Deel D: Kwaliteit, gebruik en beheer'
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Kwaliteit en beperkingen
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wat is er bekend over de kwaliteit van deze dataset?
+      description: Vat samen wat uit het datakwaliteit-assessment volgt, of geef aan dat dat nog niet is uitgevoerd.
+      id: "4.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_d.kwaliteit
+    - task: Welke bekende beperkingen of vertekeningen kent de dataset?
+      description: >-
+        Denk aan ontbrekende periodes, groepen die stelselmatig onder- of oververtegenwoordigd zijn, wijzigingen in registratiewijze die tijdreeksen breken, en meetfouten. Dit is het veld dat toekomstige gebruikers voor de grootste fouten behoedt.
+      id: "4.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_d.beperkingen
+    - task: Voor welk gebruik is deze dataset uitdrukkelijk niet geschikt?
+      description: >-
+        Even belangrijk als het beoogde gebruik. Bijv. niet geschikt voor uitspraken op individueel niveau, niet geschikt als tijdreeks vóór een bepaald jaar, niet geschikt voor besluiten met rechtsgevolg.
+      id: "4.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_d.ongeschikt
+  - task: Gebruiksvoorwaarden en beheer
+    id: "4.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Onder welke voorwaarden mag de dataset gebruikt worden?
+      description: >-
+        Beschrijf de gebruiksbeperkingen die volgen uit grondslag, contract of afspraak met de bronhouder — bijv. alleen voor het oorspronkelijke doel, niet voor profilering, niet voor training van modellen.
+      id: "4.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_d.voorwaarden
+    - task: Welke licentie of rechtenregeling geldt?
+      id: "4.2.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Publiek domein / CC0
+      - value: CC BY 4.0
+      - value: Andere open licentie
+      - value: Alleen intern gebruik, geen externe licentie
+      - value: Gebruiksrecht op basis van contract met een leverancier
+      - value: Nog niet bepaald
+      required_status: false
+      references:
+        invulhulp: ds_d.licentie
+    - task: Toelichting
+      description: Licht toe welke rechten en beperkingen er precies gelden.
+      id: "4.2.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.2.2"
+          operator: any
+        action: show
+    - task: Is de dataset (of een afgeleide ervan) openbaar beschikbaar?
+      id: "4.2.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, als open data gepubliceerd
+      - value: Ja, op verzoek beschikbaar
+      - value: Nee, en dat kan ook niet
+      - value: Nee, maar publicatie wordt onderzocht
+      required_status: false
+      references:
+        invulhulp: ds_d.openbaar
+    - task: Toelichting
+      description: Noem de vindplaats of de reden waarom publicatie niet kan.
+      id: "4.2.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.2.3"
+          operator: any
+        action: show
+    - task: Is de dataset opgenomen in een datacatalogus of dataregister?
+      id: "4.2.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, in de interne datacatalogus
+      - value: Ja, op data.overheid.nl
+      - value: Ja, in beide
+      - value: Nee, nog niet opgenomen
+      required_status: false
+      references:
+        invulhulp: ds_d.catalogus
+    - task: Toelichting
+      description: Noem de vindplaats of het registratienummer.
+      id: "4.2.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.2.4"
+          operator: any
+        action: show
+    - task: Hoe wordt deze registratie onderhouden?
+      description: >-
+        Wie actualiseert de datasheet, bij welke gebeurtenissen (schemawijziging, nieuwe afnemer, gewijzigde grondslag) en met welke periodieke controle?
+      id: "4.2.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ds_d.onderhoud
+    - task: Datum en versie van deze registratie
+      id: "4.2.6"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ds_d.versie

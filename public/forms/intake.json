@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/intake.yaml + scripts/form-overlays/intake.overlay.json; niet handmatig bewerken.",
   "id": "intake",
   "version": "2.0",
-  "urn": "urn:nl:minfin:tr:intake:2.0",
+  "urn": "urn:nl:minfin:ir:intake:2.0",
   "title": "Intakeformulier nieuwe IV-verzoeken",
   "source": {
     "instrument": "Intakeformulier IV-verzoek",
@@ -38,13 +39,35 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "intake_a" },
-    { "type": "subsections", "sectionId": "intake_b" },
-    { "type": "subsections", "sectionId": "intake_c" },
-    { "type": "subsections", "sectionId": "intake_d" },
-    { "type": "subsections", "sectionId": "intake_e" },
-    { "type": "subsections", "sectionId": "intake_f" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "intake_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "intake_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "intake_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "intake_d"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "intake_e"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "intake_f"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -219,13 +242,22 @@
               "text": "Zijn er risico's of andere factoren die belangrijk zijn voor het succesvol afronden van dit initiatief?",
               "type": "table",
               "importance": "optional",
-              "optionalTable": true,
-              "notesLabel": "Toelichting (u kunt de risico's hier ook in gewone tekst beschrijven)",
               "columns": [
-                { "id": "risico", "label": "Risico of factor" },
-                { "id": "impact", "label": "Impact" },
-                { "id": "beheersmaatregel", "label": "Beheersmaatregel" }
-              ]
+                {
+                  "id": "risico",
+                  "label": "Risico of factor"
+                },
+                {
+                  "id": "impact",
+                  "label": "Impact"
+                },
+                {
+                  "id": "beheersmaatregel",
+                  "label": "Beheersmaatregel"
+                }
+              ],
+              "notesLabel": "Toelichting (u kunt de risico's hier ook in gewone tekst beschrijven)",
+              "optionalTable": true
             }
           ]
         }
@@ -292,7 +324,10 @@
               "guidance": "Bij 'Ja': GO Regulier/Project/Innovatie.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "intake_f.criteria_gedeeltelijk",
@@ -300,7 +335,10 @@
               "guidance": "Bij 'Ja': GO onder voorbehoud.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "intake_f.criteria_niet",
@@ -308,7 +346,10 @@
               "guidance": "Bij 'Ja': NO-GO, afwijzing.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "intake_f.toelichting_besluit",
@@ -327,7 +368,10 @@
               "text": "1. Het is uitsluitend ter ondersteuning van taken binnen Financiën?",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "intake_f.wem_2",
@@ -335,42 +379,60 @@
               "guidance": "* Dit proces speelt een primaire rol voor doelstelling van de organisatie. Het bestaansrecht van de organisatie wordt aan dit proces ontleend. Als de activiteit langer dan één week stilvalt of niet goed verloopt heeft dit ernstige gevolgen voor het voortbestaan van de organisatie, c.q. het brengt de organisatie in een hachelijke positie.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "intake_f.wem_3",
               "text": "3. Er zijn geen standaardmarktproducten of Rijksvoorzieningen beschikbaar/bekend?",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "intake_f.wem_4",
               "text": "4. Het is ten behoeve van ondersteunende, repeterende, eenvoudige processen die herhaaldelijk worden uitgevoerd en niet complex van aard zijn (dus bijv. geen ketenproces) en één eindverantwoordelijke hebben?",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "intake_f.wem_5",
               "text": "5. Het is uitsluitend bedoeld voor taakondersteuning van medewerkers (front-end applicatie)?",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "intake_f.wem_6",
               "text": "6. De applicatie is niet bedoeld voor archiveringsdoeleinden?",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "intake_f.wem_7",
               "text": "7. Er is sprake van een beperkt aantal geautomatiseerde koppelvlakken met de omgeving?",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             }
           ]
         }

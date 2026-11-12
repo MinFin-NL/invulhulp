@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/ihhtoets.yaml + scripts/form-overlays/ihhtoets.overlay.json; niet handmatig bewerken.",
   "id": "ihhtoets",
   "version": "0.1",
-  "urn": "urn:nl:minfin:tr:ihhtoets:0.1",
+  "urn": "urn:nl:minfin:ir:ihhtoets:0.1",
   "title": "IHH-toets",
   "aiContext": "Dit is de Informatiehuishoudingstoets bij IV-verzoeken (IHH-toets) van het Ministerie van Financiën (CDIO/Informatiehuishouding). De toets brengt in beeld welke maatregelen of functionaliteiten nodig zijn om overheidsinformatie in de beoogde applicatie of het beoogde systeem duurzaam toegankelijk te houden: vindbaar, beschikbaar, leesbaar, interpreteerbaar en betrouwbaar. Het kader is de Archiefwet, RINFIN 2022, NEN-ISO 16175-1:2020 en het DUTO-raamwerk van het Nationaal Archief. Schrijf in termen van informatiebeheer en archivering (selectielijst, bewaartermijn, metadata, migratie, vernietiging, ter beschikking stellen) en niet in privacy- of AI-terminologie. Beschrijf per vraag concreet welke functionaliteit of (werk)afspraak wél of niet aanwezig is; noem waar mogelijk het betrokken proces uit de Selectielijst van het ministerie van Financiën.",
   "source": {
@@ -36,11 +37,27 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "ihh_a" },
-    { "type": "subsections", "sectionId": "ihh_b" },
-    { "type": "subsections", "sectionId": "ihh_c" },
-    { "type": "subsections", "sectionId": "ihh_d" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "ihh_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ihh_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ihh_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ihh_d"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -57,38 +74,38 @@
               "id": "ihh_a.naam_project",
               "text": "Naam project / IV-verzoek",
               "type": "text",
-              "format": "shorttext",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             },
             {
               "id": "ihh_a.topdesk",
               "text": "TOPdesk nummer (indien aanwezig)",
+              "guidance": "Het meldingsnummer van het IV-verzoek in ITS Topdesk, als dat al is uitgegeven.",
               "type": "text",
-              "format": "shorttext",
               "importance": "optional",
-              "guidance": "Het meldingsnummer van het IV-verzoek in ITS Topdesk, als dat al is uitgegeven."
+              "format": "shorttext"
             },
             {
               "id": "ihh_a.datum",
               "text": "Datum",
+              "guidance": "De datum waarop deze toets is ingevuld.",
               "type": "text",
-              "format": "date",
               "importance": "mandatory",
-              "guidance": "De datum waarop deze toets is ingevuld."
+              "format": "date"
             },
             {
               "id": "ihh_a.opdrachtgever",
               "text": "Opdrachtgever",
               "type": "text",
-              "format": "shorttext",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             },
             {
               "id": "ihh_a.projectleider",
               "text": "Projectleider of contactpersoon",
               "type": "text",
-              "format": "shorttext",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             }
           ]
         },
@@ -100,20 +117,21 @@
             {
               "id": "ihh_a.processen",
               "text": "Binnen welk(e) proces(sen) wordt de applicatie of het systeem ingezet?",
+              "guidance": "Geef hier aan binnen welk(e) proces(sen) de applicatie of het systeem gebruikt gaat worden. Bij voorkeur wordt hier ook een verwijzing gemaakt naar (een) proces(sen) binnen de Selectielijst van het ministerie van Financiën.",
               "type": "text",
-              "importance": "mandatory",
-              "guidance": "Geef hier aan binnen welk(e) proces(sen) de applicatie of het systeem gebruikt gaat worden. Bij voorkeur wordt hier ook een verwijzing gemaakt naar (een) proces(sen) binnen de Selectielijst van het ministerie van Financiën."
+              "importance": "mandatory"
             },
             {
               "id": "ihh_a.bewaartermijn",
               "text": "Hoe lang zijn de overheidsinformatie/-gegevens die in de applicatie of het systeem opgeslagen worden te bewaren?",
+              "guidance": "Hoe lang overheidsinformatie/-gegevens bewaard moeten worden is vastgelegd in de selectielijst (zie: Selectielijst van het ministerie van Financiën). Informatie is óf permanent te bewaren, óf op termijn te vernietigen.",
               "type": "text",
-              "importance": "mandatory",
-              "guidance": "Hoe lang overheidsinformatie/-gegevens bewaard moeten worden is vastgelegd in de selectielijst (zie: Selectielijst van het ministerie van Financiën). Informatie is óf permanent te bewaren, óf op termijn te vernietigen."
+              "importance": "mandatory"
             },
             {
               "id": "ihh_a.archiveringslocatie",
               "text": "Waar vindt de archivering van deze overheidsinformatie/-gegevens plaats?",
+              "guidance": "Geef hier aan waar de overheidsinformatie/-gegevens, na creatie en/of gebruik, gearchiveerd worden.",
               "type": "radio",
               "importance": "mandatory",
               "options": [
@@ -121,17 +139,20 @@
                 "Ergens anders (bijvoorbeeld in Digidoc Online)",
                 "Nog niet bekend"
               ],
-              "followUp": "Licht toe waar de overheidsinformatie/-gegevens, na creatie en/of gebruik, gearchiveerd worden.",
-              "guidance": "Geef hier aan waar de overheidsinformatie/-gegevens, na creatie en/of gebruik, gearchiveerd worden."
+              "followUp": "Licht toe waar de overheidsinformatie/-gegevens, na creatie en/of gebruik, gearchiveerd worden."
             },
             {
               "id": "ihh_a.gerubriceerd",
               "text": "Worden er gerubriceerde overheidsinformatie/-gegevens opgeslagen in de applicatie of het systeem?",
+              "guidance": "Gerubriceerde informatie vraagt vaak extra (beveiligings)maatregelen om deze veilig en duurzaam te kunnen bewaren.",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee", "Nog niet bekend"],
-              "followUp": "Geef toelichting bij antwoord — om welke rubricering gaat het en welke maatregelen zijn daarvoor voorzien?",
-              "guidance": "Gerubriceerde informatie vraagt vaak extra (beveiligings)maatregelen om deze veilig en duurzaam te kunnen bewaren."
+              "options": [
+                "Ja",
+                "Nee",
+                "Nog niet bekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord — om welke rubricering gaat het en welke maatregelen zijn daarvoor voorzien?"
             }
           ]
         }
@@ -150,20 +171,28 @@
             {
               "id": "ihh_b.1",
               "text": "1. Er worden (vastgelegde) afspraken gemaakt over hoe met overheidsinformatie/-gegevens wordt omgegaan of gewerkt in de applicatie of het systeem.",
+              "guidance": "Het maken van dergelijke (werk)afspraken is altijd belangrijk voor de duurzame toegankelijkheid van onze informatie, ook wanneer een nieuwe applicatie of systeem in gebruik genomen worden. Deze vraag omvat ook het maken van afspraken over het na gebruik verplaatsen van overheidsinformatie naar een ander systeem voor archivering.",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Het maken van dergelijke (werk)afspraken is altijd belangrijk voor de duurzame toegankelijkheid van onze informatie, ook wanneer een nieuwe applicatie of systeem in gebruik genomen worden. Deze vraag omvat ook het maken van afspraken over het na gebruik verplaatsen van overheidsinformatie naar een ander systeem voor archivering."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             },
             {
               "id": "ihh_b.2",
               "text": "2. Er worden (vastgelegde) afspraken gemaakt over de structuur waarbinnen overheidsinformatie/-gegevens in de applicatie of het systeem worden opgeslagen.",
+              "guidance": "Het maken van dergelijke (werk)afspraken is altijd belangrijk voor de duurzame toegankelijkheid van onze informatie, ook wanneer een nieuwe applicatie of systeem in gebruik genomen worden. Hierbij kan gedacht worden aan een mappen- of dossierstructuur.",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Het maken van dergelijke (werk)afspraken is altijd belangrijk voor de duurzame toegankelijkheid van onze informatie, ook wanneer een nieuwe applicatie of systeem in gebruik genomen worden. Hierbij kan gedacht worden aan een mappen- of dossierstructuur."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             }
           ]
         },
@@ -175,29 +204,41 @@
             {
               "id": "ihh_b.3",
               "text": "3. Het is mogelijk om in de applicatie of het systeem unieke identificatienummers toe te voegen aan documenten, mappen, en/of dossiers.",
+              "guidance": "Een uniek identificatienummer (zoals een uniek documentnummer) bevordert het kunnen terugvinden van onze overheidsinformatie.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Een uniek identificatienummer (zoals een uniek documentnummer) bevordert het kunnen terugvinden van onze overheidsinformatie."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             },
             {
               "id": "ihh_b.4",
               "text": "4. Het is mogelijk om overheidsinformatie/-gegevens in de applicatie of het systeem (handmatig of geautomatiseerd) te voorzien van metadata.",
+              "guidance": "Metadata zijn 'gegevens over gegevens': gegevens die andere gegevens beschrijven, verklaren of context geven. Het toekennen van metadata gebeurt bij voorkeur zoveel mogelijk geautomatiseerd; maar het kan ook een optie zijn om metadata handmatig toe te voegen.",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Metadata zijn 'gegevens over gegevens': gegevens die andere gegevens beschrijven, verklaren of context geven. Het toekennen van metadata gebeurt bij voorkeur zoveel mogelijk geautomatiseerd; maar het kan ook een optie zijn om metadata handmatig toe te voegen."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             },
             {
               "id": "ihh_b.5",
               "text": "5. Er wordt voorafgaand aan het in gebruik nemen van de applicatie of het systeem bepaald welke metadata minimaal vastgelegd moet worden.",
+              "guidance": "(Tijdig) aandacht besteden aan metadatering is altijd belangrijk voor de duurzame toegankelijkheid van onze informatie, ook wanneer een nieuwe applicatie of systeem in gebruik genomen worden. Bij voorkeur wordt hier uitgegaan van een vastgesteld metagegevensschema.",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "(Tijdig) aandacht besteden aan metadatering is altijd belangrijk voor de duurzame toegankelijkheid van onze informatie, ook wanneer een nieuwe applicatie of systeem in gebruik genomen worden. Bij voorkeur wordt hier uitgegaan van een vastgesteld metagegevensschema."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             }
           ]
         }
@@ -216,47 +257,67 @@
             {
               "id": "ihh_b.6",
               "text": "6. Het is mogelijk een overzicht te genereren van de typen overheidsinformatie/-gegevens die in de applicatie of het systeem opgeslagen staan.",
+              "guidance": "Om onze overheidsinformatie/-gegevens goed en duurzaam te kunnen beheren, is het randvoorwaardelijk om inzicht te hebben in welke locaties deze informatie/gegevens zich bevinden.",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Om onze overheidsinformatie/-gegevens goed en duurzaam te kunnen beheren, is het randvoorwaardelijk om inzicht te hebben in welke locaties deze informatie/gegevens zich bevinden."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             },
             {
               "id": "ihh_b.7",
               "text": "7. Het is inzichtelijk (te maken) in de applicatie of het systeem hoe lang de overheidsinformatie/-gegevens bewaard moeten worden.",
+              "guidance": "Hoe lang overheidsinformatie bewaard moet worden is vastgelegd in de selectielijst. Aan deze vraag kan op verschillende manieren invulling gegeven worden, bijvoorbeeld door het toevoegen van metadata of door dit vast te (laten) leggen in het Informatiebeheerplan (IBP).",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Hoe lang overheidsinformatie bewaard moet worden is vastgelegd in de selectielijst. Aan deze vraag kan op verschillende manieren invulling gegeven worden, bijvoorbeeld door het toevoegen van metadata of door dit vast te (laten) leggen in het Informatiebeheerplan (IBP)."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             },
             {
               "id": "ihh_b.8",
               "text": "8. Het is mogelijk om overheidsinformatie/-gegevens (en de bijbehorende metagegevens) in de applicatie of het systeem onveranderlijk te maken, zodat deze niet meer kunnen worden gewijzigd.",
+              "guidance": "Een manier om hier invulling aan te geven is door de informatie/gegevens op 'Alleen lezen' te kunnen zetten.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Een manier om hier invulling aan te geven is door de informatie/gegevens op 'Alleen lezen' te kunnen zetten."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             },
             {
               "id": "ihh_b.9",
               "text": "9. De overheidsinformatie/-gegevens in de applicatie of het systeem worden opgeslagen in duurzame bestandsformaten.",
+              "guidance": "Zie de Lijst voorkeursformaten van het Nationaal Archief.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Zie de Lijst voorkeursformaten van het Nationaal Archief."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             },
             {
               "id": "ihh_b.10",
               "text": "10. Het is mogelijk om overheidsinformatie/-gegevens te converteren naar een ander bestandsformaat.",
+              "guidance": "'Converteren' is het omzetten van informatie/gegevens naar een ander (bestands)formaat.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "'Converteren' is het omzetten van informatie/gegevens naar een ander (bestands)formaat."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             }
           ]
         },
@@ -268,27 +329,39 @@
             {
               "id": "ihh_b.11",
               "text": "11. Het is mogelijk om een overzicht te genereren van de overheidsinformatie/-gegevens in de applicatie of het systeem die voor migratie in aanmerking komen.",
+              "guidance": "Bij 'migratie' worden informatie/gegevens overgezet van de ene opslaglocatie naar de andere.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Bij 'migratie' worden informatie/gegevens overgezet van de ene opslaglocatie naar de andere."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             },
             {
               "id": "ihh_b.12",
               "text": "12. Het is mogelijk om overheidsinformatie/-gegevens, inclusief de bijbehorende metadata, uit de applicatie of het systeem te migreren of verplaatsen naar een andere applicatie.",
+              "guidance": "Het kunnen migreren of verplaatsen van overheidsinformatie is vooral van belang wanneer de archivering van de informatie elders plaatsvindt, bijvoorbeeld in Digidoc Online.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Het kunnen migreren of verplaatsen van overheidsinformatie is vooral van belang wanneer de archivering van de informatie elders plaatsvindt, bijvoorbeeld in Digidoc Online."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             },
             {
               "id": "ihh_b.13",
               "text": "13. Het is mogelijk om overheidsinformatie/-gegevens, inclusief de bijbehorende metadata, (in bulk) te exporteren uit de applicatie of het systeem.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
               "followUp": "Geef toelichting bij antwoord…"
             }
           ]
@@ -301,20 +374,28 @@
             {
               "id": "ihh_b.14",
               "text": "14. Het is mogelijk om overheidsinformatie/-gegevens in de applicatie of het systeem die in aanmerking komen voor vernietiging te markeren, of hiervan een overzicht te genereren.",
+              "guidance": "Overheidsinformatie/-gegevens waarvan de bewaartermijn (op basis van de selectielijst) is verstreken, komen in aanmerking voor vernietiging.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Overheidsinformatie/-gegevens waarvan de bewaartermijn (op basis van de selectielijst) is verstreken, komen in aanmerking voor vernietiging."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             },
             {
               "id": "ihh_b.15",
               "text": "15. Het is mogelijk om overheidsinformatie/-gegevens in de applicatie of het systeem (onherstelbaar) te vernietigen.",
+              "guidance": "Bij voorkeur is het mogelijk een rapport te genereren van de vernietigingsacties die zijn uitgevoerd. Deze vraag omvat ook het vernietigen van de overheidsinformatie/-gegevens uit eventuele back-ups van de applicatie of het systeem.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Bij voorkeur is het mogelijk een rapport te genereren van de vernietigingsacties die zijn uitgevoerd. Deze vraag omvat ook het vernietigen van de overheidsinformatie/-gegevens uit eventuele back-ups van de applicatie of het systeem."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             }
           ]
         }
@@ -335,26 +416,38 @@
               "text": "16. Het is mogelijk om, door middel van een zoekfunctionaliteit, de overheidsinformatie/-gegevens in de applicatie of het systeem te doorzoeken.",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
               "followUp": "Geef toelichting bij antwoord…"
             },
             {
               "id": "ihh_b.17",
               "text": "17. Het is mogelijk om autorisatie- en toegangsbeperkingen toe te passen, zodat gebruikers alleen toegang hebben tot die overheidsinformatie/-gegevens waar zij rechten toe hebben.",
+              "guidance": "Bij voorkeur gebeurt dit op basis van RBAC of role based access. Geef in de toelichting aan hoe autorisatie- en toegangsbeperkingen worden toegepast.",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord — hoe worden autorisatie- en toegangsbeperkingen toegepast?",
-              "guidance": "Bij voorkeur gebeurt dit op basis van RBAC of role based access. Geef in de toelichting aan hoe autorisatie- en toegangsbeperkingen worden toegepast."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord — hoe worden autorisatie- en toegangsbeperkingen toegepast?"
             },
             {
               "id": "ihh_b.18",
               "text": "18. Het is mogelijk de toegang tot en het gebruik van overheidsinformatie/-gegevens bij te houden, bijvoorbeeld door middel van logging.",
+              "guidance": "Hierbij wordt in ieder geval de naam van de actor, datum en tijdstip, en detail van de wijziging vastgelegd.",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee", "N.v.t. of onbekend"],
-              "followUp": "Geef toelichting bij antwoord…",
-              "guidance": "Hierbij wordt in ieder geval de naam van de actor, datum en tijdstip, en detail van de wijziging vastgelegd."
+              "options": [
+                "Ja",
+                "Nee",
+                "N.v.t. of onbekend"
+              ],
+              "followUp": "Geef toelichting bij antwoord…"
             }
           ]
         }

@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/dataethiek.yaml + scripts/form-overlays/dataethiek.overlay.json; niet handmatig bewerken.",
   "id": "dataethiek",
   "version": "1.0",
-  "urn": "urn:nl:minfin:tr:dataethiek:1.0",
+  "urn": "urn:nl:minfin:ir:dataethiek:1.0",
   "title": "Data-ethiektoets",
   "aiContext": "Dit is een data-ethiektoets voor het Ministerie van Financiën, afgeleid van DAMA-DMBOK2 hoofdstuk 2 (Data Handling Ethics) en de daar gehanteerde Belmont-principes, vertaald naar gegevensverwerking: respect voor personen, weldoen (baten versus schade) en rechtvaardigheid. De toets is complementair aan de IAMA (grondrechten) en de AIIA (proportionaliteit) en legt de ethische afweging vast die daar impliciet blijft. Schrijf reflectief en concreet: benoem wie het raakt, waarom een keuze verdedigbaar is, en welke twijfels er zijn blijven bestaan. Vermijd geruststellende algemeenheden.",
   "source": {
@@ -37,11 +38,27 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "de_a" },
-    { "type": "subsections", "sectionId": "de_b" },
-    { "type": "subsections", "sectionId": "de_c" },
-    { "type": "subsections", "sectionId": "de_d" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "de_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "de_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "de_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "de_d"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -205,11 +222,41 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "schade", "label": "Mogelijke schade" },
-                { "id": "wie", "label": "Wie wordt geraakt" },
-                { "id": "soort", "label": "Soort", "type": "select", "options": ["Materieel of financieel", "Immaterieel: stigmatisering of reputatie", "Beperking van rechten of toegang", "Verlies van privacy of autonomie", "Verlies van vertrouwen in de overheid", "Overig"] },
-                { "id": "kans", "label": "Kans", "type": "select", "options": ["Groot", "Reëel", "Klein"] },
-                { "id": "maatregel", "label": "Beperkende maatregel" }
+                {
+                  "id": "schade",
+                  "label": "Mogelijke schade"
+                },
+                {
+                  "id": "wie",
+                  "label": "Wie wordt geraakt"
+                },
+                {
+                  "id": "soort",
+                  "label": "Soort",
+                  "type": "select",
+                  "options": [
+                    "Materieel of financieel",
+                    "Immaterieel: stigmatisering of reputatie",
+                    "Beperking van rechten of toegang",
+                    "Verlies van privacy of autonomie",
+                    "Verlies van vertrouwen in de overheid",
+                    "Overig"
+                  ]
+                },
+                {
+                  "id": "kans",
+                  "label": "Kans",
+                  "type": "select",
+                  "options": [
+                    "Groot",
+                    "Reëel",
+                    "Klein"
+                  ]
+                },
+                {
+                  "id": "maatregel",
+                  "label": "Beperkende maatregel"
+                }
               ],
               "notesLabel": "Toelichting op de schade-analyse"
             },

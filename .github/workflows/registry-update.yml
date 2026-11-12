@@ -1,0 +1,139 @@
+name: Instrument registry update
+
+# Dependabot for MinBZK/instrument-registry. Weekly (and on demand) it compares
+# the pinned release in vendor/instrument-registry/pin.json with the latest
+# upstream release. When there is a newer one it syncs and rebuilds the forms:
+#
+#   build OK    -> a pull request with the regenerated forms, for review
+#   build fails -> an issue: the release drops a question the overlay still
+#                  places, adds one the overlay doesn't place, or uses a
+#                  registry feature the builder doesn't support. Each of those
+#                  needs a human decision (what happens to stored answers? where
+#                  does the new question go?), so nothing is changed
+#                  automatically.
+#
+# A PR opened with GITHUB_TOKEN does not trigger other workflows, so this job
+# runs the test suite itself and reports the result in the PR body.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # maandag, 07:00/08:00 Amsterdam
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+concurrency:
+  group: registry-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vergelijk pin met laatste release
+        id: release
+        run: |
+          pinned=$(jq -r .tag vendor/instrument-registry/pin.json)
+          latest=$(gh release view --repo MinBZK/instrument-registry --json tagName --jq .tagName)
+          echo "pinned=$pinned" >> "$GITHUB_OUTPUT"
+          echo "latest=$latest" >> "$GITHUB_OUTPUT"
+          # Only move forward: `sort -V` puts the higher version last.
+          newest=$(printf '%s\n%s\n' "$pinned" "$latest" | sort -V | tail -n1)
+          if [ "$latest" != "$pinned" ] && [ "$newest" = "$latest" ]; then
+            echo "newer=true" >> "$GITHUB_OUTPUT"
+            echo "Nieuwe release: $pinned -> $latest"
+          else
+            echo "newer=false" >> "$GITHUB_OUTPUT"
+            echo "Up-to-date op $pinned"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.release.outputs.newer == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Sync en build
+        id: build
+        if: steps.release.outputs.newer == 'true'
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm ci
+          npm run registry:sync -- "${{ steps.release.outputs.latest }}"
+          npm run forms:build 2>&1 | tee build.log
+
+      - name: Tests
+        id: test
+        if: steps.release.outputs.newer == 'true' && steps.build.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee test.log
+
+      - name: PR-tekst
+        if: steps.release.outputs.newer == 'true' && steps.build.outcome == 'success'
+        run: |
+          {
+            echo "MinBZK/instrument-registry ${{ steps.release.outputs.pinned }} → [${{ steps.release.outputs.latest }}](https://github.com/MinBZK/instrument-registry/releases/tag/${{ steps.release.outputs.latest }})."
+            echo
+            echo "Gegenereerd door \`.github/workflows/registry-update.yml\` (\`npm run registry:sync\` + \`npm run forms:build\`)."
+            echo
+            if [ "${{ steps.test.outcome }}" = "success" ]; then
+              echo "**Tests:** geslaagd."
+            else
+              echo "**Tests:** ❌ mislukt — zie de log van deze workflow-run."
+            fi
+            echo
+            echo "Controleer vóór het mergen:"
+            echo "- de inhoudelijke wijzigingen in \`public/forms/\` (vraagteksten, opties: een hernoemde optie wist opgeslagen keuzes);"
+            echo "- de dropped-dependencies-rapporten in \`scripts/form-overlays/\`;"
+            echo "- of \`crossFormMappings.json\` nog klopt."
+            echo
+            echo '```'
+            git diff --stat -- public/forms scripts/form-overlays
+            echo '```'
+          } > pr-body.md
+
+      - name: Pull request
+        if: steps.release.outputs.newer == 'true' && steps.build.outcome == 'success'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: registry/${{ steps.release.outputs.latest }}
+          title: 'Instrument registry ${{ steps.release.outputs.latest }}'
+          commit-message: 'Sync instrument registry ${{ steps.release.outputs.latest }}'
+          body-path: pr-body.md
+          add-paths: |
+            vendor/instrument-registry
+            public/forms
+            scripts/form-overlays
+          labels: instrument-registry
+
+      - name: Issue bij een build die een beslissing vraagt
+        if: steps.release.outputs.newer == 'true' && steps.build.outcome != 'success'
+        run: |
+          title="Instrument registry ${{ steps.release.outputs.latest }} vraagt een beslissing"
+          if [ -n "$(gh issue list --state open --search "in:title \"$title\"" --json number --jq '.[].number')" ]; then
+            echo "Issue bestaat al"; exit 0
+          fi
+          {
+            echo "De build met MinBZK/instrument-registry [${{ steps.release.outputs.latest }}](https://github.com/MinBZK/instrument-registry/releases/tag/${{ steps.release.outputs.latest }}) faalt (nu gepind: ${{ steps.release.outputs.pinned }})."
+            echo
+            echo "Meestal betekent dat: het registry heeft een vraag verwijderd/hernoemd die de overlay nog plaatst (wat gebeurt er met opgeslagen antwoorden?), of een nieuwe vraag toegevoegd die nog in een overlay moet (welke subsectie?)."
+            echo
+            echo "Lokaal oplossen: \`npm run registry:sync -- ${{ steps.release.outputs.latest }} && npm run forms:build\`, overlays aanpassen, PR."
+            echo
+            echo '```'
+            tail -n 40 build.log 2>/dev/null || echo "(geen build.log: sync of npm ci faalde, zie de workflow-run)"
+            echo '```'
+            echo
+            echo "Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > issue-body.md
+          gh issue create --title "$title" --body-file issue-body.md

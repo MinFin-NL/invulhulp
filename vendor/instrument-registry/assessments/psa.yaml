@@ -1,0 +1,418 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: Project Start Architectuur (PSA)
+urn: urn:nl:minfin:ir:psa:1.0
+version: '1.0'
+description: >-
+  De Project Start Architectuur (PSA) beschrijft in globale termen hoe de organisatorische, informatie-, applicatie- en technologielaag eruitzien na het project. De PSA is één van de voorwaarden om te starten met een project en geeft richting aan de uitvoering.
+
+  Bron: Project Start Architectuur (PSA) (Ministerie van Financiën). Digitalisering van het eigen PSA-sjabloon; geen extern invulinstrument als origineel.
+tasks:
+- task: Over de verandering (projectaanleiding)
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 1. Aanleiding en context
+    description: Beschrijf de context en redenen voor het project en de afbakening ervan.
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Managementsamenvatting
+      description: >-
+        Geef een korte beschrijving van het document (maximaal 1 pagina). Wat is de kern van de architectuurbeslissingen en de verandering?
+      id: "1.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_a.managementsamenvatting
+    - task: Aanleiding en doelstelling
+      description: >-
+        Beschrijf de huidige situatie en de precieze aanleiding om deze PSA op te stellen: welke vraagstukken doen zich voor, welke doelstellingen worden nagestreefd?
+      id: "1.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_a.aanleiding
+    - task: De opdracht, het resultaat en te bereiken effect
+      description: >-
+        Beschrijf kort de verandering en aan welke maatschappelijke doelen die verandering bijdraagt. Wat is het resultaat en wat zijn de te bereiken effecten?
+      id: "1.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_a.opdracht_resultaat
+    - task: Projectafbakening
+      description: 'Geef duidelijk aan wat de afbakening is van het project: wat valt er wel en niet onder.'
+      id: "1.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_a.projectafbakening
+    - task: De relatie met andere projecten
+      description: Geef de relatie aan met eventuele andere (deel)projecten en waaruit de relatie bestaat.
+      id: "1.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: psa_a.relatie_andere_projecten
+- task: Grondslagen
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 2. Wet- en regelgeving en kaders
+    description: Beschrijf de uitgangspunten die zijn gehanteerd bij het opstellen van deze PSA.
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Relevante wet- en regelgeving
+      description: >-
+        Geef de relevante wet- en regelgeving die van toepassing zijn op deze PSA. Denk aan Woo, Wdo, Archiefwet, AVG.
+      id: "2.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_b.wet_regelgeving
+    - task: Beleidskaders
+      description: >-
+        Geef de beleidskaders die van toepassing zijn, inclusief informatiebeveiliging en het Privacybeleid van het Ministerie van Financiën.
+      id: "2.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_b.beleidskaders
+    - task: Architectuurkaders, -voorschriften en standaarden
+      description: >-
+        Noem de Enterprise Architectuur Principes Financiën, NORA, Forum Standaardisatie 'Pas toe of leg uit'-standaarden en eventuele specifieke kaders.
+      id: "2.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_b.architectuurkaders
+- task: Organisatorisch
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 3. Organisatielaag
+    description: >-
+      Beschrijf welke producten, diensten, processen en organisatieonderdelen worden geraakt door het project.
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Producten en diensten
+      description: Welke producten en diensten worden geraakt of geleverd door het project?
+      id: "3.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_c.producten_diensten
+    - task: Processen
+      description: Welke bedrijfsprocessen worden geraakt door de verandering?
+      id: "3.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_c.processen
+    - task: Bijlagen
+      id: "3.1.2-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "3.1.2-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Betrokken organisatieonderdelen
+      description: Welke organisatieonderdelen worden geraakt door het project?
+      id: "3.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_c.organisatieonderdelen
+    - task: Genomen architectuurbesluiten (organisatorisch)
+      description: Welke architectuurbesluiten zijn genomen op het organisatorische vlak?
+      id: "3.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: psa_c.architectuurbesluiten_org
+- task: Informatie en applicatie
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 4. Informatielaag
+    description: Beschrijf de informatieobjecten en gegevens die relevant zijn voor het project.
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Gegevensmodel
+      description: Beschrijf de relevante informatieobjecten en gegevens. Welke (persoons)gegevens worden verwerkt?
+      id: "4.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_d.gegevensmodel
+    - task: Bijlagen
+      id: "4.1.1-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "4.1.1-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Genomen architectuurbesluiten (informatie)
+      id: "4.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: psa_d.architectuurbesluiten_info
+  - task: 5. Applicatielaag
+    description: Beschrijf de applicatiecontext en functionaliteit die wordt gerealiseerd.
+    id: "4.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Functionele beschrijving
+      description: >-
+        Beschrijf de relevante applicatiecontext, welke functionaliteit wordt gerealiseerd en welke data wordt uitgewisseld.
+      id: "4.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_d.functioneel
+    - task: Bijlagen
+      id: "4.2.1-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "4.2.1-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Niet-functionele eisen en wensen
+      description: Beschrijf de niet-functionele eisen, zoals performance, schaalbaarheid, beschikbaarheid.
+      id: "4.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: psa_d.nonfunctioneel
+    - task: Eigenaarschap data en applicaties
+      description: Wie is eigenaar van de data en de applicatie?
+      id: "4.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: psa_d.eigenaarschap
+    - task: Algoritmeregister
+      description: >-
+        Wordt er gebruik gemaakt van algoritmen? Zo ja, beschrijf het gebruik en verwijs naar het algoritmeregister.
+      id: "4.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: psa_d.algoritmeregister
+    - task: Genomen architectuurbesluiten (applicatie)
+      id: "4.2.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: psa_d.architectuurbesluiten_app
+  - task: 6. Technologielaag
+    description: Beschrijf de technologielaag die de applicaties ondersteunt.
+    id: "4.3"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Technologielaag
+      description: Beschrijf de technologielaag voor dit project, inclusief infrastructuur, netwerk en platforms.
+      id: "4.3.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_d.technologie
+    - task: Bijlagen
+      id: "4.3.1-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "4.3.1-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+- task: Niet-functionele aspecten
+  id: "5"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 7. Beveiliging en privacy
+    description: >-
+      Beschrijf de niet-functionele aspecten op het gebied van beveiliging, privacy, logging en toegangsbeheer.
+    id: "5.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Informatiebeveiliging
+      description: >-
+        Beschrijf de maatregelen op het gebied van informatiebeveiliging conform de BIO. Noem het vastgestelde basisbeveiligingsniveau (BBN).
+      id: "5.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_e.informatiebeveiliging
+    - task: Privacy
+      description: >-
+        Beschrijf de privacy-aspecten: welke persoonsgegevens worden verwerkt, hoe worden betrokkenen geïnformeerd en zijn er aanvullende maatregelen uit een DPIA van toepassing?
+      id: "5.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_e.privacy
+    - task: Logging en monitoring
+      description: Beschrijf de aanpak voor logging en monitoring conform het Financiën-beleid.
+      id: "5.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_e.logging_monitoring
+    - task: Identity & access management
+      description: Beschrijf hoe identity & access management is ingericht voor dit project.
+      id: "5.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_e.iam
+- task: Beheer, exit en openstaande issues
+  id: "6"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 8. Beheer en exit-strategie
+    description: Beschrijf de beheeraspecten en exit-strategie.
+    id: "6.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Beheer in de operationele situatie
+      description: Beschrijf hoe het beheer van de applicatie en infrastructuur is ingericht na oplevering.
+      id: "6.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_f.beheer
+    - task: Exit-strategie
+      description: >-
+        Beschrijf wat er gebeurt als de applicatie wordt uitgefaseerd: datamigratie, beëindiging contracten, afbouw infrastructuur.
+      id: "6.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: psa_f.exit_strategie
+    - task: Toetsing aan Enterprise Architectuur Principes en architectuurafwijkingen
+      description: >-
+        Beschrijf hoe invulling is gegeven aan de EA-principes Financiën en wat de eventuele architectuurafwijkingen zijn.
+      id: "6.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: psa_f.ea_toetsing
+    - task: Openstaande issues
+      description: Welke issues staan nog open die voor de start van het project moeten worden opgelost?
+      id: "6.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: psa_f.openstaande_issues

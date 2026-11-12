@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/psa.yaml + scripts/form-overlays/psa.overlay.json; niet handmatig bewerken.",
   "id": "psa",
   "version": "1.0",
-  "urn": "urn:nl:minfin:tr:psa:1.0",
+  "urn": "urn:nl:minfin:ir:psa:1.0",
   "title": "Project Start Architectuur (PSA)",
   "source": {
     "instrument": "Project Start Architectuur (PSA)",
@@ -38,13 +39,35 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "psa_a" },
-    { "type": "subsections", "sectionId": "psa_b" },
-    { "type": "subsections", "sectionId": "psa_c" },
-    { "type": "subsections", "sectionId": "psa_d" },
-    { "type": "subsections", "sectionId": "psa_e" },
-    { "type": "subsections", "sectionId": "psa_f" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "psa_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "psa_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "psa_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "psa_d"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "psa_e"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "psa_f"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -149,11 +172,12 @@
               "importance": "mandatory"
             },
             {
-              "id": "psa_c.processen", "allowAttachments": true,
+              "id": "psa_c.processen",
               "text": "Processen",
               "guidance": "Welke bedrijfsprocessen worden geraakt door de verandering?",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "allowAttachments": true
             },
             {
               "id": "psa_c.organisatieonderdelen",
@@ -184,11 +208,12 @@
           "description": "Beschrijf de informatieobjecten en gegevens die relevant zijn voor het project.",
           "questions": [
             {
-              "id": "psa_d.gegevensmodel", "allowAttachments": true,
+              "id": "psa_d.gegevensmodel",
               "text": "Gegevensmodel",
               "guidance": "Beschrijf de relevante informatieobjecten en gegevens. Welke (persoons)gegevens worden verwerkt?",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "allowAttachments": true
             },
             {
               "id": "psa_d.architectuurbesluiten_info",
@@ -204,11 +229,12 @@
           "description": "Beschrijf de applicatiecontext en functionaliteit die wordt gerealiseerd.",
           "questions": [
             {
-              "id": "psa_d.functioneel", "allowAttachments": true,
+              "id": "psa_d.functioneel",
               "text": "Functionele beschrijving",
               "guidance": "Beschrijf de relevante applicatiecontext, welke functionaliteit wordt gerealiseerd en welke data wordt uitgewisseld.",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "allowAttachments": true
             },
             {
               "id": "psa_d.nonfunctioneel",
@@ -245,11 +271,12 @@
           "description": "Beschrijf de technologielaag die de applicaties ondersteunt.",
           "questions": [
             {
-              "id": "psa_d.technologie", "allowAttachments": true,
+              "id": "psa_d.technologie",
               "text": "Technologielaag",
               "guidance": "Beschrijf de technologielaag voor dit project, inclusief infrastructuur, netwerk en platforms.",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "allowAttachments": true
             }
           ]
         }

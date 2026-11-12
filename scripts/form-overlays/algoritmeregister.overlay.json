@@ -1,0 +1,310 @@
+{
+  "_comment": "Overlay voor algoritmeregister: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/algoritmeregister.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "algoritmeregister",
+    "title": "Algoritmeregister-publicatie",
+    "aiContext": "Dit is de voorbereiding van een publicatie in het Algoritmeregister van de Nederlandse overheid voor het Ministerie van Financiën. Het legt per algoritme of AI-systeem de publicatiegegevens vast: algemene informatie en doel, juridische grondslag en uitgevoerde toetsen, werking en gebruikte data, menselijke tussenkomst en toezicht, en de publicatiestatus. De tekst is bestemd voor een openbaar register en wordt gelezen door burgers, journalisten en volksvertegenwoordigers. Schrijf daarom in begrijpelijk Nederlands op B1-niveau: korte zinnen, geen jargon, geen afkortingen zonder uitleg, en beschrijf wat het algoritme voor mensen betekent in plaats van hoe het technisch werkt.",
+    "source": {
+      "instrument": "Standaard voor de publicatie van algoritmes — Algoritmeregister van de Nederlandse overheid",
+      "publisher": "Ministerie van Binnenlandse Zaken en Koninkrijksrelaties",
+      "url": "https://algoritmes.overheid.nl/",
+      "reference": "Veldenschema van het Algoritmeregister (algemene informatie, juridisch kader, werking, toezicht en verantwoording)",
+      "derivation": "harmonized",
+      "note": "Voorbereidingsformulier: de daadwerkelijke publicatie verloopt via het Algoritmeregister zelf. Het veldenschema upstream wordt doorontwikkeld — controleer de actuele velden vóór publicatie. Roadmap: docs/sporen-en-roadmap.md §4.2 nr. 4."
+    },
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "Algoritmeregister-publicatie",
+      "docTitle": "Algoritmeregister-publicatie — voorbereiding",
+      "footerLabel": "Algoritmeregister – MinFin",
+      "filename": "Algoritmeregister-publicatie.pdf",
+      "systemNamePlaceholder": "Bijv. Risicoselectie aangiften",
+      "homeContent": {
+        "notice": "Alles wat u hier invult is bestemd voor een openbaar register. Schrijf voor een lezer zonder voorkennis en zonder belang bij de organisatie. Vermeld geen gegevens die de werking manipuleerbaar maken — beschrijf in dat geval wél dát er informatie is weggelaten en waarom.",
+        "description": "Overheidsorganisaties publiceren hun algoritmes in het Algoritmeregister zodat burgers kunnen zien welke algoritmes worden gebruikt, waarvoor, en met welke waarborgen. Dit formulier verzamelt de publicatiegegevens in het dossier: wat het algoritme doet en waarom, op welke wettelijke grondslag het rust, welke toetsen zijn uitgevoerd (DPIA, IAMA, AIIA), hoe het werkt, welke data het gebruikt, hoe mensen erop toezien en waar iemand terecht kan met vragen of bezwaar. Veel velden zijn af te leiden uit de AI Model Card en de eerder ingevulde assessments.",
+        "steps": [
+          "Deel A – Algemene informatie: naam, organisatie, doel en status",
+          "Deel B – Juridisch kader: grondslag, uitgevoerde toetsen en rechtsbescherming",
+          "Deel C – Werking en data: methode, gegevensbronnen en prestaties",
+          "Deel D – Toezicht en publicatie: menselijke tussenkomst, risicobeheer en publicatiegegevens"
+        ],
+        "buttonLabel": "Starten met de publicatievoorbereiding"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "ar_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ar_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ar_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ar_d"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "ar_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "ara1",
+            "questions": [
+              {
+                "id": "ar_a.naam"
+              },
+              {
+                "id": "ar_a.organisatie"
+              },
+              {
+                "id": "ar_a.afdeling"
+              },
+              {
+                "id": "ar_a.beschrijving"
+              },
+              {
+                "id": "ar_a.doel"
+              },
+              {
+                "id": "ar_a.categorie",
+                "followUp": "Onderbouw de indeling: welke gevolgen heeft het algoritme voor mensen?"
+              },
+              {
+                "id": "ar_a.status",
+                "followUp": "Noem de datum waarop deze status is ingegaan."
+              },
+              {
+                "id": "ar_a.beleidsterrein"
+              }
+            ]
+          },
+          {
+            "id": "ara2",
+            "questions": [
+              {
+                "id": "ar_a.proces"
+              },
+              {
+                "id": "ar_a.geraakt"
+              },
+              {
+                "id": "ar_a.gevolg",
+                "followUp": "Beschrijf concreet wat een betrokkene ervan merkt."
+              },
+              {
+                "id": "ar_a.aivo",
+                "followUp": "Noem de rol onder de verordening en verwijs naar de uitkomst van de beslishulp."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ar_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "arb1",
+            "questions": [
+              {
+                "id": "ar_b.grondslag"
+              },
+              {
+                "id": "ar_b.persoonsgegevens",
+                "followUp": "Beschrijf welke categorieën gegevens worden gebruikt."
+              },
+              {
+                "id": "ar_b.register",
+                "followUp": "Noem het registratienummer of de aanduiding in het register."
+              }
+            ]
+          },
+          {
+            "id": "arb2",
+            "questions": [
+              {
+                "id": "ar_b.toetsen",
+                "columns": [
+                  {
+                    "id": "toets"
+                  },
+                  {
+                    "id": "status"
+                  },
+                  {
+                    "id": "datum"
+                  },
+                  {
+                    "id": "uitkomst"
+                  },
+                  {
+                    "id": "openbaar"
+                  }
+                ],
+                "notesLabel": "Toelichting op de uitgevoerde toetsen"
+              },
+              {
+                "id": "ar_b.normenkaders"
+              },
+              {
+                "id": "ar_b.grondrechten"
+              }
+            ]
+          },
+          {
+            "id": "arb3",
+            "questions": [
+              {
+                "id": "ar_b.uitleg"
+              },
+              {
+                "id": "ar_b.bezwaar"
+              },
+              {
+                "id": "ar_b.contact"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ar_c",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "arc1",
+            "questions": [
+              {
+                "id": "ar_c.type",
+                "followUp": "Beschrijf de gebruikte techniek in begrijpelijke taal."
+              },
+              {
+                "id": "ar_c.werking",
+                "allowAttachments": true
+              },
+              {
+                "id": "ar_c.kenmerken"
+              },
+              {
+                "id": "ar_c.leverancier",
+                "followUp": "Noem de leverancier of de herkomst, en of de werking inzichtelijk is voor de organisatie zelf."
+              },
+              {
+                "id": "ar_c.broncode",
+                "followUp": "Noem de vindplaats of de reden waarom niet wordt gepubliceerd."
+              }
+            ]
+          },
+          {
+            "id": "arc2",
+            "questions": [
+              {
+                "id": "ar_c.databronnen",
+                "columns": [
+                  {
+                    "id": "bron"
+                  },
+                  {
+                    "id": "inhoud"
+                  },
+                  {
+                    "id": "rol"
+                  },
+                  {
+                    "id": "houder"
+                  }
+                ],
+                "notesLabel": "Toelichting op de gebruikte gegevensbronnen"
+              },
+              {
+                "id": "ar_c.kwaliteit"
+              },
+              {
+                "id": "ar_c.prestatie"
+              },
+              {
+                "id": "ar_c.beperkingen"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ar_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "ard1",
+            "questions": [
+              {
+                "id": "ar_d.menselijk"
+              },
+              {
+                "id": "ar_d.monitoring"
+              },
+              {
+                "id": "ar_d.risicos",
+                "columns": [
+                  {
+                    "id": "risico"
+                  },
+                  {
+                    "id": "gevolg"
+                  },
+                  {
+                    "id": "maatregel"
+                  }
+                ],
+                "notesLabel": "Toelichting op het risicobeheer"
+              },
+              {
+                "id": "ar_d.ingrijpen"
+              },
+              {
+                "id": "ar_d.verantwoordelijke"
+              }
+            ]
+          },
+          {
+            "id": "ard2",
+            "questions": [
+              {
+                "id": "ar_d.begrijpelijk",
+                "followUp": "Beschrijf wie de tekst heeft beoordeeld."
+              },
+              {
+                "id": "ar_d.weggelaten"
+              },
+              {
+                "id": "ar_d.publicatiedatum"
+              },
+              {
+                "id": "ar_d.actualisatie"
+              },
+              {
+                "id": "ar_d.vindplaats"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

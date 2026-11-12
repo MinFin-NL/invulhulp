@@ -82,3 +82,5 @@ opstelhulp/
 *.mov
 
 vendor/*
+# Pinned MinBZK/instrument-registry release: the build needs it (npm run registry:sync).
+!vendor/instrument-registry/

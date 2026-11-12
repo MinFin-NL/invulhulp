@@ -1,16 +1,14 @@
 {
-  "_comment": "Hand-authored overlay for the Pre-scan DPIA converter. Carries everything the upstream MinBZK YAML does NOT contain: our presentation (meta/homeContent), AI hints, feature flags, and the mapping of upstream tasks into our Deel A/B/C/D structure. scripts/convert-form.mjs merges this with vendor/par-dpia-form/prescandpia.yaml (= upstream sources/prescan.yaml). NOTE: upstream carries a top-level `assessments` rules-engine that auto-computes which follow-up assessments (DPIA/DTIA/IAMA) are required from the answers; our model has no such engine, so that logic is not reproduced — the pre-scan captures the same questions but the 'is a DPIA needed' conclusion stays a human judgement (see docs/SCHEMA_HARMONIZATION.md).",
+  "_comment": "Hand-authored overlay for the Pre-scan DPIA converter. Carries everything the upstream MinBZK YAML does NOT contain: our presentation (meta/homeContent), AI hints, feature flags, and the mapping of upstream tasks into our Deel A/B/C/D structure. scripts/convert-form.mjs merges this with vendor/instrument-registry/assessments/prescan.yaml. NOTE: upstream carries a top-level `assessments` rules-engine that auto-computes which follow-up assessments (DPIA/DTIA/IAMA) are required from the answers; our model has no such engine, so that logic is not reproduced — the pre-scan captures the same questions but the 'is a DPIA needed' conclusion stays a human judgement (see docs/SCHEMA_HARMONIZATION.md).",
   "form": {
     "id": "prescandpia",
-    "version": "2.0",
-    "urn": "urn:nl:minfin:tr:prescandpia:2.0",
     "title": "Pre-scan DPIA",
     "source": {
-      "instrument": "Pre-scan DPIA (urn:nl:prescan)",
+      "instrument": "Pre-scan DPIA (urn:nl:minbzk:ir:prescan:2.0)",
       "publisher": "Ministerie van Binnenlandse Zaken en Koninkrijksrelaties",
       "version": "2.0",
-      "url": "https://github.com/MinBZK/par-dpia-form",
-      "reference": "vendor/par-dpia-form/prescandpia.yaml (upstream sources/prescan.yaml, commit 3d76a6d5da166b0dc089ca80740ac7be64fb7ab8)",
+      "url": "https://github.com/MinBZK/instrument-registry",
+      "reference": "vendor/instrument-registry/assessments/prescan.yaml (MinBZK/instrument-registry v0.1.0, zie vendor/instrument-registry/PROVENANCE.md)",
       "derivation": "generated",
       "note": "Gegenereerd met `npm run forms:build`; niet handmatig bewerken. Elke vraag draagt de upstream task-id als officialId. Zie docs/SCHEMA_HARMONIZATION.md."
     },
@@ -45,25 +43,41 @@
       "id": "ps_a",
       "title": "Deel A: Beschrijving van de verwerking",
       "part": "A",
-      "paragraphs": ["0"]
+      "paragraphs": [
+        "0"
+      ]
     },
     {
       "id": "ps_b",
       "title": "Deel B: Gegevensverwerking en internationale doorgiften",
       "part": "B",
-      "paragraphs": ["1.1", "1.2", "1.3", "1.4", "1.5", "2.1"]
+      "paragraphs": [
+        "1.1",
+        "1.2",
+        "1.3",
+        "1.4",
+        "1.5",
+        "2.1"
+      ]
     },
     {
       "id": "ps_c",
       "title": "Deel C: Risico-indicatoren en basisregistraties",
       "part": "C",
-      "paragraphs": ["3", "4", "5.1"]
+      "paragraphs": [
+        "3",
+        "4",
+        "5.1"
+      ]
     },
     {
       "id": "ps_d",
       "title": "Deel D: Algoritmes, AI en kinderrechten",
       "part": "D",
-      "paragraphs": ["6.1", "7.1"]
+      "paragraphs": [
+        "6.1",
+        "7.1"
+      ]
     }
   ]
 }

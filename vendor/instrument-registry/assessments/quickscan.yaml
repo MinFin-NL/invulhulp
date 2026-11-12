@@ -1,0 +1,1998 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: Quickscan BIO2 – Classificatietoets
+urn: urn:nl:minfin:ir:quickscan:2.0
+version: '2.0'
+description: >-
+  De Quickscan BIO2 bepaalt de classificatie van informatie op beschikbaarheid, integriteit en vertrouwelijkheid conform de Baseline Informatiebeveiliging Overheid versie 2. De uitkomst geeft aan welk beschermingsniveau vereist is, of een aanvullende risicoanalyse of DPIA nodig is, en welke BIO2-maatregelen van toepassing zijn. Er wordt gestreefd naar een zo laag mogelijk classificatieniveau: te hoog classificeren leidt tot onnodige kosten.
+
+  Bron: Classificatietoets BIO2 — dataclassificatie op beschikbaarheid, integriteit en vertrouwelijkheid (Ministerie van Financiën, op basis van de IBD-handreiking dataclassificatie bij de Baseline Informatiebeveiliging Overheid versie 2, versie QIS BIO2 MinFin v1.0 — 10-07-2026). Veldgetrouw overgezet uit de werkmap 'QIS BIO2 MinFin v1.0 - 10072026.xlsx'. De rekenformules van de werkmap (maximumwaarde per aspect, risiconiveau, quantumresultaat) zijn hier invulvelden: de invuller neemt de hoogste waardering zelf over. De maatregelentabbladen zijn een selectie van toepasselijke BIO2-controls, geen in-controlverklaring.
+tasks:
+- task: Algemeen
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 0. Basisgegevens
+    description: >-
+      Vul de basisgegevens in over het proces of informatiesysteem waarvoor de classificatietoets BIO2 wordt uitgevoerd.
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Directie
+      id: "1.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_a.organisatie
+    - task: Afdeling of team
+      id: "1.1.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_a.afdeling
+    - task: Naam van het proces of informatiesysteem
+      description: 'Het object van de classificatie: het bedrijfsproces, de applicatie of het informatiesysteem.'
+      id: "1.1.3"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_a.systeemnaam
+    - task: Naam en functie opsteller
+      id: "1.1.4"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_a.opsteller
+    - task: Versienummer
+      id: "1.1.5"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: qs_a.versienummer
+    - task: Datum van de classificatietoets
+      id: "1.1.6"
+      type:
+      - date
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_a.datum
+  - task: 1. Managementsamenvatting
+    id: "1.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Managementsamenvatting
+      description: >-
+        Vat in het kort samen wat er is getoetst en wat de uitkomst is. Vul dit als laatste in, als de classificatie bekend is.
+      id: "1.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_a.managementsamenvatting
+  - task: 2. Inleiding
+    id: "1.3"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Waarom wordt deze Quickscan BIO2 uitgevoerd?
+      id: "1.3.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_a.aanleiding
+    - task: Wie voert de classificatietoets uit?
+      id: "1.3.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_a.uitvoerder
+    - task: Zijn er bijzonderheden bij de uitvoering van deze toets?
+      description: Bijvoorbeeld informatie die nog niet beschikbaar is, of aannames die zijn gedaan.
+      id: "1.3.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: qs_a.bijzonderheden
+    - task: Projectsamenvatting
+      description: Korte beschrijving van het project of de wijziging waarbinnen dit proces of systeem wordt gebruikt.
+      id: "1.3.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_a.projectsamenvatting
+  - task: 2.2 – 2.8 Relatie met andere producten en toetsen
+    description: >-
+      Deze classificatietoets bouwt voort op eerder uitgevoerde toetsen. Verwijs per onderdeel naar het document en neem de uitkomst over.
+    id: "1.4"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: 'Programma Start Architectuur (PSA): verwijzing en uitkomst'
+      description: Verwijs naar de PSA en beschrijf welke architectuurkaders relevant zijn voor deze classificatie.
+      id: "1.4.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_a.psa
+    - task: Is er eerder een IB-quickscan of classificatietoets uitgevoerd?
+      id: "1.4.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: qs_a.ib_quickscan_eerder
+    - task: Verwijzing naar de eerdere IB-quickscan en de eerdere dataclassificatie
+      id: "1.4.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: qs_a.ib_quickscan_uitkomst
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.4.2"
+          operator: equals
+          value: Ja
+        action: show
+    - task: Is er eerder een BIA uitgevoerd?
+      id: "1.4.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: qs_a.bia_uitgevoerd
+    - task: Verwijzing naar de BIA en de uitkomsten daarvan
+      id: "1.4.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: qs_a.bia_uitkomst
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.4.4"
+          operator: equals
+          value: Ja
+        action: show
+    - task: Is het proces of de applicatie vastgesteld als TBB (te beschermen belang)?
+      id: "1.4.6"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: qs_a.tbb
+    - task: Verwijzing naar de TBB-toets en de resulterende TBB-classificatie
+      id: "1.4.7"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: qs_a.tbb_uitkomst
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.4.6"
+          operator: equals
+          value: Ja
+        action: show
+    - task: Wat is de rubricering van dit proces of deze informatie?
+      description: >-
+        De rubricering volgt uit het VIR-BI / de Rijksbrede rubriceringsregels en is iets anders dan de vertrouwelijkheidsclassificatie in deel C.
+      id: "1.4.8"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ongerubriceerd
+      - value: Departementaal Vertrouwelijk (Dep.V)
+      - value: Staatsgeheim Confidentieel
+      - value: Staatsgeheim Geheim
+      - value: Staatsgeheim Zeer Geheim
+      required_status: true
+      references:
+        invulhulp: qs_a.rubricering
+    - task: Is er een prescan DPIA uitgevoerd?
+      id: "1.4.9"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: qs_a.prescan_dpia
+    - task: Verwijzing naar de (pre)DPIA en de uitkomsten daarvan
+      id: "1.4.10"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: qs_a.prescan_dpia_uitkomst
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.4.9"
+          operator: equals
+          value: Ja
+        action: show
+    - task: Betreft het een applicatie in de cloud?
+      id: "1.4.11"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: qs_a.cloud
+    - task: Toelichting op de cloudoplossing en de uitkomst van de cloudtoets
+      id: "1.4.12"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: qs_a.cloud_uitkomst
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.4.11"
+          operator: equals
+          value: Ja
+        action: show
+- task: Proces en informatiesysteem
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 3.1 Geïnterviewden en eigenaarschap
+    description: >-
+      De informatie-eigenaar moet in deze fase bekend zijn: die stelt de classificatie vast en is verantwoordelijk voor de te nemen beveiligingsmaatregelen.
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wie is geïnterviewd voor deze quickscan?
+      id: "2.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.geinterviewde
+    - task: Wie is de proceseigenaar?
+      id: "2.1.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.proceseigenaar
+    - task: Wie is de business owner?
+      id: "2.1.3"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.businessowner
+  - task: 3.2 – 3.3 Proces en procesbeschrijving
+    id: "2.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Functie van het proces waarin de informatie wordt gebruikt
+      id: "2.2.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.procesfunctie
+    - task: Geef een bondige beschrijving van het proces en de informatie
+      description: Benoem daarbij ook de proces- en informatie-eigenaar.
+      id: "2.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.procesbeschrijving
+    - task: Bijlagen
+      id: "2.2.2-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "2.2.2-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Benoem het hoofdproces en alle subprocessen
+      id: "2.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.hoofd_en_subprocessen
+    - task: Betreft het 24/7-dienstverlening, of is er in bepaalde perioden hoge beschikbaarheid nodig?
+      description: >-
+        Denk aan piekmomenten zoals een aangiftecampagne of een betaalrun: dan gelden vaak strengere eisen dan de rest van het jaar.
+      id: "2.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.beschikbaarheidsvenster
+  - task: 3.4 Ketens en ketenpartners
+    description: Maakt het proces deel uit van een of meer ketens, of zijn anderen afhankelijk van deze informatie?
+    id: "2.3"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Van welke keten(s) maakt het proces deel uit?
+      id: "2.3.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.ketens
+    - task: Wie zijn de ketenpartners?
+      description: Welke externe partijen zijn betrokken bij of afhankelijk van dit proces of systeem?
+      id: "2.3.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.ketenpartners
+    - task: Bijlagen
+      id: "2.3.2-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "2.3.2-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+  - task: 3.5 Subprocessen en activiteiten
+    id: "2.4"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke subprocessen zijn te onderscheiden?
+      id: "2.4.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: qs_c.subprocessen
+    - task: Welke hoofdactiviteiten worden binnen het proces uitgevoerd en wie voeren die uit?
+      id: "2.4.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.hoofdactiviteiten
+  - task: 3.6 Type informatie
+    id: "2.5"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke informatie wordt gebruikt binnen het proces en de subprocessen?
+      description: >-
+        Bijvoorbeeld financiële gegevens, aanslaggegevens of bedrijfsgegevens. Persoonsgegevens komen in deel D aan bod.
+      id: "2.5.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.informatiesoorten
+  - task: 3.7 – 3.8 Afnemers en leveranciers van informatie
+    id: "2.6"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke afnemers van informatie heeft het proces, en welke informatie nemen zij af?
+      id: "2.6.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.afnemers
+    - task: Welke kwaliteitseisen stellen de afnemers aan deze informatie?
+      id: "2.6.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.afnemers_eisen
+    - task: Welke leveranciers van informatie heeft het proces, en welke informatie leveren zij aan?
+      id: "2.6.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.leveranciers
+    - task: Welke eisen stellen zij aan de informatie die in het proces wordt gebruikt?
+      id: "2.6.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.leveranciers_eisen
+  - task: 3.9 Wet- en regelgeving
+    id: "2.7"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke wet- en regelgeving is van toepassing op deze informatie en dit proces?
+      description: Bijvoorbeeld AVG, Archiefwet, Cyberbeveiligingswet (Cbw), sectorspecifieke wetgeving.
+      id: "2.7.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.wetgeving
+    - task: Welke specifieke eisen komen daaruit voort?
+      description: Bijvoorbeeld een verplichte (pre)DPIA, een AIIA of een bewaartermijn.
+      id: "2.7.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.wetgeving_eisen
+  - task: 4. Vragenlijst informatiesysteem
+    id: "2.8"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Door welke informatievoorziening of systemen wordt de informatie verwerkt?
+      description: Welke systemen of applicaties worden ingezet voor dit proces?
+      id: "2.8.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.systemen_beschrijving
+    - task: Bijlagen
+      id: "2.8.1-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "2.8.1-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Wie is de (beoogd) eigenaar van de informatie?
+      description: >-
+        Let op: de eigenaar moet in deze fase bekend zijn of benoemd worden — die stelt de classificatie vast.
+      id: "2.8.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.informatie_eigenaar
+    - task: Wie is de informatiesysteemeigenaar?
+      id: "2.8.3"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.systeemeigenaar
+    - task: Wie zijn de gebruikers van het informatiesysteem?
+      id: "2.8.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.gebruikers
+    - task: Wat voor soort systeem betreft het?
+      description: Bijvoorbeeld maatwerk, standaardpakket, SaaS-dienst of koppelvlak.
+      id: "2.8.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.systeemsoort
+    - task: Wat is de output van het informatiesysteem?
+      id: "2.8.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.output
+    - task: Zijn er koppelvlakken met andere informatiesystemen? Zo ja, welke?
+      id: "2.8.7"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.koppelvlakken
+    - task: Bijlagen
+      id: "2.8.7-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "2.8.7-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Hoe kan de informatie of data zich verplaatsen?
+      description: Denk aan export, koppelvlakken, back-ups, e-mail en meegenomen apparatuur.
+      id: "2.8.8"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.dataverplaatsing
+    - task: Hoe kan de informatie gemuteerd of aangepast worden, en hoe krijgt iemand autorisatie?
+      id: "2.8.9"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.mutatie_autorisatie
+    - task: Hoe ziet de roadmap eruit die aangeeft hoe en wanneer het systeem quantumveilig wordt?
+      description: 'Bijvoorbeeld: geen roadmap, hoog-over of gedetailleerd.'
+      id: "2.8.10"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.quantum_roadmap
+    - task: Hoe geeft het systeem inzicht in de softwarematige en cryptografische afhankelijkheden?
+      description: Bijvoorbeeld via een SBOM of CBOM.
+      id: "2.8.11"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.crypto_inzicht
+    - task: Hoe wordt crypto-agility meegenomen in het systeem?
+      description: Bijvoorbeeld via de architectuur of via een handmatig overzicht van gebruikte algoritmen.
+      id: "2.8.12"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.crypto_agility
+  - task: 4.9 Quantumveiligheid
+    description: >-
+      Vragen over de quantumveiligheid van de informatie. Dit raakt zowel de vertrouwelijkheid, de integriteit als de beschikbaarheid. Beantwoord alle vragen; licht toe wat nog niet volledig te beantwoorden is en kom daarop terug zodra de informatie beschikbaar is.
+    id: "2.9"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Q1 Informatietransport — wordt het communicatiekanaal beschermd met versleuteling?
+      id: "2.9.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_c.q1_informatietransport
+    - task: >-
+        Q2 Transportmiddel — wordt voor de versleuteling van het communicatiekanaal iets anders dan TLS, IPsec of SSH gebruikt?
+      id: "2.9.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_c.q2_transportmiddel
+    - task: Q3 TLS-versie — wordt voor de versleuteling een quantumveilige methode ondersteund?
+      description: Als OpenSSL wordt gebruikt is minimaal versie 3.5 nodig.
+      id: "2.9.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_c.q3_tls_versie
+    - task: >-
+        Q4 Quantumveilig certificaat — wordt voor de authenticatie een quantumveilig certificaat ondersteund?
+      id: "2.9.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_c.q4_quantumveilig_certificaat
+    - task: Q5 Sleuteluitwisseling — wordt voor de sleuteluitwisseling een quantumveilige methode ondersteund?
+      id: "2.9.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_c.q5_sleuteluitwisseling
+    - task: Q6 Authenticatiecertificaat — wordt voor de authenticatie een quantumveilig certificaat ondersteund?
+      id: "2.9.6"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_c.q6_authenticatie_certificaat
+    - task: >-
+        Q7 SSH-sleuteluitwisseling — wordt voor de sleuteluitwisseling een quantumveilige methode ondersteund?
+      description: >-
+        Er is nog geen vastgestelde IETF-standaard voor quantumveilige SSH-sleuteluitwisseling; de draft draft-ietf-sshm-mlkem-hybrid-kex wordt door OpenSSH 10.3 al standaard ondersteund.
+      id: "2.9.7"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_c.q7_ssh_sleuteluitwisseling
+    - task: Q8 SSH-certificaat — wordt voor de authenticatie een quantumveilige handtekeningmethode gebruikt?
+      description: OpenSSH ondersteunt quantumveilige handtekeningen nog niet; dat komt in een latere versie.
+      id: "2.9.8"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_c.q8_ssh_certificaat
+    - task: >-
+        Q9 Authenticatie — wordt authenticatie gebruikt om autorisatie te verkrijgen voor het aanpassen of inzien van informatie?
+      id: "2.9.9"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_c.q9_authenticatie
+    - task: Q10 Authenticatiecertificaten — wordt daarbij gebruikgemaakt van certificaten?
+      description: Bijvoorbeeld via Active Directory.
+      id: "2.9.10"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_c.q10_certificaten
+    - task: Q11 Publieke sleutels — zijn de publieke sleutels in deze certificaten van quantumveilige methoden?
+      id: "2.9.11"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_c.q11_publieke_sleutels
+    - task: >-
+        Q12 Digitale handtekeningen — zijn de digitale handtekeningen in deze certificaten van quantumveilige methoden?
+      id: "2.9.12"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_c.q12_handtekeningen
+    - task: Argumentatie bij het informatietransport (Q1 – Q3)
+      id: "2.9.13"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.quantum_transport_argumentatie
+    - task: Argumentatie bij certificaten en sleuteluitwisseling (Q4 – Q6)
+      id: "2.9.14"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.quantum_certificaten_argumentatie
+    - task: Argumentatie bij SSH (Q7 – Q8)
+      id: "2.9.15"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.quantum_ssh_argumentatie
+    - task: Argumentatie bij authenticatie en certificaten (Q9 – Q12)
+      id: "2.9.16"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_c.quantum_authenticatie_argumentatie
+    - task: Resultaat quantumveiligheid
+      description: >-
+        Niet quantumveilig betekent dat aan minimaal één van de voorwaarden om quantumveilig te zijn niet wordt voldaan.
+      id: "2.9.17"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Quantumveilig
+      - value: Niet quantumveilig
+      - value: Nog niet vast te stellen
+      - value: Niet van toepassing
+      required_status: true
+      references:
+        invulhulp: qs_c.quantum_resultaat
+- task: Classificatie (BIV)
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Beschikbaarheid
+    description: >-
+      Gevolgen van het niet beschikbaar hebben van de benodigde informatie of gegevens, in het ergste geval. Kies per vraag één antwoord en vul altijd de argumentatie in.
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: >-
+        B1 Managementbeslissingen — Welke tijdsduur, waarin het nemen van beslissingen door het ontbreken van informatie negatief wordt beïnvloed, is acceptabel?
+      id: "3.1.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Uren
+      - value: Kritiek/Zeer ernstig — Dag (deel)
+      - value: Gemiddeld — Week
+      - value: Gering — Meer dan een week
+      - value: Verwaarloosbaar — Meer dan 2 weken
+      required_status: true
+      references:
+        invulhulp: qs_b.b1
+    - task: Argumentatie bij B1
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.b1_argumentatie
+    - task: >-
+        B2 Imagoverlies — Hoe lang duurt het voordat er sprake is van imagoverlies wanneer de informatie niet voorhanden is?
+      description: >-
+        Imagoverlies is lastig in te schatten omdat er soms veel tijd is voor bepaalde beslissingen. Bedenk wel dat er soms een wettelijke maximumtermijn is waarbinnen informatie beschikbaar moet zijn.
+      id: "3.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Uren
+      - value: Kritiek/Zeer ernstig — Dag (deel)
+      - value: Gemiddeld — Week
+      - value: Gering — Meer dan een week
+      - value: Verwaarloosbaar — Meer dan 2 weken
+      required_status: true
+      references:
+        invulhulp: qs_b.b2
+    - task: Argumentatie bij B2
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.b2_argumentatie
+    - task: >-
+        B3 Hapering dienstverlening (RTO) — Hoe lang kan de informatie onbeschikbaar zijn voordat er hapering in de dienstverlening aan burgers, bedrijven of ketenpartners ontstaat? Binnen welke tijd moet de dienstverlening hersteld zijn?
+      description: >-
+        Deze vraag gaat over de hersteltijd (Recovery Time Objective); vraag B7 gaat over het dataverlies (RPO). In de hersteltijd zit ook het herstellen van gegevens, zodat het proces weer normaal kan verlopen.
+      id: "3.1.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Hersteltijd max 4 werkuren
+      - value: Kritiek/Zeer ernstig — Hersteltijd max 8 werkuren
+      - value: Gemiddeld — Hersteltijd max 16 werkuren
+      - value: Gering — Hersteltijd max 40 werkuren
+      - value: Verwaarloosbaar — Hersteltijd meer dan 40 werkuren
+      required_status: true
+      references:
+        invulhulp: qs_b.b3
+    - task: Argumentatie bij B3
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.1.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.b3_argumentatie
+    - task: >-
+        B4 Wettelijke aansprakelijkheid — Hoe lang kan de informatie onbeschikbaar zijn voordat wettelijke of contractuele verplichtingen niet kunnen worden nagekomen?
+      description: >-
+        Let op situaties waarin uitval een week mag duren, behalve op de dag dat bijvoorbeeld uitkeringen worden berekend en naar de bank gestuurd. Geef dat aan in de argumentatie en bedenk daar mitigerende maatregelen voor.
+      id: "3.1.7"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Dag (deel)
+      - value: Kritiek/Zeer ernstig — Dag (deel)
+      - value: Gemiddeld — Week
+      - value: Gering — Meer dan een week
+      - value: Verwaarloosbaar — Meer dan 2 weken
+      required_status: true
+      references:
+        invulhulp: qs_b.b4
+    - task: Argumentatie bij B4
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.1.8"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.b4_argumentatie
+    - task: >-
+        B5 Additionele kosten — Na welke periode zijn additionele kosten voor de organisatie te verwachten wanneer de informatie niet beschikbaar is?
+      id: "3.1.9"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Dag (deel)
+      - value: Kritiek/Zeer ernstig — Dag (deel)
+      - value: Gemiddeld — Week
+      - value: Gering — Meer dan een week
+      - value: Verwaarloosbaar — Meer dan 2 weken
+      required_status: true
+      references:
+        invulhulp: qs_b.b5
+    - task: Argumentatie bij B5
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.1.10"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.b5_argumentatie
+    - task: >-
+        B6 Moreel van de medewerkers — Na welke periode is er een duidelijk negatieve invloed op het moreel en de motivatie van medewerkers wanneer de informatiestroom hapert?
+      description: >-
+        Bedenk hierbij ook dat er een wettelijke plicht kan zijn om bepaalde systemen tijdig beschikbaar te hebben.
+      id: "3.1.11"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Uren
+      - value: Kritiek/Zeer ernstig — Dag (deel)
+      - value: Gemiddeld — Week
+      - value: Gering — Meer dan een week
+      - value: Verwaarloosbaar — Meer dan 2 weken
+      required_status: true
+      references:
+        invulhulp: qs_b.b6
+    - task: Argumentatie bij B6
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.1.12"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.b6_argumentatie
+    - task: >-
+        B7 Herstel (RPO) — Hoeveel dataverlies is acceptabel voordat er hapering in de dienstverlening aan burgers, bedrijven of ketenpartners ontstaat? Zijn er hoge herstelkosten voor het achteraf verwerken van verloren werk?
+      description: >-
+        Deze vraag gaat over het dataverlies (Recovery Point Objective); vraag B3 gaat over de hersteltijd (RTO).
+      id: "3.1.13"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Dataverlies minder dan 4 uur
+      - value: Kritiek/Zeer ernstig — Dataverlies tot 8 uur
+      - value: Gemiddeld — Dataverlies 8 – 24 uur
+      - value: Gering — Dataverlies meer dan 24 uur
+      - value: Verwaarloosbaar — Dataverlies meer dan een week
+      required_status: true
+      references:
+        invulhulp: qs_b.b7
+    - task: Argumentatie bij B7
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.1.14"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.b7_argumentatie
+  - task: Integriteit
+    description: >-
+      Gevolgen van fouten in de informatie of van doelbewuste manipulatie om te frauderen of fraude te maskeren, in het ergste geval. In deze methode worden integriteit en authenticiteit samen beoordeeld: verlies van authenticiteit manifesteert zich in de praktijk als foutieve of misleidende informatie.
+    id: "3.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: >-
+        I1 Managementbeslissingen — Kan onjuiste informatie leiden tot onjuiste beslissingen? Wat zijn daarvan de gevolgen?
+      id: "3.2.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Zeer zware gevolgen
+      - value: Kritiek/Zeer ernstig — Zware gevolgen
+      - value: Gemiddeld — Gemiddelde gevolgen
+      - value: Gering — Beperkte gevolgen
+      - value: Verwaarloosbaar — Verwaarloosbaar / geen gevolgen
+      required_status: true
+      references:
+        invulhulp: qs_b.i1
+    - task: Argumentatie bij I1
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.i1_argumentatie
+    - task: I2 Fraudepotentie — Zijn er frauderisico's met deze informatie, en welke gevolgen hebben die?
+      id: "3.2.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Zeer zware schade
+      - value: Kritiek/Zeer ernstig — Zware schade
+      - value: Gemiddeld — Gemiddelde schade
+      - value: Gering — Beperkte schade
+      - value: Verwaarloosbaar — Verwaarloosbaar / geen schade
+      required_status: true
+      references:
+        invulhulp: qs_b.i2
+    - task: Argumentatie bij I2
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.i2_argumentatie
+    - task: >-
+        I3 Onderbreking van strategische processen — In hoeverre kunnen de kernprocessen van de organisatie onderbroken worden door ongeautoriseerde wijzigingen in of fouten in de informatie?
+      id: "3.2.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Zeer hoog
+      - value: Kritiek/Zeer ernstig — Hoog
+      - value: Gemiddeld — Gemiddeld
+      - value: Gering — Beperkt
+      - value: Verwaarloosbaar — Verwaarloosbaar
+      required_status: true
+      references:
+        invulhulp: qs_b.i3
+    - task: Argumentatie bij I3
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.2.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.i3_argumentatie
+    - task: >-
+        I4 Vertrouwen van het publiek c.q. klanten — Kan het vertrouwen van het publiek geschaad worden door onjuiste informatie?
+      id: "3.2.7"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Zeer zwaar
+      - value: Kritiek/Zeer ernstig — Zwaar
+      - value: Gemiddeld — Gemiddeld
+      - value: Gering — Beperkt
+      - value: Verwaarloosbaar — Verwaarloosbaar
+      required_status: true
+      references:
+        invulhulp: qs_b.i4
+    - task: Argumentatie bij I4
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.2.8"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.i4_argumentatie
+    - task: >-
+        I5 Wettelijke aansprakelijkheid — Wat kunnen de gevolgen zijn van het niet voldoen aan wettelijke of contractuele verplichtingen doordat de informatie onjuist is?
+      id: "3.2.9"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Zeer zwaar
+      - value: Kritiek/Zeer ernstig — Zwaar
+      - value: Gemiddeld — Gemiddeld
+      - value: Gering — Beperkt
+      - value: Verwaarloosbaar — Verwaarloosbaar
+      required_status: true
+      references:
+        invulhulp: qs_b.i5
+    - task: Argumentatie bij I5
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.2.10"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.i5_argumentatie
+    - task: >-
+        I6 Additionele kosten — In hoeverre kunnen er additionele kosten ontstaan door het toepassen van onjuiste informatie?
+      description: Bijvoorbeeld door het herstellen van een corrupte database of het opnieuw invoeren van gegevens.
+      id: "3.2.11"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Zeer hoge kosten
+      - value: Kritiek/Zeer ernstig — Hoge kosten
+      - value: Gemiddeld — Gemiddelde kosten
+      - value: Gering — Lage kosten
+      - value: Verwaarloosbaar — Verwaarloosbaar
+      required_status: true
+      references:
+        invulhulp: qs_b.i6
+    - task: Argumentatie bij I6
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.2.12"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.i6_argumentatie
+    - task: >-
+        I7 Moreel van de medewerkers — Wat zijn de schadelijke effecten op het moreel van medewerkers wanneer zij onjuiste informatie gebruiken?
+      id: "3.2.13"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal — Zeer zwaar
+      - value: Kritiek/Zeer ernstig — Zwaar
+      - value: Gemiddeld — Gemiddeld
+      - value: Gering — Beperkt
+      - value: Verwaarloosbaar — Verwaarloosbaar
+      required_status: true
+      references:
+        invulhulp: qs_b.i7
+    - task: Argumentatie bij I7
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.2.14"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.i7_argumentatie
+  - task: Vertrouwelijkheid
+    description: >-
+      Gevolgen van onbedoelde of ongeautoriseerde verspreiding van gegevens of informatie, in het ergste geval.
+    id: "3.3"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: >-
+        V1 Vertrouwen van de burger — Wat zijn de gevolgen voor de organisatie als de binnen het proces beschikbare informatie te vroeg of niet volgens de regels wordt verspreid?
+      description: >-
+        Het vertrouwen van de burger wordt geschaad als informatie lekt, bedoeld of onbedoeld. Hoe ernstig is dat, en wat zijn de (politieke) gevolgen?
+      id: "3.3.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Geheim / Zeer Geheim — Catastrofale gevolgen
+      - value: Confidentieel — Zeer ernstige gevolgen
+      - value: Vertrouwelijk — Ernstige gevolgen
+      - value: Intern — Acceptabel
+      - value: Openbaar — Geen gevolgen
+      required_status: true
+      references:
+        invulhulp: qs_b.v1
+    - task: Argumentatie bij V1
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.3.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.v1_argumentatie
+    - task: >-
+        V2 Vertrouwen van het publiek — Wat zijn de gevolgen voor het publieke imago van de organisatie als vertrouwelijke informatie onterecht wordt verspreid?
+      description: Neem bij de beantwoording zowel persoonsgegevens als niet-persoonsgegevens mee.
+      id: "3.3.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Geheim / Zeer Geheim — Catastrofale gevolgen
+      - value: Confidentieel — Zeer ernstige gevolgen
+      - value: Vertrouwelijk — Ernstige gevolgen
+      - value: Intern — Acceptabel
+      - value: Openbaar — Geen gevolgen
+      required_status: true
+      references:
+        invulhulp: qs_b.v2
+    - task: Argumentatie bij V2
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.3.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.v2_argumentatie
+    - task: V3 Toegang tot de keten — Kan de organisatie de toegang tot de keten geweigerd worden?
+      id: "3.3.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Geheim / Zeer Geheim — Ja
+      - value: Confidentieel — Ja
+      - value: Vertrouwelijk — Mogelijk
+      - value: Intern — Nee
+      - value: Openbaar — Niet van toepassing
+      required_status: true
+      references:
+        invulhulp: qs_b.v3
+    - task: Argumentatie bij V3
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.3.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.v3_argumentatie
+    - task: >-
+        V4 Vertrouwen van ketenpartners — Wat zijn de gevolgen voor de relatie met de ketenpartners als vertrouwelijke informatie onterecht wordt verspreid?
+      description: Denk aan koppelingen met ketenpartners zoals Suwinet of de BRP.
+      id: "3.3.7"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Geheim / Zeer Geheim — Catastrofale gevolgen
+      - value: Confidentieel — Zeer ernstige gevolgen
+      - value: Vertrouwelijk — Ernstige gevolgen
+      - value: Intern — Acceptabel
+      - value: Openbaar — Geen gevolgen
+      required_status: true
+      references:
+        invulhulp: qs_b.v4
+    - task: Argumentatie bij V4
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.3.8"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.v4_argumentatie
+    - task: >-
+        V5 (Wettelijke) aansprakelijkheid — Wat zijn de gevolgen voor de (wettelijke) aansprakelijkheid bij het onterecht verspreiden van deze informatie?
+      description: Neem zowel persoonsgegevens als niet-persoonsgegevens mee.
+      id: "3.3.9"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Geheim / Zeer Geheim — Catastrofale gevolgen
+      - value: Confidentieel — Zeer ernstige gevolgen
+      - value: Vertrouwelijk — Ernstige gevolgen
+      - value: Intern — Acceptabel
+      - value: Openbaar — Geen gevolgen
+      required_status: true
+      references:
+        invulhulp: qs_b.v5
+    - task: Argumentatie bij V5
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.3.10"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.v5_argumentatie
+    - task: >-
+        V6 Additionele kosten — In hoeverre is er sprake van additionele kosten door onterechte verspreiding van deze informatie?
+      description: >-
+        Denk aan herstelkosten, juridische kosten en schadevergoedingen, maar ook aan de bestuurlijke boete van de Autoriteit Persoonsgegevens en andere toezichthouders voor de Cbw.
+      id: "3.3.11"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Geheim / Zeer Geheim — Zeer hoge kosten
+      - value: Confidentieel — Hoge kosten
+      - value: Vertrouwelijk — Gemiddelde kosten
+      - value: Intern — Lage kosten
+      - value: Openbaar — Geen kosten
+      required_status: true
+      references:
+        invulhulp: qs_b.v6
+    - task: Argumentatie bij V6
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.3.12"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.v6_argumentatie
+    - task: >-
+        V7 Moreel van de medewerkers — In hoeverre kan de onterechte verspreiding van deze informatie een duidelijk negatieve invloed hebben op het moreel en de motivatie van medewerkers?
+      description: Neem zowel persoonsgegevens als niet-persoonsgegevens mee.
+      id: "3.3.13"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Geheim / Zeer Geheim — Zeer hoge invloed
+      - value: Confidentieel — Hoge invloed
+      - value: Vertrouwelijk — Gemiddelde invloed
+      - value: Intern — Lage invloed
+      - value: Openbaar — Geen invloed
+      required_status: true
+      references:
+        invulhulp: qs_b.v7
+    - task: Argumentatie bij V7
+      description: >-
+        Verplicht: leg vast waarom deze waardering is gekozen, zodat iemand die de toets later herhaalt de keuze kan volgen.
+      id: "3.3.14"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.v7_argumentatie
+  - task: Classificatieresultaat
+    description: >-
+      Neem per betrouwbaarheidsaspect de hoogste waardering uit de voorgaande blokken over. Dat is de classificatie van de informatie.
+    id: "3.4"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Beschikbaarheidsclassificatie
+      description: De hoogste waardering uit B1 tot en met B7.
+      id: "3.4.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal
+      - value: Kritiek/Zeer ernstig
+      - value: Gemiddeld
+      - value: Gering
+      - value: Verwaarloosbaar
+      required_status: true
+      references:
+        invulhulp: qs_b.beschikbaarheid
+    - task: Integriteitsclassificatie
+      description: De hoogste waardering uit I1 tot en met I7.
+      id: "3.4.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Catastrofaal
+      - value: Kritiek/Zeer ernstig
+      - value: Gemiddeld
+      - value: Gering
+      - value: Verwaarloosbaar
+      required_status: true
+      references:
+        invulhulp: qs_b.integriteit
+    - task: Vertrouwelijkheidsclassificatie
+      description: >-
+        De hoogste waardering uit V1 tot en met V7. Vanaf Confidentieel gelden altijd de aanvullende regels uit ABDO of ABRO; BIO2 alleen volstaat dan niet.
+      id: "3.4.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Geheim / Zeer Geheim
+      - value: Confidentieel
+      - value: Vertrouwelijk
+      - value: Intern
+      - value: Openbaar
+      required_status: true
+      references:
+        invulhulp: qs_b.vertrouwelijkheid
+    - task: Onderbouwing van de classificatie
+      description: >-
+        Vat samen waar het zwaartepunt van het te beschermen belang ligt en waarom. Er wordt gestreefd naar een zo laag mogelijk classificatieniveau: te hoog classificeren leidt tot onnodige kosten.
+      id: "3.4.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_b.classificatie_onderbouwing
+- task: Resultaat, risico en maatregelen
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 5. Classificatie van het proces
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke procesklasse hoort bij dit proces?
+      description: >-
+        Ondersteunend: geen directe relatie met de producten of diensten waaraan de organisatie haar bestaansrecht ontleent. Bijdragend: indirecte relatie, het ontbreken ervan geeft effectiviteits- en efficiencyverlies in het primaire proces. Strategisch: directe relatie met de doelstellingen van de organisatie. Kritisch strategisch: het proces speelt een primaire rol voor de doelstelling; langdurige uitval brengt de organisatie in een hachelijke positie.
+      id: "4.1.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ondersteunend — gewenst proces, MTU meer dan 2 weken
+      - value: Bijdragend — noodzakelijk proces, MTU meer dan 1 week
+      - value: Strategisch — vitaal proces, MTU meer dan 48 uur
+      - value: Kritisch strategisch — tijdkritiek proces, MTU meer dan 24 uur
+      required_status: true
+      references:
+        invulhulp: qs_d.procesklasse
+    - task: Toelichting op de procesklasse
+      id: "4.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_d.procesklasse_toelichting
+  - task: 6. Classificatie van het informatiesysteem
+    id: "4.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke klasse hoort bij het informatiesysteem?
+      description: >-
+        Nuttig: het systeem ondersteunt het bedrijfsproces en is handig om te hebben. Belangrijk: het levert een belangrijke bijdrage, voortzetting van het proces zonder het systeem kost onevenredig veel inspanning, het verhoogt effectiviteit en efficiëntie, of het wordt door veel medewerkers of burgers gebruikt. Vitaal: het uitvoeren van de bedrijfsprocessen is zonder het systeem (nagenoeg) onmogelijk.
+      id: "4.2.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Nuttig
+      - value: Belangrijk
+      - value: Vitaal
+      required_status: true
+      references:
+        invulhulp: qs_d.systeemklasse
+    - task: Argumentatie bij de systeemklasse
+      id: "4.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_d.systeemklasse_argumentatie
+  - task: 7. Zijn aanvullende maatregelen noodzakelijk?
+    description: >-
+      Wordt één van deze vragen met Ja beantwoord, dan krijgt het systeem altijd de classificatie HOOG en moeten er op basis van een risicoanalyse aanvullende maatregelen bovenop de BIO2-maatregelen worden gedefinieerd om de cyberdreiging te reduceren.
+    id: "4.3"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: 1. Is er weerstand vereist tegen statelijke actoren?
+      id: "4.3.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_d.statelijke_actoren
+    - task: >-
+        2. Heeft de ontvangen informatie een classificatie of rubricering meegekregen van de (externe) bronhouder?
+      description: Bijvoorbeeld een EU- of NAVO-rubricering.
+      id: "4.3.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_d.externe_rubricering
+    - task: 3. Is er weerstand nodig tegen georganiseerde misdaad en zware criminaliteit?
+      id: "4.3.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_d.georganiseerde_misdaad
+    - task: 'Conclusie: zijn aanvullende maatregelen bovenop de BIO2-baseline noodzakelijk?'
+      id: "4.3.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Nader te bepalen
+      required_status: true
+      references:
+        invulhulp: qs_d.extra_maatregelen
+    - task: Toelichting op de aanvullende maatregelen
+      id: "4.3.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_d.extra_maatregelen_toelichting
+  - task: Privacy en DPIA-screening
+    description: >-
+      Persoonsgegevens bepalen mede de vertrouwelijkheidsclassificatie en de vraag of een DPIA verplicht is.
+    id: "4.4"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Worden er persoonsgegevens verwerkt?
+      id: "4.4.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: qs_d.persoonsgegevens
+    - task: Worden er bijzondere persoonsgegevens verwerkt (artikel 9 AVG)?
+      description: >-
+        Bijvoorbeeld BSN, godsdienst of levensovertuiging, ras, politieke gezindheid, medische gegevens of strafrechtelijke gegevens.
+      id: "4.4.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Niet van toepassing
+      required_status: true
+      references:
+        invulhulp: qs_d.bijzondere_persoonsgegevens
+    - task: Welke (bijzondere) persoonsgegevens worden verwerkt?
+      description: >-
+        Beschrijf welke persoonsgegevens worden verwerkt en in welke context. Bijvoorbeeld naam, adres en woonplaats, telefoonnummers of postcodes met huisnummers.
+      id: "4.4.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: qs_d.persoonsgegevens_toelichting
+    - task: Is een DPIA noodzakelijk op basis van deze scan?
+      description: >-
+        Of een volledige DPIA verplicht is, volgt uit de prescan DPIA. Deze vraag legt vast wat deze classificatietoets daarover signaleert.
+      id: "4.4.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja — DPIA is verplicht
+      - value: Nee — geen DPIA vereist
+      - value: Nader te bepalen
+      required_status: true
+      references:
+        invulhulp: qs_d.dpia_noodzakelijk
+  - task: Risiconiveau in context
+    description: >-
+      Ondergrens: de BIO2-overheidsmaatregelen (deel 2) zijn wettelijk verplicht voor alle overheidsorganisaties, ongeacht het risiconiveau. Cbw- en Cbb-maatregelen zijn aanvullend verplicht voor Cbw-entiteiten. Eigen aanvullende maatregelen zijn bindend via het organisatiebeleid (ISMS, BIO2 §5).
+    id: "4.5"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welk risiconiveau volgt uit de classificatie?
+      description: >-
+        Staat één of meer van de drie aspecten op Hoog, dan is een diepgaande risicoanalyse het advies. Risicoacceptatie na een bewuste, gedocumenteerde proportionaliteitsafweging is een volwaardige keuze voor ISO- en organisatie-eigen maatregelen; voor BIO2-overheidsmaatregelen nooit.
+      id: "4.5.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: '1 — Zeer laag: BIO2-overheidsmaatregelen voldoende'
+      - value: '2 — Laag: BIO2 + eigen maatregelen voldoende'
+      - value: '3 — Gemiddeld: BIO2 + eigen maatregelen voldoende, aanvullende risicoanalyse overwegen'
+      - value: '4 — Hoog: aanvullende risicoanalyse vereist'
+      - value: '5 — Extreem: aanvullende risicoanalyse vereist, escaleren naar CISO en management'
+      required_status: true
+      references:
+        invulhulp: qs_d.risiconiveau
+    - task: Welke vervolgstappen zijn afgesproken?
+      description: >-
+        Bij 'aanvullende risicoanalyse vereist': start de risicoanalyse, rapporteer de uitkomst aan het management, registreer het risico in het risicoacceptatieformulier of risicoregister en leg de verbetermaatregelen vast met een streefdatum.
+      id: "4.5.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_d.vervolgstappen
+  - task: BIO2-maatregelen
+    description: >-
+      Selecteer alle BIO2-maatregelen die van toepassing zijn op basis van de context van het proces en de resulterende BIV-classificatie. Neem de geselecteerde maatregelen over in het risicoacceptatieformulier dat de proceseigenaar ondertekent.
+    id: "4.6"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: 5. Organisatorische maatregelen
+      id: "4.6.1"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: 5.01 Beleidsregels voor informatiebeveiliging
+      - value: 5.02 Rollen en verantwoordelijkheden bij informatiebeveiliging
+      - value: 5.03 Functiescheiding
+      - value: 5.04 Managementverantwoordelijkheden
+      - value: 5.05 Contact met overheidsinstanties
+      - value: 5.06 Contact met speciale belangengroepen
+      - value: 5.07 Informatie en analyses over dreigingen
+      - value: 5.08 Informatiebeveiliging in projectmanagement
+      - value: 5.09 Inventarisatie van informatie en andere gerelateerde bedrijfsmiddelen
+      - value: 5.10 Aanvaardbaar gebruik van informatie en andere gerelateerde bedrijfsmiddelen
+      - value: 5.11 Retourneren van bedrijfsmiddelen
+      - value: 5.12 Classificeren van informatie
+      - value: 5.13 Labelen van informatie
+      - value: 5.14 Overdragen van informatie
+      - value: 5.15 Toegangsbeveiliging
+      - value: 5.16 Identiteitsbeheer
+      - value: 5.17 Beheren van authenticatie-informatie
+      - value: 5.18 Toegangsrechten
+      - value: 5.19 Informatiebeveiliging in leveranciersrelaties
+      - value: 5.20 Adresseren van informatiebeveiliging in leveranciersovereenkomsten
+      - value: 5.21 Beheren van informatiebeveiliging in de ICT-toeleveringsketen
+      - value: 5.22 Monitoren, beoordelen en beheren van wijzigingen van leveranciersdiensten
+      - value: 5.23 Informatiebeveiliging voor het gebruik van clouddiensten
+      - value: 5.24 Plannen en voorbereiden van het beheer van informatiebeveiligingsincidenten
+      - value: 5.25 Beoordelen van en besluiten over informatiebeveiligingsgebeurtenissen
+      - value: 5.26 Reageren op informatiebeveiligingsincidenten
+      - value: 5.27 Leren van informatiebeveiligingsincidenten
+      - value: 5.28 Verzamelen van bewijsmateriaal
+      - value: 5.29 Informatiebeveiliging tijdens een verstoring
+      - value: 5.30 ICT-gereedheid voor bedrijfscontinuïteit
+      - value: 5.31 Wettelijke, statutaire, regelgevende en contractuele eisen
+      - value: 5.32 Intellectuele eigendomsrechten
+      - value: 5.33 Beschermen van registraties
+      - value: 5.34 Privacy en bescherming van persoonsgegevens
+      - value: 5.35 Onafhankelijke beoordeling van informatiebeveiliging
+      - value: 5.36 Naleving van beleid, regels en normen voor informatiebeveiliging
+      - value: 5.37 Gedocumenteerde bedieningsprocedure
+      required_status: true
+      references:
+        invulhulp: qs_d.maatregelen_organisatorisch
+    - task: 6. Mensgerichte beheersmaatregelen
+      id: "4.6.2"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: 6.01 Screening
+      - value: 6.02 Arbeidsovereenkomst
+      - value: 6.03 Bewustwording van, opleiding en training in informatiebeveiliging
+      - value: 6.04 Disciplinaire procedure
+      - value: 6.05 Verantwoordelijkheden na beëindiging of wijziging van het dienstverband
+      - value: 6.06 Vertrouwelijkheids- of geheimhoudingsovereenkomsten
+      - value: 6.07 Werken op afstand
+      - value: 6.08 Melden van informatiebeveiligingsgebeurtenissen
+      required_status: true
+      references:
+        invulhulp: qs_d.maatregelen_mensgericht
+    - task: 7. Fysieke beheersmaatregelen
+      id: "4.6.3"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: 7.01 Fysieke beveiligingszones
+      - value: 7.02 Fysieke toegangsbeveiliging
+      - value: 7.03 Beveiligen van kantoren, ruimten en faciliteiten
+      - value: 7.04 Monitoren van de fysieke beveiliging
+      - value: 7.05 Beschermen tegen fysieke en omgevingsdreigingen
+      - value: 7.06 Werken in beveiligde zones
+      - value: 7.07 'Clear desk' en 'clear screen'
+      - value: 7.08 Plaatsen en beschermen van apparatuur
+      - value: 7.09 Beveiligen van bedrijfsmiddelen buiten het terrein
+      - value: 7.10 Opslagmedia
+      - value: 7.11 Nutsvoorzieningen
+      - value: 7.12 Beveiligen van bekabeling
+      - value: 7.13 Onderhoud van apparatuur
+      - value: 7.14 Veilig verwijderen of hergebruiken van apparatuur
+      required_status: true
+      references:
+        invulhulp: qs_d.maatregelen_fysiek
+    - task: 8. Technologische beheersmaatregelen
+      id: "4.6.4"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: 8.01 'User endpoint devices'
+      - value: 8.02 Speciale toegangsrechten
+      - value: 8.03 Beperking toegang tot informatie
+      - value: 8.04 Toegangsbeveiliging op broncode
+      - value: 8.05 Beveiligde authenticatie
+      - value: 8.06 Capaciteitsbeheer
+      - value: 8.07 Bescherming tegen malware
+      - value: 8.08 Beheer van technische kwetsbaarheden
+      - value: 8.09 Configuratiebeheer
+      - value: 8.10 Wissen van informatie
+      - value: 8.11 Maskeren van gegevens
+      - value: 8.12 Voorkomen van gegevenslekken (data leakage prevention)
+      - value: 8.13 Back-up van informatie
+      - value: 8.14 Redundantie van informatieverwerkende faciliteiten
+      - value: 8.15 Logging
+      - value: 8.16 Monitoren van activiteiten
+      - value: 8.17 Kloksynchronisatie
+      - value: 8.18 Gebruik van speciale systeemhulpmiddelen
+      - value: 8.19 Installeren van software op operationele omgevingen
+      - value: 8.20 Beveiliging netwerkcomponenten
+      - value: 8.21 Beveiliging van netwerkdiensten
+      - value: 8.22 Netwerksegmentatie
+      - value: 8.23 Toepassen van webfilters
+      - value: 8.24 Gebruik van cryptografie
+      - value: 8.25 Beveiligen tijdens de ontwikkelcyclus
+      - value: 8.26 Toepassingsbeveiligingseisen
+      - value: 8.27 Veilige systeemarchitectuur en technische uitgangspunten
+      - value: 8.28 Veilig coderen
+      - value: 8.29 Testen van de beveiliging tijdens ontwikkeling en acceptatie
+      - value: 8.30 Uitbestede systeemontwikkeling
+      - value: 8.31 Scheiding van ontwikkel-, test- en productieomgevingen
+      - value: 8.32 Wijzigingenbeheer
+      - value: 8.33 Testgegevens
+      - value: 8.34 Bescherming van informatiesystemen tijdens audits
+      required_status: true
+      references:
+        invulhulp: qs_d.maatregelen_technologisch
+    - task: Onderbouwing van de selectie van maatregelen
+      id: "4.6.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_d.maatregelen_onderbouwing
+    - task: Maatregelen die nog opvolging nodig hebben
+      id: "4.6.6"
+      type:
+      - task_group
+      repeatable: true
+      required_status: false
+      references:
+        invulhulp: qs_d.maatregelen_opvolging
+      tasks:
+      - task: Control
+        description: Het BIO2-nummer, bijvoorbeeld 8.13.
+        id: "4.6.6.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: qs_d.maatregelen_opvolging.control
+      - task: Maatregel
+        description: De naam van de beheersmaatregel.
+        id: "4.6.6.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: qs_d.maatregelen_opvolging.maatregel
+      - task: Status
+        id: "4.6.6.3"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Niet gestart
+        - value: In uitvoering
+        - value: Geïmplementeerd
+        - value: Risico geaccepteerd
+        references:
+          invulhulp: qs_d.maatregelen_opvolging.status
+      - task: Onderbouwing
+        description: Waarom deze maatregel nodig is en wat er nog moet gebeuren.
+        id: "4.6.6.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: qs_d.maatregelen_opvolging.onderbouwing
+    - task: Toelichting bij de opvolging
+      id: "4.6.6-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+  - task: Ondertekening
+    description: >-
+      De uitgevoerde classificatietoets maakt onderdeel uit van het systeemdossier en wordt bewaard zolang het informatiesysteem in gebruik is: zowel de Cbw als de AVG spreken over 'passende maatregelen', en dat moet ook achteraf aantoonbaar zijn.
+    id: "4.7"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Is er een motivatie om af te wijken van de conclusie?
+      description: Alleen de data-eigenaar kan gemotiveerd afwijken van de conclusie van deze toets.
+      id: "4.7.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: qs_d.afwijking_motivatie
+    - task: Naam van de informatie-eigenaar die vaststelt
+      id: "4.7.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_d.naam_eigenaar
+    - task: Aldus opgemaakt d.d.
+      id: "4.7.3"
+      type:
+      - date
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: qs_d.datum_vaststelling

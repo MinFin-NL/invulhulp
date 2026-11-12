@@ -1,0 +1,296 @@
+{
+  "_comment": "Overlay voor restrisico: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/restrisico.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "restrisico",
+    "title": "Restrisico-acceptatie",
+    "aiContext": "Dit is een restrisico-acceptatieformulier voor het Ministerie van Financiën: het sluitstuk van de DPIA, de AI Impact Assessment, de IAMA en de Quick scan BIO. Het bundelt de risico's die na alle beheersmaatregelen overblijven, legt per risico een expliciet besluit vast (accepteren, aanvullend beheersen, of niet accepteren) en registreert wie dat besluit neemt, op welke termijn het geldig is en onder welke voorwaarden. Schrijf zakelijk en besluitvormend: een restrisico is pas bruikbaar beschreven als duidelijk is wat er kan gebeuren, hoe erg dat is, wie het draagt en wat het signaal is dat het zich voordoet.",
+    "source": {
+      "instrument": "Sluitstuk van de risico-instrumenten: Model DPIA Rijksdienst, AI Impact Assessment, IAMA en Quick scan BIO",
+      "publisher": "Ministerie van Financiën",
+      "reference": "Geen extern origineel; opgesteld naar het in elk risicoraamwerk (o.a. ISO 31000, BIO/ISO 27005) gangbare patroon van formele risicoacceptatie door de verantwoordelijke eigenaar",
+      "derivation": "original",
+      "note": "Roadmap: docs/sporen-en-roadmap.md §4.2 nr. 2. Bestaat om de losse assessments af te hechten: zonder expliciete acceptatie blijven geïdentificeerde restrisico's zonder eigenaar."
+    },
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "Restrisico-acceptatie",
+      "docTitle": "Restrisico-acceptatie en besluitvorming",
+      "footerLabel": "Restrisico-acceptatie – MinFin",
+      "filename": "Restrisico-acceptatie.pdf",
+      "systemNamePlaceholder": "Bijv. Klantportaal persoonsgegevens v1",
+      "homeContent": {
+        "notice": "Vul dit formulier pas in als de onderliggende assessments zijn afgerond. Het verzamelt hun uitkomsten; het vervangt ze niet. De acceptatie moet worden vastgesteld door iemand die bevoegd is het risico te dragen — doorgaans de opdrachtgever of proceseigenaar, niet de projectleider.",
+        "description": "Elk assessment eindigt met risico's die na de maatregelen overblijven. Dit formulier brengt die restrisico's bij elkaar uit de DPIA, de AI Impact Assessment, de IAMA en de Quick scan BIO, weegt ze afzonderlijk en in samenhang, en legt per risico een expliciet besluit vast. Het resultaat is een ondertekend document waarin staat wie welk risico accepteert, onder welke voorwaarden en tot wanneer.",
+        "steps": [
+          "Deel A – Context: wat wordt in gebruik genomen, welke assessments liggen eronder",
+          "Deel B – Restrisico's: de risico's die na beheersing overblijven, per bron",
+          "Deel C – Weging: samenhang, risicobereidheid en aanvullende maatregelen",
+          "Deel D – Besluit: acceptatie, voorwaarden, geldigheidsduur en vaststelling"
+        ],
+        "buttonLabel": "Starten met de restrisico-acceptatie"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "rr_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "rr_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "rr_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "rr_d"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "rr_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "rra1",
+            "questions": [
+              {
+                "id": "rr_a.onderwerp"
+              },
+              {
+                "id": "rr_a.aanleiding",
+                "followUp": "Licht de aanleiding kort toe."
+              },
+              {
+                "id": "rr_a.reikwijdte"
+              }
+            ]
+          },
+          {
+            "id": "rra2",
+            "questions": [
+              {
+                "id": "rr_a.assessments"
+              },
+              {
+                "id": "rr_a.status",
+                "columns": [
+                  {
+                    "id": "assessment"
+                  },
+                  {
+                    "id": "status"
+                  },
+                  {
+                    "id": "datum"
+                  },
+                  {
+                    "id": "advies"
+                  }
+                ],
+                "notesLabel": "Toelichting op de status van de assessments"
+              },
+              {
+                "id": "rr_a.adviezen"
+              },
+              {
+                "id": "rr_a.afwijking",
+                "followUp": "Motiveer de afwijking en beschrijf wie daarvan op de hoogte is gesteld."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "rr_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "rrb1",
+            "questions": [
+              {
+                "id": "rr_b.risicos",
+                "minRows": 1,
+                "columns": [
+                  {
+                    "id": "risico"
+                  },
+                  {
+                    "id": "bron"
+                  },
+                  {
+                    "id": "wie"
+                  },
+                  {
+                    "id": "kans"
+                  },
+                  {
+                    "id": "impact"
+                  },
+                  {
+                    "id": "maatregelen"
+                  }
+                ],
+                "notesLabel": "Toelichting op het risico-overzicht"
+              },
+              {
+                "id": "rr_b.zwaarste"
+              },
+              {
+                "id": "rr_b.betrokkenen"
+              },
+              {
+                "id": "rr_b.openstaand",
+                "columns": [
+                  {
+                    "id": "maatregel"
+                  },
+                  {
+                    "id": "risico"
+                  },
+                  {
+                    "id": "verantwoordelijke"
+                  },
+                  {
+                    "id": "termijn"
+                  },
+                  {
+                    "id": "blokkerend"
+                  }
+                ],
+                "notesLabel": "Toelichting op de openstaande maatregelen"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "rr_c",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "rrc1",
+            "questions": [
+              {
+                "id": "rr_c.samenhang"
+              },
+              {
+                "id": "rr_c.bereidheid",
+                "followUp": "Onderbouw het antwoord en verwijs naar het kader waaraan getoetst is."
+              },
+              {
+                "id": "rr_c.baten"
+              },
+              {
+                "id": "rr_c.alternatief"
+              },
+              {
+                "id": "rr_c.aanvullend",
+                "columns": [
+                  {
+                    "id": "maatregel"
+                  },
+                  {
+                    "id": "doel"
+                  },
+                  {
+                    "id": "verantwoordelijke"
+                  },
+                  {
+                    "id": "termijn"
+                  }
+                ],
+                "notesLabel": "Toelichting op de aanvullende maatregelen"
+              }
+            ]
+          },
+          {
+            "id": "rrc2",
+            "questions": [
+              {
+                "id": "rr_c.monitoring"
+              },
+              {
+                "id": "rr_c.grens"
+              },
+              {
+                "id": "rr_c.escalatie"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "rr_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "rrd1",
+            "questions": [
+              {
+                "id": "rr_d.besluit",
+                "followUp": "Motiveer het besluit."
+              },
+              {
+                "id": "rr_d.perrisico",
+                "columns": [
+                  {
+                    "id": "risico"
+                  },
+                  {
+                    "id": "besluit"
+                  },
+                  {
+                    "id": "voorwaarde"
+                  },
+                  {
+                    "id": "eigenaar"
+                  }
+                ],
+                "notesLabel": "Toelichting op de besluiten per risico"
+              },
+              {
+                "id": "rr_d.voorwaarden"
+              },
+              {
+                "id": "rr_d.geldigheid"
+              }
+            ]
+          },
+          {
+            "id": "rrd2",
+            "questions": [
+              {
+                "id": "rr_d.besluitnemer"
+              },
+              {
+                "id": "rr_d.datum"
+              },
+              {
+                "id": "rr_d.geinformeerd"
+              },
+              {
+                "id": "rr_d.vastlegging"
+              },
+              {
+                "id": "rr_d.herbeoordeling"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/restrisico.yaml + scripts/form-overlays/restrisico.overlay.json; niet handmatig bewerken.",
   "id": "restrisico",
   "version": "1.1",
-  "urn": "urn:nl:minfin:tr:restrisico:1.1",
+  "urn": "urn:nl:minfin:ir:restrisico:1.1",
   "title": "Restrisico-acceptatie",
   "aiContext": "Dit is een restrisico-acceptatieformulier voor het Ministerie van Financiën: het sluitstuk van de DPIA, de AI Impact Assessment, de IAMA en de Quick scan BIO. Het bundelt de risico's die na alle beheersmaatregelen overblijven, legt per risico een expliciet besluit vast (accepteren, aanvullend beheersen, of niet accepteren) en registreert wie dat besluit neemt, op welke termijn het geldig is en onder welke voorwaarden. Schrijf zakelijk en besluitvormend: een restrisico is pas bruikbaar beschreven als duidelijk is wat er kan gebeuren, hoe erg dat is, wie het draagt en wat het signaal is dat het zich voordoet.",
   "source": {
@@ -36,11 +37,27 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "rr_a" },
-    { "type": "subsections", "sectionId": "rr_b" },
-    { "type": "subsections", "sectionId": "rr_c" },
-    { "type": "subsections", "sectionId": "rr_d" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "rr_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "rr_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "rr_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "rr_d"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -111,10 +128,29 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "assessment", "label": "Assessment" },
-                { "id": "status", "label": "Status", "type": "select", "options": ["Afgerond en vastgesteld", "Afgerond, nog niet vastgesteld", "Concept", "Niet uitgevoerd"] },
-                { "id": "datum", "label": "Datum" },
-                { "id": "advies", "label": "Advies van de adviseur (FG, CISO, ethiek)" }
+                {
+                  "id": "assessment",
+                  "label": "Assessment"
+                },
+                {
+                  "id": "status",
+                  "label": "Status",
+                  "type": "select",
+                  "options": [
+                    "Afgerond en vastgesteld",
+                    "Afgerond, nog niet vastgesteld",
+                    "Concept",
+                    "Niet uitgevoerd"
+                  ]
+                },
+                {
+                  "id": "datum",
+                  "label": "Datum"
+                },
+                {
+                  "id": "advies",
+                  "label": "Advies van de adviseur (FG, CISO, ethiek)"
+                }
               ],
               "notesLabel": "Toelichting op de status van de assessments"
             },
@@ -157,16 +193,59 @@
               "text": "Welke restrisico's blijven bestaan?",
               "type": "table",
               "importance": "mandatory",
-              "minRows": 1,
               "columns": [
-                { "id": "risico", "label": "Restrisico" },
-                { "id": "bron", "label": "Uit welk assessment", "type": "select", "options": ["DPIA", "Pre-scan DPIA", "AIIA", "IAMA", "EU AI Act-checklist", "Quick scan BIO", "Datakwaliteit-assessment", "Data-ethiektoets", "Overig"] },
-                { "id": "wie", "label": "Wie wordt geraakt" },
-                { "id": "kans", "label": "Kans", "type": "select", "options": ["Hoog", "Middel", "Laag"] },
-                { "id": "impact", "label": "Impact", "type": "select", "options": ["Zeer hoog", "Hoog", "Middel", "Laag"] },
-                { "id": "maatregelen", "label": "Reeds getroffen maatregelen" }
+                {
+                  "id": "risico",
+                  "label": "Restrisico"
+                },
+                {
+                  "id": "bron",
+                  "label": "Uit welk assessment",
+                  "type": "select",
+                  "options": [
+                    "DPIA",
+                    "Pre-scan DPIA",
+                    "AIIA",
+                    "IAMA",
+                    "EU AI Act-checklist",
+                    "Quick scan BIO",
+                    "Datakwaliteit-assessment",
+                    "Data-ethiektoets",
+                    "Overig"
+                  ]
+                },
+                {
+                  "id": "wie",
+                  "label": "Wie wordt geraakt"
+                },
+                {
+                  "id": "kans",
+                  "label": "Kans",
+                  "type": "select",
+                  "options": [
+                    "Hoog",
+                    "Middel",
+                    "Laag"
+                  ]
+                },
+                {
+                  "id": "impact",
+                  "label": "Impact",
+                  "type": "select",
+                  "options": [
+                    "Zeer hoog",
+                    "Hoog",
+                    "Middel",
+                    "Laag"
+                  ]
+                },
+                {
+                  "id": "maatregelen",
+                  "label": "Reeds getroffen maatregelen"
+                }
               ],
-              "notesLabel": "Toelichting op het risico-overzicht"
+              "notesLabel": "Toelichting op het risico-overzicht",
+              "minRows": 1
             },
             {
               "id": "rr_b.zwaarste",
@@ -188,11 +267,31 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "maatregel", "label": "Maatregel" },
-                { "id": "risico", "label": "Bijbehorend risico" },
-                { "id": "verantwoordelijke", "label": "Verantwoordelijke" },
-                { "id": "termijn", "label": "Uiterlijke termijn" },
-                { "id": "blokkerend", "label": "Blokkerend voor ingebruikname", "type": "select", "options": ["Ja", "Nee"] }
+                {
+                  "id": "maatregel",
+                  "label": "Maatregel"
+                },
+                {
+                  "id": "risico",
+                  "label": "Bijbehorend risico"
+                },
+                {
+                  "id": "verantwoordelijke",
+                  "label": "Verantwoordelijke"
+                },
+                {
+                  "id": "termijn",
+                  "label": "Uiterlijke termijn"
+                },
+                {
+                  "id": "blokkerend",
+                  "label": "Blokkerend voor ingebruikname",
+                  "type": "select",
+                  "options": [
+                    "Ja",
+                    "Nee"
+                  ]
+                }
               ],
               "notesLabel": "Toelichting op de openstaande maatregelen"
             }
@@ -249,10 +348,22 @@
               "type": "table",
               "importance": "optional",
               "columns": [
-                { "id": "maatregel", "label": "Aanvullende maatregel" },
-                { "id": "doel", "label": "Welk risico verlaagt dit" },
-                { "id": "verantwoordelijke", "label": "Verantwoordelijke" },
-                { "id": "termijn", "label": "Termijn" }
+                {
+                  "id": "maatregel",
+                  "label": "Aanvullende maatregel"
+                },
+                {
+                  "id": "doel",
+                  "label": "Welk risico verlaagt dit"
+                },
+                {
+                  "id": "verantwoordelijke",
+                  "label": "Verantwoordelijke"
+                },
+                {
+                  "id": "termijn",
+                  "label": "Termijn"
+                }
               ],
               "notesLabel": "Toelichting op de aanvullende maatregelen"
             }
@@ -316,10 +427,29 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "risico", "label": "Restrisico" },
-                { "id": "besluit", "label": "Besluit", "type": "select", "options": ["Accepteren", "Accepteren onder voorwaarden", "Aanvullend beheersen", "Niet accepteren"] },
-                { "id": "voorwaarde", "label": "Voorwaarde of aanvullende maatregel" },
-                { "id": "eigenaar", "label": "Risico-eigenaar" }
+                {
+                  "id": "risico",
+                  "label": "Restrisico"
+                },
+                {
+                  "id": "besluit",
+                  "label": "Besluit",
+                  "type": "select",
+                  "options": [
+                    "Accepteren",
+                    "Accepteren onder voorwaarden",
+                    "Aanvullend beheersen",
+                    "Niet accepteren"
+                  ]
+                },
+                {
+                  "id": "voorwaarde",
+                  "label": "Voorwaarde of aanvullende maatregel"
+                },
+                {
+                  "id": "eigenaar",
+                  "label": "Risico-eigenaar"
+                }
               ],
               "notesLabel": "Toelichting op de besluiten per risico"
             },

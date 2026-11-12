@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/modelcard.yaml + scripts/form-overlays/modelcard.overlay.json; niet handmatig bewerken.",
   "id": "modelcard",
   "version": "0.1",
-  "urn": "urn:nl:minfin:tr:modelcard:0.1",
+  "urn": "urn:nl:minfin:ir:modelcard:0.1",
   "title": "AI-systeemregistratie (Model Card)",
   "source": {
     "instrument": "AI Body of Knowledge (AI-BOK) — Template 2: AI System Registration / Model Card",
@@ -37,11 +38,27 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "mc_a" },
-    { "type": "subsections", "sectionId": "mc_b" },
-    { "type": "subsections", "sectionId": "mc_c" },
-    { "type": "subsections", "sectionId": "mc_d" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "mc_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "mc_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "mc_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "mc_d"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -144,14 +161,20 @@
               "text": "Persoonsgegevens in de input?",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "mc_b.persoonsgegevens_output",
               "text": "Persoonsgegevens in de output?",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             }
           ]
         }
@@ -240,7 +263,10 @@
               "text": "Bias-beoordeling uitgevoerd?",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "mc_d.bias_notities",
@@ -253,7 +279,10 @@
               "text": "Fairness-metrieken gedefinieerd?",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "mc_d.bias_risicos",
@@ -273,7 +302,10 @@
               "text": "DPIA vereist?",
               "type": "radio",
               "importance": "mandatory",
-              "options": ["Ja", "Nee"]
+              "options": [
+                "Ja",
+                "Nee"
+              ]
             },
             {
               "id": "mc_d.dpia_datum",
@@ -288,7 +320,11 @@
               "guidance": "Alleen van toepassing op hoog-risico AI-systemen (art. 43 AI-verordening).",
               "type": "radio",
               "importance": "optional",
-              "options": ["Ja", "Nee", "Niet van toepassing"]
+              "options": [
+                "Ja",
+                "Nee",
+                "Niet van toepassing"
+              ]
             },
             {
               "id": "mc_d.goedkeuringsstatus",

@@ -1,0 +1,690 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: Verwerkingsregister (AVG art. 30)
+urn: urn:nl:minfin:ir:verwerkingsregister:1.0
+version: '1.0'
+description: >-
+  Artikel 30 AVG verplicht elke verwerkingsverantwoordelijke een register bij te houden van de verwerkingsactiviteiten onder zijn verantwoordelijkheid. Dit formulier legt de in lid 1 verplicht gestelde elementen vast: verantwoordelijke en FG, doeleinden, categorieën betrokkenen en gegevens, ontvangers, doorgiften buiten de EER, bewaartermijnen en een algemene beschrijving van de beveiligingsmaatregelen. Veel velden zijn af te leiden uit een eerder ingevulde DPIA of intake.
+
+  Bron: Algemene verordening gegevensbescherming (AVG / Verordening (EU) 2016/679) (Europese Unie, versie Verordening (EU) 2016/679). https://eur-lex.europa.eu/legal-content/NL/TXT/?uri=CELEX%3A32016R0679 Rechtstreeks afgeleid van de opsomming in art. 30 lid 1 sub a–g; er bestaat geen verplicht landelijk invulmodel. Roadmap: docs/sporen-en-roadmap.md §4.2 nr. 1.
+tasks:
+- task: 'Deel A: Verwerking en verantwoordelijke'
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: De verwerking
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Naam van de verwerking
+      description: Een korte, herkenbare aanduiding zoals die in het register komt te staan.
+      id: "1.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: vr_a.naam
+        officialId: art30-1
+    - task: Registratienummer in het verwerkingsregister
+      id: "1.1.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: vr_a.nummer
+    - task: Korte omschrijving van de verwerking
+      description: >-
+        Wat gebeurt er feitelijk: welke gegevens worden van wie verzameld, wat gebeurt ermee en met welk resultaat?
+      id: "1.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: vr_a.omschrijving
+    - task: Wat zijn de doeleinden van de verwerking?
+      description: >-
+        Artikel 30 lid 1 sub b. Omschrijf elk doel afzonderlijk en specifiek. 'Bedrijfsvoering' of 'dienstverlening' is te ruim om als doel te gelden.
+      id: "1.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: vr_a.doel
+        officialId: art30-1-b
+    - task: Op welke grondslag berust de verwerking?
+      description: >-
+        Kies de grondslag uit artikel 6 lid 1 AVG. Bij een wettelijke verplichting of publieke taak: noem de concrete wettelijke bepaling.
+      id: "1.1.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Wettelijke verplichting (art. 6 lid 1 sub c)
+      - value: Vervulling van een taak van algemeen belang of openbaar gezag (art. 6 lid 1 sub e)
+      - value: Uitvoering van een overeenkomst (art. 6 lid 1 sub b)
+      - value: Toestemming (art. 6 lid 1 sub a)
+      - value: Gerechtvaardigd belang (art. 6 lid 1 sub f)
+      - value: Vitaal belang (art. 6 lid 1 sub d)
+      required_status: true
+      references:
+        invulhulp: vr_a.grondslag
+    - task: Toelichting
+      description: Noem de concrete wettelijke bepaling of onderbouw de gekozen grondslag.
+      id: "1.1.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.1.5"
+          operator: any
+        action: show
+    - task: >-
+        Als er bijzondere of strafrechtelijke persoonsgegevens worden verwerkt: op welke uitzondering berust dat?
+      description: >-
+        Artikel 9 lid 2 of artikel 10 AVG, met de nationale bepaling (UAVG) erbij. Laat leeg als dit niet speelt.
+      id: "1.1.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: vr_a.bijzonder_grondslag
+  - task: Verantwoordelijke en betrokken partijen
+    id: "1.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wie is de verwerkingsverantwoordelijke?
+      description: >-
+        Artikel 30 lid 1 sub a: naam en contactgegevens van de verwerkingsverantwoordelijke (de rechtspersoon, met het verantwoordelijke organisatieonderdeel erbij).
+      id: "1.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: vr_a.verantwoordelijke
+        officialId: art30-1-a
+    - task: Wie is de proceseigenaar of interne verantwoordelijke voor deze verwerking?
+      id: "1.2.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: vr_a.proceseigenaar
+    - task: Contactgegevens van de Functionaris voor Gegevensbescherming (FG)
+      description: Artikel 30 lid 1 sub a.
+      id: "1.2.3"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: vr_a.fg
+    - task: Is er sprake van gezamenlijke verwerkingsverantwoordelijkheid (art. 26 AVG)?
+      id: "1.2.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Nee
+      - value: Ja
+      - value: Onduidelijk — nog vast te stellen
+      required_status: true
+      references:
+        invulhulp: vr_a.gezamenlijk
+    - task: Toelichting
+      description: Noem de andere verantwoordelijke(n) en beschrijf hoe de onderlinge verdeling is vastgelegd.
+      id: "1.2.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.2.4"
+          operator: any
+        action: show
+    - task: Welke verwerkers zijn bij deze verwerking betrokken?
+      id: "1.2.5"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: vr_a.verwerkers
+      tasks:
+      - task: Verwerker
+        id: "1.2.5.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_a.verwerkers.verwerker
+      - task: Wat doet deze partij
+        id: "1.2.5.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_a.verwerkers.rol
+      - task: Verwerkersovereenkomst
+        id: "1.2.5.3"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Ja, gesloten
+        - value: Nee, nog niet gesloten
+        - value: Niet van toepassing
+        references:
+          invulhulp: vr_a.verwerkers.overeenkomst
+      - task: Land van verwerking
+        id: "1.2.5.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_a.verwerkers.locatie
+    - task: Toelichting op de betrokken verwerkers en subverwerkers
+      id: "1.2.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+- task: 'Deel B: Gegevens en betrokkenen'
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Categorieën
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke categorieën betrokkenen worden verwerkt?
+      description: >-
+        Artikel 30 lid 1 sub c. Bijv. burgers die een aanvraag indienen, medewerkers, contactpersonen van bedrijven.
+      id: "2.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: vr_b.betrokkenen
+        officialId: art30-1-c
+    - task: Welke categorieën persoonsgegevens worden verwerkt?
+      id: "2.1.2"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Identificerende gegevens (naam, adres, geboortedatum)
+      - value: Burgerservicenummer of ander wettelijk identificatienummer
+      - value: Contactgegevens
+      - value: Financiële en fiscale gegevens
+      - value: Gegevens over werk, opleiding of inkomen
+      - value: Gegevens over gebruik van diensten of voorzieningen
+      - value: Locatiegegevens
+      - value: Digitale identificatiegegevens (IP-adres, sessie, apparaat)
+      - value: Beeld- of geluidsmateriaal
+      - value: Bijzondere persoonsgegevens (art. 9 AVG)
+      - value: Strafrechtelijke gegevens (art. 10 AVG)
+      - value: Gegevens over kinderen
+      required_status: true
+      references:
+        invulhulp: vr_b.categorieen
+        officialId: art30-1-c
+    - task: Specificeer de verwerkte gegevens per categorie
+      description: >-
+        Werk de aangevinkte categorieën uit tot concrete gegevensvelden. Bij bijzondere of strafrechtelijke gegevens: benoem exact welke.
+      id: "2.1.3"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: vr_b.specificatie
+      tasks:
+      - task: Categorie
+        id: "2.1.3.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_b.specificatie.categorie
+      - task: Concrete gegevens
+        id: "2.1.3.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_b.specificatie.gegevens
+      - task: Van welke betrokkenen
+        id: "2.1.3.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_b.specificatie.betrokkenen
+      - task: Waarom noodzakelijk voor het doel
+        id: "2.1.3.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_b.specificatie.noodzaak
+    - task: Aanvullende toelichting op de gegevensspecificatie
+      id: "2.1.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Uit welke bronnen zijn de gegevens afkomstig?
+      description: >-
+        Verzameld bij de betrokkene zelf, of verkregen uit een andere bron? Bij het laatste geldt de informatieplicht van artikel 14 AVG.
+      id: "2.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: vr_b.bronnen
+    - task: Hoeveel betrokkenen omvat de verwerking (orde van grootte)?
+      id: "2.1.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Minder dan 100
+      - value: 100 tot 10.000
+      - value: 10.000 tot 1 miljoen
+      - value: Meer dan 1 miljoen
+      - value: Onbekend
+      required_status: false
+      references:
+        invulhulp: vr_b.aantal
+    - task: Is er sprake van geautomatiseerde besluitvorming of profilering (art. 22 AVG)?
+      id: "2.1.6"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Nee
+      - value: Ja, profilering zonder geautomatiseerd besluit met rechtsgevolg
+      - value: Ja, uitsluitend geautomatiseerde besluitvorming met rechtsgevolg of vergelijkbaar effect
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: vr_b.geautomatiseerd
+    - task: Toelichting
+      description: Beschrijf de logica op hoofdlijnen en de waarborgen die zijn getroffen.
+      id: "2.1.6-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.6"
+          operator: any
+        action: show
+- task: 'Deel C: Ontvangers en doorgifte'
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Ontvangers
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Aan welke categorieën ontvangers worden de gegevens verstrekt?
+      description: >-
+        Artikel 30 lid 1 sub d. Ook ontvangers in derde landen en internationale organisaties tellen mee. Interne ontvangers binnen dezelfde verantwoordelijke zijn geen 'ontvanger' in de zin van dit artikel, maar vermeld ze wel als de gegevens buiten het eigen organisatieonderdeel gaan.
+      id: "3.1.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: vr_c.ontvangers
+        officialId: art30-1-d
+      tasks:
+      - task: Categorie ontvanger
+        id: "3.1.1.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_c.ontvangers.ontvanger
+      - task: Doel van de verstrekking
+        id: "3.1.1.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_c.ontvangers.doel
+      - task: Grondslag of wettelijke bepaling
+        id: "3.1.1.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_c.ontvangers.grondslag
+      - task: Frequentie
+        id: "3.1.1.4"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Structureel
+        - value: Periodiek
+        - value: Incidenteel
+        - value: Op verzoek
+        references:
+          invulhulp: vr_c.ontvangers.frequentie
+    - task: Toelichting op de verstrekkingen
+      id: "3.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Worden de gegevens niet aan derden verstrekt?
+      id: "3.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: 'Correct: er vinden geen verstrekkingen aan derden plaats'
+      - value: Er vinden wel verstrekkingen plaats (zie de tabel hierboven)
+      required_status: false
+      references:
+        invulhulp: vr_c.geen
+  - task: Doorgifte buiten de EER
+    id: "3.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Vindt er doorgifte plaats naar een land buiten de EER of naar een internationale organisatie?
+      description: >-
+        Artikel 30 lid 1 sub e. Denk ook aan opslag bij een cloudleverancier buiten de EER en aan support- of beheertoegang vanuit een derde land: ook dat is doorgifte.
+      id: "3.2.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Nee
+      - value: Ja, naar een land met een adequaatheidsbesluit
+      - value: Ja, met passende waarborgen (art. 46 AVG)
+      - value: Ja, op grond van een uitzondering (art. 49 AVG)
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: vr_c.doorgifte
+        officialId: art30-1-e
+    - task: Toelichting
+      description: Noem het land, de ontvanger en de toegepaste grondslag.
+      id: "3.2.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.2.1"
+          operator: any
+        action: show
+    - task: Welke waarborgen zijn bij de doorgifte getroffen?
+      description: >-
+        Bijv. standaardcontractbepalingen, een uitgevoerde transfer impact assessment (DTIA), aanvullende technische maatregelen zoals versleuteling met sleutelbeheer binnen de EER. Laat leeg als er geen doorgifte is.
+      id: "3.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: vr_c.waarborgen
+- task: 'Deel D: Bewaring, beveiliging en beheer'
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Bewaartermijnen
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke bewaartermijnen gelden voor de verschillende categorieën gegevens?
+      description: >-
+        Artikel 30 lid 1 sub f. Noem per categorie de termijn en de grondslag ervoor (selectielijst Archiefwet, wettelijke bewaarplicht, of eigen afweging op grond van art. 5 lid 1 sub e AVG).
+      id: "4.1.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: vr_d.bewaartermijn
+        officialId: art30-1-f
+      tasks:
+      - task: Categorie gegevens
+        id: "4.1.1.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_d.bewaartermijn.categorie
+      - task: Bewaartermijn
+        id: "4.1.1.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_d.bewaartermijn.termijn
+      - task: Vanaf welk moment
+        id: "4.1.1.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_d.bewaartermijn.startpunt
+      - task: Grondslag van de termijn
+        id: "4.1.1.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: vr_d.bewaartermijn.grondslag
+      - task: Daarna
+        id: "4.1.1.5"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Vernietigen
+        - value: Overbrengen naar archief
+        - value: Anonimiseren
+        references:
+          invulhulp: vr_d.bewaartermijn.daarna
+    - task: Toelichting op de bewaartermijnen
+      id: "4.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Is de verwijdering of vernietiging feitelijk ingericht?
+      id: "4.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, geautomatiseerd
+      - value: Ja, via een periodieke procedure
+      - value: Nee, nog niet ingericht
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: vr_d.verwijdering
+    - task: Toelichting
+      description: Beschrijf hoe de verwijdering plaatsvindt, ook in back-ups en afgeleide bestanden.
+      id: "4.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.1.2"
+          operator: any
+        action: show
+  - task: Beveiliging
+    id: "4.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Geef een algemene beschrijving van de technische en organisatorische beveiligingsmaatregelen
+      description: >-
+        Artikel 30 lid 1 sub g, verwijzend naar artikel 32 lid 1. Een beschrijving op hoofdlijnen volstaat — het register is geen beveiligingsplan. Sluit aan bij de maatregelen uit de Quick scan BIO en de PSA.
+      id: "4.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: vr_d.maatregelen
+        officialId: art30-1-g
+    - task: Welke maatregelen zijn getroffen?
+      id: "4.2.2"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Toegangsbeheer op basis van rollen en het need-to-know-beginsel
+      - value: Meerfactorauthenticatie
+      - value: Versleuteling van gegevens in rust
+      - value: Versleuteling van gegevens tijdens transport
+      - value: Pseudonimisering of anonimisering
+      - value: Logging van toegang en bewerkingen
+      - value: Periodieke beoordeling van autorisaties
+      - value: Back-up en herstelprocedure
+      - value: Geheimhoudingsverklaringen en bewustwording bij medewerkers
+      - value: Penetratietest of beveiligingsaudit
+      - value: Incidentprocedure en meldproces datalekken
+      required_status: true
+      references:
+        invulhulp: vr_d.maatregeltypen
+    - task: Welk beveiligingsniveau (BBN) is vastgesteld?
+      id: "4.2.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: BBN1
+      - value: BBN2
+      - value: BBN3
+      - value: Nog niet bepaald
+      required_status: false
+      references:
+        invulhulp: vr_d.bbn
+  - task: Samenhang en beheer van de registratie
+    id: "4.3"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Is voor deze verwerking een DPIA uitgevoerd?
+      id: "4.3.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, DPIA uitgevoerd
+      - value: Nee, uit de pre-scan bleek dat het niet verplicht is
+      - value: Nee, nog niet uitgevoerd maar wel nodig
+      - value: Nog niet beoordeeld
+      required_status: true
+      references:
+        invulhulp: vr_d.dpia
+    - task: Toelichting
+      description: Verwijs naar het DPIA-document of de pre-scan en de datum daarvan.
+      id: "4.3.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.3.1"
+          operator: any
+        action: show
+    - task: Hoe kunnen betrokkenen hun rechten uitoefenen?
+      description: >-
+        Beschrijf de route voor inzage, correctie, verwijdering, beperking, bezwaar en dataportabiliteit, en wie de verzoeken afhandelt.
+      id: "4.3.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: vr_d.rechten
+    - task: Wat is de status van deze registratie?
+      id: "4.3.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Concept
+      - value: Vastgesteld en opgenomen in het register
+      - value: In herziening
+      - value: Beëindigd — de verwerking vindt niet meer plaats
+      required_status: true
+      references:
+        invulhulp: vr_d.status
+    - task: Wanneer is de registratie voor het laatst geactualiseerd en wanneer wordt zij herzien?
+      description: >-
+        Het register moet actueel zijn. Noem naast een vaste herzieningstermijn ook de gebeurtenissen die tussentijds tot bijwerking leiden: nieuwe ontvanger, gewijzigd doel, andere leverancier.
+      id: "4.3.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: vr_d.actualisatie

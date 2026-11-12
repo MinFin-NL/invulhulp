@@ -1,0 +1,228 @@
+{
+  "_comment": "Overlay voor dataethiek: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/dataethiek.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "dataethiek",
+    "title": "Data-ethiektoets",
+    "aiContext": "Dit is een data-ethiektoets voor het Ministerie van Financiën, afgeleid van DAMA-DMBOK2 hoofdstuk 2 (Data Handling Ethics) en de daar gehanteerde Belmont-principes, vertaald naar gegevensverwerking: respect voor personen, weldoen (baten versus schade) en rechtvaardigheid. De toets is complementair aan de IAMA (grondrechten) en de AIIA (proportionaliteit) en legt de ethische afweging vast die daar impliciet blijft. Schrijf reflectief en concreet: benoem wie het raakt, waarom een keuze verdedigbaar is, en welke twijfels er zijn blijven bestaan. Vermijd geruststellende algemeenheden.",
+    "source": {
+      "instrument": "DAMA-DMBOK2 — Data Management Body of Knowledge, 2nd Edition",
+      "publisher": "DAMA International",
+      "version": "2nd Edition (2017)",
+      "reference": "hoofdstuk 2 (Data Handling Ethics), §3.1 — Belmont-principes (US National Commission / HHS, 1979) toegepast op data",
+      "derivation": "derived",
+      "note": "DAMA-DMBOK is een referentiekader zonder invul-template; dit formulier is afgeleid van de daarin beschreven ethische principes. Geen tekst overgenomen. Ontwerpspec: docs/DAMA-DMBOK-form-opportunities.md §4E."
+    },
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "Data-ethiektoets",
+      "docTitle": "Data-ethiektoets",
+      "footerLabel": "Data-ethiektoets – MinFin",
+      "filename": "Data-ethiektoets.pdf",
+      "systemNamePlaceholder": "Bijv. Risicoselectie toeslagaanvragen",
+      "homeContent": {
+        "notice": "Deze toets vervangt geen DPIA en geen IAMA. Hij vult ze aan: waar de DPIA vraagt of iets mág en de IAMA of grondrechten worden geraakt, vraagt deze toets of het ook behoorlijk is. Vul hem bij voorkeur met meerdere mensen in — een ethische afweging van één persoon is vooral een mening.",
+        "description": "De data-ethiektoets beoordeelt een gegevensverwerking langs drie principes uit DAMA-DMBOK, ontleend aan het Belmont-rapport: respect voor personen (weten mensen wat er met hun gegevens gebeurt en hebben ze zeggenschap), weldoen (wegen de baten op tegen de mogelijke schade, en is er een minder ingrijpend alternatief) en rechtvaardigheid (worden groepen ongelijk behandeld, en zijn lasten en baten eerlijk verdeeld). U sluit af met een expliciete afweging en de voorwaarden waaronder de verwerking verantwoord is.",
+        "steps": [
+          "Deel A – Context: welke verwerking, wie raakt het, welk belang dient het",
+          "Deel B – Respect voor personen: transparantie, zeggenschap en verwachtingen",
+          "Deel C – Weldoen: baten, mogelijke schade en minder ingrijpende alternatieven",
+          "Deel D – Rechtvaardigheid en afweging: gelijke behandeling, verdeling en eindoordeel"
+        ],
+        "buttonLabel": "Starten met de data-ethiektoets"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "de_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "de_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "de_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "de_d"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "de_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "dea1",
+            "questions": [
+              {
+                "id": "de_a.verwerking"
+              },
+              {
+                "id": "de_a.belang"
+              },
+              {
+                "id": "de_a.betrokkenen"
+              },
+              {
+                "id": "de_a.kwetsbaar"
+              },
+              {
+                "id": "de_a.gevolgen",
+                "followUp": "Beschrijf het gevolg concreet: wat merkt de betrokkene ervan?"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "de_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "deb1",
+            "questions": [
+              {
+                "id": "de_b.weten",
+                "followUp": "Licht toe hoe er geïnformeerd wordt, of waarom dat niet gebeurt."
+              },
+              {
+                "id": "de_b.verwachting",
+                "followUp": "Onderbouw het antwoord en beschrijf hoe met een eventuele afwijking is omgegaan."
+              },
+              {
+                "id": "de_b.zeggenschap"
+              },
+              {
+                "id": "de_b.uitleg",
+                "followUp": "Beschrijf hoe de uitleg eruitziet, of wat de belemmering is."
+              },
+              {
+                "id": "de_b.menselijk",
+                "followUp": "Licht toe hoe de tussenkomst is ingericht en geborgd."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "de_c",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "dec1",
+            "questions": [
+              {
+                "id": "de_c.baten"
+              },
+              {
+                "id": "de_c.schade",
+                "columns": [
+                  {
+                    "id": "schade"
+                  },
+                  {
+                    "id": "wie"
+                  },
+                  {
+                    "id": "soort"
+                  },
+                  {
+                    "id": "kans"
+                  },
+                  {
+                    "id": "maatregel"
+                  }
+                ],
+                "notesLabel": "Toelichting op de schade-analyse"
+              },
+              {
+                "id": "de_c.onbedoeld"
+              },
+              {
+                "id": "de_c.dataminimalisatie",
+                "followUp": "Beschrijf welke gegevens het betreft en waarom ze niet worden weggelaten."
+              }
+            ]
+          },
+          {
+            "id": "dec2",
+            "questions": [
+              {
+                "id": "de_c.alternatief"
+              },
+              {
+                "id": "de_c.nietdoen"
+              },
+              {
+                "id": "de_c.proportioneel",
+                "followUp": "Onderbouw de proportionaliteitsafweging."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "de_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "ded1",
+            "questions": [
+              {
+                "id": "de_d.ongelijk",
+                "followUp": "Beschrijf welk onderscheid ontstaat, tussen welke groepen, en waaruit dat blijkt."
+              },
+              {
+                "id": "de_d.proxy"
+              },
+              {
+                "id": "de_d.getoetst",
+                "followUp": "Beschrijf de methode en de uitkomst, of waarom toetsing niet mogelijk is."
+              },
+              {
+                "id": "de_d.verdeling"
+              },
+              {
+                "id": "de_d.fout"
+              }
+            ]
+          },
+          {
+            "id": "ded2",
+            "questions": [
+              {
+                "id": "de_d.dilemma"
+              },
+              {
+                "id": "de_d.deelnemers"
+              },
+              {
+                "id": "de_d.voorwaarden"
+              },
+              {
+                "id": "de_d.oordeel",
+                "followUp": "Onderbouw het eindoordeel en benoem wie het vaststelt."
+              },
+              {
+                "id": "de_d.herijking"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

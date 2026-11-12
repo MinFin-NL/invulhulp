@@ -1,0 +1,202 @@
+{
+  "_comment": "Overlay voor modelcard: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/modelcard.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "modelcard",
+    "title": "AI-systeemregistratie (Model Card)",
+    "source": {
+      "instrument": "AI Body of Knowledge (AI-BOK) — Template 2: AI System Registration / Model Card",
+      "publisher": "Jan Willem van Veen",
+      "version": "v1.0 (2026)",
+      "reference": "Appendix 'Templates, Checklists and Quick Start', Template 2 (p. 194–196); veldstructuur uitgelijnd met het MinBZK-systemcard-concept",
+      "derivation": "harmonized",
+      "note": "AI-BOK-templates mogen vrij worden gebruikt en aangepast (p. 204), met bronvermelding."
+    },
+    "aiContext": "Dit is een AI-systeemregistratie (Model Card): een gestandaardiseerd registratieformulier per AI-systeem in ontwikkeling of productie, dat de centrale registratie vormt voor governance, compliance en audit. Gebaseerd op de AI Body of Knowledge (Template 2, AI System Registration / Model Card) en het model card-concept (Mitchell et al., 2019). De velden sluiten aan op de systemcard-structuur van het MinBZK task-registry (naam, beschrijving, eigenaar). Schrijf feitelijk en registrerend; wees concreet over doel, data, model en beperkingen.",
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "Model Card",
+      "docTitle": "AI-systeemregistratie (Model Card)",
+      "footerLabel": "AI-systeemregistratie (Model Card)",
+      "filename": "Model-Card.pdf",
+      "systemNamePlaceholder": "Bijv. Fraudedetectiemodel Toeslagen v2",
+      "homeContent": {
+        "notice": "Vul dit formulier in voor elk AI-systeem in productie of in ontwikkeling. De registratie vormt de basis voor audits, DPIA's en continue monitoring. Begin met de hoog-risico systemen en werk daarna de rest van de lijst af.",
+        "description": "De AI-systeemregistratie (Model Card) legt de essentiële informatie van een AI-systeem vast: wat het doet, wie het bezit, welke data erin gaat, welk model wordt gebruikt en wat de bekende beperkingen en compliance-status zijn. Gebaseerd op de AI Body of Knowledge (Template 2).",
+        "steps": [
+          "Basisinformatie: naam, eigenaar, afdeling, risicoclassificatie en doel",
+          "Data: input- en outputgegevens en de aanwezigheid van persoonsgegevens",
+          "Model: type, versie, aanbieder en trainingsdata",
+          "Beperkingen en compliance: bias, DPIA, conformiteit en goedkeuringsstatus"
+        ],
+        "buttonLabel": "Starten met de registratie"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "mc_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "mc_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "mc_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "mc_d"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "mc_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "mc_a1",
+            "questions": [
+              {
+                "id": "mc_a.systeemnaam"
+              },
+              {
+                "id": "mc_a.systeemid"
+              },
+              {
+                "id": "mc_a.eigenaar"
+              },
+              {
+                "id": "mc_a.afdeling"
+              },
+              {
+                "id": "mc_a.risicoclassificatie"
+              },
+              {
+                "id": "mc_a.doel",
+                "allowAttachments": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mc_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "mc_b1",
+            "questions": [
+              {
+                "id": "mc_b.inputdata"
+              },
+              {
+                "id": "mc_b.outputtype"
+              },
+              {
+                "id": "mc_b.persoonsgegevens_input"
+              },
+              {
+                "id": "mc_b.persoonsgegevens_output"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mc_c",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "mc_c1",
+            "questions": [
+              {
+                "id": "mc_c.modeltype"
+              },
+              {
+                "id": "mc_c.modelversie"
+              },
+              {
+                "id": "mc_c.aanbieder"
+              },
+              {
+                "id": "mc_c.trainingsdata_bron"
+              },
+              {
+                "id": "mc_c.trainingsdata_volume"
+              },
+              {
+                "id": "mc_c.trainingsdata_datum"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mc_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "mc_d1",
+            "questions": [
+              {
+                "id": "mc_d.beperkingen"
+              },
+              {
+                "id": "mc_d.bias_uitgevoerd"
+              },
+              {
+                "id": "mc_d.bias_notities"
+              },
+              {
+                "id": "mc_d.fairness_metrics"
+              },
+              {
+                "id": "mc_d.bias_risicos"
+              }
+            ]
+          },
+          {
+            "id": "mc_d2",
+            "questions": [
+              {
+                "id": "mc_d.dpia_vereist"
+              },
+              {
+                "id": "mc_d.dpia_datum"
+              },
+              {
+                "id": "mc_d.conformiteit_uitgevoerd"
+              },
+              {
+                "id": "mc_d.goedkeuringsstatus"
+              },
+              {
+                "id": "mc_d.goedgekeurd_door"
+              },
+              {
+                "id": "mc_d.laatste_evaluatie"
+              },
+              {
+                "id": "mc_d.volgende_evaluatie"
+              },
+              {
+                "id": "mc_d.opmerkingen"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

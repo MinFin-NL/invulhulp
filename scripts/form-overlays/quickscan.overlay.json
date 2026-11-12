@@ -1,0 +1,651 @@
+{
+  "_comment": "Overlay voor quickscan: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/quickscan.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "quickscan",
+    "title": "Quickscan BIO2 – Classificatietoets",
+    "source": {
+      "instrument": "Classificatietoets BIO2 — dataclassificatie op beschikbaarheid, integriteit en vertrouwelijkheid",
+      "publisher": "Ministerie van Financiën, op basis van de IBD-handreiking dataclassificatie bij de Baseline Informatiebeveiliging Overheid versie 2",
+      "version": "QIS BIO2 MinFin v1.0 — 10-07-2026",
+      "reference": "BIO2 5.12.01; Cyberbeveiligingswet art. 21.3.i; Cyberbeveiligingsbesluit art. 16.1–16.3",
+      "derivation": "harmonized",
+      "note": "Veldgetrouw overgezet uit de werkmap 'QIS BIO2 MinFin v1.0 - 10072026.xlsx'. De rekenformules van de werkmap (maximumwaarde per aspect, risiconiveau, quantumresultaat) zijn hier invulvelden: de invuller neemt de hoogste waardering zelf over. De maatregelentabbladen zijn een selectie van toepasselijke BIO2-controls, geen in-controlverklaring."
+    },
+    "aiContext": "Dit is de Quickscan BIO2 (classificatietoets) van het Ministerie van Financiën. Hiermee wordt de classificatie van informatie bepaald op beschikbaarheid, integriteit en vertrouwelijkheid, wordt de quantumveiligheid beoordeeld en wordt vastgesteld welke BIO2-maatregelen van toepassing zijn. Schrijf in informatiebeveiligings- en privacytermen. Bij de waarderingsvragen gaat het steeds om het ergste geval; onderbouw elke waardering feitelijk, zodat iemand die de toets later herhaalt de keuze kan volgen.",
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "Quickscan BIO2",
+      "docTitle": "Quickscan BIO2 – Classificatietoets",
+      "footerLabel": "Quickscan BIO2 – MinFin",
+      "filename": "Quickscan-BIO2.pdf",
+      "systemNamePlaceholder": "Bijv. Klantportaal medewerkers v1",
+      "homeContent": {
+        "notice": "De classificatietoets BIO2 is een momentopname van de huidige situatie. Voer de toets opnieuw uit bij nieuwe wet- of regelgeving, meer ketenpartners, meer (persoons)gegevens voor dezelfde doelen, of bij grote proces- en systeemwijzigingen — en herijk hem jaarlijks. Uitgevoerde classificatietoetsen, risicoanalyses en DPIA's maken onderdeel uit van het systeemdossier en worden bewaard zolang het informatiesysteem in gebruik is.",
+        "description": "De Quickscan BIO2 bepaalt de classificatie van informatie op beschikbaarheid, integriteit en vertrouwelijkheid conform de Baseline Informatiebeveiliging Overheid versie 2. De uitkomst geeft aan welk beschermingsniveau vereist is, of een aanvullende risicoanalyse of DPIA nodig is, en welke BIO2-maatregelen van toepassing zijn. Er wordt gestreefd naar een zo laag mogelijk classificatieniveau: te hoog classificeren leidt tot onnodige kosten.",
+        "steps": [
+          "Algemeen: basisgegevens, samenvatting en de relatie met eerdere toetsen (PSA, BIA, TBB, prescan DPIA, cloudtoets)",
+          "Proces en informatiesysteem: keten, informatiesoorten, wet- en regelgeving, systemen en quantumveiligheid",
+          "Classificatie: waardeer beschikbaarheid, integriteit en vertrouwelijkheid per vraag, met verplichte argumentatie",
+          "Resultaat: proces- en systeemklasse, aanvullende maatregelen, risiconiveau, BIO2-maatregelen en ondertekening"
+        ],
+        "buttonLabel": "Starten met de quickscan"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "qs_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "qs_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "qs_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "qs_d"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "qs_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "qs_a1",
+            "questions": [
+              {
+                "id": "qs_a.organisatie"
+              },
+              {
+                "id": "qs_a.afdeling"
+              },
+              {
+                "id": "qs_a.systeemnaam"
+              },
+              {
+                "id": "qs_a.opsteller"
+              },
+              {
+                "id": "qs_a.versienummer"
+              },
+              {
+                "id": "qs_a.datum"
+              }
+            ]
+          },
+          {
+            "id": "qs_a2",
+            "questions": [
+              {
+                "id": "qs_a.managementsamenvatting"
+              }
+            ]
+          },
+          {
+            "id": "qs_a3",
+            "questions": [
+              {
+                "id": "qs_a.aanleiding"
+              },
+              {
+                "id": "qs_a.uitvoerder"
+              },
+              {
+                "id": "qs_a.bijzonderheden"
+              },
+              {
+                "id": "qs_a.projectsamenvatting"
+              }
+            ]
+          },
+          {
+            "id": "qs_a4",
+            "questions": [
+              {
+                "id": "qs_a.psa"
+              },
+              {
+                "id": "qs_a.ib_quickscan_eerder"
+              },
+              {
+                "id": "qs_a.ib_quickscan_uitkomst"
+              },
+              {
+                "id": "qs_a.bia_uitgevoerd"
+              },
+              {
+                "id": "qs_a.bia_uitkomst"
+              },
+              {
+                "id": "qs_a.tbb"
+              },
+              {
+                "id": "qs_a.tbb_uitkomst"
+              },
+              {
+                "id": "qs_a.rubricering"
+              },
+              {
+                "id": "qs_a.prescan_dpia"
+              },
+              {
+                "id": "qs_a.prescan_dpia_uitkomst"
+              },
+              {
+                "id": "qs_a.cloud"
+              },
+              {
+                "id": "qs_a.cloud_uitkomst"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "qs_c",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "qs_c1",
+            "questions": [
+              {
+                "id": "qs_c.geinterviewde"
+              },
+              {
+                "id": "qs_c.proceseigenaar"
+              },
+              {
+                "id": "qs_c.businessowner"
+              }
+            ]
+          },
+          {
+            "id": "qs_c2",
+            "questions": [
+              {
+                "id": "qs_c.procesfunctie"
+              },
+              {
+                "id": "qs_c.procesbeschrijving",
+                "allowAttachments": true
+              },
+              {
+                "id": "qs_c.hoofd_en_subprocessen"
+              },
+              {
+                "id": "qs_c.beschikbaarheidsvenster"
+              }
+            ]
+          },
+          {
+            "id": "qs_c3",
+            "questions": [
+              {
+                "id": "qs_c.ketens"
+              },
+              {
+                "id": "qs_c.ketenpartners",
+                "allowAttachments": true
+              }
+            ]
+          },
+          {
+            "id": "qs_c4",
+            "questions": [
+              {
+                "id": "qs_c.subprocessen"
+              },
+              {
+                "id": "qs_c.hoofdactiviteiten"
+              }
+            ]
+          },
+          {
+            "id": "qs_c5",
+            "questions": [
+              {
+                "id": "qs_c.informatiesoorten"
+              }
+            ]
+          },
+          {
+            "id": "qs_c6",
+            "questions": [
+              {
+                "id": "qs_c.afnemers"
+              },
+              {
+                "id": "qs_c.afnemers_eisen"
+              },
+              {
+                "id": "qs_c.leveranciers"
+              },
+              {
+                "id": "qs_c.leveranciers_eisen"
+              }
+            ]
+          },
+          {
+            "id": "qs_c7",
+            "questions": [
+              {
+                "id": "qs_c.wetgeving"
+              },
+              {
+                "id": "qs_c.wetgeving_eisen"
+              }
+            ]
+          },
+          {
+            "id": "qs_c8",
+            "questions": [
+              {
+                "id": "qs_c.systemen_beschrijving",
+                "allowAttachments": true
+              },
+              {
+                "id": "qs_c.informatie_eigenaar"
+              },
+              {
+                "id": "qs_c.systeemeigenaar"
+              },
+              {
+                "id": "qs_c.gebruikers"
+              },
+              {
+                "id": "qs_c.systeemsoort"
+              },
+              {
+                "id": "qs_c.output"
+              },
+              {
+                "id": "qs_c.koppelvlakken",
+                "allowAttachments": true
+              },
+              {
+                "id": "qs_c.dataverplaatsing"
+              },
+              {
+                "id": "qs_c.mutatie_autorisatie"
+              },
+              {
+                "id": "qs_c.quantum_roadmap"
+              },
+              {
+                "id": "qs_c.crypto_inzicht"
+              },
+              {
+                "id": "qs_c.crypto_agility"
+              }
+            ]
+          },
+          {
+            "id": "qs_c9",
+            "questions": [
+              {
+                "id": "qs_c.q1_informatietransport"
+              },
+              {
+                "id": "qs_c.q2_transportmiddel"
+              },
+              {
+                "id": "qs_c.q3_tls_versie"
+              },
+              {
+                "id": "qs_c.q4_quantumveilig_certificaat"
+              },
+              {
+                "id": "qs_c.q5_sleuteluitwisseling"
+              },
+              {
+                "id": "qs_c.q6_authenticatie_certificaat"
+              },
+              {
+                "id": "qs_c.q7_ssh_sleuteluitwisseling"
+              },
+              {
+                "id": "qs_c.q8_ssh_certificaat"
+              },
+              {
+                "id": "qs_c.q9_authenticatie"
+              },
+              {
+                "id": "qs_c.q10_certificaten"
+              },
+              {
+                "id": "qs_c.q11_publieke_sleutels"
+              },
+              {
+                "id": "qs_c.q12_handtekeningen"
+              },
+              {
+                "id": "qs_c.quantum_transport_argumentatie"
+              },
+              {
+                "id": "qs_c.quantum_certificaten_argumentatie"
+              },
+              {
+                "id": "qs_c.quantum_ssh_argumentatie"
+              },
+              {
+                "id": "qs_c.quantum_authenticatie_argumentatie"
+              },
+              {
+                "id": "qs_c.quantum_resultaat"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "qs_b",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "qs_b1",
+            "questions": [
+              {
+                "id": "qs_b.b1"
+              },
+              {
+                "id": "qs_b.b1_argumentatie"
+              },
+              {
+                "id": "qs_b.b2"
+              },
+              {
+                "id": "qs_b.b2_argumentatie"
+              },
+              {
+                "id": "qs_b.b3"
+              },
+              {
+                "id": "qs_b.b3_argumentatie"
+              },
+              {
+                "id": "qs_b.b4"
+              },
+              {
+                "id": "qs_b.b4_argumentatie"
+              },
+              {
+                "id": "qs_b.b5"
+              },
+              {
+                "id": "qs_b.b5_argumentatie"
+              },
+              {
+                "id": "qs_b.b6"
+              },
+              {
+                "id": "qs_b.b6_argumentatie"
+              },
+              {
+                "id": "qs_b.b7"
+              },
+              {
+                "id": "qs_b.b7_argumentatie"
+              }
+            ]
+          },
+          {
+            "id": "qs_b2",
+            "questions": [
+              {
+                "id": "qs_b.i1"
+              },
+              {
+                "id": "qs_b.i1_argumentatie"
+              },
+              {
+                "id": "qs_b.i2"
+              },
+              {
+                "id": "qs_b.i2_argumentatie"
+              },
+              {
+                "id": "qs_b.i3"
+              },
+              {
+                "id": "qs_b.i3_argumentatie"
+              },
+              {
+                "id": "qs_b.i4"
+              },
+              {
+                "id": "qs_b.i4_argumentatie"
+              },
+              {
+                "id": "qs_b.i5"
+              },
+              {
+                "id": "qs_b.i5_argumentatie"
+              },
+              {
+                "id": "qs_b.i6"
+              },
+              {
+                "id": "qs_b.i6_argumentatie"
+              },
+              {
+                "id": "qs_b.i7"
+              },
+              {
+                "id": "qs_b.i7_argumentatie"
+              }
+            ]
+          },
+          {
+            "id": "qs_b3",
+            "questions": [
+              {
+                "id": "qs_b.v1"
+              },
+              {
+                "id": "qs_b.v1_argumentatie"
+              },
+              {
+                "id": "qs_b.v2"
+              },
+              {
+                "id": "qs_b.v2_argumentatie"
+              },
+              {
+                "id": "qs_b.v3"
+              },
+              {
+                "id": "qs_b.v3_argumentatie"
+              },
+              {
+                "id": "qs_b.v4"
+              },
+              {
+                "id": "qs_b.v4_argumentatie"
+              },
+              {
+                "id": "qs_b.v5"
+              },
+              {
+                "id": "qs_b.v5_argumentatie"
+              },
+              {
+                "id": "qs_b.v6"
+              },
+              {
+                "id": "qs_b.v6_argumentatie"
+              },
+              {
+                "id": "qs_b.v7"
+              },
+              {
+                "id": "qs_b.v7_argumentatie"
+              }
+            ]
+          },
+          {
+            "id": "qs_b4",
+            "questions": [
+              {
+                "id": "qs_b.beschikbaarheid"
+              },
+              {
+                "id": "qs_b.integriteit"
+              },
+              {
+                "id": "qs_b.vertrouwelijkheid"
+              },
+              {
+                "id": "qs_b.classificatie_onderbouwing"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "qs_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "qs_d1",
+            "questions": [
+              {
+                "id": "qs_d.procesklasse"
+              },
+              {
+                "id": "qs_d.procesklasse_toelichting"
+              }
+            ]
+          },
+          {
+            "id": "qs_d2",
+            "questions": [
+              {
+                "id": "qs_d.systeemklasse"
+              },
+              {
+                "id": "qs_d.systeemklasse_argumentatie"
+              }
+            ]
+          },
+          {
+            "id": "qs_d3",
+            "questions": [
+              {
+                "id": "qs_d.statelijke_actoren"
+              },
+              {
+                "id": "qs_d.externe_rubricering"
+              },
+              {
+                "id": "qs_d.georganiseerde_misdaad"
+              },
+              {
+                "id": "qs_d.extra_maatregelen"
+              },
+              {
+                "id": "qs_d.extra_maatregelen_toelichting"
+              }
+            ]
+          },
+          {
+            "id": "qs_d4",
+            "questions": [
+              {
+                "id": "qs_d.persoonsgegevens"
+              },
+              {
+                "id": "qs_d.bijzondere_persoonsgegevens"
+              },
+              {
+                "id": "qs_d.persoonsgegevens_toelichting"
+              },
+              {
+                "id": "qs_d.dpia_noodzakelijk"
+              }
+            ]
+          },
+          {
+            "id": "qs_d5",
+            "questions": [
+              {
+                "id": "qs_d.risiconiveau"
+              },
+              {
+                "id": "qs_d.vervolgstappen"
+              }
+            ]
+          },
+          {
+            "id": "qs_d6",
+            "questions": [
+              {
+                "id": "qs_d.maatregelen_organisatorisch"
+              },
+              {
+                "id": "qs_d.maatregelen_mensgericht"
+              },
+              {
+                "id": "qs_d.maatregelen_fysiek"
+              },
+              {
+                "id": "qs_d.maatregelen_technologisch"
+              },
+              {
+                "id": "qs_d.maatregelen_onderbouwing"
+              },
+              {
+                "id": "qs_d.maatregelen_opvolging",
+                "columns": [
+                  {
+                    "id": "control"
+                  },
+                  {
+                    "id": "maatregel"
+                  },
+                  {
+                    "id": "status"
+                  },
+                  {
+                    "id": "onderbouwing"
+                  }
+                ],
+                "notesLabel": "Toelichting bij de opvolging",
+                "minRows": 1,
+                "maxRows": 40,
+                "optionalTable": true
+              }
+            ]
+          },
+          {
+            "id": "qs_d7",
+            "questions": [
+              {
+                "id": "qs_d.afwijking_motivatie"
+              },
+              {
+                "id": "qs_d.naam_eigenaar"
+              },
+              {
+                "id": "qs_d.datum_vaststelling"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,806 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: Datakwaliteit-assessment
+urn: urn:nl:minfin:ir:datakwaliteit:1.0
+version: '1.0'
+description: >-
+  Dit assessment brengt de kwaliteit van een dataset of gegevensverwerking in kaart langs de kerndimensies uit DAMA-DMBOK: volledigheid, uniciteit, tijdigheid, validiteit, juistheid en consistentie. U legt per dimensie een oordeel met onderbouwing vast, beschrijft de datakwaliteitsregels en hoe die gemeten worden, registreert de geconstateerde issues en maakt afspraken over verbetering en bewaking. De uitkomst onderbouwt de datavragen in de DPIA, de AI Impact Assessment en de Model Card.
+
+  Bron: DAMA-DMBOK2 — Data Management Body of Knowledge, 2nd Edition (DAMA International, versie 2nd Edition (2017)). DAMA-DMBOK is een referentiekader zonder invul-template; dit formulier is afgeleid van de daarin beschreven DQ-dimensies, regels en deliverables. Geen tekst overgenomen. Ontwerpspec: docs/DAMA-DMBOK-form-opportunities.md §4A.
+tasks:
+- task: 'Deel A: Scope en context'
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Afbakening
+    description: Beschrijf welke dataset of gegevensverwerking wordt beoordeeld en binnen welke context.
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke dataset of gegevensverwerking wordt beoordeeld?
+      description: >-
+        Noem de naam zoals die in de organisatie bekend staat, het bronsysteem en de afbakening (welke tabellen, velden of periode vallen er wel en niet onder).
+      id: "1.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: dq_a.dataset
+    - task: Waarvoor wordt deze data gebruikt?
+      description: >-
+        Beschrijf het gebruiksdoel: welk proces, besluit, rapportage of AI-model steunt op deze data? Hoe zwaarder het gebruik weegt, hoe hoger de kwaliteitseis.
+      id: "1.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: dq_a.doel
+    - task: Wordt deze data gebruikt voor het trainen, valideren of voeden van een AI-systeem of algoritme?
+      id: "1.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, als trainings- of validatiedata
+      - value: Ja, als invoerdata tijdens gebruik
+      - value: Ja, zowel voor training als als invoerdata
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: dq_a.aigebruik
+    - task: Toelichting
+      description: Licht toe om welk systeem of model het gaat.
+      id: "1.1.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.1.3"
+          operator: any
+        action: show
+    - task: Bevat de dataset persoonsgegevens?
+      id: "1.1.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, waaronder bijzondere persoonsgegevens
+      - value: Ja, gewone persoonsgegevens
+      - value: Nee, uitsluitend niet-herleidbare gegevens
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: dq_a.persoonsgegevens
+    - task: Toelichting
+      description: Licht toe welke categorieën gegevens het betreft.
+      id: "1.1.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.1.4"
+          operator: any
+        action: show
+    - task: Wat is de omvang en actualiteit van de dataset?
+      description: Bijv. aantal records, aantal attributen, historische diepte, en hoe vaak de data ververst wordt.
+      id: "1.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: dq_a.omvang
+  - task: Eigenaarschap en herkomst
+    id: "1.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wie is de data-eigenaar?
+      description: >-
+        De functionaris die verantwoordelijk is voor de inhoud en het gebruik van deze data — geen team, maar een rol met naam.
+      id: "1.2.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: dq_a.eigenaar
+    - task: Wie is de datasteward of beheerder?
+      description: >-
+        Degene die de dagelijkse kwaliteitsbewaking uitvoert: regels onderhoudt, meldingen afhandelt en correcties doorvoert.
+      id: "1.2.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: dq_a.steward
+    - task: Wat is de herkomst van de data (lineage)?
+      description: >-
+        Beschrijf de keten: primaire bron, tussenliggende systemen, bewerkingen en het punt waarop de data in dit gebruik terechtkomt. Vermeld of het om een basisregistratie, een aangeleverde dataset of eigen registratie gaat.
+      id: "1.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: dq_a.herkomst
+    - task: Bijlagen
+      id: "1.2.3-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "1.2.3-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Wat voor soort bron betreft het?
+      id: "1.2.4"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Basisregistratie (bijv. BRP, Handelsregister, BAG)
+      - value: Eigen registratie of administratie
+      - value: Aangeleverd door een andere overheidsorganisatie
+      - value: Ingekocht bij of aangeleverd door een externe partij
+      - value: Door burgers of bedrijven zelf ingevoerd
+      - value: Afgeleid of berekend uit andere data
+      - value: Openbare of open data
+      - value: Onbekend
+      required_status: true
+      references:
+        invulhulp: dq_a.brontype
+    - task: Is de kwaliteit van deze data eerder beoordeeld?
+      id: "1.2.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, met een formeel assessment
+      - value: Ja, informeel of op onderdelen
+      - value: Nee, dit is de eerste beoordeling
+      required_status: false
+      references:
+        invulhulp: dq_a.eerder
+    - task: Toelichting
+      description: Beschrijf wanneer, door wie en met welke uitkomst.
+      id: "1.2.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.2.5"
+          operator: any
+        action: show
+- task: 'Deel B: Kwaliteitsdimensies'
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Kerndimensies
+    description: >-
+      Beoordeel de dataset op de zes kerndimensies uit DAMA-DMBOK. Geef per dimensie een oordeel en onderbouw dat — bij voorkeur met een gemeten waarde (percentage, aantal afwijkingen) en niet alleen met een indruk. Kies 'Niet gemeten' als er geen meting achter zit; dat is een eerlijker antwoord dan een geschat oordeel.
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: 'Volledigheid (completeness): zijn alle vereiste gegevens aanwezig?'
+      description: >-
+        Kijk naar ontbrekende records én ontbrekende waarden in verplichte velden. Onderbouw met een vulgraad per kritiek attribuut.
+      id: "2.1.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Goed – voldoet aan de gestelde norm
+      - value: Voldoende – kleine afwijkingen zonder gevolgen voor het gebruik
+      - value: Matig – afwijkingen die het gebruik beïnvloeden
+      - value: Onvoldoende – ongeschikt voor het beoogde gebruik
+      - value: Niet gemeten
+      required_status: true
+      references:
+        invulhulp: dq_b.volledigheid
+    - task: Toelichting
+      description: Onderbouw het oordeel met de gemeten vulgraad en de gehanteerde norm.
+      id: "2.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.1"
+          operator: any
+        action: show
+    - task: 'Uniciteit (uniqueness): komt elk object precies één keer voor?'
+      description: >-
+        Denk aan dubbele registraties van dezelfde persoon, organisatie of transactie, en aan de sleutel waarop uniciteit wordt bepaald.
+      id: "2.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Goed – voldoet aan de gestelde norm
+      - value: Voldoende – kleine afwijkingen zonder gevolgen voor het gebruik
+      - value: Matig – afwijkingen die het gebruik beïnvloeden
+      - value: Onvoldoende – ongeschikt voor het beoogde gebruik
+      - value: Niet gemeten
+      required_status: true
+      references:
+        invulhulp: dq_b.uniciteit
+    - task: Toelichting
+      description: 'Onderbouw het oordeel: welke sleutel is gebruikt en hoeveel duplicaten zijn aangetroffen?'
+      id: "2.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.2"
+          operator: any
+        action: show
+    - task: 'Tijdigheid (timeliness): is de data actueel genoeg voor het gebruik?'
+      description: >-
+        Beoordeel de vertraging tussen de gebeurtenis in de werkelijkheid en de verwerking in de data, afgezet tegen wat het gebruik vraagt.
+      id: "2.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Goed – voldoet aan de gestelde norm
+      - value: Voldoende – kleine afwijkingen zonder gevolgen voor het gebruik
+      - value: Matig – afwijkingen die het gebruik beïnvloeden
+      - value: Onvoldoende – ongeschikt voor het beoogde gebruik
+      - value: Niet gemeten
+      required_status: true
+      references:
+        invulhulp: dq_b.tijdigheid
+    - task: Toelichting
+      description: 'Onderbouw het oordeel: welke doorlooptijd is gemeten en welke is vereist?'
+      id: "2.1.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.3"
+          operator: any
+        action: show
+    - task: 'Validiteit (validity): voldoen de waarden aan de gedefinieerde formaten, domeinen en regels?'
+      description: >-
+        Bijv. geldige datumnotaties, waarden binnen een toegestane codelijst, correcte BSN- of KvK-structuur.
+      id: "2.1.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Goed – voldoet aan de gestelde norm
+      - value: Voldoende – kleine afwijkingen zonder gevolgen voor het gebruik
+      - value: Matig – afwijkingen die het gebruik beïnvloeden
+      - value: Onvoldoende – ongeschikt voor het beoogde gebruik
+      - value: Niet gemeten
+      required_status: true
+      references:
+        invulhulp: dq_b.validiteit
+    - task: Toelichting
+      description: 'Onderbouw het oordeel: welke regels zijn getoetst en hoeveel schendingen zijn gevonden?'
+      id: "2.1.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.4"
+          operator: any
+        action: show
+    - task: 'Juistheid (accuracy): komt de data overeen met de werkelijkheid?'
+      description: >-
+        De lastigste dimensie: juistheid vraagt een referentie buiten de dataset zelf (steekproef, controlebron, terugmelding). Beschrijf welke referentie is gebruikt.
+      id: "2.1.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Goed – voldoet aan de gestelde norm
+      - value: Voldoende – kleine afwijkingen zonder gevolgen voor het gebruik
+      - value: Matig – afwijkingen die het gebruik beïnvloeden
+      - value: Onvoldoende – ongeschikt voor het beoogde gebruik
+      - value: Niet gemeten
+      required_status: true
+      references:
+        invulhulp: dq_b.juistheid
+    - task: Toelichting
+      description: 'Onderbouw het oordeel: tegen welke referentie is getoetst en wat was de uitkomst?'
+      id: "2.1.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.5"
+          operator: any
+        action: show
+    - task: 'Consistentie (consistency): is de data intern en tussen systemen met elkaar in overeenstemming?'
+      description: >-
+        Denk aan dezelfde entiteit met verschillende waarden in twee systemen, of aan onderling strijdige velden binnen één record.
+      id: "2.1.6"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Goed – voldoet aan de gestelde norm
+      - value: Voldoende – kleine afwijkingen zonder gevolgen voor het gebruik
+      - value: Matig – afwijkingen die het gebruik beïnvloeden
+      - value: Onvoldoende – ongeschikt voor het beoogde gebruik
+      - value: Niet gemeten
+      required_status: true
+      references:
+        invulhulp: dq_b.consistentie
+    - task: Toelichting
+      description: 'Onderbouw het oordeel: welke systemen of velden zijn vergeleken en waar liepen ze uiteen?'
+      id: "2.1.6-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.6"
+          operator: any
+        action: show
+  - task: Aanvullende dimensies
+    description: >-
+      Optionele dimensies die DAMA-DMBOK noemt naast de kern. Vul in wat relevant is voor het gebruiksdoel.
+    id: "2.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: 'Bruikbaarheid en begrijpelijkheid: is de betekenis van de gegevens vastgelegd en te achterhalen?'
+      description: >-
+        Bestaat er een begrippenkader, datawoordenboek of codeboek? Kunnen gebruikers zonder de bouwers erbij de velden juist interpreteren?
+      id: "2.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: dq_b.bruikbaarheid
+    - task: 'Representativiteit: dekt de dataset de populatie waarover uitspraken worden gedaan?'
+      description: >-
+        Voor AI-toepassingen essentieel: onder- of oververtegenwoordiging van groepen in de data vertaalt zich rechtstreeks naar vertekende uitkomsten. Beschrijf bekende scheefheid en de gevolgen daarvan.
+      id: "2.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: dq_b.representativiteit
+    - task: 'Toegankelijkheid en beschikbaarheid: is de data beschikbaar wanneer en voor wie dat nodig is?'
+      id: "2.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: dq_b.toegankelijkheid
+    - task: 'Vertrouwen: hoe kijken de gebruikers zelf naar de kwaliteit van deze data?'
+      description: >-
+        Gebruikers die een dataset wantrouwen, bouwen schaduwadministraties. Dat signaal zegt vaak meer dan een meting.
+      id: "2.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: dq_b.vertrouwen
+- task: 'Deel C: Regels en meting'
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Datakwaliteitsregels
+    description: >-
+      Leg de regels vast waaraan de data moet voldoen, met de norm en de meting erbij. Een regel zonder norm en meting is een intentie, geen bewaking.
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke datakwaliteitsregels gelden voor deze dataset?
+      id: "3.1.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: dq_c.regels
+      tasks:
+      - task: Regel
+        description: Bijv. 'BSN is gevuld en voldoet aan de elfproef'
+        id: "3.1.1.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: dq_c.regels.regel
+      - task: Dimensie
+        id: "3.1.1.2"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Volledigheid
+        - value: Uniciteit
+        - value: Tijdigheid
+        - value: Validiteit
+        - value: Juistheid
+        - value: Consistentie
+        - value: Overig
+        references:
+          invulhulp: dq_c.regels.dimensie
+      - task: Norm
+        description: De grens waarboven de data acceptabel is, bijv. '≥ 99,5%'
+        id: "3.1.1.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: dq_c.regels.norm
+      - task: Gemeten waarde
+        id: "3.1.1.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: dq_c.regels.meting
+      - task: Voldoet
+        id: "3.1.1.5"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Ja
+        - value: Nee
+        - value: Deels
+        - value: Niet gemeten
+        references:
+          invulhulp: dq_c.regels.oordeel
+    - task: Toelichting op de regels en normen
+      id: "3.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Hoe wordt de datakwaliteit gemeten?
+      description: >-
+        Beschrijf het instrument of script, de frequentie, wie de meting uitvoert en waar de uitkomsten worden vastgelegd (bijv. een DQ-dashboard).
+      id: "3.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: dq_c.meetmethode
+    - task: Met welke frequentie wordt gemeten?
+      id: "3.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Continu of bij elke verwerking
+      - value: Dagelijks
+      - value: Wekelijks of maandelijks
+      - value: Per kwartaal of jaarlijks
+      - value: Alleen ad hoc, bij aanleiding
+      - value: Nog niet ingericht
+      required_status: true
+      references:
+        invulhulp: dq_c.frequentie
+    - task: Is de meting geautomatiseerd en wordt er gealarmeerd bij overschrijding van een norm?
+      id: "3.1.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, geautomatiseerd met alerting
+      - value: Ja, geautomatiseerd zonder alerting
+      - value: Nee, handmatige controle
+      - value: Nog niet ingericht
+      required_status: false
+      references:
+        invulhulp: dq_c.geautomatiseerd
+    - task: Toelichting
+      description: Licht toe wie de signalen ontvangt en opvolgt.
+      id: "3.1.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.1.4"
+          operator: any
+        action: show
+    - task: Aan welke standaarden of afspraken is de datadefinitie uitgelijnd?
+      description: >-
+        Bijv. ISO/IEC 25012 voor kwaliteitskenmerken, de DAMA-NL DDQ-dimensies, of sectorale gegevensstandaarden.
+      id: "3.1.5"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: ISO/IEC 25012 (datakwaliteitsmodel)
+      - value: DAMA-NL DDQ-dimensies
+      - value: DCAT-AP-NL (dataset-metadata)
+      - value: MIM 1.2 (informatiemodellering)
+      - value: Sectorale of ketenafspraak
+      - value: Interne organisatiestandaard
+      - value: Geen expliciete standaard
+      required_status: false
+      references:
+        invulhulp: dq_c.standaarden
+- task: 'Deel D: Bevindingen en verbetering'
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Geconstateerde issues
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke datakwaliteitsissues zijn geconstateerd?
+      id: "4.1.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: dq_d.issues
+      tasks:
+      - task: Issue
+        id: "4.1.1.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: dq_d.issues.issue
+      - task: Dimensie
+        id: "4.1.1.2"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Volledigheid
+        - value: Uniciteit
+        - value: Tijdigheid
+        - value: Validiteit
+        - value: Juistheid
+        - value: Consistentie
+        - value: Overig
+        references:
+          invulhulp: dq_d.issues.dimensie
+      - task: Vermoedelijke oorzaak
+        id: "4.1.1.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: dq_d.issues.oorzaak
+      - task: Gevolg voor het gebruik
+        id: "4.1.1.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: dq_d.issues.gevolg
+      - task: Ernst
+        id: "4.1.1.5"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Hoog
+        - value: Middel
+        - value: Laag
+        references:
+          invulhulp: dq_d.issues.ernst
+    - task: Toelichting op de bevindingen
+      id: "4.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Welke van deze issues zijn structureel en welke incidenteel?
+      description: >-
+        Structurele issues komen voort uit het ontwerp van het proces of systeem en keren terug na correctie; incidentele issues zijn eenmalig. Alleen de eerste categorie vraagt om een procesingreep.
+      id: "4.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: dq_d.structureel
+  - task: Verbetering en bewaking
+    id: "4.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke verbeteracties worden ondernomen?
+      id: "4.2.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: dq_d.acties
+      tasks:
+      - task: Actie
+        id: "4.2.1.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: dq_d.acties.actie
+      - task: Type
+        id: "4.2.1.2"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Correctie van bestaande data
+        - value: Aanpassing van het invoerproces
+        - value: Technische maatregel of validatie
+        - value: Afspraak met de bronhouder
+        - value: Aanvullende monitoring
+        - value: Overig
+        references:
+          invulhulp: dq_d.acties.type
+      - task: Verantwoordelijke
+        id: "4.2.1.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: dq_d.acties.eigenaar
+      - task: Termijn
+        id: "4.2.1.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: dq_d.acties.termijn
+    - task: Toelichting op de verbeteraanpak
+      id: "4.2.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Welke afspraken zijn gemaakt over de te leveren kwaliteit (DQ-SLA)?
+      description: >-
+        Leg vast welke normen structureel gelden, wie ze bewaakt, hoe er wordt gerapporteerd en wat er gebeurt bij overschrijding. Vermeld bij een externe bron of dit contractueel is vastgelegd.
+      id: "4.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: dq_d.afspraken
+    - task: Is er een terugmeldvoorziening voor geconstateerde fouten?
+      description: >-
+        Voor basisregistraties is terugmelden wettelijk geregeld (Digimelding). Voor andere bronnen: is er een route waarlangs een gebruiker een fout kan melden en wordt die opgevolgd?
+      id: "4.2.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, via Digimelding of een vergelijkbare voorziening
+      - value: Ja, via een eigen meldproces
+      - value: Nee, geen terugmeldroute
+      - value: Niet van toepassing
+      required_status: false
+      references:
+        invulhulp: dq_d.terugmelding
+    - task: Toelichting
+      description: Beschrijf de route en hoe meldingen worden opgevolgd.
+      id: "4.2.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.2.3"
+          operator: any
+        action: show
+    - task: Welk restrisico blijft bestaan en is de data geschikt voor het beoogde gebruik?
+      description: >-
+        Sluit expliciet af: is de kwaliteit toereikend, toereikend onder voorwaarden, of niet toereikend? Benoem bij AI-gebruik nadrukkelijk wat de resterende gebreken betekenen voor de betrouwbaarheid van de uitkomsten.
+      id: "4.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: dq_d.restrisico
+    - task: 'Eindoordeel: is de datakwaliteit toereikend voor het beoogde gebruik?'
+      id: "4.2.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, toereikend
+      - value: Ja, mits de genoemde verbeteracties worden uitgevoerd
+      - value: Nee, niet toereikend voor dit gebruik
+      - value: Nog niet vast te stellen — eerst meten
+      required_status: true
+      references:
+        invulhulp: dq_d.oordeel
+    - task: Toelichting
+      description: Onderbouw het eindoordeel en benoem wie het vaststelt.
+      id: "4.2.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.2.5"
+          operator: any
+        action: show

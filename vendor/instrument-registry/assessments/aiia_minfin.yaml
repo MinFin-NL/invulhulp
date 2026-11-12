@@ -1,0 +1,1783 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: AI Impact Assessment (MinFin)
+urn: urn:nl:minfin:ir:aiia:2.1
+version: '2.1'
+description: >-
+  Het AI Impact Assessment (AIIA) helpt medewerkers van MinFin om op een gestructureerde manier te beoordelen of het verantwoord is een AI-systeem in te zetten, en hoe dit systeem verantwoord geïmplementeerd en gebruikt kan worden.
+
+  Bron: AI Impact Assessment (AIIA) 2.0 (Ministerie van Financiën, versie 2.0). https://www.rijksoverheid.nl/documenten/rapporten/2022/11/30/ai-impact-assessment-ministerie-van-infrastructuur-en-waterstaat Bron is het AI Impact Assessment 2.0 van het Ministerie van Infrastructuur en Waterstaat (PDF, december 2024); de officiele Invultemplate-AIIA2.0.docx van het Algoritmekader is de invulvorm daarvan. De 110 vragen en hun verplicht/hulpvraag-indeling (34 blauw, 76 groen) zijn ongewijzigd overgenomen. Eigen toevoegingen van MinFin, niet afkomstig uit het IenW-format: 1.1.4 (aanleiding), 1.1.5 (verwachte voordelen), 1.1.6 (termijn en looptijd) en 3.3 (conclusie; stuurt de beslispoort naar deel B aan en is daarom verplicht, hoewel de bron hier geen vraag stelt). Bijlage 1 van de bron is vervangen door de MinBZK-beslishulp AI-verordening (zie vendor/ai-verordening-beslishulp); Bijlage 2 wordt gedekt door euaiact; Bijlage 3 (generatieve AI) is nog niet verwerkt. Niet gegenereerd uit par-dpia-form en losstaand van de vendored IAMA.
+tasks:
+- task: 'Deel A: Afweging'
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 1.1 Doel van het systeem
+    description: Beschrijf het doel en de noodzaak van het AI-systeem dat u wilt inzetten.
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Geef een beknopte beschrijving van het beoogde doel en de verwachte resultaten van het AI-systeem.
+      id: "1.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 1.1.1
+    - task: >-
+        In welke risicocategorie van de AI-verordening valt het systeem (onaanvaardbaar, hoog, beperkt, minimaal)?
+      description: Zie Bijlage 1 voor de risicoclassificatie. Vul dit in nadat u Bijlage 1 heeft ingevuld.
+      id: "1.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Onaanvaardbaar risico
+      - value: Hoog risico
+      - value: Beperkt risico
+      - value: Minimaal risico
+      - value: Nog niet bepaald
+      required_status: true
+      references:
+        invulhulp: 1.1.2
+    - task: Toelichting
+      description: Licht uw antwoord toe.
+      id: "1.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.1.2"
+          operator: any
+        action: show
+    - task: Waar in de organisatie wordt het systeem ingezet (afdeling, proces, werkzaamheden)?
+      id: "1.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 1.1.3
+    - task: Wat is de aanleiding voor de inzet van dit AI-systeem?
+      description: Beschrijf welk probleem of welke behoefte ten grondslag ligt aan de keuze voor dit systeem.
+      id: "1.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 1.1.4
+    - task: Wat zijn de verwachte voordelen van het gebruik van dit AI-systeem?
+      id: "1.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 1.1.5
+    - task: Op welke termijn wordt het systeem ingezet en wat is de geplande looptijd?
+      id: "1.1.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 1.1.6
+  - task: 1.2 Beoogde oplossing
+    description: Beschrijf de technische oplossing en de overwegingen daarbij.
+    id: "1.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Geef een beschrijving van het AI-systeem (techniek, data, type algoritme).
+      description: >-
+        Beschrijf welk type AI-systeem wordt gebruikt (machine learning, regelgebaseerd, generatief AI, etc.), welke data als input dient en welk type output het systeem produceert.
+      id: "1.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 1.2.1
+    - task: Bijlagen
+      id: "1.2.1-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "1.2.1-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Waarom is voor deze vorm van AI gekozen?
+      description: Motiveer de keuze voor AI ten opzichte van niet-AI-alternatieven.
+      id: "1.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 1.2.2
+    - task: Welke alternatieven zijn overwogen (inclusief niet-AI-oplossingen)?
+      id: "1.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 1.2.3
+  - task: 1.3 Rol binnen de organisatie
+    description: Beschrijf de rolverdeling en betrokken partijen.
+    id: "1.3"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe is de rolverdeling geregeld (ontwikkelaar, opdrachtgever, projectleider, beheerders)?
+      description: Benoem de namen of functies van de betrokkenen en hun verantwoordelijkheden.
+      id: "1.3.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: 1.3.1
+      tasks:
+      - task: Rol
+        description: bijv. ontwikkelaar, opdrachtgever, projectleider, beheerder
+        id: "1.3.1.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: 1.3.1.rol
+      - task: Naam of functie
+        id: "1.3.1.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: 1.3.1.naam
+      - task: Verantwoordelijkheden
+        id: "1.3.1.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: 1.3.1.verantwoordelijkheden
+    - task: Wie zijn de gebruikers en betrokkenen (degenen die de output van het systeem ondervinden)?
+      id: "1.3.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 1.3.2
+    - task: Welke stakeholders zijn geconsulteerd bij de ontwikkeling of aanschaf van het systeem?
+      id: "1.3.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 1.3.3
+    - task: >-
+        Welke feedback is verzameld van diverse groepen, inclusief kwetsbare of ondervertegenwoordigde groepen?
+      id: "1.3.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 1.3.4
+  - task: 1.4 Onderhoud en beheer
+    description: Beschrijf hoe het systeem beheerd en onderhouden wordt.
+    id: "1.4"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe is de rolverdeling voor het onderhoud en beheer van het systeem geregeld?
+      id: "1.4.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 1.4.1
+    - task: Hoe wordt omgegaan met wijzigingen in wet- en regelgeving die het systeem raken?
+      id: "1.4.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 1.4.2
+    - task: Is de benodigde expertise voor onderhoud en beheer gedocumenteerd en geborgd?
+      id: "1.4.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      - value: N.v.t.
+      required_status: false
+      references:
+        invulhulp: 1.4.3
+    - task: Toelichting
+      description: Licht toe hoe de expertise is geborgd of welke stappen worden genomen.
+      id: "1.4.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.4.3"
+          operator: any
+        action: show
+    - task: Hoe wordt omgegaan met veranderingen in de context waarbinnen het systeem wordt ingezet?
+      description: Denk aan organisatorische veranderingen, wijziging van werkprocessen, of nieuwe gebruikersgroepen.
+      id: "1.4.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 1.4.4
+  - task: 2.1 Grondrechten
+    description: Beoordeel de mogelijke impact op grondrechten van burgers.
+    id: "1.5"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wat is de mogelijke impact van het AI-systeem op grondrechten van burgers?
+      description: >-
+        Denk aan privacy, non-discriminatie, vrijheid van meningsuiting, recht op een eerlijk proces, en toegang tot diensten.
+      id: "1.5.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 2.1.1
+    - task: Wat is de wettelijke grondslag voor de inzet van het AI-systeem?
+      id: "1.5.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 2.1.2
+    - task: Welke grondrechtelijke bepalingen zijn van toepassing op dit systeem?
+      id: "1.5.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 2.1.3
+    - task: Welke rechten kunnen worden geschonden als het systeem niet correct functioneert?
+      id: "1.5.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 2.1.4
+  - task: 2.2 Duurzaamheid
+    description: Beoordeel de milieu-impact van het AI-systeem.
+    id: "1.6"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: >-
+        Wat is de milieu-impact van het AI-systeem (ontwikkeling, installatie, gebruik) en hoe wordt dit gemeten?
+      description: Denk aan energieverbruik, CO₂-uitstoot en gebruik van schaarse materialen.
+      id: "1.6.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 2.2.1
+    - task: Welke maatregelen worden getroffen om de negatieve milieu-impact te minimaliseren?
+      id: "1.6.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 2.2.2
+  - task: 2.3 Overige effecten
+    description: Beschrijf overige maatschappelijke effecten van het AI-systeem.
+    id: "1.7"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe draagt het AI-systeem bij aan de missie van de organisatie?
+      id: "1.7.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 2.3.1
+    - task: >-
+        Zijn er overige positieve of negatieve effecten voor specifieke groepen of de samenleving als geheel?
+      description: Denk aan werkgelegenheid, toegankelijkheid, sociale cohesie of ongelijkheid.
+      id: "1.7.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 2.3.2
+  - task: 3. Afweging
+    description: >-
+      Maak een expliciete afweging over de inzet van het AI-systeem op basis van proportionaliteit en subsidiariteit.
+    id: "1.8"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: >-
+        Is de impact van het AI-systeem proportioneel ten opzichte van de doelstellingen en zijn er minder ingrijpende alternatieven?
+      description: >-
+        Proportionaliteit: weeg de voordelen af tegen de risico's en nadelen. Subsidiariteit: is er een minder ingrijpend alternatief dat hetzelfde doel bereikt?
+      id: "1.8.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: '3.1'
+    - task: Welke aanvullende maatregelen kunnen worden getroffen om verantwoord gebruik te waarborgen?
+      id: "1.8.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: '3.2'
+    - task: 'Conclusie: wordt het AI-systeem ingezet?'
+      id: "1.8.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, het systeem wordt ingezet
+      - value: Nee, het systeem wordt niet ingezet
+      required_status: true
+      references:
+        invulhulp: '3.3'
+    - task: Toelichting
+      description: Motiveer uw beslissing.
+      id: "1.8.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.8.3"
+          operator: any
+        action: show
+- task: 'Deel B: Implementatie en gebruik AI-systeem'
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  dependencies:
+  - type: conditional
+    condition:
+      id: "1.8.3"
+      operator: equals
+      value: Ja, het systeem wordt ingezet
+    action: show
+  tasks:
+  - task: 4.1 Bias
+    description: Beschrijf hoe ongewenste bias in het AI-systeem wordt voorkomen en beheersed.
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe wordt omgegaan met ongewenste bias (in input, model en output)?
+      description: 'Beschrijf de maatregelen voor elk van de drie fasen: inputdata, het model zelf en de output.'
+      id: "2.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 4.1.1
+    - task: Is de inputdata relevant en representatief voor de beoogde toepassing?
+      id: "2.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      - value: N.v.t.
+      required_status: false
+      references:
+        invulhulp: 4.1.2
+    - task: Toelichting
+      description: Licht toe hoe de representativiteit is vastgesteld.
+      id: "2.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.2"
+          operator: any
+        action: show
+    - task: Zijn subpopulaties beschermd in de steekproefstrategie?
+      id: "2.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: N.v.t.
+      required_status: false
+      references:
+        invulhulp: 4.1.3
+    - task: Toelichting
+      description: Beschrijf welke subpopulaties zijn onderscheiden en hoe zij beschermd worden.
+      id: "2.1.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.3"
+          operator: any
+        action: show
+    - task: Is de variabelekeuze gemotiveerd en gerechtvaardigd?
+      id: "2.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.1.4
+    - task: Hoe houdt het systeem rekening met ongerechtvaardigde bias in de uitkomsten?
+      id: "2.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.1.5
+    - task: Kunnen beoogde gebruikers het systeem feitelijk gebruiken ongeacht hun kenmerken (toegankelijkheid)?
+      id: "2.1.6"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      required_status: false
+      references:
+        invulhulp: 4.1.6
+    - task: Toelichting
+      description: Beschrijf eventuele toegankelijkheidsmaatregelen.
+      id: "2.1.6-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.6"
+          operator: any
+        action: show
+    - task: >-
+        Zijn er monitoringsmechanismen ingericht om negatieve effecten voor specifieke groepen te signaleren?
+      id: "2.1.7"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: In ontwikkeling
+      required_status: false
+      references:
+        invulhulp: 4.1.7
+    - task: Toelichting
+      description: Beschrijf hoe de monitoring is ingericht.
+      id: "2.1.7-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.7"
+          operator: any
+        action: show
+  - task: 4.2 Accuraatheid
+    description: Beschrijf hoe de nauwkeurigheid van het systeem wordt gemeten en geborgd.
+    id: "2.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe wordt de nauwkeurigheid van het systeem continu gemeten en gewaarborgd?
+      id: "2.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 4.2.1
+    - task: Welke acceptatiecriteria gelden voor de kwaliteit van input en output?
+      id: "2.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.2.2
+    - task: Sluiten de acceptatiecriteria aan bij de data en het doel van het systeem?
+      id: "2.2.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      required_status: false
+      references:
+        invulhulp: 4.2.3
+    - task: Toelichting
+      description: Licht toe waarom de criteria aansluiten of wat er nog moet worden verbeterd.
+      id: "2.2.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.2.3"
+          operator: any
+        action: show
+    - task: Hoe wordt de output periodiek gemonitord?
+      id: "2.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.2.4
+    - task: Hoe worden afwijkingen van de acceptatiecriteria geanalyseerd en gecorrigeerd?
+      id: "2.2.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.2.5
+    - task: Wat zijn de resultaten van alternatieve modellen die zijn overwogen?
+      id: "2.2.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.2.6
+  - task: 4.3 Betrouwbaarheid
+    description: Beschrijf hoe de betrouwbaarheid van het systeem is geborgd.
+    id: "2.3"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Is het systeem betrouwbaar en hoe is dit vastgesteld?
+      id: "2.3.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 4.3.1
+    - task: Welke factoren hebben de meeste invloed op de prestaties van het systeem?
+      id: "2.3.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.3.2
+    - task: Is de testdata gescheiden voor validatie of wordt cross-validatie gebruikt?
+      id: "2.3.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Testdata gescheiden
+      - value: Cross-validatie
+      - value: Beide
+      - value: N.v.t.
+      required_status: false
+      references:
+        invulhulp: 4.3.3
+    - task: Toelichting
+      description: Beschrijf de validatiemethodiek.
+      id: "2.3.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.3.3"
+          operator: any
+        action: show
+    - task: Hoe is de hyperparameter-tuning onderbouwd en getest?
+      id: "2.3.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.3.4
+  - task: 4.4 Technische implementatie
+    description: Beschrijf de technische opzet en infrastructuur van het systeem.
+    id: "2.4"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe is het systeem technisch geïmplementeerd?
+      id: "2.4.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 4.4.1
+    - task: Bijlagen
+      id: "2.4.1-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "2.4.1-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: >-
+        Past het systeem binnen de bestaande technische infrastructuur? Zo niet, welke maatregelen zijn getroffen?
+      id: "2.4.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee, met aanpassingen
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: 4.4.2
+    - task: Toelichting
+      description: Beschrijf de aanpassingen of afwijkingen.
+      id: "2.4.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.4.2"
+          operator: any
+        action: show
+    - task: Wat is de systeemarchitectuur?
+      id: "2.4.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.4.3
+    - task: Bijlagen
+      id: "2.4.3-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "2.4.3-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Zijn de hardware- en softwarevereisten gedocumenteerd?
+      id: "2.4.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      required_status: false
+      references:
+        invulhulp: 4.4.4
+    - task: Toelichting
+      description: Beschrijf of verwijs naar de documentatie.
+      id: "2.4.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.4.4"
+          operator: any
+        action: show
+    - task: Als het systeem extern gehost wordt, onder welke voorwaarden?
+      description: Denk aan verwerkersovereenkomst, datalocatie, SLA en exitstrategie.
+      id: "2.4.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.4.5
+    - task: Hoe is toegangsbeheer ingericht?
+      id: "2.4.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.4.6
+    - task: Hoe kan het systeem samenwerken met andere hard- en software?
+      id: "2.4.7"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.4.7
+    - task: Bijlagen
+      id: "2.4.7-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "2.4.7-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Hoe zijn logging en monitoring ingericht?
+      id: "2.4.8"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.4.8
+  - task: 4.5 Reproduceerbaarheid
+    description: Beschrijf hoe de reproduceerbaarheid van het systeem is geborgd.
+    id: "2.5"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Is het systeem reproduceerbaar en is er een meetproces voor vastgesteld?
+      id: "2.5.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      required_status: true
+      references:
+        invulhulp: 4.5.1
+    - task: Toelichting
+      description: Beschrijf het meetproces.
+      id: "2.5.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.5.1"
+          operator: any
+        action: show
+    - task: Kan de output worden gereconstrueerd met oude versies, datasets en condities?
+      id: "2.5.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      required_status: false
+      references:
+        invulhulp: 4.5.2
+    - task: Toelichting
+      description: Beschrijf hoe dit is ingericht.
+      id: "2.5.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.5.2"
+          operator: any
+        action: show
+    - task: Kan het model worden gereconstrueerd gegeven de parameters en een vaste seed?
+      id: "2.5.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: N.v.t.
+      required_status: false
+      references:
+        invulhulp: 4.5.3
+    - task: Toelichting
+      description: Licht toe.
+      id: "2.5.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.5.3"
+          operator: any
+        action: show
+    - task: Kan het systeem worden gereproduceerd op basis van de documentatie?
+      id: "2.5.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      required_status: false
+      references:
+        invulhulp: 4.5.4
+    - task: Toelichting
+      description: Beschrijf eventuele lacunes in de documentatie.
+      id: "2.5.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.5.4"
+          operator: any
+        action: show
+    - task: Hoe worden wijzigingen gedurende de levensduur van het systeem gedocumenteerd?
+      id: "2.5.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.5.5
+  - task: 4.6 Uitlegbaarheid
+    description: Beschrijf hoe het systeem uitlegbaar is voor ontwikkelaars en gebruikers.
+    id: "2.6"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Is het systeem voldoende uitlegbaar voor de ontwikkelaars?
+      id: "2.6.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 4.6.1
+    - task: Hoe is uitlegbaarheid voor gebruikers meegewogen tijdens de ontwikkeling?
+      id: "2.6.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.6.2
+    - task: Welke technieken maken het systeem uitlegbaar en waarom zijn deze gekozen?
+      description: Denk aan SHAP, LIME, attention maps, regelgebaseerde uitleg, etc.
+      id: "2.6.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 4.6.3
+  - task: 5.1 Kwaliteit en integriteit van data
+    description: Beschrijf hoe de datakwaliteit en data-integriteit zijn geborgd.
+    id: "2.7"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke trainingsdata worden gebruikt en uit welke bronnen?
+      id: "2.7.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 5.1.1
+    - task: Hoe wordt de datakwaliteit geborgd?
+      id: "2.7.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 5.1.2
+    - task: Is de gebruikte data noodzakelijk voor het systeem (dataminimalisatie)?
+      id: "2.7.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      required_status: false
+      references:
+        invulhulp: 5.1.3
+    - task: Toelichting
+      description: Licht toe welke data worden gebruikt en waarom deze noodzakelijk zijn.
+      id: "2.7.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.7.3"
+          operator: any
+        action: show
+    - task: Hoe worden onbedoelde dataduplicaties voorkomen?
+      id: "2.7.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 5.1.4
+    - task: >-
+        Kunnen trainings- en testdata worden bijgewerkt indien nodig? Wanneer wordt het model opnieuw getraind, gestopt of opnieuw ontwikkeld?
+      id: "2.7.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 5.1.5
+    - task: Voldoet de data aan de modelaannames?
+      id: "2.7.6"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      required_status: false
+      references:
+        invulhulp: 5.1.6
+    - task: Toelichting
+      description: Beschrijf de modelaannames en hoe de data hieraan voldoet.
+      id: "2.7.6-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.7.6"
+          operator: any
+        action: show
+    - task: Hoe wordt inputdata verzameld en gecombineerd?
+      id: "2.7.7"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 5.1.7
+    - task: Bijlagen
+      id: "2.7.7-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "2.7.7-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Hoe wordt data gelabeld?
+      id: "2.7.8"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 5.1.8
+    - task: Welke factoren beïnvloeden de kwaliteit van de inputdata en wat kan hiertegen worden gedaan?
+      id: "2.7.9"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 5.1.9
+    - task: Wordt inputdata getest op wijzigingen tijdens training, testen en gebruik?
+      id: "2.7.10"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      required_status: false
+      references:
+        invulhulp: 5.1.10
+    - task: Toelichting
+      description: Beschrijf hoe datatests zijn ingericht.
+      id: "2.7.10-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.7.10"
+          operator: any
+        action: show
+    - task: Als output als nieuwe input wordt gebruikt, hoe wordt dit opgeslagen en geverifieerd?
+      id: "2.7.11"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 5.1.11
+    - task: Hoe is de beschikbaarheid van outputdata gewaarborgd?
+      id: "2.7.12"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 5.1.12
+  - task: 5.2 Privacy en vertrouwelijkheid
+    description: Beschrijf hoe privacyrisico's en vertrouwelijke data worden beheerd.
+    id: "2.8"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe wordt omgegaan met persoonsgegevens en vertrouwelijke data?
+      id: "2.8.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 5.2.1
+    - task: Verwerkt het systeem persoonsgegevens (AVG van toepassing)?
+      id: "2.8.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: 5.2.2
+    - task: Toelichting
+      description: Beschrijf welke persoonsgegevens worden verwerkt en op welke grondslag.
+      id: "2.8.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.8.2"
+          operator: any
+        action: show
+    - task: Is de verwerking van persoonsgegevens proportioneel en subsidiair?
+      id: "2.8.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: N.v.t.
+      required_status: false
+      references:
+        invulhulp: 5.2.3
+    - task: Toelichting
+      description: Motiveer de proportionaliteit en subsidiariteit.
+      id: "2.8.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.8.3"
+          operator: any
+        action: show
+    - task: Is de output herleidbaar tot individuen?
+      id: "2.8.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Mogelijk
+      required_status: false
+      references:
+        invulhulp: 5.2.4
+    - task: Toelichting
+      description: Beschrijf de risico's en maatregelen.
+      id: "2.8.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.8.4"
+          operator: any
+        action: show
+    - task: Zijn relevante functionarissen betrokken (Chief Privacy Officer, Functionaris Gegevensbescherming)?
+      id: "2.8.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: N.v.t.
+      required_status: false
+      references:
+        invulhulp: 5.2.5
+    - task: Toelichting
+      description: Beschrijf de betrokkenheid.
+      id: "2.8.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.8.5"
+          operator: any
+        action: show
+    - task: Hoe vaak wordt de kwaliteit en noodzakelijkheid van de verwerking van persoonsgegevens geëvalueerd?
+      id: "2.8.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 5.2.6
+    - task: Worden vertrouwelijke gegevens (niet-persoonlijk) gebruikt of opgeslagen?
+      id: "2.8.7"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: 5.2.7
+    - task: Toelichting
+      description: Beschrijf welke vertrouwelijke gegevens en hoe deze worden beschermd.
+      id: "2.8.7-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.8.7"
+          operator: any
+        action: show
+    - task: Hoe is de beveiliging van vertrouwelijke informatie gewaarborgd?
+      id: "2.8.8"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 5.2.8
+  - task: 6.1 Risicobeheersing
+    description: Beschrijf hoe risicobeheer is ingericht.
+    id: "2.9"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe is het systeem getest op passende risicobeheersmaatregelen?
+      description: Beschrijf de uitgevoerde risicoanalyse(s) en de getroffen beheersmaatregelen.
+      id: "2.9.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 6.1.1
+  - task: 6.2 Alternatieve werkwijze
+    description: Beschrijf de aanpak als het systeem uitvalt of niet beschikbaar is.
+    id: "2.10"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wat is het plan als het systeem uitvalt (fallback procedure)?
+      id: "2.10.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 6.2.1
+    - task: Wat is de impact als het systeem uitvalt?
+      id: "2.10.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 6.2.2
+    - task: Welk verlies van vaardigheden of expertise kan optreden door het gebruik van AI (deskilling)?
+      description: >-
+        Denk aan situaties waarbij medewerkers bepaalde handelingen niet meer zelf kunnen uitvoeren doordat het systeem dit overneemt.
+      id: "2.10.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 6.2.3
+  - task: 6.3 Informatiebeveiligingsrisico's
+    description: Beschrijf hoe informatiebeveiligingsrisico's worden beheerd.
+    id: "2.11"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe worden informatiebeveiligingsrisico's inzichtelijk gemaakt, gereduceerd en getest?
+      id: "2.11.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 6.3.1
+    - task: Hoe wordt onbevoegde toegang voorkomen?
+      id: "2.11.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 6.3.2
+    - task: Wat is de impact als er onbevoegde toegang plaatsvindt?
+      id: "2.11.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 6.3.3
+    - task: >-
+        Kunnen personen misbruik maken van het feit dat AI wordt gebruikt in plaats van menselijke beslissingen?
+      id: "2.11.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Mogelijk
+      required_status: false
+      references:
+        invulhulp: 6.3.4
+    - task: Toelichting
+      description: Beschrijf de risico's en maatregelen.
+      id: "2.11.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.11.4"
+          operator: any
+        action: show
+    - task: Hoe wordt geregistreerd wie het systeem gebruikt en gedurende hoelang?
+      id: "2.11.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 6.3.5
+    - task: Worden aanvullende maatregelen getroffen bovenop de standaard MinFin-beveiligingsmaatregelen?
+      id: "2.11.6"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: 6.3.6
+    - task: Toelichting
+      description: Beschrijf de aanvullende maatregelen.
+      id: "2.11.6-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.11.6"
+          operator: any
+        action: show
+  - task: 7.1 Transparantie richting gebruikers
+    description: Beschrijf hoe het systeem transparant is voor de gebruikers.
+    id: "2.12"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: >-
+        Hoe begrijpen eindgebruikers het functioneren en de beperkingen van het systeem? Hoe wordt dit actueel gehouden?
+      id: "2.12.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 7.1.1
+    - task: Welke rol spelen mensen in de besluitvorming (human in the loop)?
+      id: "2.12.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 7.1.2
+    - task: Hoe kan het systeem worden gemonitord en begrepen door mensen (human oversight)?
+      id: "2.12.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 7.1.3
+  - task: 7.2 Communicatie naar betrokkenen
+    description: Beschrijf hoe gecommuniceerd wordt over het AI-systeem naar verschillende doelgroepen.
+    id: "2.13"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe transparant bent u naar verschillende groepen over het systeem?
+      id: "2.13.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 7.2.1
+    - task: Zijn er mechanismen voor gebruikersfeedback en hoe worden zorgen geadresseerd?
+      id: "2.13.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 7.2.2
+    - task: Moet het systeem worden geregistreerd in het algoritmeregister of de EU-database?
+      id: "2.13.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Wordt onderzocht
+      required_status: true
+      references:
+        invulhulp: 7.2.3
+    - task: Toelichting
+      description: Beschrijf de registratiestatus.
+      id: "2.13.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.13.3"
+          operator: any
+        action: show
+    - task: Wordt aan eindgebruikers en betrokkenen gecommuniceerd dat het AI-gegenereerde output betreft?
+      id: "2.13.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      required_status: false
+      references:
+        invulhulp: 7.2.4
+    - task: Toelichting
+      description: Beschrijf hoe dit gecommuniceerd wordt.
+      id: "2.13.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.13.4"
+          operator: any
+        action: show
+    - task: Is er een gebruikershandleiding?
+      id: "2.13.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: In ontwikkeling
+      required_status: false
+      references:
+        invulhulp: 7.2.5
+    - task: Toelichting
+      description: Geef een link of beschrijving van de handleiding.
+      id: "2.13.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.13.5"
+          operator: any
+        action: show
+    - task: >-
+        Welke psychologische neveneffecten kunnen optreden (verwarring, voorkeursbias, cognitieve vermoeidheid)?
+      id: "2.13.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 7.2.6
+    - task: >-
+        Hoe krijgen verschillende groepen inzicht in de verschillende aspecten van het systeem (data, model, uitkomsten)?
+      id: "2.13.7"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 7.2.7
+    - task: Hoe is uitlegbaarheid specifiek voor eindgebruikers uitgewerkt?
+      id: "2.13.8"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 7.2.8
+    - task: Is het systeem voldoende transparant voor verantwoord gebruik?
+      id: "2.13.9"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      required_status: false
+      references:
+        invulhulp: 7.2.9
+    - task: Toelichting
+      description: Licht toe.
+      id: "2.13.9-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.13.9"
+          operator: any
+        action: show
+    - task: Worden eindgebruikers getraind in het gebruik van het systeem?
+      id: "2.13.10"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gepland
+      required_status: false
+      references:
+        invulhulp: 7.2.10
+    - task: Toelichting
+      description: Beschrijf het trainingsaanbod.
+      id: "2.13.10-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.13.10"
+          operator: any
+        action: show
+    - task: Hoe wordt feedback van stakeholders intern verwerkt?
+      id: "2.13.11"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 7.2.11
+    - task: >-
+        Is het duidelijk welke stappen betrokkenen kunnen nemen om bezwaar te maken, te klagen of in beroep te gaan?
+      id: "2.13.12"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Gedeeltelijk
+      required_status: false
+      references:
+        invulhulp: 7.2.12
+    - task: Toelichting
+      description: Beschrijf de bezwaar- en beroepsprocedures.
+      id: "2.13.12-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.13.12"
+          operator: any
+        action: show
+  - task: 7.3 Controleerbaarheid
+    description: Beschrijf hoe het systeem gecontroleerd en verantwoord kan worden.
+    id: "2.14"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe en door wie wordt het systeem gecontroleerd?
+      id: "2.14.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 7.3.1
+    - task: Hoe wordt verantwoording afgelegd?
+      id: "2.14.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: 7.3.2
+    - task: Wie voert onafhankelijke controle uit en hoe?
+      id: "2.14.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 7.3.3
+  - task: 7.4 Archivering
+    description: Beschrijf hoe data en modellen worden gearchiveerd.
+    id: "2.15"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe wordt de inputdata opgeslagen?
+      id: "2.15.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 7.4.1
+    - task: Hoe wordt het model opgeslagen?
+      id: "2.15.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 7.4.2
+    - task: Wat is de bewaartermijn van de outputdata?
+      id: "2.15.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 7.4.3
+    - task: Wat is de bewaartermijn van de inputdata?
+      id: "2.15.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 7.4.4
+    - task: Hoe is het versiebeheer ingeregeld?
+      description: Beschrijf hoe versies van model, data en configuratie worden vastgelegd en teruggevonden.
+      id: "2.15.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: 7.4.5

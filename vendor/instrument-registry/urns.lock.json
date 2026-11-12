@@ -1,0 +1,23 @@
+{
+  "urn:nl:minbzk:ir:dpia": "dpia.yaml",
+  "urn:nl:minbzk:ir:iama": "iama.yaml",
+  "urn:nl:minbzk:ir:prescan": "prescan.yaml",
+  "urn:nl:minbzk:ir:begrippenkader-dpia": "begrippenkader_dpia.yaml",
+  "urn:nl:minfin:ir:aanbiedingsformulier": "aanbiedingsformulier.yaml",
+  "urn:nl:minfin:ir:aiia": "aiia_minfin.yaml",
+  "urn:nl:minfin:ir:algoritmeregister": "algoritmeregister.yaml",
+  "urn:nl:minfin:ir:cloudtoets": "cloudtoets.yaml",
+  "urn:nl:minfin:ir:dataethiek": "dataethiek.yaml",
+  "urn:nl:minfin:ir:datakwaliteit": "datakwaliteit.yaml",
+  "urn:nl:minfin:ir:datasetregistratie": "datasetregistratie.yaml",
+  "urn:nl:minfin:ir:euaiact": "euaiact.yaml",
+  "urn:nl:minfin:ir:ihhtoets": "ihhtoets.yaml",
+  "urn:nl:minfin:ir:intake": "intake.yaml",
+  "urn:nl:minfin:ir:modelcard": "modelcard.yaml",
+  "urn:nl:minfin:ir:ppm": "ppm.yaml",
+  "urn:nl:minfin:ir:psa": "psa.yaml",
+  "urn:nl:minfin:ir:quickscan": "quickscan.yaml",
+  "urn:nl:minfin:ir:restrisico": "restrisico.yaml",
+  "urn:nl:minfin:ir:toegankelijkheid": "toegankelijkheid.yaml",
+  "urn:nl:minfin:ir:verwerkingsregister": "verwerkingsregister.yaml"
+}

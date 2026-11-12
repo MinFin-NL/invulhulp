@@ -1,0 +1,727 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: PPM Projectplan
+urn: urn:nl:minfin:ir:ppm:2.0
+version: '2.0'
+description: >-
+  Het PPM Projectplan (versie 2.0) legt vast waarom het project er is, wat het oplevert, hoe het wordt aangepakt en georganiseerd, wat het kost en welke risico's en analyses erbij horen. Het is één van de verplichte documenten bij de start van een project in het projectportfolioproces van MinFin en vormt de basis voor sturing door de stuurgroep.
+
+  Bron: PPM-Projectplan 2.0 (Ministerie van Financiën, versie 2.0). Digitalisering van het eigen projectplansjabloon (versie 2.0); geen extern origineel. De export 'origineel format' vult het Word-sjabloon zelf in.
+tasks:
+- task: Voorblad en colofon
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Voorblad en colofon
+    description: De gegevens op het voorblad en in het colofon van het projectplan.
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Naam project
+      description: 'Verschijnt in de titel op het voorblad: ''Projectplan <naam project>''.'
+      id: "1.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_0.naam_project
+    - task: Versie
+      description: Bijv. 0.1 voor een eerste concept, 1.0 voor de vastgestelde versie.
+      id: "1.1.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ppm_0.versie
+    - task: Datum
+      id: "1.1.3"
+      type:
+      - date
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ppm_0.datum
+    - task: Status
+      description: Bijv. Concept, Ter besluitvorming of Definitief.
+      id: "1.1.4"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ppm_0.status
+    - task: Auteur(s)
+      id: "1.1.5"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ppm_0.auteurs
+    - task: Bijlagen
+      description: Noem de documenten die als bijlage bij het projectplan horen.
+      id: "1.1.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ppm_0.bijlagen
+    - task: Inlichtingen
+      description: Bij wie kan de lezer terecht met vragen over dit projectplan?
+      id: "1.1.7"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ppm_0.inlichtingen
+    - task: Revisiegegevens
+      description: Houd per versie bij wanneer, door wie en waarom het projectplan is gewijzigd.
+      id: "1.1.8"
+      type:
+      - task_group
+      repeatable: true
+      required_status: false
+      references:
+        invulhulp: ppm_0.revisies
+      tasks:
+      - task: Versie
+        id: "1.1.8.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_0.revisies.versie
+      - task: Datum
+        id: "1.1.8.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_0.revisies.datum
+      - task: Status
+        id: "1.1.8.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_0.revisies.status
+      - task: Wie
+        id: "1.1.8.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_0.revisies.wie
+      - task: Omschrijving
+        id: "1.1.8.5"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_0.revisies.omschrijving
+- task: 1. Inleiding & doelstelling
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 1. Inleiding & doelstelling
+    description: Beschrijf waarom het project er is, wat het moet bereiken en welke opties daarvoor zijn overwogen.
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Aanleiding
+      description: >-
+        Een duidelijke beschrijving van de situatie vóór het project. Het probleem, de behoefte of kans die wordt aangepakt, onderbouwd met feiten. Verwerk het externe en interne belang (bv. urgentie, wettelijke verplichtingen, doelstellingen organisatie).
+      id: "2.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_a.achtergrond
+    - task: Doelstelling
+      description: >-
+        Een heldere uiteenzetting van de doelstelling en subdoelstellingen van het project. Bij voorkeur middels de SMART-formulering (Specifiek, Meetbaar, Acceptabel, Realistisch, Tijdgebonden), zodat duidelijk is wanneer het project als geslaagd wordt beschouwd.
+      id: "2.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_a.doelstellingen
+    - task: Overwogen opties en argumentatie voor gekozen optie
+      description: >-
+        Een overzicht van opties met voor- en nadelen. De zogenaamde niets-doen-optie dient altijd te worden meegenomen. Motiveer waarom de uiteindelijke optie de voorkeur heeft gekregen.
+      id: "2.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_b.overwogen_opties
+- task: 2. Projectresultaat & scope
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 2. Projectresultaat & scope
+    description: >-
+      Beschrijf wat het project oplevert, wat binnen en buiten de scope valt, en waar het project van afhankelijk is.
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Projectresultaat
+      description: Beschrijving van de resultaten aan het einde van het project.
+      id: "3.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_2.projectresultaat
+    - task: Projectscope
+      description: >-
+        Geef duidelijk aan wat wel én niet binnen het project valt. Baken de werkzaamheden af, met scope-in (wat het project zeker oplevert) en scope-out (wat buiten het project blijft).
+      id: "3.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_a.scope
+    - task: Randvoorwaarden
+      description: >-
+        Zaken waaraan het project moet voldoen om te kunnen slagen (bijv. wetten, ICT-standaarden, beslissingen van management).
+      id: "3.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_2.randvoorwaarden
+    - task: Beperkingen en aannames
+      description: Beschrijving van de beperkingen en aannames die voor het project gelden.
+      id: "3.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ppm_a.beperkingen
+    - task: Afhankelijkheden
+      description: >-
+        Overzicht van producten, diensten, projecten, leveranciers of afdelingen waarvan het project afhankelijk is, en hoe deze afhankelijkheden worden gemanaged. Beschrijf ook factoren buiten het project die het resultaat beïnvloeden.
+      id: "3.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_a.afhankelijkheden
+- task: 3. Organisatie & communicatie
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 3. Organisatie & communicatie
+    description: >-
+      Beschrijf hoe het project is georganiseerd, wie erbij betrokken is, hoe besluiten worden genomen en hoe er wordt gecommuniceerd.
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Projectorganisatie
+      description: >-
+        Organogram of projectstructuur. Taken en verantwoordelijkheden van de projectorganisatie, met rollen zoals projectleider, teamleden, stuurgroep en (gedelegeerd) opdrachtgever.
+      id: "4.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_d.projectmanagement
+    - task: Bijlagen
+      id: "4.1.1-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "4.1.1-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Stakeholders
+      description: >-
+        Identificatie van de belangrijkste belanghebbenden, met een beschrijving van hun belangen, invloed en betrokkenheid.
+      id: "4.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_d.stakeholders
+    - task: Besluitvorming
+      description: >-
+        Beschrijving van het besluitvormingsproces (wie beslist waarover?), met een overzicht van escalatieprocedures en governance.
+      id: "4.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_3.besluitvorming
+    - task: Resources
+      description: >-
+        Overzicht van benodigde mensen en specialismes, inclusief (globale) tijdsindicaties per rol. Betreft zowel business- als IT-resources en zowel interne als externe resources.
+      id: "4.1.4"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: ppm_3.resources
+      tasks:
+      - task: Rol / specialisme
+        id: "4.1.4.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_3.resources.rol
+      - task: Business of IT
+        id: "4.1.4.2"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Business
+        - value: IT
+        references:
+          invulhulp: ppm_3.resources.soort
+      - task: Intern of extern
+        id: "4.1.4.3"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Intern
+        - value: Extern
+        references:
+          invulhulp: ppm_3.resources.herkomst
+      - task: Tijdsindicatie
+        description: bijv. 16 uur/week gedurende 6 maanden
+        id: "4.1.4.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_3.resources.tijdsindicatie
+    - task: Toelichting
+      id: "4.1.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Communicatie
+      description: >-
+        Communicatieplan: wie informeert wie, hoe, wanneer en waarover? Overzicht van interne en externe kanalen en de frequentie, bv. wekelijkse meetings en rapportages.
+      id: "4.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_3.communicatie
+- task: 4. Projectaanpak
+  id: "5"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 4. Projectaanpak
+    description: 'Beschrijf hoe het project wordt uitgevoerd: de aanpak, de fasen, de planning en de mijlpalen.'
+    id: "5.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Beschrijving van de gekozen aanpak
+      description: >-
+        Als vervolg op paragraaf 1.3, die beschrijft wat we gaan doen, beschrijft deze paragraaf hoe we dat gaan doen.
+      id: "5.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_c.gekozen_aanpak
+    - task: Fasering
+      description: Indeling van het project in fasen (bijv. verkenning, ontwerp, realisatie, test, implementatie).
+      id: "5.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_b.fasering
+    - task: Bijlagen
+      id: "5.1.2-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "5.1.2-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Planning
+      description: Gedetailleerde planning met activiteiten en tijdsduur per fase, inclusief afhankelijkheden.
+      id: "5.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_4.planning
+    - task: Bijlagen
+      id: "5.1.3-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "5.1.3-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Mijlpalen
+      description: >-
+        Concrete mijlpalen die aantonen dat onderdelen van het project klaar zijn, en de belangrijke momenten in de besluitvorming.
+      id: "5.1.4"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: ppm_a.eindresultaten
+      tasks:
+      - task: Mijlpaal of besluitmoment
+        id: "5.1.4.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_a.eindresultaten.milestone
+      - task: Beoogde datum
+        id: "5.1.4.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_a.eindresultaten.datum
+- task: 5. Budget
+  id: "6"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 5. Budget
+    description: Beschrijf de baten en de kosten van het project, en welk budget wordt gevraagd.
+    id: "6.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Baten – kwalitatief & kwantitatief
+      description: >-
+        Kwalitatieve baten: bv. betere klanttevredenheid, minder fouten, veiliger proces. Kwantitatieve baten: bv. kostenbesparing, omzetgroei, tijdwinst, opbrengsten (met cijfers).
+      id: "6.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_5.baten
+    - task: Kosten – eenmalig & beheer
+      description: >-
+        Eenmalige projectkosten: bv. inhuur, aanschafkosten, implementatiekosten. Structurele kosten: bv. van beheer, onderhoud, licenties, doorlopende personeelskosten. Interne en externe uren: neem inhuur op als eenmalige projectkosten. Zet het totaal benodigde budget uiteen en welk budget wordt gevraagd van welk type budget (zoals beheer- of projectenbudget).
+      id: "6.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_5.kosten
+- task: 6. Risico's en beheersfactoren
+  id: "7"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 6. Risico's en beheersfactoren
+    description: Breng de belangrijkste projectrisico's in kaart en leg vast welke afwijkingen acceptabel zijn.
+    id: "7.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Projectrisico's en beheersmaatregelen
+      description: >-
+        Overzicht van de belangrijkste projectrisico's (bijv. vertraging, technische problemen, budgetoverschrijding). Per risico: inschatting van kans en impact, en de geplande beheersmaatregelen.
+      id: "7.1.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: ppm_6.risicos
+      tasks:
+      - task: Risico
+        id: "7.1.1.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_6.risicos.risico
+      - task: Kans
+        id: "7.1.1.2"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Laag
+        - value: Middel
+        - value: Hoog
+        references:
+          invulhulp: ppm_6.risicos.kans
+      - task: Impact
+        id: "7.1.1.3"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Laag
+        - value: Middel
+        - value: Hoog
+        references:
+          invulhulp: ppm_6.risicos.impact
+      - task: Beheersmaatregel
+        id: "7.1.1.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_6.risicos.beheersmaatregel
+    - task: Toelichting
+      id: "7.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Toleranties
+      description: >-
+        Omschrijving van de maximale afwijkingen in tijd, geld, scope en kwaliteit die acceptabel zijn. Is de afwijking naar verwachting groter dan de afgesproken tolerantie, dan wordt daarover apart gerapporteerd aan de stuurgroep en aan het portfolioboard, aan de hand van een afwijkingsformulier.
+      id: "7.1.2"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: ppm_6.toleranties
+      tasks:
+      - task: Aspect
+        id: "7.1.2.1"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Tijd
+        - value: Geld
+        - value: Scope
+        - value: Kwaliteit
+        references:
+          invulhulp: ppm_6.toleranties.aspect
+      - task: Maximale afwijking
+        id: "7.1.2.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_6.toleranties.tolerantie
+    - task: Toelichting
+      id: "7.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+- task: 7. Omschrijving van de oplossing
+  id: "8"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 7. Omschrijving van de oplossing
+    description: >-
+      Beschrijf het eindproduct, de maatregelen uit de risicoanalyses, de impact van de oplossing en hoe de dienst of het product ooit wordt beëindigd.
+    id: "8.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Beschrijving eindproduct
+      description: >-
+        Gedetailleerde beschrijving van de op te leveren dienst of het op te leveren product aan de hand van de belangrijkste functionele en technische eisen.
+      id: "8.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_e.doel_eindproduct
+    - task: Vereiste maatregelen risicoanalyses
+      description: >-
+        Overzicht van de maatregelen die voortkomen uit de risicoanalyses (PSA, QIS etc.) en hoe deze in het eindproduct worden doorgevoerd.
+      id: "8.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_7.maatregelen
+    - task: Impact op gebruikers, processen en organisatie
+      description: >-
+        Beschrijving van de veranderingen voor gebruikers, processen en organisatie, bijvoorbeeld door een andere werkwijze, benodigde training of aanpassing van procedures.
+      id: "8.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_7.impact_gebruikers
+    - task: Impact op technische systemen & aspecten
+      description: Beschrijving van de technisch benodigde aanpassingen en de gevolgen voor bestaande systemen.
+      id: "8.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_7.impact_techniek
+    - task: Impact op de beheerorganisatie
+      description: >-
+        Beschrijving van de beheerorganisatie aan de hand van de te beleggen rollen, taken en verantwoordelijkheden, bijvoorbeeld functioneel beheer, technisch beheer en leveranciersmanagement. Let hierbij op de acceptatie van het eindresultaat door de beheerorganisatie.
+      id: "8.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_c.beheeromgeving
+    - task: Exitstrategie
+      description: >-
+        Plan voor de beëindiging van de dienst of het product: wanneer, hoe, onder welke voorwaarden en met welke terugvalopties.
+      id: "8.1.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ppm_7.exitstrategie
+- task: 8. Risico- en impactanalyses
+  id: "9"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 8. Risico- en impactanalyses
+    description: >-
+      Geef aan welke ondersteunende analyses tijdens het project wel of niet zijn opgesteld, en wat de conclusie was.
+    id: "9.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Tabel ondersteunende documenten
+      description: >-
+        Neem per analyse een rij op: PSA, Quick scan, Pre DPIA, DPIA, BIA, AIIA, IHH Toets en Cloudtoets. Geef aan of de analyse wel of niet is opgesteld, wie ervoor verantwoordelijk is en wat de conclusie is.
+      id: "9.1.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: ppm_8.analyses
+      tasks:
+      - task: Document
+        id: "9.1.1.1"
+        type:
+        - text_input
+        repeatable: false
+        options:
+        - value: PSA
+        - value: Quick scan
+        - value: Pre DPIA
+        - value: DPIA
+        - value: BIA
+        - value: AIIA
+        - value: IHH Toets
+        - value: Cloudtoets
+        references:
+          invulhulp: ppm_8.analyses.document
+      - task: Wel/niet
+        id: "9.1.1.2"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Wel
+        - value: Niet
+        references:
+          invulhulp: ppm_8.analyses.wel_niet
+      - task: Naam verantwoordelijke
+        id: "9.1.1.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_8.analyses.verantwoordelijke
+      - task: Conclusie
+        id: "9.1.1.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ppm_8.analyses.conclusie
+    - task: Toelichting
+      description: Geef waar relevant een aanvullende toelichting per analyse of maatregel.
+      id: "9.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ppm_8.toelichting

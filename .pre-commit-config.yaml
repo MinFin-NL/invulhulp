@@ -16,3 +16,16 @@ repos:
     rev: v8.28.0
     hooks:
       - id: gitleaks
+
+  # public/forms/*.json is generated from vendor/instrument-registry + the
+  # overlays. Rebuilds whenever one of the inputs or outputs is staged; if the
+  # result differs from what is staged, pre-commit fails and leaves the
+  # regenerated files in the working tree: review, `git add`, commit again.
+  - repo: local
+    hooks:
+      - id: forms-build
+        name: forms up to date with instrument registry + overlays
+        entry: node scripts/build-forms.mjs
+        language: system
+        pass_filenames: false
+        files: ^(public/forms/|scripts/form-overlays/|scripts/lib/merge-form\.mjs|scripts/convert-form\.mjs|scripts/build-forms\.mjs|scripts/registry-map\.json|vendor/instrument-registry/)

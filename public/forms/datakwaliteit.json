@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/datakwaliteit.yaml + scripts/form-overlays/datakwaliteit.overlay.json; niet handmatig bewerken.",
   "id": "datakwaliteit",
   "version": "1.0",
-  "urn": "urn:nl:minfin:tr:datakwaliteit:1.0",
+  "urn": "urn:nl:minfin:ir:datakwaliteit:1.0",
   "title": "Datakwaliteit-assessment",
   "aiContext": "Dit is een datakwaliteit-assessment (DQA) voor het Ministerie van Financiën, afgeleid van DAMA-DMBOK2 hoofdstuk 13 (Data Quality) en uitgelijnd met ISO/IEC 25012 en de DAMA-NL DDQ-dimensies. Het beoordeelt per dataset of gegevensverwerking de kwaliteit langs de kerndimensies volledigheid, uniciteit, tijdigheid, validiteit, juistheid en consistentie, en legt datakwaliteitsregels, meetmethoden, bevindingen en verbeterafspraken vast. Schrijf in feitelijke, meetbare data-managementtermen: noem waar mogelijk aantallen, percentages, meetfrequenties en normen in plaats van kwalitatieve uitspraken.",
   "source": {
@@ -37,11 +38,27 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "dq_a" },
-    { "type": "subsections", "sectionId": "dq_b" },
-    { "type": "subsections", "sectionId": "dq_c" },
-    { "type": "subsections", "sectionId": "dq_d" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "dq_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "dq_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "dq_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "dq_d"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -317,11 +334,45 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "regel", "label": "Regel", "hint": "Bijv. 'BSN is gevuld en voldoet aan de elfproef'" },
-                { "id": "dimensie", "label": "Dimensie", "type": "select", "options": ["Volledigheid", "Uniciteit", "Tijdigheid", "Validiteit", "Juistheid", "Consistentie", "Overig"] },
-                { "id": "norm", "label": "Norm", "hint": "De grens waarboven de data acceptabel is, bijv. '≥ 99,5%'" },
-                { "id": "meting", "label": "Gemeten waarde" },
-                { "id": "oordeel", "label": "Voldoet", "type": "select", "options": ["Ja", "Nee", "Deels", "Niet gemeten"] }
+                {
+                  "id": "regel",
+                  "label": "Regel",
+                  "hint": "Bijv. 'BSN is gevuld en voldoet aan de elfproef'"
+                },
+                {
+                  "id": "dimensie",
+                  "label": "Dimensie",
+                  "type": "select",
+                  "options": [
+                    "Volledigheid",
+                    "Uniciteit",
+                    "Tijdigheid",
+                    "Validiteit",
+                    "Juistheid",
+                    "Consistentie",
+                    "Overig"
+                  ]
+                },
+                {
+                  "id": "norm",
+                  "label": "Norm",
+                  "hint": "De grens waarboven de data acceptabel is, bijv. '≥ 99,5%'"
+                },
+                {
+                  "id": "meting",
+                  "label": "Gemeten waarde"
+                },
+                {
+                  "id": "oordeel",
+                  "label": "Voldoet",
+                  "type": "select",
+                  "options": [
+                    "Ja",
+                    "Nee",
+                    "Deels",
+                    "Niet gemeten"
+                  ]
+                }
               ],
               "notesLabel": "Toelichting op de regels en normen"
             },
@@ -394,11 +445,42 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "issue", "label": "Issue" },
-                { "id": "dimensie", "label": "Dimensie", "type": "select", "options": ["Volledigheid", "Uniciteit", "Tijdigheid", "Validiteit", "Juistheid", "Consistentie", "Overig"] },
-                { "id": "oorzaak", "label": "Vermoedelijke oorzaak" },
-                { "id": "gevolg", "label": "Gevolg voor het gebruik" },
-                { "id": "ernst", "label": "Ernst", "type": "select", "options": ["Hoog", "Middel", "Laag"] }
+                {
+                  "id": "issue",
+                  "label": "Issue"
+                },
+                {
+                  "id": "dimensie",
+                  "label": "Dimensie",
+                  "type": "select",
+                  "options": [
+                    "Volledigheid",
+                    "Uniciteit",
+                    "Tijdigheid",
+                    "Validiteit",
+                    "Juistheid",
+                    "Consistentie",
+                    "Overig"
+                  ]
+                },
+                {
+                  "id": "oorzaak",
+                  "label": "Vermoedelijke oorzaak"
+                },
+                {
+                  "id": "gevolg",
+                  "label": "Gevolg voor het gebruik"
+                },
+                {
+                  "id": "ernst",
+                  "label": "Ernst",
+                  "type": "select",
+                  "options": [
+                    "Hoog",
+                    "Middel",
+                    "Laag"
+                  ]
+                }
               ],
               "notesLabel": "Toelichting op de bevindingen"
             },
@@ -421,10 +503,31 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "actie", "label": "Actie" },
-                { "id": "type", "label": "Type", "type": "select", "options": ["Correctie van bestaande data", "Aanpassing van het invoerproces", "Technische maatregel of validatie", "Afspraak met de bronhouder", "Aanvullende monitoring", "Overig"] },
-                { "id": "eigenaar", "label": "Verantwoordelijke" },
-                { "id": "termijn", "label": "Termijn" }
+                {
+                  "id": "actie",
+                  "label": "Actie"
+                },
+                {
+                  "id": "type",
+                  "label": "Type",
+                  "type": "select",
+                  "options": [
+                    "Correctie van bestaande data",
+                    "Aanpassing van het invoerproces",
+                    "Technische maatregel of validatie",
+                    "Afspraak met de bronhouder",
+                    "Aanvullende monitoring",
+                    "Overig"
+                  ]
+                },
+                {
+                  "id": "eigenaar",
+                  "label": "Verantwoordelijke"
+                },
+                {
+                  "id": "termijn",
+                  "label": "Termijn"
+                }
               ],
               "notesLabel": "Toelichting op de verbeteraanpak"
             },

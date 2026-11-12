@@ -1,0 +1,286 @@
+{
+  "_comment": "Overlay voor datasetregistratie: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/datasetregistratie.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "datasetregistratie",
+    "title": "Dataset-registratie (datasheet)",
+    "aiContext": "Dit is een dataset-registratie ofwel datasheet voor het Ministerie van Financiën, afgeleid van DAMA-DMBOK2 hoofdstuk 12 (Metadata Management) en het patroon 'Datasheets for Datasets' (Gebru et al.), uitgelijnd met DCAT-AP-NL en MIM 1.2. Het legt per dataset de identificatie, herkomst, inhoud, juridische grondslag, kwaliteit en gebruiksvoorwaarden vast. Dit is de datakant van de AI Model Card. Schrijf feitelijk en beschrijvend in metadata-termen; vermijd waardeoordelen en houd velden kort en eenduidig zodat ze als metadata herbruikbaar zijn.",
+    "source": {
+      "instrument": "DAMA-DMBOK2 — Data Management Body of Knowledge, 2nd Edition",
+      "publisher": "DAMA International",
+      "version": "2nd Edition (2017)",
+      "reference": "hoofdstuk 12 (Metadata Management) met hoofdstuk 10 (Reference & Master Data); veldstructuur uitgelijnd met DCAT-AP-NL (Geonovum) en MIM 1.2, patroon ontleend aan 'Datasheets for Datasets' (Gebru et al., 2018)",
+      "derivation": "derived",
+      "note": "DAMA-DMBOK is een referentiekader zonder invul-template; dit formulier is afgeleid van de daarin beschreven metadata-deliverables. Geen tekst overgenomen. Ontwerpspec: docs/DAMA-DMBOK-form-opportunities.md §4C."
+    },
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "Dataset-registratie",
+      "docTitle": "Dataset-registratie (datasheet)",
+      "footerLabel": "Dataset-registratie – MinFin",
+      "filename": "Dataset-registratie.pdf",
+      "systemNamePlaceholder": "Bijv. Aangiftegegevens omzetbelasting 2020-2024",
+      "homeContent": {
+        "notice": "Registreer één datasheet per dataset, niet per systeem: de AI Model Card beschrijft het systeem, deze registratie beschrijft de data eronder. Let op — een dossier biedt op dit moment ruimte aan één exemplaar van dit formulier. Gebruikt het project meerdere datasets, registreer dan hier de belangrijkste en neem de overige op als losse bijlage of in een apart dossier.",
+        "description": "Deze registratie legt vast wat een dataset is, waar hij vandaan komt, wat erin zit, onder welke grondslag hij verwerkt wordt en onder welke voorwaarden hij gebruikt mag worden. Het is het overheidsequivalent van een 'datasheet for datasets': de documentatie die nodig is om later, door iemand anders, verantwoord met deze data te kunnen werken. De velden zijn uitgelijnd met DCAT-AP-NL zodat de registratie herbruikbaar is als dataset-metadata.",
+        "steps": [
+          "Deel A – Identificatie: naam, eigenaar, doel en vindplaats van de dataset",
+          "Deel B – Herkomst en samenstelling: bron, verzamelwijze, inhoud en structuur",
+          "Deel C – Juridisch en classificatie: grondslag, persoonsgegevens, rubricering en bewaartermijn",
+          "Deel D – Kwaliteit, gebruik en beheer: kwaliteit, gebruiksvoorwaarden, licentie en onderhoud"
+        ],
+        "buttonLabel": "Starten met de dataset-registratie"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "ds_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ds_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ds_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ds_d"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "ds_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "dsa1",
+            "questions": [
+              {
+                "id": "ds_a.naam"
+              },
+              {
+                "id": "ds_a.identifier"
+              },
+              {
+                "id": "ds_a.omschrijving"
+              },
+              {
+                "id": "ds_a.doel"
+              },
+              {
+                "id": "ds_a.huidiggebruik"
+              },
+              {
+                "id": "ds_a.thema"
+              }
+            ]
+          },
+          {
+            "id": "dsa2",
+            "questions": [
+              {
+                "id": "ds_a.eigenaar"
+              },
+              {
+                "id": "ds_a.steward"
+              },
+              {
+                "id": "ds_a.contact",
+                "format": "email"
+              },
+              {
+                "id": "ds_a.organisatie"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ds_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "dsb1",
+            "questions": [
+              {
+                "id": "ds_b.herkomst",
+                "allowAttachments": true
+              },
+              {
+                "id": "ds_b.verzamelwijze"
+              },
+              {
+                "id": "ds_b.periode"
+              },
+              {
+                "id": "ds_b.voorbewerking"
+              },
+              {
+                "id": "ds_b.ruwebewaard"
+              }
+            ]
+          },
+          {
+            "id": "dsb2",
+            "questions": [
+              {
+                "id": "ds_b.omvang"
+              },
+              {
+                "id": "ds_b.eenheid"
+              },
+              {
+                "id": "ds_b.attributen",
+                "columns": [
+                  {
+                    "id": "attribuut"
+                  },
+                  {
+                    "id": "betekenis"
+                  },
+                  {
+                    "id": "type",
+                    "type": "suggest"
+                  },
+                  {
+                    "id": "bijzonder"
+                  }
+                ],
+                "notesLabel": "Verwijzing naar het volledige gegevenswoordenboek of datamodel"
+              },
+              {
+                "id": "ds_b.formaat"
+              },
+              {
+                "id": "ds_b.begrippen",
+                "followUp": "Verwijs naar de vindplaats van het model of de begrippenlijst."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ds_c",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "dsc1",
+            "questions": [
+              {
+                "id": "ds_c.persoonsgegevens",
+                "followUp": "Beschrijf welke categorieën betrokkenen en welke categorieën gegevens het betreft."
+              },
+              {
+                "id": "ds_c.grondslag"
+              },
+              {
+                "id": "ds_c.dpia",
+                "followUp": "Verwijs naar het betreffende DPIA-document of de pre-scan."
+              },
+              {
+                "id": "ds_c.derden",
+                "columns": [
+                  {
+                    "id": "partij"
+                  },
+                  {
+                    "id": "doel"
+                  },
+                  {
+                    "id": "grondslag"
+                  },
+                  {
+                    "id": "vorm"
+                  }
+                ],
+                "notesLabel": "Toelichting op het delen met derden"
+              },
+              {
+                "id": "ds_c.doorgifte",
+                "followUp": "Beschrijf naar welk land, op welke grondslag en welke waarborgen zijn getroffen."
+              }
+            ]
+          },
+          {
+            "id": "dsc2",
+            "questions": [
+              {
+                "id": "ds_c.rubricering"
+              },
+              {
+                "id": "ds_c.bbn"
+              },
+              {
+                "id": "ds_c.toegang"
+              },
+              {
+                "id": "ds_c.bewaartermijn"
+              },
+              {
+                "id": "ds_c.vernietiging"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ds_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "dsd1",
+            "questions": [
+              {
+                "id": "ds_d.kwaliteit"
+              },
+              {
+                "id": "ds_d.beperkingen"
+              },
+              {
+                "id": "ds_d.ongeschikt"
+              }
+            ]
+          },
+          {
+            "id": "dsd2",
+            "questions": [
+              {
+                "id": "ds_d.voorwaarden"
+              },
+              {
+                "id": "ds_d.licentie",
+                "followUp": "Licht toe welke rechten en beperkingen er precies gelden."
+              },
+              {
+                "id": "ds_d.openbaar",
+                "followUp": "Noem de vindplaats of de reden waarom publicatie niet kan."
+              },
+              {
+                "id": "ds_d.catalogus",
+                "followUp": "Noem de vindplaats of het registratienummer."
+              },
+              {
+                "id": "ds_d.onderhoud"
+              },
+              {
+                "id": "ds_d.versie"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

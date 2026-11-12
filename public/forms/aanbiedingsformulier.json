@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/aanbiedingsformulier.yaml + scripts/form-overlays/aanbiedingsformulier.overlay.json; niet handmatig bewerken.",
   "id": "aanbiedingsformulier",
   "version": "2.0",
-  "urn": "urn:nl:minfin:tr:aanbiedingsformulier:2.0",
+  "urn": "urn:nl:minfin:ir:aanbiedingsformulier:2.0",
   "title": "PPM Aanbiedingsformulier (Outline Businesscase)",
   "source": {
     "instrument": "PPM-aanbiedingsformulier (outline business case)",
@@ -38,12 +39,31 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "aa_a" },
-    { "type": "subsections", "sectionId": "aa_b" },
-    { "type": "subsections", "sectionId": "aa_c" },
-    { "type": "subsections", "sectionId": "aa_d" },
-    { "type": "subsections", "sectionId": "aa_e" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "aa_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "aa_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "aa_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "aa_d"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "aa_e"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -260,11 +280,26 @@
               "type": "table",
               "importance": "optional",
               "columns": [
-                { "id": "resource", "label": "Resource" },
-                { "id": "activiteit", "label": "Activiteit" },
-                { "id": "uren_week", "label": "Uren/week" },
-                { "id": "startdatum", "label": "Gewenste startdatum" },
-                { "id": "einddatum", "label": "Gewenste einddatum" }
+                {
+                  "id": "resource",
+                  "label": "Resource"
+                },
+                {
+                  "id": "activiteit",
+                  "label": "Activiteit"
+                },
+                {
+                  "id": "uren_week",
+                  "label": "Uren/week"
+                },
+                {
+                  "id": "startdatum",
+                  "label": "Gewenste startdatum"
+                },
+                {
+                  "id": "einddatum",
+                  "label": "Gewenste einddatum"
+                }
               ]
             }
           ]

@@ -1,0 +1,238 @@
+{
+  "_comment": "Overlay voor psa: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/psa.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "psa",
+    "title": "Project Start Architectuur (PSA)",
+    "source": {
+      "instrument": "Project Start Architectuur (PSA)",
+      "publisher": "Ministerie van Financiën",
+      "reference": "Intern PSA-sjabloon, opgezet langs de lagen van het NORA-vijflaagsmodel (organisatie, informatie, applicatie, technologie) plus wet- en regelgeving, beveiliging en privacy",
+      "derivation": "original",
+      "note": "Digitalisering van het eigen PSA-sjabloon; geen extern invulinstrument als origineel."
+    },
+    "aiContext": "Dit is een Project Start Architectuur (PSA) voor het Ministerie van Financiën: het beschrijft de organisatie-, informatie-, applicatie- en technologielaag na afronding van het project, plus wet- en regelgeving, beveiliging en privacy. Schrijf in architectuur- en compliance-termen.",
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "PSA",
+      "docTitle": "Project Start Architectuur",
+      "footerLabel": "PSA – MinFin",
+      "filename": "PSA.pdf",
+      "systemNamePlaceholder": "Bijv. Vervanging declaratiesysteem",
+      "homeContent": {
+        "notice": "Een PSA is verplicht als onderdeel van het werken onder architectuur bij MinFin. De PSA wordt opgesteld door architecten in nauwe samenwerking met het projectteam en vereist goedkeuring van de Architectuurboard Financiën en het MT CDIO.",
+        "description": "De Project Start Architectuur (PSA) beschrijft in globale termen hoe de organisatorische, informatie-, applicatie- en technologielaag eruitzien na het project. De PSA is één van de voorwaarden om te starten met een project en geeft richting aan de uitvoering.",
+        "steps": [
+          "Over de verandering: aanleiding, opdracht, afbakening en relaties met andere projecten",
+          "Grondslagen: wet- en regelgeving, beleid en architectuurkaders",
+          "Organisatorisch: producten, processen en betrokken organisatieonderdelen",
+          "Informatie en applicatie: gegevensmodel, functionaliteit, technologie en algoritmeregister",
+          "Niet-functionele aspecten: informatiebeveiliging, privacy, logging en IAM",
+          "Beheer, exit-strategie, EA-toetsing en openstaande issues"
+        ],
+        "buttonLabel": "Starten met de PSA"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "psa_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "psa_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "psa_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "psa_d"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "psa_e"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "psa_f"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "psa_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "psa_a1",
+            "questions": [
+              {
+                "id": "psa_a.managementsamenvatting"
+              },
+              {
+                "id": "psa_a.aanleiding"
+              },
+              {
+                "id": "psa_a.opdracht_resultaat"
+              },
+              {
+                "id": "psa_a.projectafbakening"
+              },
+              {
+                "id": "psa_a.relatie_andere_projecten"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "psa_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "psa_b1",
+            "questions": [
+              {
+                "id": "psa_b.wet_regelgeving"
+              },
+              {
+                "id": "psa_b.beleidskaders"
+              },
+              {
+                "id": "psa_b.architectuurkaders"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "psa_c",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "psa_c1",
+            "questions": [
+              {
+                "id": "psa_c.producten_diensten"
+              },
+              {
+                "id": "psa_c.processen",
+                "allowAttachments": true
+              },
+              {
+                "id": "psa_c.organisatieonderdelen"
+              },
+              {
+                "id": "psa_c.architectuurbesluiten_org"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "psa_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "psa_d1",
+            "questions": [
+              {
+                "id": "psa_d.gegevensmodel",
+                "allowAttachments": true
+              },
+              {
+                "id": "psa_d.architectuurbesluiten_info"
+              }
+            ]
+          },
+          {
+            "id": "psa_d2",
+            "questions": [
+              {
+                "id": "psa_d.functioneel",
+                "allowAttachments": true
+              },
+              {
+                "id": "psa_d.nonfunctioneel"
+              },
+              {
+                "id": "psa_d.eigenaarschap"
+              },
+              {
+                "id": "psa_d.algoritmeregister"
+              },
+              {
+                "id": "psa_d.architectuurbesluiten_app"
+              }
+            ]
+          },
+          {
+            "id": "psa_d3",
+            "questions": [
+              {
+                "id": "psa_d.technologie",
+                "allowAttachments": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "psa_e",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "psa_e1",
+            "questions": [
+              {
+                "id": "psa_e.informatiebeveiliging"
+              },
+              {
+                "id": "psa_e.privacy"
+              },
+              {
+                "id": "psa_e.logging_monitoring"
+              },
+              {
+                "id": "psa_e.iam"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "psa_f",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "psa_f1",
+            "questions": [
+              {
+                "id": "psa_f.beheer"
+              },
+              {
+                "id": "psa_f.exit_strategie"
+              },
+              {
+                "id": "psa_f.ea_toetsing"
+              },
+              {
+                "id": "psa_f.openstaande_issues"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

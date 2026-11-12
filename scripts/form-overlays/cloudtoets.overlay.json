@@ -1,0 +1,311 @@
+{
+  "_comment": "Overlay voor cloudtoets: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/cloudtoets.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "cloudtoets",
+    "title": "Cloudtoets",
+    "aiContext": "Dit is de Handreiking gebruik clouddienst van het Ministerie van Financiën: de toetsing van voorgenomen gebruik van een clouddienst aan het Cloudbeleid Financiën, dat is gebaseerd op het Rijksbreed Cloudbeleid 2022 en het implementatiekader 'risicoafweging cloudgebruik'. Publieke, private, hybride en community clouddiensten zijn in scope. Schrijf in termen van cloudbeleid en informatiebeveiliging: clouddienst, cloud provider, cloud broker, rubricering, BBN, doorgifte, exitstrategie. Wees concreet over de beoogde dienst, de te verwerken gegevens en de provider; noem waar mogelijk het type clouddienst (public/private/hybride/community) en het servicemodel (IaaS/PaaS/SaaS/BaaS/BPaaS). Beantwoord de ja/nee-vragen in onderdeel 3 en 4 alleen als het brondocument daar uitsluitsel over geeft — deze vragen bepalen of een clouddienst is toegestaan.",
+    "source": {
+      "instrument": "Handreiking gebruik clouddienst (Handreiking Toestaan Cloudtoepassing)",
+      "publisher": "Ministerie van Financiën — Adviescommissie Cloudgebruik (ACC)",
+      "version": "1.0",
+      "reference": "assets/docs_project_management/Handreiking Toestaan Cloudtoepassingv1.0.docx; Cloudbeleid Ministerie van Financiën, gebaseerd op het Rijksbreed Cloudbeleid 2022 en het implementatiekader 'risicoafweging cloudgebruik'",
+      "derivation": "harmonized",
+      "note": "Handmatig overgenomen uit het Word-origineel. De vier onderdelen, de ja/nee-vragen en de toelichtingen volgen het origineel; de invulvelden uit de Word-tabellen zijn omgezet naar losse vragen of naar een invulbare tabel. Toegevoegd ten opzichte van het origineel: de naam van de cloud provider (onderdeel 4), de checkbox met de vijf NIST-karakteristieken uit de definitie van een clouddienst (onderdeel 2), de optie 'Niet van toepassing (geen community clouddienst)' bij de twee community-cloudvragen, en de afsluitende subsectie 'Uitkomst en vervolg' die de conclusie vastlegt die het origineel in de leeswijzer beschrijft (rood/groen gearceerd). De go/no-go wordt niet automatisch berekend: de invuller stelt de uitkomst zelf vast. Bijlage A (activiteiten 1 t/m 12) en bijlage B (aan te leveren documenten) zijn opgenomen als checklists; de RACI-tabellen en de rollentabel uit het origineel zijn niet overgenomen omdat die geen invulvelden zijn."
+    },
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "Cloudtoets",
+      "docTitle": "Handreiking gebruik clouddienst",
+      "footerLabel": "Cloudtoets – MinFin",
+      "filename": "Cloudtoets.pdf",
+      "systemNamePlaceholder": "Bijv. Documentopslag in Microsoft 365",
+      "homeContent": {
+        "notice": "Deze handreiking maakt het toetsingsproces inzichtelijk, maar vervangt het beleidsdocument niet en dekt mogelijk niet alle informatie af. Het is aan de indiener om de informatie te verstrekken die nodig is om een advies te kunnen uitbrengen. Een volledig ingevulde versie wordt door de Adviescommissie Cloudgebruik besproken; op basis van een gedeeltelijke invulling is feedback of hulp ook mogelijk.",
+        "description": "Met deze toets krijgt u inzicht of gegevens door een clouddienst mogen worden verwerkt en of clouddiensten van een beoogde cloud provider mogen worden afgenomen. De toets volgt het Cloudbeleid van het Ministerie van Financiën, dat is gebaseerd op het Rijksbreed Cloudbeleid 2022 en het implementatiekader 'risicoafweging cloudgebruik'. Publieke, private, hybride en community clouddiensten zijn in scope. Aan het gebruik van clouddiensten zijn restricties verbonden; die zitten in onderdeel 3 en 4. Wordt een of meer van die vragen negatief beantwoord, dan is het inschakelen van een clouddienst niet toegestaan. Zijn alle vragen positief beantwoord, dan is het inschakelen van een clouddienst in beginsel toegestaan.",
+        "steps": [
+          "Onderdeel 1 – Meta-informatie: indiener, verantwoordelijken en identificatie van de aanvraag",
+          "Onderdeel 2 – Business problematiek/behoefte en de voorziene oplossing: type clouddienst en type service",
+          "Onderdeel 3 – Informatie over de gegevensverwerking: rubricering, basisregistraties en bijzondere persoonsgegevens",
+          "Onderdeel 4 – Informatie over de cloud provider: de restricties die bepalen of een clouddienst is toegestaan",
+          "Vervolg – Op te leveren producten, de activiteiten uit het cloudbeleid (bijlage A) en de uitkomst van de toets"
+        ],
+        "buttonLabel": "Starten met de cloudtoets"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "ct_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ct_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ct_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ct_d"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "ct_e"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "ct_a",
+        "part": "A",
+        "kicker": "Onderdeel 1",
+        "subsections": [
+          {
+            "id": "cta1",
+            "questions": [
+              {
+                "id": "ct_a.betrokkenen",
+                "columns": [
+                  {
+                    "id": "naam"
+                  },
+                  {
+                    "id": "dg_directie"
+                  },
+                  {
+                    "id": "functie"
+                  },
+                  {
+                    "id": "rol"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "cta2",
+            "questions": [
+              {
+                "id": "ct_a.identificatie"
+              },
+              {
+                "id": "ct_a.datum"
+              },
+              {
+                "id": "ct_a.versie"
+              },
+              {
+                "id": "ct_a.status"
+              },
+              {
+                "id": "ct_a.fase"
+              },
+              {
+                "id": "ct_a.bijlagen"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ct_b",
+        "part": "B",
+        "kicker": "Onderdeel 2",
+        "subsections": [
+          {
+            "id": "ctb1",
+            "questions": [
+              {
+                "id": "ct_b.naam_proces"
+              },
+              {
+                "id": "ct_b.beschrijving"
+              },
+              {
+                "id": "ct_b.deadline"
+              }
+            ]
+          },
+          {
+            "id": "ctb2",
+            "questions": [
+              {
+                "id": "ct_b.type_clouddienst",
+                "followUp": "Waarom is deze categorie clouddienst zinvol voor de geformuleerde behoefte?"
+              },
+              {
+                "id": "ct_b.type_service",
+                "followUp": "Waarom is dit type dienst passend voor de geformuleerde behoefte?"
+              },
+              {
+                "id": "ct_b.karakteristieken"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ct_c",
+        "part": "C",
+        "kicker": "Onderdeel 3",
+        "subsections": [
+          {
+            "id": "ctc1",
+            "questions": [
+              {
+                "id": "ct_c.gegevenssets",
+                "columns": [
+                  {
+                    "id": "naam"
+                  },
+                  {
+                    "id": "rubricering"
+                  },
+                  {
+                    "id": "bri"
+                  },
+                  {
+                    "id": "bijzondere_pg"
+                  },
+                  {
+                    "id": "uitzondering"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ctc2",
+            "questions": [
+              {
+                "id": "ct_c.rubricering",
+                "followUp": "Licht toe. Bij 'Nee': onderbouw de uitzondering (pas-toe-of-leg-uit) en geef aan wie die heeft vastgesteld."
+              },
+              {
+                "id": "ct_c.basisregistratie",
+                "followUp": "Om welke basisregistratie(s) gaat het, en wat is de stand van de explain?"
+              },
+              {
+                "id": "ct_c.bijzondere_persoonsgegevens",
+                "followUp": "Welke bijzondere persoonsgegevens betreft het, en wat is de stand van de explain?"
+              },
+              {
+                "id": "ct_c.explain"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ct_d",
+        "part": "D",
+        "kicker": "Onderdeel 4",
+        "subsections": [
+          {
+            "id": "ctd1",
+            "questions": [
+              {
+                "id": "ct_d.naam_provider"
+              },
+              {
+                "id": "ct_d.offensief_cyberprogramma",
+                "followUp": "Licht toe op welke bron of welk advies dit antwoord is gebaseerd."
+              },
+              {
+                "id": "ct_d.certificering",
+                "followUp": "Welke certificering of norm betreft het, en tot wanneer is die geldig?"
+              }
+            ]
+          },
+          {
+            "id": "ctd2",
+            "questions": [
+              {
+                "id": "ct_d.ciso_geinformeerd",
+                "followUp": "Wie is geïnformeerd, wanneer, en hoe is dat vastgelegd?"
+              },
+              {
+                "id": "ct_d.ciso_toestemming",
+                "followUp": "Wie heeft toestemming verleend, wanneer, en waar is dat vastgelegd?"
+              }
+            ]
+          },
+          {
+            "id": "ctd3",
+            "questions": [
+              {
+                "id": "ct_d.doorgifte",
+                "followUp": "Waar vindt de verwerking plaats (opslag, support, telemetrie), en op welk mechanisme berust de doorgifte? Vermeld bij 'Nee' de stand van de DTIA."
+              },
+              {
+                "id": "ct_d.cloud_broker",
+                "followUp": "Welke interne dienstverlener ontsluit de dienst? Licht bij 'Nee' toe hoe de ontsluiting dan wel is belegd."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "ct_e",
+        "part": "D",
+        "kicker": "Vervolg",
+        "subsections": [
+          {
+            "id": "cte1",
+            "questions": [
+              {
+                "id": "ct_e.producten"
+              },
+              {
+                "id": "ct_e.producten_toelichting"
+              },
+              {
+                "id": "ct_e.documenten_cloudadvies"
+              }
+            ]
+          },
+          {
+            "id": "cte2",
+            "questions": [
+              {
+                "id": "ct_e.activiteiten"
+              },
+              {
+                "id": "ct_e.activiteiten_toelichting"
+              },
+              {
+                "id": "ct_e.exitstrategie"
+              }
+            ]
+          },
+          {
+            "id": "cte3",
+            "questions": [
+              {
+                "id": "ct_e.uitkomst",
+                "followUp": "Onderbouw de uitkomst: welke vragen zijn bepalend geweest, en wat is de vervolgstap?"
+              },
+              {
+                "id": "ct_e.pre_advies",
+                "followUp": "Wanneer wordt de aanvraag ingediend bij ACC@minfin.nl, en welke producten gaan mee?"
+              },
+              {
+                "id": "ct_e.vervolgstappen"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

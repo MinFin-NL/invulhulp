@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/euaiact.yaml + scripts/form-overlays/euaiact.overlay.json; niet handmatig bewerken.",
   "id": "euaiact",
   "version": "0.1",
-  "urn": "urn:nl:minfin:tr:euaiact:0.1",
+  "urn": "urn:nl:minfin:ir:euaiact:0.1",
   "registryUrn": "urn:nl:aivt:tr:ca:1.0",
   "title": "EU AI Act Compliance Checklist",
   "source": {
@@ -39,11 +40,27 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "eaa_a" },
-    { "type": "subsections", "sectionId": "eaa_b" },
-    { "type": "subsections", "sectionId": "eaa_c" },
-    { "type": "subsections", "sectionId": "eaa_d" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "eaa_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "eaa_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "eaa_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "eaa_d"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {

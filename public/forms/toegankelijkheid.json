@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/toegankelijkheid.yaml + scripts/form-overlays/toegankelijkheid.overlay.json; niet handmatig bewerken.",
   "id": "toegankelijkheid",
   "version": "1.0",
-  "urn": "urn:nl:minfin:tr:toegankelijkheid:1.0",
+  "urn": "urn:nl:minfin:ir:toegankelijkheid:1.0",
   "title": "Toegankelijkheidsverklaring",
   "aiContext": "Dit is de voorbereiding van een toegankelijkheidsverklaring voor een website of mobiele app van het Ministerie van Financiën, op grond van het Tijdelijk besluit digitale toegankelijkheid overheid en de norm EN 301 549 (die WCAG 2.1 niveau AA overneemt). Het legt vast welke digitale voorziening het betreft, welk onderzoek is uitgevoerd, welke onderdelen niet toegankelijk zijn en waarom, welke verbetermaatregelen lopen en hoe gebruikers een probleem kunnen melden. Schrijf feitelijk en concreet, en beschrijf niet-toegankelijke onderdelen vanuit het gevolg voor de gebruiker (wat kan iemand niet doen) in plaats van uitsluitend in technische succescriteria.",
   "source": {
@@ -37,11 +38,27 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "tv_a" },
-    { "type": "subsections", "sectionId": "tv_b" },
-    { "type": "subsections", "sectionId": "tv_c" },
-    { "type": "subsections", "sectionId": "tv_d" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "tv_a"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "tv_b"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "tv_c"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "tv_d"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -242,11 +259,33 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "onderdeel", "label": "Onderdeel of pagina" },
-                { "id": "probleem", "label": "Wat gaat er mis" },
-                { "id": "gevolg", "label": "Gevolg voor de gebruiker" },
-                { "id": "criterium", "label": "WCAG-succescriterium" },
-                { "id": "ernst", "label": "Ernst", "type": "select", "options": ["Blokkerend", "Ernstig", "Matig", "Klein"] }
+                {
+                  "id": "onderdeel",
+                  "label": "Onderdeel of pagina"
+                },
+                {
+                  "id": "probleem",
+                  "label": "Wat gaat er mis"
+                },
+                {
+                  "id": "gevolg",
+                  "label": "Gevolg voor de gebruiker"
+                },
+                {
+                  "id": "criterium",
+                  "label": "WCAG-succescriterium"
+                },
+                {
+                  "id": "ernst",
+                  "label": "Ernst",
+                  "type": "select",
+                  "options": [
+                    "Blokkerend",
+                    "Ernstig",
+                    "Matig",
+                    "Klein"
+                  ]
+                }
               ],
               "notesLabel": "Toelichting op de bevindingen"
             },
@@ -309,11 +348,32 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "maatregel", "label": "Maatregel" },
-                { "id": "bevinding", "label": "Lost welke bevinding op" },
-                { "id": "verantwoordelijke", "label": "Verantwoordelijke" },
-                { "id": "termijn", "label": "Gereed uiterlijk" },
-                { "id": "status", "label": "Status", "type": "select", "options": ["Gepland", "In uitvoering", "Afgerond"] }
+                {
+                  "id": "maatregel",
+                  "label": "Maatregel"
+                },
+                {
+                  "id": "bevinding",
+                  "label": "Lost welke bevinding op"
+                },
+                {
+                  "id": "verantwoordelijke",
+                  "label": "Verantwoordelijke"
+                },
+                {
+                  "id": "termijn",
+                  "label": "Gereed uiterlijk"
+                },
+                {
+                  "id": "status",
+                  "label": "Status",
+                  "type": "select",
+                  "options": [
+                    "Gepland",
+                    "In uitvoering",
+                    "Afgerond"
+                  ]
+                }
               ],
               "notesLabel": "Toelichting op de verbeteraanpak"
             },

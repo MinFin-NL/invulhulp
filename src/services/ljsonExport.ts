@@ -390,7 +390,7 @@ export interface LjsonExportInput {
 
 export interface FormDefinitionSource {
   // How the source is named in the span, e.g. "AI Impact Assessment
-  // (urn:nl:minfin:tr:aiia:2.1, aiia.json)".
+  // (urn:nl:minfin:ir:aiia:2.1, aiia.json)".
   name: string
   // The file's exact text: hashed, and searched for each copied string.
   raw: string

@@ -1,0 +1,251 @@
+{
+  "_comment": "Overlay voor toegankelijkheid: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/toegankelijkheid.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "toegankelijkheid",
+    "title": "Toegankelijkheidsverklaring",
+    "aiContext": "Dit is de voorbereiding van een toegankelijkheidsverklaring voor een website of mobiele app van het Ministerie van Financiën, op grond van het Tijdelijk besluit digitale toegankelijkheid overheid en de norm EN 301 549 (die WCAG 2.1 niveau AA overneemt). Het legt vast welke digitale voorziening het betreft, welk onderzoek is uitgevoerd, welke onderdelen niet toegankelijk zijn en waarom, welke verbetermaatregelen lopen en hoe gebruikers een probleem kunnen melden. Schrijf feitelijk en concreet, en beschrijf niet-toegankelijke onderdelen vanuit het gevolg voor de gebruiker (wat kan iemand niet doen) in plaats van uitsluitend in technische succescriteria.",
+    "source": {
+      "instrument": "Tijdelijk besluit digitale toegankelijkheid overheid; model toegankelijkheidsverklaring (DigiToegankelijk)",
+      "publisher": "Rijksoverheid / Logius — DigiToegankelijk",
+      "url": "https://www.digitoegankelijk.nl/",
+      "reference": "Richtlijn (EU) 2016/2102 en Uitvoeringsbesluit (EU) 2018/1523 (modelverklaring); toegankelijkheidsnorm EN 301 549 / WCAG 2.1 niveau AA",
+      "derivation": "harmonized",
+      "note": "Voorbereidingsformulier: de officiële verklaring wordt gepubliceerd via het invulhulpmiddel op digitoegankelijk.nl en opgenomen in het register. Dit formulier verzamelt de benodigde inhoud in het dossier; controleer de exacte statusaanduiding en modelteksten tegen het actuele model vóór publicatie. Roadmap: docs/sporen-en-roadmap.md §4.2 nr. 3."
+    },
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "Toegankelijkheidsverklaring",
+      "docTitle": "Toegankelijkheidsverklaring — voorbereiding",
+      "footerLabel": "Toegankelijkheidsverklaring – MinFin",
+      "filename": "Toegankelijkheidsverklaring.pdf",
+      "systemNamePlaceholder": "Bijv. www.voorbeeld.nl of de app Voorbeeld",
+      "homeContent": {
+        "notice": "Dit formulier bereidt de verklaring voor; het publiceert haar niet. De officiële toegankelijkheidsverklaring wordt opgesteld met het invulhulpmiddel op digitoegankelijk.nl en opgenomen in het centrale register. Eén verklaring geldt voor één website of app.",
+        "description": "Overheidsinstanties zijn verplicht hun websites en mobiele apps toegankelijk te maken volgens EN 301 549 (WCAG 2.1 niveau AA) en daarover een toegankelijkheidsverklaring te publiceren. Dit formulier verzamelt alles wat die verklaring nodig heeft: de voorziening, het uitgevoerde onderzoek, de nalevingsstatus, de niet-toegankelijke onderdelen met hun gevolgen voor gebruikers, de verbetermaatregelen met planning, en de meld- en klachtroute. De uitkomst is de inhoud waarmee de officiële verklaring wordt ingevuld.",
+        "steps": [
+          "Deel A – De voorziening: welke website of app, wie is verantwoordelijk",
+          "Deel B – Onderzoek: hoe is de toegankelijkheid onderzocht en door wie",
+          "Deel C – Bevindingen: nalevingsstatus, niet-toegankelijke onderdelen en alternatieven",
+          "Deel D – Verbetering en publicatie: maatregelen, planning, meldroute en borging"
+        ],
+        "buttonLabel": "Starten met de toegankelijkheidsverklaring"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "tv_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "tv_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "tv_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "tv_d"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "tv_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "tva1",
+            "questions": [
+              {
+                "id": "tv_a.naam"
+              },
+              {
+                "id": "tv_a.url"
+              },
+              {
+                "id": "tv_a.type",
+                "followUp": "Licht toe wat de voorziening doet en voor wie."
+              },
+              {
+                "id": "tv_a.doelgroep"
+              },
+              {
+                "id": "tv_a.uitzonderingen"
+              }
+            ]
+          },
+          {
+            "id": "tva2",
+            "questions": [
+              {
+                "id": "tv_a.instantie"
+              },
+              {
+                "id": "tv_a.eigenaar"
+              },
+              {
+                "id": "tv_a.leverancier"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tv_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "tvb1",
+            "questions": [
+              {
+                "id": "tv_b.onderzoek",
+                "followUp": "Beschrijf wie het onderzoek heeft uitgevoerd en wanneer."
+              },
+              {
+                "id": "tv_b.methode"
+              },
+              {
+                "id": "tv_b.omvang"
+              },
+              {
+                "id": "tv_b.norm",
+                "followUp": "Licht toe welke versie en welk niveau precies zijn gehanteerd."
+              },
+              {
+                "id": "tv_b.hulpmiddelen"
+              },
+              {
+                "id": "tv_b.rapport",
+                "allowAttachments": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tv_c",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "tvc1",
+            "questions": [
+              {
+                "id": "tv_c.status",
+                "followUp": "Onderbouw de gekozen status kort."
+              },
+              {
+                "id": "tv_c.bevindingen",
+                "columns": [
+                  {
+                    "id": "onderdeel"
+                  },
+                  {
+                    "id": "probleem"
+                  },
+                  {
+                    "id": "gevolg"
+                  },
+                  {
+                    "id": "criterium"
+                  },
+                  {
+                    "id": "ernst"
+                  }
+                ],
+                "notesLabel": "Toelichting op de bevindingen"
+              },
+              {
+                "id": "tv_c.blokkerend"
+              }
+            ]
+          },
+          {
+            "id": "tvc2",
+            "questions": [
+              {
+                "id": "tv_c.onevenredig",
+                "followUp": "Benoem de onderdelen en de onderbouwing van de afweging."
+              },
+              {
+                "id": "tv_c.onderbouwing"
+              },
+              {
+                "id": "tv_c.alternatief"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tv_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "tvd1",
+            "questions": [
+              {
+                "id": "tv_d.maatregelen",
+                "columns": [
+                  {
+                    "id": "maatregel"
+                  },
+                  {
+                    "id": "bevinding"
+                  },
+                  {
+                    "id": "verantwoordelijke"
+                  },
+                  {
+                    "id": "termijn"
+                  },
+                  {
+                    "id": "status"
+                  }
+                ],
+                "notesLabel": "Toelichting op de verbeteraanpak"
+              },
+              {
+                "id": "tv_d.structureel"
+              },
+              {
+                "id": "tv_d.hervalidatie"
+              }
+            ]
+          },
+          {
+            "id": "tvd2",
+            "questions": [
+              {
+                "id": "tv_d.melden"
+              },
+              {
+                "id": "tv_d.reactietermijn"
+              },
+              {
+                "id": "tv_d.handhaving",
+                "followUp": "Beschrijf de vermelde procedure."
+              },
+              {
+                "id": "tv_d.publicatie"
+              },
+              {
+                "id": "tv_d.datum"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

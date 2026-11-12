@@ -1,0 +1,786 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: Cloudtoets
+urn: urn:nl:minfin:ir:cloudtoets:1.0
+version: '1.0'
+description: >-
+  Met deze toets krijgt u inzicht of gegevens door een clouddienst mogen worden verwerkt en of clouddiensten van een beoogde cloud provider mogen worden afgenomen. De toets volgt het Cloudbeleid van het Ministerie van Financiën, dat is gebaseerd op het Rijksbreed Cloudbeleid 2022 en het implementatiekader 'risicoafweging cloudgebruik'. Publieke, private, hybride en community clouddiensten zijn in scope. Aan het gebruik van clouddiensten zijn restricties verbonden; die zitten in onderdeel 3 en 4. Wordt een of meer van die vragen negatief beantwoord, dan is het inschakelen van een clouddienst niet toegestaan. Zijn alle vragen positief beantwoord, dan is het inschakelen van een clouddienst in beginsel toegestaan.
+
+  Bron: Handreiking gebruik clouddienst (Handreiking Toestaan Cloudtoepassing) (Ministerie van Financiën — Adviescommissie Cloudgebruik (ACC), versie 1.0). Handmatig overgenomen uit het Word-origineel. De vier onderdelen, de ja/nee-vragen en de toelichtingen volgen het origineel; de invulvelden uit de Word-tabellen zijn omgezet naar losse vragen of naar een invulbare tabel. Toegevoegd ten opzichte van het origineel: de naam van de cloud provider (onderdeel 4), de checkbox met de vijf NIST-karakteristieken uit de definitie van een clouddienst (onderdeel 2), de optie 'Niet van toepassing (geen community clouddienst)' bij de twee community-cloudvragen, en de afsluitende subsectie 'Uitkomst en vervolg' die de conclusie vastlegt die het origineel in de leeswijzer beschrijft (rood/groen gearceerd). De go/no-go wordt niet automatisch berekend: de invuller stelt de uitkomst zelf vast. Bijlage A (activiteiten 1 t/m 12) en bijlage B (aan te leveren documenten) zijn opgenomen als checklists; de RACI-tabellen en de rollentabel uit het origineel zijn niet overgenomen omdat die geen invulvelden zijn.
+tasks:
+- task: Meta-informatie
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Indiener en betrokkenen
+    description: >-
+      Leg vast wie de aanvraag indient en welke directie verantwoordelijk is. Tenzij expliciet anders benoemd, wordt aangenomen dat de directie waaronder de indiener valt verantwoordelijk is voor het onderkennen en tijdig treffen van maatregelen om onderkende risico's te mitigeren.
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wie zijn er bij deze aanvraag betrokken?
+      description: >-
+        Noem in elk geval de indiener. Vul bij DG/Directie de directie in die verantwoordelijk is voor het mitigeren van de onderkende risico's.
+      id: "1.1.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: ct_a.betrokkenen
+      tasks:
+      - task: Naam
+        id: "1.1.1.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ct_a.betrokkenen.naam
+      - task: DG / Directie
+        id: "1.1.1.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ct_a.betrokkenen.dg_directie
+      - task: Functie
+        id: "1.1.1.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ct_a.betrokkenen.functie
+      - task: Rol
+        description: bijv. indiener, opdrachtgever, (d)CISO, CPO, projectleider
+        id: "1.1.1.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ct_a.betrokkenen.rol
+  - task: Identificatie van de aanvraag
+    id: "1.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Identificatie
+      description: >-
+        Het kenmerk waaronder deze aanvraag bekend is, bijvoorbeeld een Topdesk-meldingsnummer of een projectnummer.
+      id: "1.2.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ct_a.identificatie
+    - task: Datum
+      id: "1.2.2"
+      type:
+      - date
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ct_a.datum
+    - task: Versie
+      id: "1.2.3"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ct_a.versie
+    - task: Status
+      description: 'Bijvoorbeeld: concept, ter bespreking in de Adviescommissie Cloudgebruik, vastgesteld.'
+      id: "1.2.4"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ct_a.status
+    - task: Fase
+      description: In welke fase van het intake-, change-, innovatie- of projectproces bevindt dit initiatief zich?
+      id: "1.2.5"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ct_a.fase
+    - task: Bijlagen
+      description: >-
+        Welke documenten worden bij deze aanvraag meegestuurd? Zie ook de op te leveren producten aan het eind van deze toets.
+      id: "1.2.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ct_a.bijlagen
+- task: Business problematiek/behoefte en voorziene oplossing
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Behoefte en oplossing
+    description: >-
+      Een project, activiteit of initiatief volgt het reguliere intakeproces. In de initiatiefase van dat proces wordt dezelfde informatie gevraagd als in onderdeel 1 en 2 van deze handreiking.
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Naam proces / directie / DG
+      id: "2.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ct_b.naam_proces
+    - task: Korte beschrijving
+      description: Beschrijf de business problematiek of behoefte en de voorziene oplossing.
+      id: "2.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ct_b.beschrijving
+    - task: Datum en reden eventuele deadline
+      id: "2.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ct_b.deadline
+  - task: Type clouddienst en type service
+    description: >-
+      Cloud computing is een model om op afroep op een gemakkelijke manier via een netwerk toegang te krijgen tot een gedeelde verzameling van configureerbare computer resources (bijvoorbeeld netwerken, servers, opslag, applicaties en diensten) die snel kunnen worden geleverd en vrijgegeven met minimale inspanning of interactie met leveranciers.
+    id: "2.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Type clouddienst
+      description: Geef met reden aan welke categorie clouddienst zinvol wordt geacht.
+      id: "2.2.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Public cloud
+      - value: Private cloud
+      - value: Hybride cloud
+      - value: Community cloud
+      required_status: true
+      references:
+        invulhulp: ct_b.type_clouddienst
+    - task: Toelichting
+      description: Waarom is deze categorie clouddienst zinvol voor de geformuleerde behoefte?
+      id: "2.2.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.2.1"
+          operator: any
+        action: show
+    - task: Type service
+      description: Geef met reden aan welk type dienst passend is voor de geformuleerde behoefte.
+      id: "2.2.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: IaaS (Infrastructure as a Service)
+      - value: PaaS (Platform as a Service)
+      - value: SaaS (Software as a Service)
+      - value: BaaS (Backend as a Service)
+      - value: BPaaS (Business Process as a Service)
+      required_status: true
+      references:
+        invulhulp: ct_b.type_service
+    - task: Toelichting
+      description: Waarom is dit type dienst passend voor de geformuleerde behoefte?
+      id: "2.2.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.2.2"
+          operator: any
+        action: show
+    - task: Aan welke karakteristieken van een clouddienst voldoet de beoogde dienst?
+      description: >-
+        Een clouddienst voldoet aan alle vijf de karakteristieken. Voldoet de beoogde dienst er niet aan, licht dat dan toe — mogelijk is er geen sprake van een clouddienst en is deze toets niet de juiste route.
+      id: "2.2.3"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: 'On-demand selfservice: naar behoefte verkrijgbaar zonder menselijke interactie met de leverancier'
+      - value: 'Breed beschikbare netwerktoegang: te gebruiken via een gestandaardiseerde netwerkverbinding'
+      - value: 'Gedeelde resources: computermiddelen worden gedeeld door verschillende afnemers'
+      - value: 'Snelle elasticiteit: gebruik is snel op en af te schalen; beschikbare computermiddelen lijken onbeperkt'
+      - value: 'Afgemeten dienstverlening: het verbruik is meetbaar, transparant en eenduidig'
+      required_status: false
+      references:
+        invulhulp: ct_b.karakteristieken
+- task: Informatie over de gegevensverwerking
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Te verwerken gegevens
+    description: >-
+      Voor de risicoafweging bij cloudgebruik is inzicht nodig in de uitkomst van het rubriceren van de processen en de gerelateerde informatiesystemen en in het vastgestelde BBN (Basis Beveiligings Niveau). Wordt een van de vragen in dit onderdeel negatief beantwoord, dan is het inschakelen van een clouddienst niet toegestaan.
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke gegevenssets worden met de clouddienst verwerkt?
+      description: >-
+        Eén rij per gegevensset. Vul de drie vragen per set in met Ja of Nee, en leg een eventuele uitzondering uit in de laatste kolom.
+      id: "3.1.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: ct_c.gegevenssets
+      tasks:
+      - task: Naam gegevensset
+        id: "3.1.1.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ct_c.gegevenssets.naam
+      - task: Rubricering gelijk of lager dan Dep. V?
+        description: Ja / Nee
+        id: "3.1.1.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ct_c.gegevenssets.rubricering
+      - task: Gegevens uit de BRI?
+        description: Ja / Nee — Basisregistratie Inkomen, gevoerd door de Belastingdienst
+        id: "3.1.1.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ct_c.gegevenssets.bri
+      - task: Bevat bijzondere persoonsgegevens?
+        description: Ja / Nee
+        id: "3.1.1.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ct_c.gegevenssets.bijzondere_pg
+      - task: Toelichting bij een uitzondering
+        id: "3.1.1.5"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ct_c.gegevenssets.uitzondering
+  - task: Rubricering, basisregistraties en bijzondere persoonsgegevens
+    id: "3.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: >-
+        Is de rubricering van alle te verwerken gegevens gelijk aan of lager dan Departementaal Vertrouwelijk (Dep. V)?
+      description: >-
+        Informatie met een rubricering Staatsgeheim Confidentieel of hoger mag niet verwerkt worden met clouddiensten die, direct of indirect, aangeboden worden door commerciële cloud providers. Bij uitzondering kan BBN 3 toegepast worden op basis van 'pas-toe-of-leg-uit' (comply or explain).
+      id: "3.2.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: ct_c.rubricering
+    - task: Toelichting
+      description: >-
+        Licht toe. Bij 'Nee': onderbouw de uitzondering (pas-toe-of-leg-uit) en geef aan wie die heeft vastgesteld.
+      id: "3.2.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.2.1"
+          operator: any
+        action: show
+    - task: Worden er gegevens uit de Basisregistratie Inkomen (BRI) of een andere basisregistratie verwerkt?
+      description: >-
+        Bij 'Ja' is een explain nodig voor de verwerking van (een bron van) een basisregistratie; dat is alleen mogelijk bij een private cloud. Het vigerende kader is op te vragen bij de CPO van het beleidsdepartement.
+      id: "3.2.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: ct_c.basisregistratie
+    - task: Toelichting
+      description: Om welke basisregistratie(s) gaat het, en wat is de stand van de explain?
+      id: "3.2.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.2.2"
+          operator: any
+        action: show
+    - task: Worden er bijzondere persoonsgegevens verwerkt?
+      description: >-
+        Bijzondere persoonsgegevens mogen in principe niet verwerkt worden met clouddiensten die, direct of indirect, aangeboden worden door commerciële cloud providers. De AVG rekent hiertoe: persoonsgegevens waaruit ras of etnische afkomst blijkt; politieke opvattingen; religieuze of levensbeschouwelijke overtuigingen; lidmaatschap van een vakvereniging; gegevens over gezondheid; gegevens over seksueel gedrag of seksuele gerichtheid; genetische gegevens; en biometrische gegevens met het oog op de unieke identificatie van een persoon.
+      id: "3.2.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: ct_c.bijzondere_persoonsgegevens
+    - task: Toelichting
+      description: Welke bijzondere persoonsgegevens betreft het, en wat is de stand van de explain?
+      id: "3.2.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.2.3"
+          operator: any
+        action: show
+    - task: Explain bij de verwerking van bijzondere persoonsgegevens of een basisregistratie
+      description: >-
+        Alleen invullen als een van de bovenstaande vragen daartoe aanleiding geeft. Beschrijf de onderbouwing, wie de explain heeft vastgesteld en waar die is vastgelegd.
+      id: "3.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ct_c.explain
+- task: Informatie over de cloud provider
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: De cloud provider
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Naam van de beoogde cloud provider
+      description: >-
+        Noem ook de eventuele subverwerkers of onderliggende providers waarvan de dienst indirect gebruikmaakt.
+      id: "4.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ct_d.naam_provider
+    - task: >-
+        Komt de cloud provider uit een land met een offensief cyberprogramma tegen de Nationale Veiligheidsbelangen?
+      description: >-
+        Er worden nooit clouddiensten, direct of indirect, afgenomen van een cloud provider uit een land met een offensief cyberprogramma tegen de Nationale Veiligheidsbelangen. Zie het Cybersecuritybeeld Nederland (NCTV) of doe een check bij de (d)CISO.
+      id: "4.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: ct_d.offensief_cyberprogramma
+    - task: Toelichting
+      description: Licht toe op welke bron of welk advies dit antwoord is gebaseerd.
+      id: "4.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.1.2"
+          operator: any
+        action: show
+    - task: >-
+        Is de cloud provider gecertificeerd volgens ISO 27001/2 of volgens een erkende norm voor informatiebeveiliging?
+      id: "4.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: ct_d.certificering
+    - task: Toelichting
+      description: Welke certificering of norm betreft het, en tot wanneer is die geldig?
+      id: "4.1.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.1.3"
+          operator: any
+        action: show
+  - task: Community clouddiensten
+    description: >-
+      Gebruik van community clouddiensten samen met organisaties die niet gehouden zijn aan het Rijkscloudbeleid maar wel aan de Baseline Informatiebeveiliging Overheid (BIO) is toegestaan. De juridische constructie en de daaraan gekoppelde verantwoordelijkheden van de deelnemende organisaties moeten duidelijk zijn, en de betreffende CISO moet vooraf geïnformeerd worden. Gebruik samen met organisaties die niet onder die criteria vallen is in principe mogelijk, mits vooraf aantoonbaar afstemming heeft plaatsgevonden met en aantoonbaar toestemming is verleend door de betreffende CISO.
+    id: "4.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: >-
+        Is de CISO vooraf geïnformeerd over de juridische constructie en de daaraan gekoppelde verantwoordelijkheden van de deelnemende organisaties?
+      id: "4.2.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Niet van toepassing (geen community clouddienst)
+      required_status: true
+      references:
+        invulhulp: ct_d.ciso_geinformeerd
+    - task: Toelichting
+      description: Wie is geïnformeerd, wanneer, en hoe is dat vastgelegd?
+      id: "4.2.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.2.1"
+          operator: any
+        action: show
+    - task: >-
+        Heeft er vooraf aantoonbaar afstemming plaatsgevonden met en is er aantoonbaar toestemming verleend door de betreffende CISO?
+      description: >-
+        Van toepassing bij een community clouddienst samen met organisaties die niet vallen onder het Rijksbreed Cloudbeleid en de BIO. De toestemming wordt verleend door de dCISO.
+      id: "4.2.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Niet van toepassing (geen community clouddienst)
+      required_status: true
+      references:
+        invulhulp: ct_d.ciso_toestemming
+    - task: Toelichting
+      description: Wie heeft toestemming verleend, wanneer, en waar is dat vastgelegd?
+      id: "4.2.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.2.2"
+          operator: any
+        action: show
+  - task: Verwerkingslocatie en ontsluiting
+    id: "4.3"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: >-
+        Vindt verwerking van gegevens plaats binnen de EER, in een land met een adequaatheidsbesluit, of op basis van een passend doorgiftemechanisme?
+      description: >-
+        Verwerking van persoonsgegevens met clouddiensten die, direct of indirect, aangeboden worden door commerciële cloud providers is alleen toegestaan als voldaan kan worden aan ten minste één van de vereisten inzake doorgifte van persoonsgegevens (hoofdstuk V AVG): binnen de Europese Economische Ruimte (EER), in landen waarvoor een adequaatheidsbesluit bestaat, of op basis van een passend doorgiftemechanisme dat voldoet aan artikel 46 AVG, zoals een door de Autoriteit Persoonsgegevens goedgekeurd modelcontract (standard contractual clauses). Is deze vraag met Nee beantwoord, dan kan zo nodig een Data Transfer Impact Assessment (DTIA) worden uitgevoerd; bij een positieve beoordeling mogen persoonsgegevens worden doorgegeven.
+      id: "4.3.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: ct_d.doorgifte
+    - task: Toelichting
+      description: >-
+        Waar vindt de verwerking plaats (opslag, support, telemetrie), en op welk mechanisme berust de doorgifte? Vermeld bij 'Nee' de stand van de DTIA.
+      id: "4.3.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.3.1"
+          operator: any
+        action: show
+    - task: Vindt ontsluiting van de clouddienst plaats via de interne ICT-dienstverlener (cloud broker)?
+      description: Ontsluiting van clouddiensten dient altijd via de interne dienstverlener plaats te vinden.
+      id: "4.3.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: ct_d.cloud_broker
+    - task: Toelichting
+      description: >-
+        Welke interne dienstverlener ontsluit de dienst? Licht bij 'Nee' toe hoe de ontsluiting dan wel is belegd.
+      id: "4.3.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.3.2"
+          operator: any
+        action: show
+- task: Op te leveren producten en vervolg
+  id: "5"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Op te leveren producten
+    description: >-
+      Indien gewenst kan de Adviescommissie Cloudgebruik (ACC) een pre-advies geven. Daartoe dienen de onderstaande producten te worden aangeleverd via ACC@minfin.nl.
+    id: "5.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke producten zijn beschikbaar voor het pre-advies?
+      id: "5.1.1"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Quickscan BIO, danwel explain verwerking bijzondere persoonsgegevens (vigerend kader op te vragen bij de CISO van het beleidsdepartement)
+      - value: Pre-scan DPIA, danwel explain voor de verwerking van een basisregistratie (vigerend kader op te vragen bij de CPO van het beleidsdepartement)
+      - value: Toestemming gebruik community clouddiensten met organisaties die niet vallen onder het Rijksbreed Cloudbeleid en de BIO (toestemming door de dCISO)
+      - value: Concept-exitplan
+      required_status: true
+      references:
+        invulhulp: ct_e.producten
+    - task: Toelichting bij de op te leveren producten
+      description: Benoem per ontbrekend product wanneer het beschikbaar komt en wie het oplevert.
+      id: "5.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ct_e.producten_toelichting
+    - task: Welke documenten zijn aangeleverd voor het cloudadvies (bijlage B)?
+      description: >-
+        Voor een volledig cloudadvies stuurt u deze documenten aan de toetsingscommissie via ACC@minfin.nl. De documenten dienen voorzien te zijn van de metadata, dat wil zeggen ondertekening conform RACI.
+      id: "5.1.3"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Business case
+      - value: 'Risicoanalyse: Quickscan BIO en indien nodig C2000-criteria, risicoscenario''s public cloud NBV, risicoanalyse Nationale Veiligheid, toestemming gebruik clouddiensten die niet vallen onder het Rijksbreed Cloudbeleid en de BIO'
+      - value: 'Privacybescherming: pre-scan DPIA en indien nodig DPIA, DTIA, verwerkersovereenkomst, explain verwerking bijzondere persoonsgegevens, explain van (bron van een) basisregistratie'
+      - value: Advies CIO Rijk (indien nodig)
+      - value: Toestemming CISO voor gebruik van een community clouddienst
+      - value: ISO-certificering van de cloud provider
+      - value: Exitstrategie
+      required_status: false
+      references:
+        invulhulp: ct_e.documenten_cloudadvies
+  - task: Activiteiten cloudbeleid (bijlage A)
+    description: >-
+      Om te voldoen aan alle vereisten van het cloudbeleid Financiën vormt dit activiteitenoverzicht de basis. Activiteiten 1 t/m 12 dienen te worden uitgewerkt. De verantwoordelijkheid voor alle onderdelen, inclusief de RACI-rollen, ligt bij de indienende directie. Op verzoek van de indienende directie kan de toetsingscommissie een advies of oordeel geven over compleetheid en juistheid.
+    id: "5.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke activiteiten uit bijlage A zijn uitgewerkt?
+      id: "5.2.1"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: 1. Opstellen business case (§4.1)
+      - value: 2. Opstellen/onderhouden risicoanalyse (§4.2)
+      - value: 3. Borgen privacybescherming (§4.3)
+      - value: 4. Vaststellen van de explain voor de verwerking van bijzondere persoonsgegevens (§4.4)
+      - value: 5. Vaststellen van de explain voor de verwerking van (een bron van) een basisregistratie (§4.5)
+      - value: 6. Toestemmen in het gebruik van community clouddiensten samen met organisaties die niet vallen onder het Rijksbreed Cloudbeleid en de BIO (§4.6)
+      - value: 7. Opstellen exitstrategie (§4.7)
+      - value: 8. Opstellen/onderhouden overeenkomst (§4.8)
+      - value: 9. Periodiek uitvoeren audit (§4.9)
+      - value: 10. Beheren administratie (§4.10)
+      - value: 11. Jaarlijks rapporteren aan CISO Rijk (§4.11)
+      - value: 12. Openbaar maken besluitvorming (§4.12)
+      required_status: true
+      references:
+        invulhulp: ct_e.activiteiten
+    - task: Toelichting bij de activiteiten en de belegde rollen
+      description: >-
+        Benoem per nog niet uitgewerkte activiteit wie die oppakt en wanneer. Kaders, richtlijnen en formats zijn te vinden in de samenwerkruimte Cloudbeleid Financiën.
+      id: "5.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ct_e.activiteiten_toelichting
+    - task: Exitstrategie
+      description: >-
+        Beschrijf hoe de organisatie de clouddienst kan verlaten: welke data en functionaliteit meegaan, welke afspraken daarover met de provider zijn gemaakt en welke doorlooptijd en kosten daarmee gemoeid zijn.
+      id: "5.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ct_e.exitstrategie
+  - task: Uitkomst en vervolg
+    description: >-
+      Wordt een of meer van de vragen in onderdeel 3 en 4 negatief beantwoord, dan is het inschakelen van een clouddienst niet toegestaan. Zijn al die vragen positief beantwoord, dan is het inschakelen van een clouddienst in beginsel toegestaan.
+    id: "5.3"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wat is de uitkomst van deze toets?
+      description: >-
+        Stel de uitkomst zelf vast op basis van de antwoorden in onderdeel 3 en 4; de toets rekent dit niet automatisch uit.
+      id: "5.3.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: In beginsel toegestaan — alle vragen in onderdeel 3 en 4 zijn positief beantwoord
+      - value: Niet toegestaan — een of meer vragen in onderdeel 3 en 4 zijn negatief beantwoord
+      - value: Nog niet vast te stellen — de toets is nog niet volledig ingevuld
+      required_status: true
+      references:
+        invulhulp: ct_e.uitkomst
+    - task: Toelichting
+      description: 'Onderbouw de uitkomst: welke vragen zijn bepalend geweest, en wat is de vervolgstap?'
+      id: "5.3.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "5.3.1"
+          operator: any
+        action: show
+    - task: Wordt een pre-advies van de Adviescommissie Cloudgebruik (ACC) gevraagd?
+      id: "5.3.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      - value: Nog niet bepaald
+      required_status: false
+      references:
+        invulhulp: ct_e.pre_advies
+    - task: Toelichting
+      description: Wanneer wordt de aanvraag ingediend bij ACC@minfin.nl, en welke producten gaan mee?
+      id: "5.3.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "5.3.2"
+          operator: any
+        action: show
+    - task: Welke vervolgstappen zijn afgesproken?
+      description: Benoem per afspraak wie die uitvoert en wanneer die gereed is.
+      id: "5.3.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ct_e.vervolgstappen

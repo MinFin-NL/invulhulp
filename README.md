@@ -92,58 +92,74 @@ Die eerste stap zit inmiddels in findocs zelf: de **AI-Verordening Beslishulp** 
 
 ## Form URNs
 
-Every form carries a stable identifier in the shape the [MinBZK task-registry](https://github.com/MinBZK/task-registry) uses for its instruments:
+The question content of every form comes from the [MinBZK instrument registry](https://github.com/MinBZK/instrument-registry), and every form carries that registry's URN for its instrument:
 
 ```
-urn:nl:<authority>:<registry>:<instrument>:<major>.<minor>
+urn:nl:<organisation>:ir:<instrument>:<version>
 ```
 
-Upstream, `schemas/schema_instruments.json` pins instrument URNs to `^urn:nl:aivt:tr:[a-z]+:[0-9]+\.[0-9]+`: authority `aivt`, registry `tr` (e.g. `urn:nl:aivt:tr:iama:1.0`). This tool issues its URNs under its own authority, `minfin`, and keeps the registry segment `tr`. The identifiers have the same shape and can sit next to the upstream ones without writing into someone else's namespace:
-
-```
-urn:nl:minfin:tr:dpia:3.0
-```
-
-The instrument segment is the form id, the version segment the form's `version`. Announced forms that have no JSON yet (the placeholders in `index.json`) are pinned at `0.1`.
+`<organisation>` is the owner of the instrument (`minbzk` for the DPIA, Pre-scan DPIA and IAMA, `minfin` for the rest), `ir` stands for instrument registry, and the version is the instrument's `version`. The instrument segment is the registry's name, which can differ from our form id: our `prescandpia` is `urn:nl:minbzk:ir:prescan:2.0`. Announced forms that are not in the registry yet (the placeholders in `index.json`) get a name in our own organisation at `0.1`.
 
 There are two separate fields:
 
 | Field | Names | Present on |
 |---|---|---|
-| `urn` | *our* form definition | every form, incl. placeholders |
-| `registryUrn` | the upstream task-registry instrument the form implements | only forms with a real counterpart there |
+| `urn` | the instrument in the MinBZK instrument registry (placeholders: our own name for it) | every form, incl. placeholders |
+| `registryUrn` | the matching instrument in the AI-validation [task-registry](https://github.com/MinBZK/task-registry) | only forms with a real counterpart there |
 
-The URN lives in both `public/forms/index.json` and the form JSON itself; `src/utils/formUrn.ts` owns the convention (`buildFormUrn`, `parseFormUrn`, `FORM_URN_PATTERN`) and `src/utils/formUrn.test.ts` fails the build if the two drift apart, a URN is missing, or a version segment no longer matches the form's `version`. The URN is shown on the form card and the form intro page and goes into the Word cover metadata. JSON files from older versions carry it as `formUrn` / `formRegistryUrn`.
-
-For the three **generated** forms (DPIA, Prescan DPIA, IAMA) the URN lives in `scripts/form-overlays/<name>.overlay.json` under `form`, so `npm run forms:build` keeps emitting it.
+`npm run forms:build` writes the URN into the form JSON; `public/forms/index.json` repeats it. `src/utils/formUrn.ts` owns the convention (`buildFormUrn`, `parseFormUrn`, the same pattern as `urn.py` upstream) and `src/utils/formUrn.test.ts` fails if index, form file and vendored registry disagree. The URN is shown on the form intro page and goes into the Word cover metadata. JSON files from older versions carry it as `formUrn` / `formRegistryUrn`, in the old `urn:nl:minfin:tr:<id>:<version>` shape.
 
 | Form | URN | Task-registry instrument |
 |---|---|---|
-| Intakeformulier | `urn:nl:minfin:tr:intake:2.0` | — |
-| Projectaanbiedingsformulier | `urn:nl:minfin:tr:aanbiedingsformulier:2.0` | — |
-| PPM Projectplan | `urn:nl:minfin:tr:ppm:2.0` | — |
-| PSA | `urn:nl:minfin:tr:psa:1.0` | — |
-| Quickscan BIO2 | `urn:nl:minfin:tr:quickscan:2.0` | — |
-| Prescan DPIA | `urn:nl:minfin:tr:prescandpia:2.0` | — |
-| DPIA | `urn:nl:minfin:tr:dpia:3.0` | — |
-| AI Impact Assessment | `urn:nl:minfin:tr:aiia:2.1` | `urn:nl:aivt:tr:aiia:1.0` |
-| IAMA | `urn:nl:minfin:tr:iama:2.0` | `urn:nl:aivt:tr:iama:1.0` |
-| EU AI Act Compliance Checklist | `urn:nl:minfin:tr:euaiact:0.1` | `urn:nl:aivt:tr:ca:1.0` |
-| Data-ethiektoets | `urn:nl:minfin:tr:dataethiek:1.0` | — |
-| IHH-toets | `urn:nl:minfin:tr:ihhtoets:0.1` | — |
-| Cloudtoets | `urn:nl:minfin:tr:cloudtoets:1.0` | — |
-| BIA *(placeholder)* | `urn:nl:minfin:tr:bia:0.1` | — |
-| Datakwaliteit-assessment | `urn:nl:minfin:tr:datakwaliteit:1.0` | — |
-| Dataset-registratie (datasheet) | `urn:nl:minfin:tr:datasetregistratie:1.0` | — |
-| AI-systeemregistratie (Model Card) | `urn:nl:minfin:tr:modelcard:0.1` | — |
-| Algoritmeregister-publicatie | `urn:nl:minfin:tr:algoritmeregister:1.0` | — |
-| Verwerkingsregister (AVG art. 30) | `urn:nl:minfin:tr:verwerkingsregister:1.0` | — |
-| Toegankelijkheidsverklaring | `urn:nl:minfin:tr:toegankelijkheid:1.0` | — |
-| Restrisico-acceptatie | `urn:nl:minfin:tr:restrisico:1.1` | — |
-| Projectvoortgangsrapportage *(placeholder)* | `urn:nl:minfin:tr:voortgangsrapportage:0.1` | — |
-| Projectafwijkingsformulier *(placeholder)* | `urn:nl:minfin:tr:afwijkingsformulier:0.1` | — |
-| Evaluatieformulier *(placeholder)* | `urn:nl:minfin:tr:evaluatie:0.1` | — |
-| Risico-impactformulier *(placeholder)* | `urn:nl:minfin:tr:risicoimpact:0.1` | — |
+| Intakeformulier | `urn:nl:minfin:ir:intake:2.0` | — |
+| Projectaanbiedingsformulier | `urn:nl:minfin:ir:aanbiedingsformulier:2.0` | — |
+| PPM Projectplan | `urn:nl:minfin:ir:ppm:2.0` | — |
+| PSA | `urn:nl:minfin:ir:psa:1.0` | — |
+| Quickscan BIO2 | `urn:nl:minfin:ir:quickscan:2.0` | — |
+| Prescan DPIA | `urn:nl:minbzk:ir:prescan:2.0` | — |
+| DPIA | `urn:nl:minbzk:ir:dpia:3.0` | — |
+| AI Impact Assessment | `urn:nl:minfin:ir:aiia:2.1` | `urn:nl:aivt:tr:aiia:1.0` |
+| IAMA | `urn:nl:minbzk:ir:iama:2.0` | `urn:nl:aivt:tr:iama:1.0` |
+| EU AI Act Compliance Checklist | `urn:nl:minfin:ir:euaiact:0.1` | `urn:nl:aivt:tr:ca:1.0` |
+| Data-ethiektoets | `urn:nl:minfin:ir:dataethiek:1.0` | — |
+| IHH-toets | `urn:nl:minfin:ir:ihhtoets:0.1` | — |
+| Cloudtoets | `urn:nl:minfin:ir:cloudtoets:1.0` | — |
+| BIA *(placeholder)* | `urn:nl:minfin:ir:bia:0.1` | — |
+| Datakwaliteit-assessment | `urn:nl:minfin:ir:datakwaliteit:1.0` | — |
+| Dataset-registratie (datasheet) | `urn:nl:minfin:ir:datasetregistratie:1.0` | — |
+| AI-systeemregistratie (Model Card) | `urn:nl:minfin:ir:modelcard:0.1` | — |
+| Algoritmeregister-publicatie | `urn:nl:minfin:ir:algoritmeregister:1.0` | — |
+| Verwerkingsregister (AVG art. 30) | `urn:nl:minfin:ir:verwerkingsregister:1.0` | — |
+| Toegankelijkheidsverklaring | `urn:nl:minfin:ir:toegankelijkheid:1.0` | — |
+| Restrisico-acceptatie | `urn:nl:minfin:ir:restrisico:1.1` | — |
+| Projectvoortgangsrapportage *(placeholder)* | `urn:nl:minfin:ir:voortgangsrapportage:0.1` | — |
+| Projectafwijkingsformulier *(placeholder)* | `urn:nl:minfin:ir:afwijkingsformulier:0.1` | — |
+| Evaluatieformulier *(placeholder)* | `urn:nl:minfin:ir:evaluatie:0.1` | — |
+| Risico-impactformulier *(placeholder)* | `urn:nl:minfin:ir:risicoimpact:0.1` | — |
+
+## Forms from the instrument registry
+
+The registry owns the **content** of a form, and this repo owns its **structure and presentation**:
+
+| Registry YAML (`vendor/instrument-registry/assessments/`) | Overlay (`scripts/form-overlays/<id>.overlay.json`) |
+|---|---|
+| question text, guidance, options, required, question type, show-if conditions, table columns, titles and descriptions of sections and subsections, URN and version | which question sits where and in what order, question ids, part/kicker, navigation, meta/homeContent, features, AI hints (`aiContext`, `aiFill`, `followUp`), email/phone formats, `optionsFrom`, attachments, table sizes |
+
+`public/forms/<id>.json` is generated from the two; never edit it by hand (a test fails if it is out of date). For the MinFin instruments, every registry task carries `references.invulhulp: <our question id>`, so question ids, and with them every stored answer, survive a registry release. The build fails if the registry drops a question the overlay still places, or adds one the overlay doesn't place yet: both need a human decision. The DPIA, Pre-scan DPIA and IAMA have no back-links and go through the older converter (`scripts/convert-form.mjs`), which derives `d<task-id>` question ids.
+
+Changing the content of a form:
+
+1. Pull request on [MinBZK/instrument-registry](https://github.com/MinBZK/instrument-registry), then a release.
+2. `npm run registry:sync -- vX.Y.Z` (pins the release in `vendor/instrument-registry/`, updates `PROVENANCE.md`).
+3. `npm run forms:build`, review the diff in `public/forms/`, run `npm test`.
+
+Changing presentation (section grouping, navigation, AI hints, …) is an overlay edit followed by `npm run forms:build`.
+
+Drift is caught automatically:
+
+- **Pre-commit** (`forms-build` hook in `.pre-commit-config.yaml`): whenever a form, overlay, builder or vendored file is staged, it rebuilds; if the result differs from what is staged the commit stops and the regenerated files are left for you to review and `git add`.
+- **Every PR and push to main** (`.github/workflows/forms.yml`): `npm run forms:check` (rebuild + `git diff --exit-code`) and `npm test`.
+- **Weekly, Monday morning** (`.github/workflows/registry-update.yml`, also runnable by hand): compares `vendor/instrument-registry/pin.json` with the latest registry release. Newer and the build passes → a PR `registry/<tag>` with the regenerated forms and the test result. Newer but the build fails (a question removed/renamed upstream, a new question not placed yet) → an issue with the build error, because that needs a decision about stored answers. The mapping from form id to registry file is in `scripts/registry-map.json`.
 
 ## Form lineage
 
@@ -198,7 +214,7 @@ Three more AI-BOK templates (Governance Charter, Maturity Quick Scan, Shadow AI 
 
 Harmonization with MinBZK runs along **two tracks**, one per upstream schema:
 
-- **[par-dpia-form](https://github.com/MinBZK/par-dpia-form)**: *form definitions (YAML)*. The DPIA, Pre-scan DPIA and IAMA are generated from the vendored upstream YAML by a build-time converter (`npm run forms:build`), so their content follows the official Model DPIA Rijksdienst and IAMA. See [`docs/SCHEMA_HARMONIZATION.md`](docs/SCHEMA_HARMONIZATION.md).
+- **[instrument-registry](https://github.com/MinBZK/instrument-registry)**: *form content (YAML)*. All 20 forms are built from a pinned release of the registry (`vendor/instrument-registry/`) by `npm run forms:build`; see [Forms from the instrument registry](#forms-from-the-instrument-registry) below. The DPIA, Pre-scan DPIA and IAMA come from MinBZK's own instruments there (formerly `par-dpia-form`); see [`docs/SCHEMA_HARMONIZATION.md`](docs/SCHEMA_HARMONIZATION.md).
 - **[task-registry](https://github.com/MinBZK/task-registry)**: *instrument/task registry (URN-keyed)*. The conformity-declaration section of the EU AI Act checklist reuses the `conformity_assessment_eu_ai_act` instrument (`urn:nl:aivt:tr:ca:1.0`). The registry also has AIIA, IAMA and technical-documentation instruments, and its explicit AIIA↔IAMA links could become cross-form mappings later.
 
 All forms use the **cross-form synthesis**: 152 mappings in `public/forms/crossFormMappings.json`, so shared information is entered once. The EU AI Act checklist and the Model Card are pre-filled from AIIA, DPIA and PSA answers; the Verwerkingsregister fills almost entirely from the DPIA (the article 30 elements are already there), and the Algoritmeregister publication from the AIIA and the Model Card. See [`docs/cross-form-connecties.md`](docs/cross-form-connecties.md).

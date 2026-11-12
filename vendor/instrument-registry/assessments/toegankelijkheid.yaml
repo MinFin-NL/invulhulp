@@ -1,0 +1,572 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: Toegankelijkheidsverklaring
+urn: urn:nl:minfin:ir:toegankelijkheid:1.0
+version: '1.0'
+description: >-
+  Overheidsinstanties zijn verplicht hun websites en mobiele apps toegankelijk te maken volgens EN 301 549 (WCAG 2.1 niveau AA) en daarover een toegankelijkheidsverklaring te publiceren. Dit formulier verzamelt alles wat die verklaring nodig heeft: de voorziening, het uitgevoerde onderzoek, de nalevingsstatus, de niet-toegankelijke onderdelen met hun gevolgen voor gebruikers, de verbetermaatregelen met planning, en de meld- en klachtroute. De uitkomst is de inhoud waarmee de officiële verklaring wordt ingevuld.
+
+  Bron: Tijdelijk besluit digitale toegankelijkheid overheid; model toegankelijkheidsverklaring (DigiToegankelijk) (Rijksoverheid / Logius — DigiToegankelijk). https://www.digitoegankelijk.nl/ Voorbereidingsformulier: de officiële verklaring wordt gepubliceerd via het invulhulpmiddel op digitoegankelijk.nl en opgenomen in het register. Dit formulier verzamelt de benodigde inhoud in het dossier; controleer de exacte statusaanduiding en modelteksten tegen het actuele model vóór publicatie. Roadmap: docs/sporen-en-roadmap.md §4.2 nr. 3.
+tasks:
+- task: 'Deel A: De digitale voorziening'
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Identificatie
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Naam van de website of mobiele app
+      id: "1.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_a.naam
+    - task: Op welk webadres of welke app is de verklaring van toepassing?
+      description: >-
+        Noem het volledige adres. Als de verklaring slechts een deel van een domein dekt, geef dan exact aan welk deel — en welk deel onder een andere verklaring valt.
+      id: "1.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_a.url
+    - task: Om wat voor voorziening gaat het?
+      id: "1.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Publieke website
+      - value: Besloten webapplicatie (login vereist)
+      - value: Mobiele app
+      - value: Intranet of extranet
+      - value: Combinatie van website en app
+      required_status: true
+      references:
+        invulhulp: tv_a.type
+    - task: Toelichting
+      description: Licht toe wat de voorziening doet en voor wie.
+      id: "1.1.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.1.3"
+          operator: any
+        action: show
+    - task: Wie gebruiken deze voorziening?
+      description: >-
+        Beschrijf de doelgroep en of gebruik vrijwillig is of noodzakelijk. Bij een voorziening die burgers moeten gebruiken om aan een verplichting te voldoen of een recht uit te oefenen, weegt ontoegankelijkheid aanzienlijk zwaarder.
+      id: "1.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_a.doelgroep
+    - task: Vallen er onderdelen buiten de wettelijke reikwijdte?
+      description: >-
+        Het besluit kent uitzonderingen, onder meer voor bepaalde archieven, kaarten en content van derden waarover de instantie geen zeggenschap heeft. Vink alleen aan wat werkelijk buiten de reikwijdte valt en licht dat toe.
+      id: "1.1.5"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Vooraf opgenomen tijdgebonden media gepubliceerd vóór de ingangsdatum
+      - value: Online kaarten en karteringsdiensten (niet voor navigatiedoeleinden)
+      - value: Content van derden die niet wordt gefinancierd of ontwikkeld door en niet onder zeggenschap staat van de instantie
+      - value: Reproducties van erfgoedstukken
+      - value: Archieven met content die niet meer wordt bijgewerkt
+      - value: Kantoorbestandsformaten gepubliceerd vóór de ingangsdatum
+      - value: Geen uitzonderingen van toepassing
+      required_status: false
+      references:
+        invulhulp: tv_a.uitzonderingen
+  - task: Verantwoordelijkheid
+    id: "1.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke overheidsinstantie is verantwoordelijk?
+      id: "1.2.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_a.instantie
+    - task: Wie is de product- of applicatie-eigenaar?
+      id: "1.2.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_a.eigenaar
+    - task: Welke leverancier(s) bouwen of beheren de voorziening?
+      description: >-
+        Vermeld ook of toegankelijkheidseisen contractueel zijn vastgelegd en of de leverancier verantwoordelijk is voor het oplossen van bevindingen.
+      id: "1.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: tv_a.leverancier
+- task: 'Deel B: Onderzoek'
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Uitgevoerd onderzoek
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Is er een toegankelijkheidsonderzoek uitgevoerd?
+      id: "2.1.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, een volledig onderzoek door een onafhankelijke partij
+      - value: Ja, een volledig onderzoek in eigen beheer
+      - value: Ja, een gedeeltelijk of steekproefsgewijs onderzoek
+      - value: Nee, alleen een quickscan of automatische controle
+      - value: Nee, nog geen onderzoek uitgevoerd
+      required_status: true
+      references:
+        invulhulp: tv_b.onderzoek
+    - task: Toelichting
+      description: Beschrijf wie het onderzoek heeft uitgevoerd en wanneer.
+      id: "2.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.1"
+          operator: any
+        action: show
+    - task: Welke onderzoeksmethode is gebruikt?
+      description: >-
+        Bijv. de WCAG-EM evaluatiemethode, een handmatige expertbeoordeling, een test met hulpmiddelen (screenreader, toetsenbordnavigatie, vergroting) of een geautomatiseerde scan. Automatische scans detecteren maar een deel van de criteria — vermeld dus altijd of er ook handmatig is getest.
+      id: "2.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_b.methode
+    - task: Welke onderdelen zijn onderzocht?
+      description: >-
+        Noem de onderzochte pagina's of schermen en waarom juist die zijn gekozen (representatieve steekproef, kritieke gebruikersroutes, meest bezochte pagina's).
+      id: "2.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_b.omvang
+    - task: Tegen welke norm en welk niveau is getoetst?
+      id: "2.1.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: EN 301 549 met WCAG 2.1 niveau AA
+      - value: EN 301 549 met WCAG 2.2 niveau AA
+      - value: Alleen WCAG niveau A
+      - value: Anders
+      required_status: true
+      references:
+        invulhulp: tv_b.norm
+    - task: Toelichting
+      description: Licht toe welke versie en welk niveau precies zijn gehanteerd.
+      id: "2.1.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.4"
+          operator: any
+        action: show
+    - task: Is er getest met gebruikers of met hulpmiddelen?
+      id: "2.1.5"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Getest met een screenreader
+      - value: Getest met alleen toetsenbordbediening
+      - value: Getest met vergroting of aangepaste weergave
+      - value: Getest met spraakbediening
+      - value: Getest met gebruikers met een beperking
+      - value: Alleen geautomatiseerd getest
+      - value: Niet getest
+      required_status: false
+      references:
+        invulhulp: tv_b.hulpmiddelen
+    - task: Waar is het onderzoeksrapport te vinden?
+      description: De verklaring verwijst naar het onderzoeksresultaat. Noem de vindplaats en de datum van het rapport.
+      id: "2.1.6"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_b.rapport
+    - task: Bijlagen
+      id: "2.1.6-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "2.1.6-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+- task: 'Deel C: Bevindingen'
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Nalevingsstatus
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke nalevingsstatus geldt voor deze voorziening?
+      description: >-
+        Het officiële model kent statussen A tot en met D. Controleer de exacte aanduiding en de bijbehorende modeltekst in het invulhulpmiddel op digitoegankelijk.nl voordat u publiceert — de omschrijving hieronder is bedoeld om de juiste categorie te kiezen, niet om de modeltekst te vervangen.
+      id: "3.1.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Voldoet volledig aan de toegankelijkheidseisen
+      - value: Voldoet gedeeltelijk — een deel van de eisen wordt nog niet gehaald
+      - value: Voldoet nog niet, maar de eerste maatregelen zijn genomen
+      - value: Voldoet niet en er zijn nog geen maatregelen genomen
+      required_status: true
+      references:
+        invulhulp: tv_c.status
+    - task: Toelichting
+      description: Onderbouw de gekozen status kort.
+      id: "3.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.1.1"
+          operator: any
+        action: show
+    - task: Welke onderdelen zijn niet toegankelijk?
+      description: >-
+        Beschrijf per bevinding wat een gebruiker hierdoor niet kan doen, niet alleen welk succescriterium faalt. 'Formulierlabels ontbreken' zegt een burger niets; 'wie een screenreader gebruikt kan niet zien welk veld om een rekeningnummer vraagt' wel.
+      id: "3.1.2"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: tv_c.bevindingen
+      tasks:
+      - task: Onderdeel of pagina
+        id: "3.1.2.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: tv_c.bevindingen.onderdeel
+      - task: Wat gaat er mis
+        id: "3.1.2.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: tv_c.bevindingen.probleem
+      - task: Gevolg voor de gebruiker
+        id: "3.1.2.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: tv_c.bevindingen.gevolg
+      - task: WCAG-succescriterium
+        id: "3.1.2.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: tv_c.bevindingen.criterium
+      - task: Ernst
+        id: "3.1.2.5"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Blokkerend
+        - value: Ernstig
+        - value: Matig
+        - value: Klein
+        references:
+          invulhulp: tv_c.bevindingen.ernst
+    - task: Toelichting op de bevindingen
+      id: "3.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Zijn er bevindingen die het gebruik volledig onmogelijk maken voor een groep gebruikers?
+      description: >-
+        Blokkerende bevindingen op een kritieke route — inloggen, een aanvraag indienen, een bezwaar maken — verdienen een eigen behandeling en een strakkere termijn dan de rest.
+      id: "3.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_c.blokkerend
+  - task: Onevenredige last en alternatieven
+    id: "3.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wordt voor een of meer onderdelen een beroep gedaan op onevenredige last?
+      description: >-
+        Onevenredige last is een uitzondering met een hoge drempel: zij moet per onderdeel worden onderbouwd met een afweging van de kosten tegen de baten voor gebruikers met een beperking, en kan niet worden gebaseerd op louter budgettaire prioritering.
+      id: "3.2.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Nee
+      - value: Ja, voor een of meer specifieke onderdelen
+      - value: Nog te beoordelen
+      required_status: true
+      references:
+        invulhulp: tv_c.onevenredig
+    - task: Toelichting
+      description: Benoem de onderdelen en de onderbouwing van de afweging.
+      id: "3.2.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.2.1"
+          operator: any
+        action: show
+    - task: Onderbouwing van het beroep op onevenredige last
+      description: >-
+        Beschrijf de afweging: welke inspanning zou nodig zijn, hoeveel gebruikers worden geraakt, hoe zwaar is het gevolg, en waarom weegt dat niet op. Vermeld ook wanneer de afweging opnieuw wordt gemaakt. Laat leeg als er geen beroep wordt gedaan.
+      id: "3.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: tv_c.onderbouwing
+    - task: Welk toegankelijk alternatief is beschikbaar?
+      description: >-
+        Bij niet-toegankelijke onderdelen moet er een alternatieve route zijn: telefonisch, op papier, aan de balie of via een andere digitale voorziening. Beschrijf die route en hoe gebruikers ervan op de hoogte raken.
+      id: "3.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_c.alternatief
+- task: 'Deel D: Verbetering en publicatie'
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Verbetermaatregelen
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke maatregelen worden genomen om de toegankelijkheid te verbeteren?
+      id: "4.1.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: tv_d.maatregelen
+      tasks:
+      - task: Maatregel
+        id: "4.1.1.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: tv_d.maatregelen.maatregel
+      - task: Lost welke bevinding op
+        id: "4.1.1.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: tv_d.maatregelen.bevinding
+      - task: Verantwoordelijke
+        id: "4.1.1.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: tv_d.maatregelen.verantwoordelijke
+      - task: Gereed uiterlijk
+        id: "4.1.1.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: tv_d.maatregelen.termijn
+      - task: Status
+        id: "4.1.1.5"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Gepland
+        - value: In uitvoering
+        - value: Afgerond
+        references:
+          invulhulp: tv_d.maatregelen.status
+    - task: Toelichting op de verbeteraanpak
+      id: "4.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Welke structurele maatregelen voorkomen nieuwe toegankelijkheidsproblemen?
+      description: >-
+        Bijv. toegankelijkheidseisen in de definition of done, geautomatiseerde controles in de pijplijn, gebruik van een toegankelijk componentenbibliotheek zoals het NL Design System, en training van redacteuren. Zonder deze maatregelen komen dezelfde bevindingen bij het volgende onderzoek terug.
+      id: "4.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_d.structureel
+    - task: Wanneer wordt opnieuw onderzocht en de verklaring herzien?
+      description: >-
+        De verklaring moet actueel blijven. Noem de herzieningstermijn en de gebeurtenissen die tussentijds aanleiding geven, zoals een grote release of een nieuwe versie van de norm.
+      id: "4.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_d.hervalidatie
+  - task: Meldroute en publicatie
+    id: "4.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe kunnen gebruikers een toegankelijkheidsprobleem melden?
+      description: >-
+        De verklaring moet een feedbackmechanisme bevatten. Noem het contactadres, telefoonnummer of formulier, en zorg dat de meldroute zelf toegankelijk is — een uitsluitend digitaal meldformulier op een ontoegankelijke site sluit precies de melders uit die het betreft.
+      id: "4.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_d.melden
+    - task: Binnen welke termijn wordt op een melding gereageerd en wie handelt die af?
+      id: "4.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_d.reactietermijn
+    - task: Is de handhavings- of klachtprocedure vermeld?
+      description: >-
+        Als een melding niet naar tevredenheid wordt afgehandeld, moet de gebruiker weten waar hij terecht kan (de nationale klacht- of handhavingsprocedure).
+      id: "4.2.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, opgenomen in de verklaring
+      - value: Nee, nog toe te voegen
+      required_status: true
+      references:
+        invulhulp: tv_d.handhaving
+    - task: Toelichting
+      description: Beschrijf de vermelde procedure.
+      id: "4.2.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.2.3"
+          operator: any
+        action: show
+    - task: Waar wordt de verklaring gepubliceerd en is zij in het register opgenomen?
+      description: >-
+        De verklaring hoort vindbaar te zijn vanaf elke pagina van de voorziening (doorgaans in de footer) en opgenomen te zijn in het centrale register van toegankelijkheidsverklaringen.
+      id: "4.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_d.publicatie
+    - task: Datum waarop de verklaring is opgesteld of voor het laatst herzien
+      id: "4.2.5"
+      type:
+      - date
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: tv_d.datum

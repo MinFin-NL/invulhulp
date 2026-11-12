@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/quickscan.yaml + scripts/form-overlays/quickscan.overlay.json; niet handmatig bewerken.",
   "id": "quickscan",
   "version": "2.0",
-  "urn": "urn:nl:minfin:tr:quickscan:2.0",
+  "urn": "urn:nl:minfin:ir:quickscan:2.0",
   "title": "Quickscan BIO2 – Classificatietoets",
   "source": {
     "instrument": "Classificatietoets BIO2 — dataclassificatie op beschikbaarheid, integriteit en vertrouwelijkheid",

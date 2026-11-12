@@ -2,6 +2,15 @@
 
 _Last updated: 2026-07-28_
 
+> **Update 2026-11-12: the source moved.** MinBZK/instrument-registry (release v0.1.0) is now the
+> authoritative source for these three instruments *and* for all MinFin forms; par-dpia-form no
+> longer is. The YAML is vendored from there (`vendor/instrument-registry/`, `npm run
+> registry:sync`), `vendor/par-dpia-form/` is gone, and the URNs are the registry's
+> (`urn:nl:minbzk:ir:dpia:3.0`, `…:prescan:2.0`, `…:iama:2.0`). The converter described below still
+> builds dpia/prescandpia/iama; the MinFin forms use the lossless merge in
+> `scripts/lib/merge-form.mjs`. The paths below are historical; the current workflow is in the
+> README, section *Forms from the instrument registry*.
+
 ## Why
 
 We want our DPIA questions to follow the **official government source** instead of maintaining
@@ -161,8 +170,9 @@ touch more of the app than any other change: per-cell conditional columns (6) an
 
 ## How to refresh from upstream
 
-1. Bump the pinned file + SHA per `vendor/par-dpia-form/PROVENANCE.md`.
-2. `npm run forms:build` (now builds **all three** generated forms: dpia, prescandpia, iama).
+1. `npm run registry:sync -- vX.Y.Z` (pins a MinBZK/instrument-registry release; see
+   `vendor/instrument-registry/PROVENANCE.md`).
+2. `npm run forms:build` (builds all forms; dpia, prescandpia and iama go through this converter).
 3. Review `git diff public/forms/*.json` and the dropped-dependencies reports.
 
 ## Extension to Pre-scan DPIA + IAMA (2026-07-28)

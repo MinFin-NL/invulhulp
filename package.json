@@ -10,7 +10,9 @@
     "dev": "vite",
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
-    "forms:build": "node scripts/convert-form.mjs dpia && node scripts/convert-form.mjs prescandpia && node scripts/convert-form.mjs iama",
+    "forms:build": "node scripts/build-forms.mjs",
+    "forms:check": "node scripts/build-forms.mjs && git diff --exit-code --stat -- public/forms scripts/form-overlays",
+    "registry:sync": "node scripts/sync-registry.mjs",
     "beslishulp:build": "node scripts/convert-beslishulp.mjs",
     "test": "vitest run",
     "test:watch": "vitest"

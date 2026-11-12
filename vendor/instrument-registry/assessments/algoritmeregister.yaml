@@ -1,0 +1,793 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: Algoritmeregister-publicatie
+urn: urn:nl:minfin:ir:algoritmeregister:1.0
+version: '1.0'
+description: >-
+  Overheidsorganisaties publiceren hun algoritmes in het Algoritmeregister zodat burgers kunnen zien welke algoritmes worden gebruikt, waarvoor, en met welke waarborgen. Dit formulier verzamelt de publicatiegegevens in het dossier: wat het algoritme doet en waarom, op welke wettelijke grondslag het rust, welke toetsen zijn uitgevoerd (DPIA, IAMA, AIIA), hoe het werkt, welke data het gebruikt, hoe mensen erop toezien en waar iemand terecht kan met vragen of bezwaar. Veel velden zijn af te leiden uit de AI Model Card en de eerder ingevulde assessments.
+
+  Bron: Standaard voor de publicatie van algoritmes — Algoritmeregister van de Nederlandse overheid (Ministerie van Binnenlandse Zaken en Koninkrijksrelaties). https://algoritmes.overheid.nl/ Voorbereidingsformulier: de daadwerkelijke publicatie verloopt via het Algoritmeregister zelf. Het veldenschema upstream wordt doorontwikkeld — controleer de actuele velden vóór publicatie. Roadmap: docs/sporen-en-roadmap.md §4.2 nr. 4.
+tasks:
+- task: 'Deel A: Algemene informatie'
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Identificatie
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Naam van het algoritme
+      description: >-
+        Kies een naam die voor een buitenstaander betekenis heeft. Interne project- of systeemnamen zeggen de lezer van het register niets.
+      id: "1.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_a.naam
+    - task: Welke organisatie gebruikt het algoritme?
+      id: "1.1.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_a.organisatie
+    - task: Welk organisatieonderdeel is verantwoordelijk?
+      id: "1.1.3"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_a.afdeling
+    - task: Beschrijf in het kort wat het algoritme doet
+      description: >-
+        Drie tot vijf zinnen in begrijpelijk Nederlands. Beschrijf de situatie waarin het wordt gebruikt, wat erin gaat en wat eruit komt. Vermijd woorden als 'model', 'score' en 'feature' zonder uitleg.
+      id: "1.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_a.beschrijving
+    - task: Waarom wordt dit algoritme gebruikt?
+      description: >-
+        Wat is het doel, en welk probleem lost het op? Beschrijf ook het beoogde effect: wat gaat er voor burgers of voor de uitvoering beter?
+      id: "1.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_a.doel
+    - task: Welke publicatiecategorie is van toepassing?
+      description: >-
+        Impactvolle algoritmes hebben aanmerkelijke gevolgen voor personen of de samenleving en vragen om een uitgebreidere publicatie dan overige algoritmes.
+      id: "1.1.6"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Impactvol algoritme
+      - value: Overig algoritme
+      - value: Nog te bepalen
+      required_status: true
+      references:
+        invulhulp: ar_a.categorie
+    - task: Toelichting
+      description: 'Onderbouw de indeling: welke gevolgen heeft het algoritme voor mensen?'
+      id: "1.1.6-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.1.6"
+          operator: any
+        action: show
+    - task: Wat is de status van het algoritme?
+      id: "1.1.7"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: In ontwikkeling
+      - value: In gebruik
+      - value: Buiten gebruik
+      required_status: true
+      references:
+        invulhulp: ar_a.status
+    - task: Toelichting
+      description: Noem de datum waarop deze status is ingegaan.
+      id: "1.1.7-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.1.7"
+          operator: any
+        action: show
+    - task: Op welk beleidsterrein wordt het algoritme ingezet?
+      id: "1.1.8"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ar_a.beleidsterrein
+  - task: Toepassing
+    id: "1.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: In welk proces wordt het algoritme gebruikt en op welk moment?
+      description: >-
+        Beschrijf de stap in het proces: gebeurt het vóór, tijdens of na een beoordeling door een medewerker, en wat gebeurt er met de uitkomst?
+      id: "1.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_a.proces
+    - task: Wie worden door het algoritme geraakt?
+      description: >-
+        Noem de groepen mensen of organisaties over wie het algoritme iets bepaalt of adviseert, en om hoeveel gevallen het ongeveer per jaar gaat.
+      id: "1.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_a.geraakt
+    - task: Welk gevolg heeft de uitkomst voor een individu?
+      id: "1.2.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: De uitkomst leidt tot een besluit met rechtsgevolg
+      - value: De uitkomst bepaalt of iemand wordt geselecteerd voor controle of onderzoek
+      - value: De uitkomst is een advies aan een medewerker, die zelfstandig beslist
+      - value: De uitkomst wordt alleen gebruikt voor prioritering of planning
+      - value: De uitkomst wordt alleen geaggregeerd gebruikt, niet per persoon
+      required_status: true
+      references:
+        invulhulp: ar_a.gevolg
+    - task: Toelichting
+      description: Beschrijf concreet wat een betrokkene ervan merkt.
+      id: "1.2.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.2.3"
+          operator: any
+        action: show
+    - task: Is het algoritme een AI-systeem in de zin van de AI-verordening?
+      description: >-
+        Neem hier de uitkomst over van de beslishulp AI-verordening en de EU AI Act-checklist, inclusief de rol (aanbieder of gebruiksverantwoordelijke) en de risicocategorie.
+      id: "1.2.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, en het valt in de categorie hoog risico
+      - value: Ja, met beperkt risico (transparantieverplichtingen)
+      - value: Ja, met minimaal risico
+      - value: Nee, geen AI-systeem in de zin van de verordening
+      - value: Nog niet vastgesteld
+      required_status: true
+      references:
+        invulhulp: ar_a.aivo
+    - task: Toelichting
+      description: Noem de rol onder de verordening en verwijs naar de uitkomst van de beslishulp.
+      id: "1.2.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "1.2.4"
+          operator: any
+        action: show
+- task: 'Deel B: Juridisch kader'
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Grondslag
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Op welke wettelijke grondslag rust de inzet van dit algoritme?
+      description: >-
+        Noem de wet en het artikel dat de taak regelt waarvoor het algoritme wordt ingezet, en bij persoonsgegevens de AVG-grondslag.
+      id: "2.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_b.grondslag
+    - task: Worden er persoonsgegevens verwerkt?
+      id: "2.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, waaronder bijzondere of strafrechtelijke persoonsgegevens
+      - value: Ja, gewone persoonsgegevens
+      - value: Nee
+      required_status: true
+      references:
+        invulhulp: ar_b.persoonsgegevens
+    - task: Toelichting
+      description: Beschrijf welke categorieën gegevens worden gebruikt.
+      id: "2.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.2"
+          operator: any
+        action: show
+    - task: Is de verwerking opgenomen in het verwerkingsregister?
+      id: "2.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee, nog niet
+      - value: Niet van toepassing — geen persoonsgegevens
+      required_status: true
+      references:
+        invulhulp: ar_b.register
+    - task: Toelichting
+      description: Noem het registratienummer of de aanduiding in het register.
+      id: "2.1.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "2.1.3"
+          operator: any
+        action: show
+  - task: Uitgevoerde toetsen
+    id: "2.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke toetsen en assessments zijn uitgevoerd?
+      id: "2.2.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: ar_b.toetsen
+      tasks:
+      - task: Toets
+        id: "2.2.1.1"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: DPIA
+        - value: Pre-scan DPIA
+        - value: IAMA
+        - value: AI Impact Assessment
+        - value: EU AI Act-conformiteitsbeoordeling
+        - value: Data-ethiektoets
+        - value: Quick scan BIO
+        - value: Datakwaliteit-assessment
+        - value: Externe audit of second opinion
+        - value: Overig
+        references:
+          invulhulp: ar_b.toetsen.toets
+      - task: Status
+        id: "2.2.1.2"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Uitgevoerd
+        - value: In uitvoering
+        - value: Gepland
+        - value: Niet van toepassing
+        references:
+          invulhulp: ar_b.toetsen.status
+      - task: Datum
+        id: "2.2.1.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ar_b.toetsen.datum
+      - task: Kernuitkomst
+        id: "2.2.1.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ar_b.toetsen.uitkomst
+      - task: Openbaar
+        id: "2.2.1.5"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Ja
+        - value: Gedeeltelijk
+        - value: Nee
+        references:
+          invulhulp: ar_b.toetsen.openbaar
+    - task: Toelichting op de uitgevoerde toetsen
+      id: "2.2.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Welke normenkaders of standaarden worden gevolgd?
+      id: "2.2.2"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Baseline Informatiebeveiliging Overheid (BIO)
+      - value: AI-verordening (Verordening (EU) 2024/1689)
+      - value: Algemene verordening gegevensbescherming (AVG)
+      - value: Algemene beginselen van behoorlijk bestuur
+      - value: Toetsingskader algoritmes van de Algemene Rekenkamer
+      - value: ISO/IEC 42001 (AI-managementsysteem)
+      - value: NEN- of ISO-normen voor informatiebeveiliging
+      - value: Archiefwet
+      - value: Anders
+      required_status: false
+      references:
+        invulhulp: ar_b.normenkaders
+    - task: Welke grondrechten kunnen door het algoritme worden geraakt, en hoe wordt dat beperkt?
+      description: >-
+        Vat de kern samen uit de IAMA of AIIA. Noem de geraakte rechten, waarom de inzet niettemin gerechtvaardigd is, en welke waarborgen zijn getroffen.
+      id: "2.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_b.grondrechten
+  - task: Rechtsbescherming
+    id: "2.3"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe wordt aan een betrokkene uitgelegd dat en hoe het algoritme is gebruikt?
+      description: >-
+        Beschrijf of dit gebeurt in het besluit zelf, op verzoek, of via een algemene publicatie, en in welke bewoordingen.
+      id: "2.3.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_b.uitleg
+    - task: Hoe kan iemand bezwaar maken of om een herbeoordeling vragen?
+      description: >-
+        Noem de route en of daarbij een mens de zaak opnieuw beoordeelt zonder gebruik van de algoritme-uitkomst.
+      id: "2.3.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_b.bezwaar
+    - task: Waar kunnen burgers terecht met vragen over dit algoritme?
+      id: "2.3.3"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_b.contact
+- task: 'Deel C: Werking en data'
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Werking
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Wat voor type algoritme is het?
+      id: "3.1.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: 'Regelgebaseerd: vaste, door mensen opgestelde regels'
+      - value: 'Statistisch of machine learning: patronen geleerd uit data'
+      - value: Combinatie van regels en machine learning
+      - value: Generatieve AI of taalmodel
+      - value: Anders
+      required_status: true
+      references:
+        invulhulp: ar_c.type
+    - task: Toelichting
+      description: Beschrijf de gebruikte techniek in begrijpelijke taal.
+      id: "3.1.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.1.1"
+          operator: any
+        action: show
+    - task: Hoe komt het algoritme tot een uitkomst?
+      description: >-
+        Leg de werking uit zoals u die aan een geïnteresseerde burger zou uitleggen: welke gegevens wegen mee, wat gebeurt daarmee, en wat komt eruit. Vermeld ook wat u bewust niet publiceert en waarom.
+      id: "3.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_c.werking
+    - task: Bijlagen
+      id: "3.1.2-bijlagen"
+      type:
+      - task_group
+      repeatable: true
+      item_name: bijlage
+      tasks:
+      - task: Bijlage
+        description: Upload een afbeelding. Optioneel kan je een titel, omschrijving en bron toevoegen.
+        id: "3.1.2-bijlagen.1"
+        type:
+        - image
+        repeatable: false
+    - task: Welke kenmerken wegen het zwaarst mee in de uitkomst?
+      description: >-
+        Noem de belangrijkste variabelen. Vermeld uitdrukkelijk of kenmerken worden gebruikt die als indirecte aanduiding van herkomst, gezondheid of sociaal-economische positie kunnen werken — zoals postcode of nationaliteit — en hoe daarmee is omgegaan.
+      id: "3.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_c.kenmerken
+    - task: Is het algoritme zelf ontwikkeld of ingekocht?
+      id: "3.1.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Zelf ontwikkeld
+      - value: Ingekocht bij een leverancier
+      - value: Ingekocht en aangepast
+      - value: Open source, al dan niet aangepast
+      required_status: true
+      references:
+        invulhulp: ar_c.leverancier
+    - task: Toelichting
+      description: Noem de leverancier of de herkomst, en of de werking inzichtelijk is voor de organisatie zelf.
+      id: "3.1.4-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.1.4"
+          operator: any
+        action: show
+    - task: Is de broncode of documentatie openbaar?
+      id: "3.1.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, de broncode is openbaar
+      - value: 'Gedeeltelijk: documentatie wel, broncode niet'
+      - value: Nee
+      - value: Nee, en publicatie zou de werking manipuleerbaar maken
+      required_status: false
+      references:
+        invulhulp: ar_c.broncode
+    - task: Toelichting
+      description: Noem de vindplaats of de reden waarom niet wordt gepubliceerd.
+      id: "3.1.5-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "3.1.5"
+          operator: any
+        action: show
+  - task: Data
+    id: "3.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Welke gegevensbronnen gebruikt het algoritme?
+      id: "3.2.1"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: ar_c.databronnen
+      tasks:
+      - task: Bron
+        id: "3.2.1.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ar_c.databronnen.bron
+      - task: Welke gegevens
+        id: "3.2.1.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ar_c.databronnen.inhoud
+      - task: Gebruikt als
+        id: "3.2.1.3"
+        type:
+        - select_option
+        repeatable: false
+        options:
+        - value: Trainingsdata
+        - value: Invoerdata tijdens gebruik
+        - value: Beide
+        - value: Validatie of controle
+        references:
+          invulhulp: ar_c.databronnen.rol
+      - task: Bronhouder
+        id: "3.2.1.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ar_c.databronnen.houder
+    - task: Toelichting op de gebruikte gegevensbronnen
+      id: "3.2.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Wat is er bekend over de kwaliteit en representativiteit van deze data?
+      description: >-
+        Vat samen wat uit het datakwaliteit-assessment volgt: bekende gebreken, onder- of oververtegenwoordiging van groepen en wat dat voor de uitkomsten betekent.
+      id: "3.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_c.kwaliteit
+    - task: Hoe goed presteert het algoritme, en hoe is dat gemeten?
+      description: >-
+        Noem de gebruikte maatstaf en de uitkomst, met de betekenis erbij: wat betekent deze uitkomst voor het aantal mensen dat ten onrechte wordt geselecteerd of afgewezen? Vermeld ook of de prestatie per groep verschilt.
+      id: "3.2.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_c.prestatie
+    - task: Wat zijn de bekende beperkingen van het algoritme?
+      description: >-
+        In welke situaties werkt het minder goed, en waarvoor mag de uitkomst niet worden gebruikt? Dit veld voorkomt oneigenlijk hergebruik.
+      id: "3.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_c.beperkingen
+- task: 'Deel D: Toezicht en publicatie'
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: Menselijke tussenkomst en toezicht
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Hoe is de menselijke tussenkomst geregeld?
+      description: >-
+        Beschrijf wie de uitkomst beoordeelt, welke informatie die persoon daarbij heeft, en of hij bevoegd en in staat is om af te wijken. Vermeld hoe vaak er in de praktijk wordt afgeweken — dat cijfer laat zien of het toezicht betekenisvol is.
+      id: "4.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_d.menselijk
+    - task: Hoe wordt de werking van het algoritme gemonitord?
+      description: >-
+        Beschrijf welke metingen periodiek plaatsvinden, hoe vaak, wie ernaar kijkt en wat de norm is waarboven wordt ingegrepen. Neem ook op hoe wordt gecontroleerd op verschillen in uitkomsten tussen groepen.
+      id: "4.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_d.monitoring
+    - task: Welke risico's zijn onderkend en welke maatregelen zijn daartegen genomen?
+      id: "4.1.3"
+      type:
+      - task_group
+      repeatable: true
+      required_status: true
+      references:
+        invulhulp: ar_d.risicos
+      tasks:
+      - task: Risico
+        id: "4.1.3.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ar_d.risicos.risico
+      - task: Mogelijk gevolg voor mensen
+        id: "4.1.3.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ar_d.risicos.gevolg
+      - task: Maatregel
+        id: "4.1.3.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: ar_d.risicos.maatregel
+    - task: Toelichting op het risicobeheer
+      id: "4.1.3-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+    - task: Wie kan het algoritme buiten werking stellen en wanneer gebeurt dat?
+      id: "4.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_d.ingrijpen
+    - task: Wie is verantwoordelijk voor het beheer en de doorontwikkeling?
+      id: "4.1.5"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_d.verantwoordelijke
+  - task: Publicatie
+    id: "4.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Is de publicatietekst getoetst op begrijpelijkheid?
+      description: >-
+        Het register is bedoeld voor burgers. Laat de tekst lezen door iemand buiten het project, bij voorkeur met toetsing op taalniveau B1.
+      id: "4.2.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja, getoetst en aangepast
+      - value: Ja, intern gelezen maar niet formeel getoetst
+      - value: Nee, nog niet getoetst
+      required_status: true
+      references:
+        invulhulp: ar_d.begrijpelijk
+    - task: Toelichting
+      description: Beschrijf wie de tekst heeft beoordeeld.
+      id: "4.2.1-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      dependencies:
+      - type: conditional
+        condition:
+          id: "4.2.1"
+          operator: any
+        action: show
+    - task: Welke informatie is bewust niet gepubliceerd, en waarom?
+      description: >-
+        Bijvoorbeeld details die de werking manipuleerbaar zouden maken, of gegevens die tot personen herleidbaar zijn. Vermeld de weglating expliciet: onvermelde weglatingen ondermijnen het doel van het register.
+      id: "4.2.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_d.weggelaten
+    - task: Datum van publicatie of laatste actualisatie
+      id: "4.2.3"
+      type:
+      - date
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_d.publicatiedatum
+    - task: Wanneer en bij welke gebeurtenissen wordt de publicatie bijgewerkt?
+      description: >-
+        Noem zowel een vaste termijn als de gebeurtenissen die tussentijds tot bijwerking leiden: een nieuwe versie van het model, een gewijzigd doel, een nieuwe databron of een gewijzigde status.
+      id: "4.2.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: ar_d.actualisatie
+    - task: Onder welke vermelding is het algoritme in het register opgenomen?
+      description: Vul de link of het registratienummer in zodra de publicatie is geplaatst.
+      id: "4.2.5"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: ar_d.vindplaats

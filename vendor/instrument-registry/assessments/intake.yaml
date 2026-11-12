@@ -1,0 +1,445 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: Intakeformulier nieuwe IV-verzoeken
+urn: urn:nl:minfin:ir:intake:2.0
+version: '2.0'
+description: >-
+  Het intakeformulier wordt gebruikt om nieuwe IV-verzoeken aan te melden voor beoordeling door het intakeboard. Op basis van dit formulier wordt bepaald of het verzoek wordt toegelaten tot het reguliere dienstverlening-, project- of innovatieportfolioproces.
+
+  Bron: Intakeformulier IV-verzoek (Ministerie van Financiën). Digitalisering van het eigen intakeformulier; geen extern origineel.
+tasks:
+- task: 'Deel 1: Gegevens opdrachtgever en contactpersoon'
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 1. Contactgegevens
+    description: Vul de contactgegevens in van de opdrachtgever en het aanspreekpunt voor dit IV-verzoek.
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Naam opdrachtgever
+      id: "1.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: intake_a.naam_opdrachtgever
+    - task: Directie / afdeling(en)
+      id: "1.1.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: intake_a.directie_afdeling
+    - task: Naam contactpersoon
+      id: "1.1.3"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: intake_a.contactpersoon
+    - task: E-mailadres contactpersoon
+      id: "1.1.4"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: intake_a.email
+    - task: Telefoonnummer contactpersoon
+      id: "1.1.5"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: intake_a.telefoonnummer
+    - task: Melding nummer ITS Topdesk
+      id: "1.1.6"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: intake_a.topdesk_nummer
+    - task: Datum aanlevering intakeformulier
+      id: "1.1.7"
+      type:
+      - date
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: intake_a.datum_aanlevering
+    - task: Behandeling aanvraag
+      id: "1.1.8"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ter beoordeling
+      - value: Ter info
+      - value: Ter advisering
+      required_status: true
+      references:
+        invulhulp: intake_a.behandeling_aanvraag
+- task: 'Deel 2: Details aanvraag'
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 2. Inhoud van het IV-verzoek
+    description: >-
+      Beschrijf wat er wordt aangevraagd, wat de aanleiding en doelstelling zijn en welke impact dit heeft.
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Omschrijving IV-verzoek
+      description: >-
+        Geef hier een algemene omschrijving van het IV-verzoek. Noem daarbij in elk geval wat het probleem is en wat je met het IV-verzoek wilt bereiken.
+      id: "2.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: intake_b.omschrijving
+    - task: Aanleiding
+      description: Op te lossen problemen, urgentie, wettelijke verplichtingen, doelstellingen organisatie etc.
+      id: "2.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: intake_b.aanleiding
+    - task: Doelstelling
+      description: Wanneer is het succesvol, hoe draagt het bij aan de organisatie.
+      id: "2.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: intake_b.doelstelling
+    - task: Mogelijke oplossingen
+      description: >-
+        Geef hier aan of er al onderzoek is gedaan naar mogelijke oplossingen of alternatieven en welke andere zaken van belang zijn om te weten.
+      id: "2.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: intake_b.oplossingen
+    - task: Mogelijke impact
+      description: >-
+        Doelgroep, omvang toekomstige gebruikers, benodigde wijzigingen in systemen, organisatie en processen.
+      id: "2.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: intake_b.impact
+- task: 'Deel 3: Planning en resources'
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 3. Planning en resources
+    description: Geef inzicht in de gewenste planning en de resources die naar verwachting nodig zijn.
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Beoogde start-/einddatum indien van toepassing
+      description: Bijv. onderbouwing deadlines in verband met nieuwe wetgeving.
+      id: "3.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: intake_c.planning
+    - task: Welke resources zijn er naar verwachting nodig voor de vervolgstappen?
+      description: Zowel IT- als business-resources benoemen.
+      id: "3.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: intake_c.resources
+- task: 'Deel 4: Afhankelijkheden'
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 4. Afhankelijkheden
+    description: Beschrijf relaties, afhankelijkheden en risico's van dit initiatief.
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Is er een relatie en/of afhankelijkheid met andere activiteiten/projecten?
+      id: "4.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: intake_d.afhankelijkheden
+    - task: >-
+        Zijn er risico's of andere factoren die belangrijk zijn voor het succesvol afronden van dit initiatief?
+      id: "4.1.2"
+      type:
+      - task_group
+      repeatable: true
+      required_status: false
+      references:
+        invulhulp: intake_d.risicos
+      tasks:
+      - task: Risico of factor
+        id: "4.1.2.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: intake_d.risicos.risico
+      - task: Impact
+        id: "4.1.2.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: intake_d.risicos.impact
+      - task: Beheersmaatregel
+        id: "4.1.2.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: intake_d.risicos.beheersmaatregel
+    - task: Toelichting (u kunt de risico's hier ook in gewone tekst beschrijven)
+      id: "4.1.2-toelichting"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+- task: 'Deel 5: Budget'
+  id: "5"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 5. Budget
+    description: Geef aan welk type budget van toepassing is en hoe het vervolgtraject wordt aangepakt.
+    id: "5.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Geef aan welk type budget van toepassing is en of dit later moet worden aangevraagd
+      id: "5.1.1"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Centraal projectenbudget
+      - value: Centraal beheerbudget
+      - value: Innovatie budget
+      - value: Decentraal lijnbudget
+      required_status: true
+      references:
+        invulhulp: intake_e.budget_type
+    - task: Geef indien mogelijk een globale raming van de kosten
+      id: "5.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: intake_e.kosten_raming
+    - task: Verzoek tot opvolging
+      description: Hoe wil de aanvrager het vervolgtraject aanpakken.
+      id: "5.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Project
+      - value: Innovatie
+      - value: Reguliere dienstverlening
+      required_status: true
+      references:
+        invulhulp: intake_e.opvolging
+- task: 'Deel 6: Beoordeling en besluit Intakeboard'
+  id: "6"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 6. Beoordeling en besluit Intakeboard
+    description: In te vullen door de servicemanager, na beoordeling van de aanvraag door het intakeboard.
+    id: "6.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Voldoet de aanvraag geheel aan de geëiste criteriapunten?
+      description: 'Bij ''Ja'': GO Regulier/Project/Innovatie.'
+      id: "6.1.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: intake_f.criteria_geheel
+    - task: Voldoet de aanvraag gedeeltelijk aan de geëiste criteriapunten?
+      description: 'Bij ''Ja'': GO onder voorbehoud.'
+      id: "6.1.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: intake_f.criteria_gedeeltelijk
+    - task: Voldoet de aanvraag niet aan de geëiste criteriapunten?
+      description: 'Bij ''Ja'': NO-GO, afwijzing.'
+      id: "6.1.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: intake_f.criteria_niet
+    - task: Toelichting
+      id: "6.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: intake_f.toelichting_besluit
+  - task: Criteria inzet WEM (indien als oplossing aangevraagd)
+    id: "6.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: 1. Het is uitsluitend ter ondersteuning van taken binnen Financiën?
+      id: "6.2.1"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: intake_f.wem_1
+    - task: 2. Het is uitsluitend ter ondersteuning van niet kritische bedrijfsprocessen?*
+      description: >-
+        * Dit proces speelt een primaire rol voor doelstelling van de organisatie. Het bestaansrecht van de organisatie wordt aan dit proces ontleend. Als de activiteit langer dan één week stilvalt of niet goed verloopt heeft dit ernstige gevolgen voor het voortbestaan van de organisatie, c.q. het brengt de organisatie in een hachelijke positie.
+      id: "6.2.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: intake_f.wem_2
+    - task: 3. Er zijn geen standaardmarktproducten of Rijksvoorzieningen beschikbaar/bekend?
+      id: "6.2.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: intake_f.wem_3
+    - task: >-
+        4. Het is ten behoeve van ondersteunende, repeterende, eenvoudige processen die herhaaldelijk worden uitgevoerd en niet complex van aard zijn (dus bijv. geen ketenproces) en één eindverantwoordelijke hebben?
+      id: "6.2.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: intake_f.wem_4
+    - task: 5. Het is uitsluitend bedoeld voor taakondersteuning van medewerkers (front-end applicatie)?
+      id: "6.2.5"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: intake_f.wem_5
+    - task: 6. De applicatie is niet bedoeld voor archiveringsdoeleinden?
+      id: "6.2.6"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: intake_f.wem_6
+    - task: 7. Er is sprake van een beperkt aantal geautomatiseerde koppelvlakken met de omgeving?
+      id: "6.2.7"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Ja
+      - value: Nee
+      required_status: false
+      references:
+        invulhulp: intake_f.wem_7

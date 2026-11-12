@@ -1,0 +1,194 @@
+{
+  "_comment": "Overlay voor euaiact: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/euaiact.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "euaiact",
+    "registryUrn": "urn:nl:aivt:tr:ca:1.0",
+    "title": "EU AI Act Compliance Checklist",
+    "source": {
+      "instrument": "AI Body of Knowledge (AI-BOK) — Template 3: EU AI Act Compliance Checklist",
+      "publisher": "Jan Willem van Veen",
+      "version": "v1.0 (2026)",
+      "reference": "Appendix 'Templates, Checklists and Quick Start', Template 3 (p. 196–198); sluitsectie uit MinBZK/task-registry instrument conformity_assessment_eu_ai_act (urn:nl:aivt:tr:ca:1.0)",
+      "url": "https://github.com/MinBZK/task-registry/blob/main/instruments/conformity_assessment_eu_ai_act.yaml",
+      "derivation": "harmonized",
+      "note": "AI-BOK-templates mogen vrij worden gebruikt en aangepast (p. 204), met bronvermelding. De velden van de EU-conformiteitsverklaring dragen hun URN als officialId."
+    },
+    "aiContext": "Dit is een EU AI Act Compliance Checklist: hiermee wordt het risiconiveau van een AI-systeem onder de AI-verordening (Verordening (EU) 2024/1689) bepaald (onaanvaardbaar, hoog, beperkt of minimaal) en per niveau cumulatief nagelopen aan welke verplichtingen wordt voldaan. De checklist sluit af met de EU-conformiteitsverklaring voor hoog-risico AI-systemen (artikel 47 en bijlage V AI-verordening), geharmoniseerd met het MinBZK task-registry instrument 'conformity_assessment_eu_ai_act' (urn:nl:aivt:tr:ca:1.0). Schrijf in juridische en compliance-termen; gebruik de rolbegrippen 'aanbieder' en 'gebruiksverantwoordelijke' uit artikel 3 AI-verordening.",
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "EU AI Act Checklist",
+      "docTitle": "EU AI Act Compliance Checklist",
+      "footerLabel": "EU AI Act Compliance Checklist",
+      "filename": "EU-AI-Act-Checklist.pdf",
+      "systemNamePlaceholder": "Bijv. Fraudedetectiemodel Toeslagen v2",
+      "homeContent": {
+        "notice": "Deze checklist is een hulpmiddel en geen juridisch advies. Bepaal eerst het risiconiveau van het AI-systeem; werk daarna de checklist voor dat niveau af. De niveaus zijn cumulatief: voor 'hoog risico' gelden ook de items van 'minimaal' en 'beperkt'. De EU-conformiteitsverklaring (Deel D) is alleen verplicht voor hoog-risico AI-systemen.",
+        "description": "De EU AI Act Compliance Checklist helpt bij het classificeren van een AI-systeem onder de AI-verordening (Verordening (EU) 2024/1689) en het cumulatief nalopen van de bijbehorende verplichtingen. De checklist is gebaseerd op de AI Body of Knowledge (Template 3, EU AI Act Compliance Checklist) en geharmoniseerd met het EU-conformiteitsverklaring-instrument van het MinBZK task-registry (urn:nl:aivt:tr:ca:1.0).",
+        "steps": [
+          "Systeemidentificatie: naam, aanbieder, gebruiksverantwoordelijke en beoogd doel",
+          "Risicoclassificatie: verboden praktijken uitsluiten en het risiconiveau bepalen",
+          "Verplichtingen: cumulatief nalopen per risiconiveau (minimaal, beperkt, hoog)",
+          "EU-conformiteitsverklaring: opstellen voor hoog-risico AI-systemen (bijlage V)"
+        ],
+        "buttonLabel": "Starten met de checklist"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "eaa_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "eaa_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "eaa_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "eaa_d"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "eaa_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "eaa_a1",
+            "questions": [
+              {
+                "id": "eaa_a.systeemnaam",
+                "officialId": "urn:nl:aivt:tr:ca:1.0:1.0"
+              },
+              {
+                "id": "eaa_a.aanbieder",
+                "officialId": "urn:nl:aivt:tr:ca:1.0:2.0"
+              },
+              {
+                "id": "eaa_a.rol"
+              },
+              {
+                "id": "eaa_a.doel",
+                "allowAttachments": true
+              },
+              {
+                "id": "eaa_a.opsteller"
+              },
+              {
+                "id": "eaa_a.datum"
+              }
+            ]
+          },
+          {
+            "id": "eaa_a2",
+            "questions": [
+              {
+                "id": "eaa_a.verboden_uitgesloten"
+              },
+              {
+                "id": "eaa_a.verboden_toelichting"
+              }
+            ]
+          },
+          {
+            "id": "eaa_a3",
+            "questions": [
+              {
+                "id": "eaa_a.risiconiveau"
+              },
+              {
+                "id": "eaa_a.risiconiveau_onderbouwing"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "eaa_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "eaa_b1",
+            "questions": [
+              {
+                "id": "eaa_b.minimaal"
+              },
+              {
+                "id": "eaa_b.minimaal_toelichting"
+              }
+            ]
+          },
+          {
+            "id": "eaa_b2",
+            "questions": [
+              {
+                "id": "eaa_b.beperkt"
+              },
+              {
+                "id": "eaa_b.beperkt_toelichting"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "eaa_c",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "eaa_c1",
+            "questions": [
+              {
+                "id": "eaa_c.hoog"
+              },
+              {
+                "id": "eaa_c.hoog_toelichting",
+                "allowAttachments": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "eaa_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "eaa_d1",
+            "questions": [
+              {
+                "id": "eaa_d.verklaringen"
+              },
+              {
+                "id": "eaa_d.geharmoniseerde_normen",
+                "officialId": "urn:nl:aivt:tr:ca:1.0:6.0",
+                "allowAttachments": true
+              },
+              {
+                "id": "eaa_d.aangemelde_instantie",
+                "officialId": "urn:nl:aivt:tr:ca:1.0:7.0"
+              },
+              {
+                "id": "eaa_d.ondertekening",
+                "officialId": "urn:nl:aivt:tr:ca:1.0:8.0"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

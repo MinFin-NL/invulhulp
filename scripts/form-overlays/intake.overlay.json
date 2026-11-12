@@ -1,0 +1,254 @@
+{
+  "_comment": "Overlay voor intake: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/intake.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "intake",
+    "title": "Intakeformulier nieuwe IV-verzoeken",
+    "source": {
+      "instrument": "Intakeformulier IV-verzoek",
+      "publisher": "Ministerie van Financiën",
+      "reference": "Intern intakeformulier voor het IV-intakeboard",
+      "derivation": "original",
+      "note": "Digitalisering van het eigen intakeformulier; geen extern origineel."
+    },
+    "aiContext": "Dit is een intakeformulier waarmee een organisatieonderdeel van het Ministerie van Financiën een nieuw IV-verzoek (IT-/informatievoorziening) aanmeldt bij het intakeboard. De antwoorden moeten zakelijk en feitelijk zijn en gaan over de opdrachtgever, het probleem dat wordt opgelost, de aanleiding, de doelstelling, de doelgroep, de urgentie, de afhankelijkheden en het benodigde budget.",
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "Intakeformulier",
+      "docTitle": "Intakeformulier nieuwe IV-verzoeken",
+      "footerLabel": "Intakeformulier – MinFin",
+      "filename": "Intakeformulier.pdf",
+      "systemNamePlaceholder": "Bijv. Klantportaal medewerkers v1",
+      "homeContent": {
+        "notice": "Dit is een digitale hulptool bij het invullen van het intakeformulier voor nieuwe IV-verzoeken. Stem het formulier af met de vertegenwoordiger van uw organisatieonderdeel in de portfolioboard voordat u het indient.",
+        "description": "Het intakeformulier wordt gebruikt om nieuwe IV-verzoeken aan te melden voor beoordeling door het intakeboard. Op basis van dit formulier wordt bepaald of het verzoek wordt toegelaten tot het reguliere dienstverlening-, project- of innovatieportfolioproces.",
+        "steps": [
+          "Gegevens opdrachtgever en contactpersoon",
+          "Details van de aanvraag: omschrijving, aanleiding, doelstelling en impact",
+          "Planning en resources",
+          "Afhankelijkheden en risico's",
+          "Budget",
+          "Beoordeling en besluit door het intakeboard (servicemanager)"
+        ],
+        "buttonLabel": "Starten met het intakeformulier"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "intake_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "intake_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "intake_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "intake_d"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "intake_e"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "intake_f"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "intake_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "intake_a1",
+            "questions": [
+              {
+                "id": "intake_a.naam_opdrachtgever"
+              },
+              {
+                "id": "intake_a.directie_afdeling"
+              },
+              {
+                "id": "intake_a.contactpersoon"
+              },
+              {
+                "id": "intake_a.email",
+                "format": "email"
+              },
+              {
+                "id": "intake_a.telefoonnummer",
+                "format": "phone"
+              },
+              {
+                "id": "intake_a.topdesk_nummer"
+              },
+              {
+                "id": "intake_a.datum_aanlevering"
+              },
+              {
+                "id": "intake_a.behandeling_aanvraag"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "intake_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "intake_b1",
+            "questions": [
+              {
+                "id": "intake_b.omschrijving"
+              },
+              {
+                "id": "intake_b.aanleiding"
+              },
+              {
+                "id": "intake_b.doelstelling"
+              },
+              {
+                "id": "intake_b.oplossingen"
+              },
+              {
+                "id": "intake_b.impact"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "intake_c",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "intake_c1",
+            "questions": [
+              {
+                "id": "intake_c.planning"
+              },
+              {
+                "id": "intake_c.resources"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "intake_d",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "intake_d1",
+            "questions": [
+              {
+                "id": "intake_d.afhankelijkheden"
+              },
+              {
+                "id": "intake_d.risicos",
+                "optionalTable": true,
+                "notesLabel": "Toelichting (u kunt de risico's hier ook in gewone tekst beschrijven)",
+                "columns": [
+                  {
+                    "id": "risico"
+                  },
+                  {
+                    "id": "impact"
+                  },
+                  {
+                    "id": "beheersmaatregel"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "intake_e",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "intake_e1",
+            "questions": [
+              {
+                "id": "intake_e.budget_type"
+              },
+              {
+                "id": "intake_e.kosten_raming"
+              },
+              {
+                "id": "intake_e.opvolging"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "intake_f",
+        "part": "D",
+        "aiFill": false,
+        "subsections": [
+          {
+            "id": "intake_f1",
+            "questions": [
+              {
+                "id": "intake_f.criteria_geheel"
+              },
+              {
+                "id": "intake_f.criteria_gedeeltelijk"
+              },
+              {
+                "id": "intake_f.criteria_niet"
+              },
+              {
+                "id": "intake_f.toelichting_besluit"
+              }
+            ]
+          },
+          {
+            "id": "intake_f2",
+            "questions": [
+              {
+                "id": "intake_f.wem_1"
+              },
+              {
+                "id": "intake_f.wem_2"
+              },
+              {
+                "id": "intake_f.wem_3"
+              },
+              {
+                "id": "intake_f.wem_4"
+              },
+              {
+                "id": "intake_f.wem_5"
+              },
+              {
+                "id": "intake_f.wem_6"
+              },
+              {
+                "id": "intake_f.wem_7"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

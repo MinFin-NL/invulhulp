@@ -1,0 +1,397 @@
+# yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
+
+name: PPM Aanbiedingsformulier (Outline Businesscase)
+urn: urn:nl:minfin:ir:aanbiedingsformulier:2.0
+version: '2.0'
+description: >-
+  Met het PPM Aanbiedingsformulier (outline businesscase) wordt een I-projectinitiatief aangemeld voor opname in het centrale projectenportfolio van het Beleidsdepartement en/of budget aangevraagd voor de start van de initiatiefase.
+
+  Bron: PPM-aanbiedingsformulier (outline business case) (Ministerie van Financiën, versie 2.0). Digitalisering van het eigen aanbiedingsformulier; geen extern origineel.
+tasks:
+- task: Algemeen
+  id: "1"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 1. Projectidentificatie
+    description: Basisgegevens over het project en de betrokkenen.
+    id: "1.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Naam project
+      id: "1.1.1"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_a.naam_project
+    - task: Directie / Afdeling(en)
+      id: "1.1.2"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_a.directie_afdeling
+    - task: Contactpersoon
+      id: "1.1.3"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_a.contactpersoon
+    - task: E-mailadres
+      id: "1.1.4"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_a.email
+    - task: Telefoonnummer
+      id: "1.1.5"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: aa_a.telefoonnummer
+    - task: Datum aanmelden
+      id: "1.1.6"
+      type:
+      - date
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_a.datum_aanmelden
+    - task: Naam opdrachtgever
+      id: "1.1.7"
+      type:
+      - text_input
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_a.naam_opdrachtgever
+    - task: Naam projectleider
+      id: "1.1.8"
+      type:
+      - text_input
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: aa_a.naam_projectleider
+  - task: Gevraagd besluit
+    description: >-
+      Geef aan welk besluit wordt gevraagd. In de initiatiefase wordt het projectplan opgesteld, inclusief Project Start Architectuur (PSA), en is het verplicht een quickscan Informatiebeveiliging (IB) en pre-scan DPIA en – indien nodig – een cloudtoets uit te voeren.
+    id: "1.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Gevraagd besluit
+      id: "1.2.1"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Opname project in projectenportfolio
+      - value: Budgetaanvraag initiatiefase
+      required_status: true
+      references:
+        invulhulp: aa_a.gevraagd_besluit
+- task: 'Business: Belang (nut-noodzaak) / toegevoegde waarde'
+  id: "2"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 2. Projectbeschrijving en toegevoegde waarde
+    description: Beschrijf het belang van het project en de bijdrage aan de strategische doelstellingen.
+    id: "2.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Aanleiding
+      description: >-
+        Beschrijf de op te lossen problemen, de urgentie, eventuele wettelijke verplichtingen en de doelstellingen van de organisatie.
+      id: "2.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_b.aanleiding
+    - task: Doelstelling (strategische context)
+      description: Wanneer is het project succesvol en hoe draagt het bij aan de organisatiedoelstellingen?
+      id: "2.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_b.doelstelling
+    - task: 'Is het project het gevolg van:'
+      id: "2.1.3"
+      type:
+      - checkbox_option
+      repeatable: false
+      valueType: string[]
+      options:
+      - value: Wet- en regelgeving
+      - value: Bestuurlijke interdepartementale afspraken / verplichtingen
+      - value: Onvermijdelijke vervangingsinvestering
+      - value: Politieke en tijdgebonden noodzaak, opdracht of toezegging (bijv. aan de Kamer)
+      required_status: true
+      references:
+        invulhulp: aa_b.gevolg_van
+    - task: Licht toe
+      description: Licht de aangevinkte aanleiding(en) nader toe.
+      id: "2.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: aa_b.gevolg_toelichting
+    - task: Mogelijke oplossingen
+      description: >-
+        Geef aan of er al onderzoek is gedaan naar mogelijke oplossingen of alternatieven en welke andere zaken van belang zijn om te weten.
+      id: "2.1.5"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_b.mogelijke_oplossingen
+- task: Afhankelijkheden, risico's en impact
+  id: "3"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 3. Afhankelijkheden, risico's en impact
+    description: Beschrijf de afhankelijkheden, risico's en de impact op gebruikers, organisatie en techniek.
+    id: "3.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Afhankelijkheden
+      description: Is er een relatie en/of afhankelijkheid met andere activiteiten of projecten?
+      id: "3.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: aa_c.afhankelijkheden
+    - task: Risico's
+      description: >-
+        Zijn er risico's of andere factoren die belangrijk zijn voor het succesvol afronden van dit initiatief? Wat gebeurt er als het project niet wordt uitgevoerd?
+      id: "3.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_c.risicos
+    - task: Mogelijke impact op gebruikers, processen en organisatie
+      description: >-
+        Denk aan de doelgroep, de omvang van toekomstige gebruikers en de benodigde wijzigingen in organisatie en processen.
+      id: "3.1.3"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_c.impact_gebruikers
+    - task: Mogelijke impact op technische systemen & aspecten
+      description: Denk aan de benodigde wijzigingen in systemen en/of de beheerorganisatie.
+      id: "3.1.4"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: aa_c.impact_techniek
+- task: Planning
+  id: "4"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 4. Planning en resources
+    description: Geef de beoogde planning en de benodigde resources.
+    id: "4.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Beoogde start- / einddatum
+      description: Benoem de start- en einddatum en eventuele fasering van zowel de initiatiefase als de projectfase.
+      id: "4.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_d.start_einddatum
+    - task: Is het project tijdgevoelig?
+      description: >-
+        Geef een korte toelichting over de urgentie. Zijn er harde deadlines of kan het project eventueel later worden uitgevoerd, bijvoorbeeld als het door gebrek aan budget of capaciteit niet past?
+      id: "4.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: aa_d.tijdgevoelig
+    - task: Benodigde resources
+      description: >-
+        Denk aan alle documenten en resources die nodig zijn voor het opstellen van het projectplan (projectleider, medewerkers uit de business, PSA, quickscan, DPIA, cloudtoets etc.).
+      id: "4.1.3"
+      type:
+      - task_group
+      repeatable: true
+      required_status: false
+      references:
+        invulhulp: aa_d.resources
+      tasks:
+      - task: Resource
+        id: "4.1.3.1"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: aa_d.resources.resource
+      - task: Activiteit
+        id: "4.1.3.2"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: aa_d.resources.activiteit
+      - task: Uren/week
+        id: "4.1.3.3"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: aa_d.resources.uren_week
+      - task: Gewenste startdatum
+        id: "4.1.3.4"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: aa_d.resources.startdatum
+      - task: Gewenste einddatum
+        id: "4.1.3.5"
+        type:
+        - text_input
+        repeatable: false
+        references:
+          invulhulp: aa_d.resources.einddatum
+- task: Budget (kosten en opbrengsten)
+  id: "5"
+  type:
+  - task_group
+  repeatable: false
+  tasks:
+  - task: 5. Baten
+    description: Beschrijf de verwachte opbrengsten van het project.
+    id: "5.1"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Kwantitatieve baten (financiële opbrengsten)
+      description: >-
+        Geef waar mogelijk de kwantitatieve baten van de nieuwe situatie aan in euro's ten opzichte van de huidige situatie.
+      id: "5.1.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: aa_e.kwantitatieve_baten
+    - task: Kwalitatieve baten (niet-financiële opbrengsten)
+      description: >-
+        Kwantificeer de niet-financiële opbrengsten van de nieuwe situatie ten opzichte van de huidige situatie.
+      id: "5.1.2"
+      type:
+      - open_text
+      repeatable: false
+      required_status: true
+      references:
+        invulhulp: aa_e.kwalitatieve_baten
+  - task: 6. Kosten
+    description: Geef een indicatie van de eenmalige projectkosten en jaarlijkse onderhoudskosten.
+    id: "5.2"
+    type:
+    - task_group
+    repeatable: false
+    tasks:
+    - task: Is er budget nodig voor het uitvoeren van de initiatiefase?
+      description: >-
+        Wanneer er budget nodig is uit het centrale projectenbudget voor het uitvoeren van de initiatiefase, geef dan hier een gespecificeerde (p×q) kostenraming inclusief BTW, bijvoorbeeld voor het inhuren van een projectleider.
+      id: "5.2.1"
+      type:
+      - open_text
+      repeatable: false
+      required_status: false
+      references:
+        invulhulp: aa_e.budget_initiatiefase
+    - task: Raming projectkosten (investering)
+      description: >-
+        Geef een ruwe indicatie van de eenmalige projectkosten die nodig zijn voor het uitvoeren van het project en onderbouw waarop dit is gebaseerd.
+      id: "5.2.2"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: < €100K
+      - value: '> €100K en < €250K'
+      - value: '> €250K en < €500K'
+      - value: '> €500K en < €1.000K'
+      - value: '> €1.000K (komt in aanmerking voor een CIO-oordeel)'
+      required_status: true
+      references:
+        invulhulp: aa_e.raming_projectkosten
+    - task: Gewenste financiering van de eenmalige projectkosten
+      id: "5.2.3"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: Centraal projectenbudget
+      - value: Decentraal lijnbudget
+      required_status: true
+      references:
+        invulhulp: aa_e.financiering
+    - task: Raming jaarlijkse onderhoudskosten (exploitatiebudget)
+      description: >-
+        Geef een ruwe inschatting van de jaarlijkse beheerkosten die nodig zijn na afronding van het project.
+      id: "5.2.4"
+      type:
+      - radio_option
+      repeatable: false
+      valueType: string
+      options:
+      - value: NVT
+      - value: < €100K
+      - value: '> €100K en < €200K'
+      - value: '> €200K en < €300K'
+      - value: '> €300K'
+      required_status: true
+      references:
+        invulhulp: aa_e.onderhoudskosten

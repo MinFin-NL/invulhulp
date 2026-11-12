@@ -1,0 +1,284 @@
+{
+  "_comment": "Overlay voor datakwaliteit: de structuur en presentatie van dit formulier (secties, volgorde, vraag-id's, part/kicker, navigatie, meta, features, AI-hints, formats als email/phone, optionsFrom, tabelgrootte). De inhoud (vraagtekst, toelichting, opties, verplicht, type, voorwaarden, kolommen, titels van (sub)secties) komt uit vendor/instrument-registry/assessments/datakwaliteit.yaml via references.invulhulp = vraag-id. Inhoud wijzigen = PR op MinBZK/instrument-registry. Bouwen: npm run forms:build.",
+  "form": {
+    "id": "datakwaliteit",
+    "title": "Datakwaliteit-assessment",
+    "aiContext": "Dit is een datakwaliteit-assessment (DQA) voor het Ministerie van Financiën, afgeleid van DAMA-DMBOK2 hoofdstuk 13 (Data Quality) en uitgelijnd met ISO/IEC 25012 en de DAMA-NL DDQ-dimensies. Het beoordeelt per dataset of gegevensverwerking de kwaliteit langs de kerndimensies volledigheid, uniciteit, tijdigheid, validiteit, juistheid en consistentie, en legt datakwaliteitsregels, meetmethoden, bevindingen en verbeterafspraken vast. Schrijf in feitelijke, meetbare data-managementtermen: noem waar mogelijk aantallen, percentages, meetfrequenties en normen in plaats van kwalitatieve uitspraken.",
+    "source": {
+      "instrument": "DAMA-DMBOK2 — Data Management Body of Knowledge, 2nd Edition",
+      "publisher": "DAMA International",
+      "version": "2nd Edition (2017)",
+      "reference": "hoofdstuk 13 (Data Quality); dimensies uitgelijnd met ISO/IEC 25012 en DAMA-NL DDQ",
+      "derivation": "derived",
+      "note": "DAMA-DMBOK is een referentiekader zonder invul-template; dit formulier is afgeleid van de daarin beschreven DQ-dimensies, regels en deliverables. Geen tekst overgenomen. Ontwerpspec: docs/DAMA-DMBOK-form-opportunities.md §4A."
+    },
+    "meta": {
+      "homeComponent": "HomePage",
+      "exportLabel": "Datakwaliteit-assessment",
+      "docTitle": "Datakwaliteit-assessment (DQA)",
+      "footerLabel": "Datakwaliteit-assessment – MinFin",
+      "filename": "Datakwaliteit-assessment.pdf",
+      "systemNamePlaceholder": "Bijv. Basisadministratie debiteuren v2",
+      "homeContent": {
+        "notice": "Een datakwaliteit-assessment beoordeelt de dataset waarop een systeem, model of verwerking steunt. Betrek de data-eigenaar en de datasteward: zij kennen de bron, de regels en de bekende gebreken. Let op — een dossier biedt op dit moment ruimte aan één exemplaar van dit formulier. Steunt het project op meerdere datasets, beoordeel dan hier de belangrijkste en neem de overige op als losse bijlage of in een apart dossier.",
+        "description": "Dit assessment brengt de kwaliteit van een dataset of gegevensverwerking in kaart langs de kerndimensies uit DAMA-DMBOK: volledigheid, uniciteit, tijdigheid, validiteit, juistheid en consistentie. U legt per dimensie een oordeel met onderbouwing vast, beschrijft de datakwaliteitsregels en hoe die gemeten worden, registreert de geconstateerde issues en maakt afspraken over verbetering en bewaking. De uitkomst onderbouwt de datavragen in de DPIA, de AI Impact Assessment en de Model Card.",
+        "steps": [
+          "Deel A – Scope: welke dataset of verwerking, wie is eigenaar, waarvoor wordt de data gebruikt",
+          "Deel B – Kwaliteitsdimensies: oordeel en onderbouwing per DQ-dimensie",
+          "Deel C – Regels en meting: datakwaliteitsregels, meetmethode en meetfrequentie",
+          "Deel D – Bevindingen en verbetering: issues, verbeteracties, DQ-afspraken en restrisico"
+        ],
+        "buttonLabel": "Starten met het datakwaliteit-assessment"
+      }
+    },
+    "features": {
+      "riskClassification": false,
+      "decisionGate": false,
+      "conditionalPartB": false
+    },
+    "navigation": [
+      {
+        "type": "subsections",
+        "sectionId": "dq_a"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "dq_b"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "dq_c"
+      },
+      {
+        "type": "subsections",
+        "sectionId": "dq_d"
+      },
+      {
+        "type": "specialView",
+        "viewId": "summary",
+        "label": "Naar samenvatting"
+      }
+    ],
+    "sections": [
+      {
+        "id": "dq_a",
+        "part": "A",
+        "subsections": [
+          {
+            "id": "dqa1",
+            "questions": [
+              {
+                "id": "dq_a.dataset"
+              },
+              {
+                "id": "dq_a.doel"
+              },
+              {
+                "id": "dq_a.aigebruik",
+                "followUp": "Licht toe om welk systeem of model het gaat."
+              },
+              {
+                "id": "dq_a.persoonsgegevens",
+                "followUp": "Licht toe welke categorieën gegevens het betreft."
+              },
+              {
+                "id": "dq_a.omvang"
+              }
+            ]
+          },
+          {
+            "id": "dqa2",
+            "questions": [
+              {
+                "id": "dq_a.eigenaar"
+              },
+              {
+                "id": "dq_a.steward"
+              },
+              {
+                "id": "dq_a.herkomst",
+                "allowAttachments": true
+              },
+              {
+                "id": "dq_a.brontype"
+              },
+              {
+                "id": "dq_a.eerder",
+                "followUp": "Beschrijf wanneer, door wie en met welke uitkomst."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dq_b",
+        "part": "B",
+        "subsections": [
+          {
+            "id": "dqb1",
+            "questions": [
+              {
+                "id": "dq_b.volledigheid",
+                "followUp": "Onderbouw het oordeel met de gemeten vulgraad en de gehanteerde norm."
+              },
+              {
+                "id": "dq_b.uniciteit",
+                "followUp": "Onderbouw het oordeel: welke sleutel is gebruikt en hoeveel duplicaten zijn aangetroffen?"
+              },
+              {
+                "id": "dq_b.tijdigheid",
+                "followUp": "Onderbouw het oordeel: welke doorlooptijd is gemeten en welke is vereist?"
+              },
+              {
+                "id": "dq_b.validiteit",
+                "followUp": "Onderbouw het oordeel: welke regels zijn getoetst en hoeveel schendingen zijn gevonden?"
+              },
+              {
+                "id": "dq_b.juistheid",
+                "followUp": "Onderbouw het oordeel: tegen welke referentie is getoetst en wat was de uitkomst?"
+              },
+              {
+                "id": "dq_b.consistentie",
+                "followUp": "Onderbouw het oordeel: welke systemen of velden zijn vergeleken en waar liepen ze uiteen?"
+              }
+            ]
+          },
+          {
+            "id": "dqb2",
+            "questions": [
+              {
+                "id": "dq_b.bruikbaarheid"
+              },
+              {
+                "id": "dq_b.representativiteit"
+              },
+              {
+                "id": "dq_b.toegankelijkheid"
+              },
+              {
+                "id": "dq_b.vertrouwen"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dq_c",
+        "part": "C",
+        "subsections": [
+          {
+            "id": "dqc1",
+            "questions": [
+              {
+                "id": "dq_c.regels",
+                "columns": [
+                  {
+                    "id": "regel"
+                  },
+                  {
+                    "id": "dimensie"
+                  },
+                  {
+                    "id": "norm"
+                  },
+                  {
+                    "id": "meting"
+                  },
+                  {
+                    "id": "oordeel"
+                  }
+                ],
+                "notesLabel": "Toelichting op de regels en normen"
+              },
+              {
+                "id": "dq_c.meetmethode"
+              },
+              {
+                "id": "dq_c.frequentie"
+              },
+              {
+                "id": "dq_c.geautomatiseerd",
+                "followUp": "Licht toe wie de signalen ontvangt en opvolgt."
+              },
+              {
+                "id": "dq_c.standaarden"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "dq_d",
+        "part": "D",
+        "subsections": [
+          {
+            "id": "dqd1",
+            "questions": [
+              {
+                "id": "dq_d.issues",
+                "columns": [
+                  {
+                    "id": "issue"
+                  },
+                  {
+                    "id": "dimensie"
+                  },
+                  {
+                    "id": "oorzaak"
+                  },
+                  {
+                    "id": "gevolg"
+                  },
+                  {
+                    "id": "ernst"
+                  }
+                ],
+                "notesLabel": "Toelichting op de bevindingen"
+              },
+              {
+                "id": "dq_d.structureel"
+              }
+            ]
+          },
+          {
+            "id": "dqd2",
+            "questions": [
+              {
+                "id": "dq_d.acties",
+                "columns": [
+                  {
+                    "id": "actie"
+                  },
+                  {
+                    "id": "type"
+                  },
+                  {
+                    "id": "eigenaar"
+                  },
+                  {
+                    "id": "termijn"
+                  }
+                ],
+                "notesLabel": "Toelichting op de verbeteraanpak"
+              },
+              {
+                "id": "dq_d.afspraken"
+              },
+              {
+                "id": "dq_d.terugmelding",
+                "followUp": "Beschrijf de route en hoe meldingen worden opgevolgd."
+              },
+              {
+                "id": "dq_d.restrisico"
+              },
+              {
+                "id": "dq_d.oordeel",
+                "followUp": "Onderbouw het eindoordeel en benoem wie het vaststelt."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

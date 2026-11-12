@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=../schemas/assessment-definition.v2.schema.json
 name: Impact Assessment Mensenrechten en Algoritmes
-urn: 'urn:nl:iama'
+urn: urn:nl:minbzk:ir:iama:2.0
 version: "2.0"
 description: >-
   Impact Assessment Mensenrechten en Algoritmes (IAMA) versie 2. Het IAMA helpt

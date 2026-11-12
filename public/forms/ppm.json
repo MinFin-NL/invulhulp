@@ -1,7 +1,8 @@
 {
+  "_generated": "Gegenereerd door `npm run forms:build` uit vendor/instrument-registry/assessments/ppm.yaml + scripts/form-overlays/ppm.overlay.json; niet handmatig bewerken.",
   "id": "ppm",
   "version": "2.0",
-  "urn": "urn:nl:minfin:tr:ppm:2.0",
+  "urn": "urn:nl:minfin:ir:ppm:2.0",
   "title": "PPM Projectplan",
   "source": {
     "instrument": "PPM-Projectplan 2.0",
@@ -42,16 +43,47 @@
     "conditionalPartB": false
   },
   "navigation": [
-    { "type": "subsections", "sectionId": "ppm_0" },
-    { "type": "subsections", "sectionId": "ppm_1" },
-    { "type": "subsections", "sectionId": "ppm_2" },
-    { "type": "subsections", "sectionId": "ppm_3" },
-    { "type": "subsections", "sectionId": "ppm_4" },
-    { "type": "subsections", "sectionId": "ppm_5" },
-    { "type": "subsections", "sectionId": "ppm_6" },
-    { "type": "subsections", "sectionId": "ppm_7" },
-    { "type": "subsections", "sectionId": "ppm_8" },
-    { "type": "specialView", "viewId": "summary", "label": "Naar samenvatting" }
+    {
+      "type": "subsections",
+      "sectionId": "ppm_0"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ppm_1"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ppm_2"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ppm_3"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ppm_4"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ppm_5"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ppm_6"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ppm_7"
+    },
+    {
+      "type": "subsections",
+      "sectionId": "ppm_8"
+    },
+    {
+      "type": "specialView",
+      "viewId": "summary",
+      "label": "Naar samenvatting"
+    }
   ],
   "sections": [
     {
@@ -70,24 +102,24 @@
               "text": "Naam project",
               "guidance": "Verschijnt in de titel op het voorblad: 'Projectplan <naam project>'.",
               "type": "text",
-              "format": "shorttext",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "format": "shorttext"
             },
             {
               "id": "ppm_0.versie",
               "text": "Versie",
               "guidance": "Bijv. 0.1 voor een eerste concept, 1.0 voor de vastgestelde versie.",
               "type": "text",
-              "format": "shorttext",
               "importance": "optional",
+              "format": "shorttext",
               "aiFill": false
             },
             {
               "id": "ppm_0.datum",
               "text": "Datum",
               "type": "text",
-              "format": "date",
               "importance": "optional",
+              "format": "date",
               "aiFill": false
             },
             {
@@ -95,16 +127,16 @@
               "text": "Status",
               "guidance": "Bijv. Concept, Ter besluitvorming of Definitief.",
               "type": "text",
-              "format": "shorttext",
               "importance": "optional",
+              "format": "shorttext",
               "aiFill": false
             },
             {
               "id": "ppm_0.auteurs",
               "text": "Auteur(s)",
               "type": "text",
-              "format": "shorttext",
               "importance": "optional",
+              "format": "shorttext",
               "aiFill": false
             },
             {
@@ -120,8 +152,8 @@
               "text": "Inlichtingen",
               "guidance": "Bij wie kan de lezer terecht met vragen over dit projectplan?",
               "type": "text",
-              "format": "shorttext",
               "importance": "optional",
+              "format": "shorttext",
               "aiFill": false
             },
             {
@@ -130,14 +162,29 @@
               "guidance": "Houd per versie bij wanneer, door wie en waarom het projectplan is gewijzigd.",
               "type": "table",
               "importance": "optional",
-              "aiFill": false,
               "columns": [
-                { "id": "versie", "label": "Versie" },
-                { "id": "datum", "label": "Datum" },
-                { "id": "status", "label": "Status" },
-                { "id": "wie", "label": "Wie" },
-                { "id": "omschrijving", "label": "Omschrijving" }
-              ]
+                {
+                  "id": "versie",
+                  "label": "Versie"
+                },
+                {
+                  "id": "datum",
+                  "label": "Datum"
+                },
+                {
+                  "id": "status",
+                  "label": "Status"
+                },
+                {
+                  "id": "wie",
+                  "label": "Wie"
+                },
+                {
+                  "id": "omschrijving",
+                  "label": "Omschrijving"
+                }
+              ],
+              "aiFill": false
             }
           ]
         }
@@ -242,11 +289,11 @@
           "questions": [
             {
               "id": "ppm_d.projectmanagement",
-              "allowAttachments": true,
               "text": "Projectorganisatie",
               "guidance": "Organogram of projectstructuur. Taken en verantwoordelijkheden van de projectorganisatie, met rollen zoals projectleider, teamleden, stuurgroep en (gedelegeerd) opdrachtgever.",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "allowAttachments": true
             },
             {
               "id": "ppm_d.stakeholders",
@@ -268,13 +315,36 @@
               "guidance": "Overzicht van benodigde mensen en specialismes, inclusief (globale) tijdsindicaties per rol. Betreft zowel business- als IT-resources en zowel interne als externe resources.",
               "type": "table",
               "importance": "mandatory",
-              "notesLabel": "Toelichting",
               "columns": [
-                { "id": "rol", "label": "Rol / specialisme" },
-                { "id": "soort", "label": "Business of IT", "type": "select", "options": ["Business", "IT"] },
-                { "id": "herkomst", "label": "Intern of extern", "type": "select", "options": ["Intern", "Extern"] },
-                { "id": "tijdsindicatie", "label": "Tijdsindicatie", "hint": "bijv. 16 uur/week gedurende 6 maanden" }
-              ]
+                {
+                  "id": "rol",
+                  "label": "Rol / specialisme"
+                },
+                {
+                  "id": "soort",
+                  "label": "Business of IT",
+                  "type": "select",
+                  "options": [
+                    "Business",
+                    "IT"
+                  ]
+                },
+                {
+                  "id": "herkomst",
+                  "label": "Intern of extern",
+                  "type": "select",
+                  "options": [
+                    "Intern",
+                    "Extern"
+                  ]
+                },
+                {
+                  "id": "tijdsindicatie",
+                  "label": "Tijdsindicatie",
+                  "hint": "bijv. 16 uur/week gedurende 6 maanden"
+                }
+              ],
+              "notesLabel": "Toelichting"
             },
             {
               "id": "ppm_3.communicatie",
@@ -307,19 +377,19 @@
             },
             {
               "id": "ppm_b.fasering",
-              "allowAttachments": true,
               "text": "Fasering",
               "guidance": "Indeling van het project in fasen (bijv. verkenning, ontwerp, realisatie, test, implementatie).",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "allowAttachments": true
             },
             {
               "id": "ppm_4.planning",
-              "allowAttachments": true,
               "text": "Planning",
               "guidance": "Gedetailleerde planning met activiteiten en tijdsduur per fase, inclusief afhankelijkheden.",
               "type": "text",
-              "importance": "mandatory"
+              "importance": "mandatory",
+              "allowAttachments": true
             },
             {
               "id": "ppm_a.eindresultaten",
@@ -328,8 +398,14 @@
               "type": "table",
               "importance": "mandatory",
               "columns": [
-                { "id": "milestone", "label": "Mijlpaal of besluitmoment" },
-                { "id": "datum", "label": "Beoogde datum" }
+                {
+                  "id": "milestone",
+                  "label": "Mijlpaal of besluitmoment"
+                },
+                {
+                  "id": "datum",
+                  "label": "Beoogde datum"
+                }
               ]
             }
           ]
@@ -382,13 +458,37 @@
               "guidance": "Overzicht van de belangrijkste projectrisico's (bijv. vertraging, technische problemen, budgetoverschrijding). Per risico: inschatting van kans en impact, en de geplande beheersmaatregelen.",
               "type": "table",
               "importance": "mandatory",
-              "notesLabel": "Toelichting",
               "columns": [
-                { "id": "risico", "label": "Risico" },
-                { "id": "kans", "label": "Kans", "type": "select", "options": ["Laag", "Middel", "Hoog"] },
-                { "id": "impact", "label": "Impact", "type": "select", "options": ["Laag", "Middel", "Hoog"] },
-                { "id": "beheersmaatregel", "label": "Beheersmaatregel" }
-              ]
+                {
+                  "id": "risico",
+                  "label": "Risico"
+                },
+                {
+                  "id": "kans",
+                  "label": "Kans",
+                  "type": "select",
+                  "options": [
+                    "Laag",
+                    "Middel",
+                    "Hoog"
+                  ]
+                },
+                {
+                  "id": "impact",
+                  "label": "Impact",
+                  "type": "select",
+                  "options": [
+                    "Laag",
+                    "Middel",
+                    "Hoog"
+                  ]
+                },
+                {
+                  "id": "beheersmaatregel",
+                  "label": "Beheersmaatregel"
+                }
+              ],
+              "notesLabel": "Toelichting"
             },
             {
               "id": "ppm_6.toleranties",
@@ -396,11 +496,24 @@
               "guidance": "Omschrijving van de maximale afwijkingen in tijd, geld, scope en kwaliteit die acceptabel zijn. Is de afwijking naar verwachting groter dan de afgesproken tolerantie, dan wordt daarover apart gerapporteerd aan de stuurgroep en aan het portfolioboard, aan de hand van een afwijkingsformulier.",
               "type": "table",
               "importance": "mandatory",
-              "notesLabel": "Toelichting",
               "columns": [
-                { "id": "aspect", "label": "Aspect", "type": "select", "options": ["Tijd", "Geld", "Scope", "Kwaliteit"] },
-                { "id": "tolerantie", "label": "Maximale afwijking" }
-              ]
+                {
+                  "id": "aspect",
+                  "label": "Aspect",
+                  "type": "select",
+                  "options": [
+                    "Tijd",
+                    "Geld",
+                    "Scope",
+                    "Kwaliteit"
+                  ]
+                },
+                {
+                  "id": "tolerantie",
+                  "label": "Maximale afwijking"
+                }
+              ],
+              "notesLabel": "Toelichting"
             }
           ]
         }
@@ -480,18 +593,41 @@
               "guidance": "Neem per analyse een rij op: PSA, Quick scan, Pre DPIA, DPIA, BIA, AIIA, IHH Toets en Cloudtoets. Geef aan of de analyse wel of niet is opgesteld, wie ervoor verantwoordelijk is en wat de conclusie is.",
               "type": "table",
               "importance": "mandatory",
-              "minRows": 8,
               "columns": [
                 {
                   "id": "document",
                   "label": "Document",
                   "type": "suggest",
-                  "options": ["PSA", "Quick scan", "Pre DPIA", "DPIA", "BIA", "AIIA", "IHH Toets", "Cloudtoets"]
+                  "options": [
+                    "PSA",
+                    "Quick scan",
+                    "Pre DPIA",
+                    "DPIA",
+                    "BIA",
+                    "AIIA",
+                    "IHH Toets",
+                    "Cloudtoets"
+                  ]
                 },
-                { "id": "wel_niet", "label": "Wel/niet", "type": "select", "options": ["Wel", "Niet"] },
-                { "id": "verantwoordelijke", "label": "Naam verantwoordelijke" },
-                { "id": "conclusie", "label": "Conclusie" }
-              ]
+                {
+                  "id": "wel_niet",
+                  "label": "Wel/niet",
+                  "type": "select",
+                  "options": [
+                    "Wel",
+                    "Niet"
+                  ]
+                },
+                {
+                  "id": "verantwoordelijke",
+                  "label": "Naam verantwoordelijke"
+                },
+                {
+                  "id": "conclusie",
+                  "label": "Conclusie"
+                }
+              ],
+              "minRows": 8
             },
             {
               "id": "ppm_8.toelichting",

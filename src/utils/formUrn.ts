@@ -1,37 +1,36 @@
 /**
  * URN-conventie voor formulieren.
  *
- * Elk formulier draagt een stabiele identifier in dezelfde vorm die het
- * task-registry van MinBZK voor zijn instrumenten hanteert:
+ * Elk formulier draagt de URN van het instrument in het instrument-registry van
+ * MinBZK (https://github.com/MinBZK/instrument-registry), de bron van de
+ * vraaginhoud:
  *
- *     urn:nl:<authority>:<registry>:<instrument>:<major>.<minor>
+ *     urn:nl:<organisatie>:ir:<instrument>:<versie>
  *
- * Upstream pint `schemas/schema_instruments.json` dat vast op
- * `^urn:nl:aivt:tr:[a-z]+:[0-9]+\.[0-9]+` — authority `aivt`, registry `tr`.
- * Deze tool mint in de authority van de uitgevende organisatie (`minfin`,
- * registry `tr`), zodat de identifiers dezelfde vorm hebben en naast elkaar
- * kunnen bestaan zonder in andermans naamruimte te schrijven:
+ * bijvoorbeeld `urn:nl:minfin:ir:quickscan:2.0` of `urn:nl:minbzk:ir:dpia:3.0`.
+ * De organisatie is de eigenaar van het instrument, `ir` staat voor instrument
+ * registry en de versie is het `version`-veld van het document. Het patroon is
+ * een kopie van `instrument_registry/urn.py` upstream.
  *
- *     urn:nl:minfin:tr:dpia:3.0
+ * De URN komt uit het registry, niet uit ons formulier-id: het instrument kan
+ * daar anders heten (onze `prescandpia` is `urn:nl:minbzk:ir:prescan:2.0`). Bij
+ * een registry-formulier zet `npm run forms:build` hem in de JSON; index.json
+ * herhaalt hem en `formUrn.test.ts` bewaakt dat ze gelijk blijven.
  *
- * Het instrument-segment is het formulier-id, het versiesegment de `version`
- * van het formulier. Formulieren die nog niet bestaan (placeholders in
- * index.json) staan op 0.1.
+ * Aangekondigde formulieren die nog niet in het registry staan (placeholders in
+ * index.json) krijgen alvast een naam in onze eigen organisatie, op versie 0.1.
  *
- * Implementeert een formulier een instrument dat *wel* in het task-registry
- * staat, dan verwijst `registryUrn` daarnaartoe (bijv. urn:nl:aivt:tr:iama:1.0).
- * Herkomst blijft daarmee zichtbaar zonder de twee identiteiten te verwarren.
- *
- * Zie https://github.com/MinBZK/task-registry.
+ * `registryUrn` is iets anders: de URN van het instrument in het
+ * *task-registry* van het AI-validatieteam (urn:nl:aivt:tr:…), voor de
+ * formulieren die daar een tegenhanger hebben.
  */
 
-/** Vorm van een URN in dit systeem — bewust identiek aan het upstream-patroon,
- *  alleen met vrije authority en registry. */
-const FORM_URN_PATTERN = /^urn:nl:[a-z]+:[a-z]+:[a-z]+:[0-9]+\.[0-9]+$/
+/** Vorm van een instrument-URN — identiek aan `PATTERN` in urn.py upstream. */
+const FORM_URN_PATTERN =
+  /^urn:nl:([a-z]+):ir:([a-z0-9]+(?:-[a-z0-9]+)*):(\d+(?:\.\d+){0,2})$/
 
-/** Onze eigen authority + registry. */
-export const FORM_URN_AUTHORITY = 'minfin'
-export const FORM_URN_REGISTRY = 'tr'
+/** De organisatie waarin wij placeholders een naam geven. */
+export const FORM_URN_ORGANISATION = 'minfin'
 
 /** Versiesegment voor aangekondigde formulieren die nog geen JSON hebben. */
 export const PLACEHOLDER_URN_VERSION = '0.1'
@@ -40,15 +39,14 @@ export function isFormUrn(urn: string): boolean {
   return FORM_URN_PATTERN.test(urn)
 }
 
-/** Bouwt de URN voor een formulier-id + versie. Gooit bij een id of versie die
- *  niet in de conventie past, zodat een typo bij het toevoegen van een
- *  formulier meteen opvalt in plaats van een stille lege identifier op te
- *  leveren. */
-export function buildFormUrn(id: string, version: string): string {
-  const urn = `urn:nl:${FORM_URN_AUTHORITY}:${FORM_URN_REGISTRY}:${id}:${version}`
+/** Bouwt een instrument-URN. Gooit bij een segment dat niet in de conventie
+ *  past, zodat een typo meteen opvalt in plaats van een stille ongeldige
+ *  identifier op te leveren. */
+export function buildFormUrn(organisation: string, instrument: string, version: string): string {
+  const urn = `urn:nl:${organisation}:ir:${instrument}:${version}`
   if (!isFormUrn(urn)) {
     throw new Error(
-      `Ongeldige formulier-URN "${urn}" — id moet [a-z]+ zijn en versie <major>.<minor>`,
+      `Ongeldige instrument-URN "${urn}" — organisatie [a-z]+, instrument [a-z0-9-], versie <major>[.<minor>[.<patch>]]`,
     )
   }
   return urn
@@ -57,8 +55,8 @@ export function buildFormUrn(id: string, version: string): string {
 /** De onderdelen van een URN, of null als hij niet aan de conventie voldoet. */
 export function parseFormUrn(
   urn: string,
-): { authority: string; registry: string; instrument: string; version: string } | null {
-  if (!isFormUrn(urn)) return null
-  const [, , authority, registry, instrument, version] = urn.split(':')
-  return { authority, registry, instrument, version }
+): { organisation: string; instrument: string; version: string } | null {
+  const m = FORM_URN_PATTERN.exec(urn)
+  if (!m) return null
+  return { organisation: m[1], instrument: m[2], version: m[3] }
 }
